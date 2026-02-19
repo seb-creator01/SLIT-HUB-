@@ -14,6 +14,18 @@
         .hidden { display: none; }
         .active-nav { color: var(--primary); border-top: 2px solid var(--primary); }
         body { padding-bottom: 70px; background-color: #f8fafc; }
+        /* Sold Overlay Style */
+        .sold-overlay { background: rgba(0,0,0,0.6); position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.2rem; transform: rotate(-15deg); border: 2px solid white; margin: 10px; z-index: 20; pointer-events: none; }
+        /* Verification Style */
+        .verified-tick { color: #1d9bf0; margin-left: 5px; font-size: 0.9em; }
+        /* Notification Badge */
+        .nav-item { position: relative; }
+        .notification-dot { position: absolute; top: -2px; right: 10px; width: 10px; height: 10px; background: red; border-radius: 50%; border: 2px solid white; display: none; }
+        /* Chat Bubble Images */
+        .chat-img { max-width: 200px; border-radius: 12px; margin-top: 5px; cursor: pointer; }
+        /* Presence Status */
+        .status-online { color: #22c55e; font-size: 0.75rem; font-weight: bold; }
+        .status-offline { color: #94a3b8; font-size: 0.75rem; }
     </style>
 </head>
 <body>
@@ -44,7 +56,7 @@
         </section>
 
         <section id="post-screen" class="screen hidden max-w-lg mx-auto bg-white p-6 rounded-xl shadow">
-            <h2 class="text-xl font-bold mb-4">Post New Product</h2>
+            <h2 id="post-screen-title" class="text-xl font-bold mb-4">Post New Product</h2>
             <div class="space-y-4">
                 <div id="image-preview-container" class="w-full h-48 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center overflow-hidden cursor-pointer">
                     <img id="image-preview" class="hidden w-full h-full object-cover">
@@ -81,6 +93,7 @@
                 <input type="text" id="post-location" placeholder="Campus Location (e.g., Hostel A)" class="w-full border p-2 rounded">
                 
                 <button id="btn-post" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition">Post Product</button>
+                <button id="btn-cancel-edit" class="hidden w-full bg-gray-200 text-gray-600 font-bold py-2 rounded-lg mt-2">Cancel Edit</button>
             </div>
         </section>
 
@@ -89,6 +102,26 @@
                 <h2 class="text-xl font-bold">My Postings</h2>
                 <button onclick="toggleAdminMode()" id="admin-toggle-btn" class="text-[10px] bg-gray-200 px-2 py-1 rounded text-gray-600 font-bold uppercase">Admin Mode: OFF</button>
             </div>
+
+            <div id="admin-panel" class="hidden mb-6 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-blue-100 p-4 rounded-lg text-center">
+                        <p class="text-xs text-blue-600 font-bold uppercase">Total Listings</p>
+                        <p id="stat-total-products" class="text-2xl font-bold text-blue-800">0</p>
+                    </div>
+                    <div class="bg-red-100 p-4 rounded-lg text-center">
+                        <p class="text-xs text-red-600 font-bold uppercase">Pending Reports</p>
+                        <p id="stat-total-reports" class="text-2xl font-bold text-red-800">0</p>
+                    </div>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-red-200">
+                    <h3 class="font-bold text-red-600 mb-2 underline text-sm">Reported Items Log</h3>
+                    <div id="reports-container" class="space-y-2 text-xs max-h-40 overflow-y-auto">
+                        <p class="text-gray-400 italic">No active reports.</p>
+                    </div>
+                </div>
+            </div>
+
             <div id="my-items-grid" class="grid grid-cols-1 gap-4"></div>
         </section>
 
@@ -101,11 +134,16 @@
             <div id="chats-list" class="space-y-2"></div>
         </section>
 
-        <section id="chatroom-screen" class="screen hidden flex flex-col h-[80vh]">
-            <div id="chat-header" class="p-4 border-b font-bold"></div>
+        <section id="chatroom-screen" class="screen hidden flex flex-col h-[85vh]">
+            <div id="chat-header" class="p-4 border-b flex justify-between items-center bg-white">
+                <div id="chat-title" class="font-bold"></div>
+                <button id="btn-clear-chat" class="text-xs text-red-500 font-bold uppercase border border-red-500 px-2 py-1 rounded">Clear</button>
+            </div>
             <div id="messages-container" class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50"></div>
-            <div class="p-4 bg-white flex gap-2">
-                <input type="text" id="message-input" placeholder="Type a message..." class="flex-1 border rounded-full px-4 py-2">
+            <div class="p-4 bg-white border-t flex gap-2 items-center">
+                <button onclick="document.getElementById('chat-img-input').click()" class="text-gray-400 hover:text-blue-600"><i class="fas fa-plus-circle text-xl"></i></button>
+                <input type="file" id="chat-img-input" class="hidden" accept="image/*">
+                <input type="text" id="message-input" placeholder="Type a message..." class="flex-1 border rounded-full px-4 py-2 text-sm">
                 <button id="btn-send" class="bg-blue-600 text-white p-2 rounded-full w-10 h-10"><i class="fas fa-paper-plane"></i></button>
             </div>
         </section>
@@ -116,20 +154,21 @@
         <button onclick="showScreen('browse-screen')" class="nav-item flex flex-col items-center">
             <i class="fas fa-home text-lg"></i><span class="text-xs">Browse</span>
         </button>
-        <button onclick="showScreen('post-screen')" class="nav-item flex flex-col items-center">
+        <button onclick="startNewPost()" class="nav-item flex flex-col items-center">
             <i class="fas fa-plus-circle text-lg"></i><span class="text-xs">Post</span>
         </button>
         <button onclick="loadMyItems()" class="nav-item flex flex-col items-center">
             <i class="fas fa-user-tag text-lg"></i><span class="text-xs">My Items</span>
         </button>
-        <button onclick="showScreen('chats-screen')" class="nav-item flex flex-col items-center">
+        <button onclick="openChats()" class="nav-item flex flex-col items-center">
+            <div id="chat-notify" class="notification-dot"></div>
             <i class="fas fa-comment-dots text-lg"></i><span class="text-xs">Chats</span>
         </button>
     </nav>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, where, serverTimestamp, doc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, updateDoc, query, orderBy, onSnapshot, where, serverTimestamp, doc, getDoc, deleteDoc, setDoc, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCpsDTN-NTkTFmbwg3T6vv9H4eE_YXQdZA",
@@ -144,38 +183,68 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Persistent User ID for mobile tracking
         if(!localStorage.getItem('slit_user_id')) {
             localStorage.setItem('slit_user_id', "user_" + Math.floor(Math.random() * 1000000));
         }
         let currentUserId = localStorage.getItem('slit_user_id');
         let activeChatId = null;
         let isAdminMode = false;
+        let editingProductId = null; 
+        let verifiedSellers = [];
 
-        // --- NAVIGATION LOGIC ---
+        // --- PRESENCE LOGIC ---
+        async function updateMyPresence() {
+            await setDoc(doc(db, "UserStatus", currentUserId), {
+                lastSeen: serverTimestamp()
+            }, { merge: true });
+        }
+        updateMyPresence();
+        setInterval(updateMyPresence, 120000); // Update presence every 2 mins
+
+        function formatLastSeen(timestamp) {
+            if (!timestamp) return '<span class="status-offline">Offline</span>';
+            const lastSeenDate = timestamp.toDate();
+            const now = new Date();
+            const diffInSeconds = Math.floor((now - lastSeenDate) / 1000);
+            
+            // If active in the last 5 minutes
+            if (diffInSeconds < 300) return `<span class="status-online">● Online</span>`;
+            
+            const mins = Math.floor(diffInSeconds / 60);
+            if (mins < 60) return `<span class="status-offline">Last seen ${mins}m ago</span>`;
+            
+            const hours = Math.floor(mins / 60);
+            if (hours < 24) return `<span class="status-offline">Last seen ${hours}h ago</span>`;
+            
+            return `<span class="status-offline">Last seen ${lastSeenDate.toLocaleDateString()}</span>`;
+        }
+
+        // --- GLOBAL DATA LISTENERS ---
+        onSnapshot(collection(db, "VerifiedUsers"), (snap) => {
+            verifiedSellers = snap.docs.map(d => d.id);
+            loadProducts(); 
+        });
+
+        onSnapshot(query(collection(db, "Notifications"), where("receiverId", "==", currentUserId), where("read", "==", false)), (snap) => {
+            document.getElementById('chat-notify').style.display = snap.empty ? 'none' : 'block';
+        });
+
         window.showScreen = (screenId) => {
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
             document.getElementById(screenId).classList.remove('hidden');
         };
 
-        // --- CLOUDINARY UPLOAD ---
         async function uploadToCloudinary(file) {
             const formData = new FormData();
             formData.append('file', file);
             formData.append('upload_preset', 'SLIT-HUB');
-
-            const res = await fetch('https://api.cloudinary.com/v1_1/ddm87a9p2/image/upload', {
-                method: 'POST',
-                body: formData
-            });
+            const res = await fetch('https://api.cloudinary.com/v1_1/ddm87a9p2/image/upload', { method: 'POST', body: formData });
             const data = await res.json();
             return data.secure_url;
         }
 
-        // --- POST PRODUCT LOGIC ---
         const imagePreview = document.getElementById('image-preview');
         const fileInput = document.getElementById('file-input');
-        
         document.getElementById('image-preview-container').onclick = () => fileInput.click();
 
         fileInput.onchange = (e) => {
@@ -191,15 +260,31 @@
             }
         };
 
+        window.startNewPost = () => {
+            editingProductId = null;
+            document.getElementById('post-screen-title').innerText = "Post New Product";
+            document.getElementById('btn-post').innerText = "Post Product";
+            document.getElementById('btn-cancel-edit').classList.add('hidden');
+            document.getElementById('post-title').value = '';
+            document.getElementById('post-desc').value = '';
+            document.getElementById('post-price').value = '';
+            imagePreview.classList.add('hidden');
+            document.getElementById('preview-placeholder').classList.remove('hidden');
+            showScreen('post-screen');
+        };
+
         document.getElementById('btn-post').onclick = async () => {
             const btn = document.getElementById('btn-post');
             btn.disabled = true;
-            btn.innerText = "Uploading...";
+            btn.innerText = "Processing...";
 
             try {
-                const imageUrl = await uploadToCloudinary(fileInput.files[0]);
-                
-                await addDoc(collection(db, "Products"), {
+                let imageUrl = imagePreview.src;
+                if (fileInput.files[0]) {
+                    imageUrl = await uploadToCloudinary(fileInput.files[0]);
+                }
+
+                const productData = {
                     Title: document.getElementById('post-title').value,
                     Description: document.getElementById('post-desc').value,
                     Price: document.getElementById('post-price').value,
@@ -209,36 +294,51 @@
                     Phone: document.getElementById('post-phone').value,
                     Location: document.getElementById('post-location').value,
                     ImageURL: imageUrl,
-                    CreatedAt: serverTimestamp(),
                     SellerId: currentUserId
-                });
+                };
 
-                alert("Product posted!");
+                if (editingProductId) {
+                    await updateDoc(doc(db, "Products", editingProductId), productData);
+                    alert("Product updated!");
+                } else {
+                    productData.CreatedAt = serverTimestamp();
+                    productData.IsSold = false;
+                    await addDoc(collection(db, "Products"), productData);
+                    alert("Product posted!");
+                }
                 showScreen('browse-screen');
             } catch (err) {
-                console.error(err);
-                alert("Error posting product.");
+                alert("Error saving product.");
             } finally {
                 btn.disabled = false;
-                btn.innerText = "Post Product";
+                btn.innerText = editingProductId ? "Update Product" : "Post Product";
             }
         };
 
-        // --- BROWSE PRODUCTS LOGIC ---
+        document.getElementById('btn-cancel-edit').onclick = () => startNewPost();
+
         const renderProducts = (docs, containerId = 'product-grid', isOwner = false) => {
             const grid = document.getElementById(containerId);
             grid.innerHTML = '';
             docs.forEach(docSnap => {
                 const p = docSnap.data();
+                const isVerified = verifiedSellers.includes(p.SellerId);
                 const card = `
                     <div class="bg-white rounded-lg shadow overflow-hidden relative">
+                        ${p.IsSold ? '<div class="sold-overlay text-red-500">SOLD</div>' : ''}
                         <div class="absolute top-2 left-2 bg-blue-600 text-white text-[9px] px-2 py-1 rounded-full uppercase font-bold z-10">${p.Condition || 'Used'}</div>
-                        <img src="${p.ImageURL}" class="w-full h-32 object-cover" onclick="viewProduct('${docSnap.id}')">
+                        <img src="${p.ImageURL}" class="w-full h-32 object-cover ${p.IsSold ? 'grayscale' : ''}" onclick="viewProduct('${docSnap.id}')">
                         <div class="p-3">
-                            <h3 class="font-bold truncate text-sm">${p.Title}</h3>
+                            <h3 class="font-bold truncate text-sm flex items-center">
+                                ${p.Title} ${isVerified ? '<i class="fas fa-check-circle verified-tick"></i>' : ''}
+                            </h3>
                             <p class="text-blue-600 font-bold text-sm">₦${p.Price} <span class="text-[10px] text-gray-400 font-normal">(${p.Negotiable || 'Fixed'})</span></p>
                             ${(isOwner || isAdminMode) ? `
-                                <button onclick="deleteProduct('${docSnap.id}')" class="mt-2 w-full text-red-500 border border-red-500 py-1 rounded text-xs font-bold">Delete Post</button>
+                                <div class="mt-2 flex gap-1">
+                                    <button onclick="editProduct('${docSnap.id}')" class="flex-1 bg-gray-100 text-gray-700 py-1 rounded text-[10px] font-bold">Edit</button>
+                                    <button onclick="toggleSoldStatus('${docSnap.id}', ${p.IsSold})" class="flex-1 ${p.IsSold ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'} py-1 rounded text-[10px] font-bold">${p.IsSold ? 'Relist' : 'Sold'}</button>
+                                    <button onclick="deleteProduct('${docSnap.id}')" class="flex-1 text-red-500 border border-red-500 py-1 rounded text-[10px] font-bold">Delete</button>
+                                </div>
                             ` : `<p class="text-gray-400 text-xs mt-1">${p.Location}</p>`}
                         </div>
                     </div>
@@ -247,35 +347,99 @@
             });
         };
 
+        window.toggleSoldStatus = async (id, currentStatus) => {
+            await updateDoc(doc(db, "Products", id), { IsSold: !currentStatus });
+        };
+
+        window.editProduct = async (id) => {
+            const snap = await getDoc(doc(db, "Products", id));
+            const p = snap.data();
+            editingProductId = id;
+            document.getElementById('post-title').value = p.Title;
+            document.getElementById('post-desc').value = p.Description;
+            document.getElementById('post-price').value = p.Price;
+            document.getElementById('post-phone').value = p.Phone;
+            document.getElementById('post-location').value = p.Location;
+            imagePreview.src = p.ImageURL;
+            imagePreview.classList.remove('hidden');
+            document.getElementById('preview-placeholder').classList.add('hidden');
+            document.getElementById('post-screen-title').innerText = "Edit Product";
+            document.getElementById('btn-post').innerText = "Update Product";
+            document.getElementById('btn-cancel-edit').classList.remove('hidden');
+            showScreen('post-screen');
+        };
+
         const loadProducts = () => {
             onSnapshot(query(collection(db, "Products"), orderBy("CreatedAt", "desc")), (snapshot) => {
                 renderProducts(snapshot.docs);
+                if(isAdminMode) document.getElementById('stat-total-products').innerText = snapshot.docs.length;
             });
         };
         loadProducts();
 
-        // --- ADMIN MODE TOGGLE ---
         window.toggleAdminMode = () => {
-            isAdminMode = !isAdminMode;
-            const btn = document.getElementById('admin-toggle-btn');
-            btn.innerText = `Admin Mode: ${isAdminMode ? 'ON' : 'OFF'}`;
-            btn.classList.toggle('bg-red-600');
-            btn.classList.toggle('text-white');
-            loadMyItems(); // Refresh view
+            if (!isAdminMode) {
+                const pass = prompt("Enter Admin Passphrase:");
+                if (pass === "junior123") {
+                    isAdminMode = true;
+                    updateAdminUI();
+                } else { alert("Incorrect passphrase!"); }
+            } else {
+                isAdminMode = false;
+                updateAdminUI();
+            }
         };
 
-        // --- MY ITEMS LOGIC ---
+        function updateAdminUI() {
+            const btn = document.getElementById('admin-toggle-btn');
+            const panel = document.getElementById('admin-panel');
+            btn.innerText = `Admin Mode: ${isAdminMode ? 'ON' : 'OFF'}`;
+            btn.classList.toggle('bg-red-600', isAdminMode);
+            btn.classList.toggle('text-white', isAdminMode);
+            panel.classList.toggle('hidden', !isAdminMode);
+            if (isAdminMode) { loadAdminStats(); loadReports(); }
+            loadMyItems(); 
+        }
+
+        function loadAdminStats() {
+            onSnapshot(collection(db, "Products"), (snap) => {
+                document.getElementById('stat-total-products').innerText = snap.size;
+            });
+        }
+
+        function loadReports() {
+            onSnapshot(collection(db, "Reports"), (snapshot) => {
+                document.getElementById('stat-total-reports').innerText = snapshot.size;
+                const container = document.getElementById('reports-container');
+                container.innerHTML = snapshot.size === 0 ? '<p class="text-gray-400 italic">No active reports.</p>' : '';
+                snapshot.docs.forEach(d => {
+                    const r = d.data();
+                    container.innerHTML += `
+                        <div class="border-b pb-2 flex justify-between items-center">
+                            <span><b>${r.productTitle}</b>: ${r.reason}</span>
+                            <div class="flex gap-2">
+                                <button onclick="viewProduct('${r.productId}')" class="text-blue-500 font-bold">VIEW</button>
+                                <button onclick="deleteReport('${d.id}')" class="text-gray-400 font-bold">X</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+        }
+
+        window.deleteReport = async (id) => { await deleteDoc(doc(db, "Reports", id)); };
+
+        window.verifyUser = async (userId) => {
+            if(confirm("Verify this seller? They will get a blue tick on all listings.")) {
+                await setDoc(doc(db, "VerifiedUsers", userId), { verified: true, date: serverTimestamp() });
+                alert("User Verified!");
+                showScreen('browse-screen');
+            }
+        };
+
         window.loadMyItems = () => {
             showScreen('my-items-screen');
-            let q;
-            if (isAdminMode) {
-                // In Admin Mode, fetch ALL products so old ones can be deleted
-                q = query(collection(db, "Products"), orderBy("CreatedAt", "desc"));
-            } else {
-                // Normal mode, fetch only current user items
-                q = query(collection(db, "Products"), where("SellerId", "==", currentUserId));
-            }
-            
+            let q = isAdminMode ? query(collection(db, "Products"), orderBy("CreatedAt", "desc")) : query(collection(db, "Products"), where("SellerId", "==", currentUserId));
             onSnapshot(q, (snapshot) => {
                 renderProducts(snapshot.docs, 'my-items-grid', !isAdminMode);
             });
@@ -287,30 +451,62 @@
             }
         };
 
-        // --- PRODUCT DETAILS ---
+        window.reportProduct = async (productId, productTitle) => {
+            const reason = prompt("Why are you reporting this product?");
+            if (reason) {
+                await addDoc(collection(db, "Reports"), { productId, productTitle, reason, reportedBy: currentUserId, timestamp: serverTimestamp() });
+                alert("Report submitted.");
+            }
+        };
+
         window.viewProduct = async (id) => {
             const docRef = doc(db, "Products", id);
             const docSnap = await getDoc(docRef);
             if (docSnap.exists()) {
                 const p = docSnap.data();
+                const isVerified = verifiedSellers.includes(p.SellerId);
+
+                // Fetch Presence Status for this seller
+                const statusSnap = await getDoc(doc(db, "UserStatus", p.SellerId));
+                const statusHtml = formatLastSeen(statusSnap.exists() ? statusSnap.data().lastSeen : null);
+
                 document.getElementById('details-content').innerHTML = `
-                    <img src="${p.ImageURL}" class="w-full max-h-80 object-cover">
+                    <div class="relative">
+                        ${p.IsSold ? '<div class="sold-overlay text-red-500">SOLD</div>' : ''}
+                        <img src="${p.ImageURL}" class="w-full max-h-80 object-cover ${p.IsSold ? 'grayscale' : ''}">
+                        <button onclick="reportProduct('${id}', '${p.Title}')" class="absolute top-4 right-4 bg-white/80 p-2 rounded-full text-red-500 shadow-sm"><i class="fas fa-flag"></i></button>
+                    </div>
                     <div class="p-6">
                         <div class="flex justify-between items-start mb-2">
-                            <h2 class="text-2xl font-bold">${p.Title}</h2>
+                            <div>
+                                <h2 class="text-2xl font-bold flex items-center">
+                                    ${p.Title} ${isVerified ? '<i class="fas fa-check-circle verified-tick"></i>' : ''}
+                                </h2>
+                                <p class="mt-1">${statusHtml}</p>
+                            </div>
                             <span class="bg-blue-100 text-blue-600 text-xs px-3 py-1 rounded-full font-bold">${p.Condition || 'Used'}</span>
                         </div>
                         <p class="text-blue-600 text-xl font-bold mb-4">₦${p.Price} <span class="text-sm text-gray-400 font-normal">(${p.Negotiable || 'Fixed'})</span></p>
-                        <p class="text-gray-600 mb-6 text-sm">${p.Description}</p>
+                        <p class="text-gray-600 mb-4 text-sm">${p.Description}</p>
+                        
+                        <div class="bg-orange-50 border border-orange-200 p-3 rounded-lg mb-6 flex gap-2 items-center">
+                            <i class="fas fa-shield-alt text-orange-400 text-sm"></i>
+                            <p class="text-[10px] text-orange-700 leading-tight font-medium">Safety: Meet in a public campus area. Never send money before seeing the item.</p>
+                        </div>
+
                         <div class="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg mb-6 text-xs">
                             <div><p class="text-gray-400 font-semibold uppercase">Category</p><p class="font-bold text-sm">${p.Category}</p></div>
                             <div><p class="text-gray-400 font-semibold uppercase">Location</p><p class="font-bold text-sm">${p.Location}</p></div>
                         </div>
+
+                        ${isAdminMode && !isVerified ? `
+                            <button onclick="verifyUser('${p.SellerId}')" class="w-full mb-4 bg-blue-500 text-white font-bold py-2 rounded-lg text-xs uppercase">Verify Seller (Blue Tick)</button>
+                        ` : ''}
                         
                         ${p.SellerId !== currentUserId ? `
                             <div class="flex gap-2">
-                                <button onclick="startChat('${p.SellerId}', '${p.Title}')" class="flex-1 bg-blue-600 text-white font-bold py-3 rounded-lg shadow-lg">Message</button>
-                                ${p.Phone ? `<a href="tel:${p.Phone}" class="flex-1 bg-green-500 text-white font-bold py-3 rounded-lg shadow-lg text-center">Call Seller</a>` : ''}
+                                <button ${p.IsSold ? 'disabled' : `onclick="startChat('${p.SellerId}', '${p.Title}')"`} class="flex-1 ${p.IsSold ? 'bg-gray-300' : 'bg-blue-600'} text-white font-bold py-3 rounded-lg shadow-lg">Message</button>
+                                ${p.Phone ? `<a href="${p.IsSold ? '#' : 'tel:'+p.Phone}" class="flex-1 ${p.IsSold ? 'bg-gray-300' : 'bg-green-500'} text-white font-bold py-3 rounded-lg shadow-lg text-center flex items-center justify-center">Call Seller</a>` : ''}
                             </div>
                         ` : `<p class="text-center text-gray-400 italic">This is your listing</p>`}
                     </div>
@@ -319,47 +515,81 @@
             }
         };
 
-        // --- CHAT SYSTEM ---
+        // --- UPDATED CHAT SYSTEM (Image + Delete Support) ---
+        window.openChats = async () => {
+            showScreen('chats-screen');
+            const q = query(collection(db, "Notifications"), where("receiverId", "==", currentUserId));
+            const snap = await getDocs(q);
+            const batch = writeBatch(db);
+            snap.forEach(d => batch.update(d.ref, { read: true }));
+            await batch.commit();
+        };
+
         window.startChat = (sellerId, productTitle) => {
             activeChatId = [currentUserId, sellerId].sort().join("_");
-            document.getElementById('chat-header').innerText = `Buying: ${productTitle}`;
+            document.getElementById('chat-title').innerText = productTitle;
             showScreen('chatroom-screen');
             loadMessages();
         };
 
         function loadMessages() {
-            const q = query(collection(db, "Chats", activeChatId, "Messages"), orderBy("timestamp", "asc"));
-            onSnapshot(q, (snapshot) => {
+            onSnapshot(query(collection(db, "Chats", activeChatId, "Messages"), orderBy("timestamp", "asc")), (snapshot) => {
                 const container = document.getElementById('messages-container');
                 container.innerHTML = '';
                 snapshot.docs.forEach(doc => {
                     const m = doc.data();
                     const isMe = m.senderId === currentUserId;
-                    container.innerHTML += `
-                        <div class="flex ${isMe ? 'justify-end' : 'justify-start'}">
-                            <div class="${isMe ? 'bg-blue-600 text-white rounded-br-none' : 'bg-white border rounded-bl-none'} px-4 py-2 rounded-2xl max-w-[85%] text-sm shadow-sm">
-                                ${m.messageText}
-                            </div>
-                        </div>
-                    `;
+                    let content = m.messageText ? `<p>${m.messageText}</p>` : `<img src="${m.imageUrl}" class="chat-img" onclick="window.open('${m.imageUrl}')">`;
+                    container.innerHTML += `<div class="flex ${isMe ? 'justify-end' : 'justify-start'}"><div class="${isMe ? 'bg-blue-600 text-white rounded-br-none' : 'bg-white border rounded-bl-none'} px-4 py-2 rounded-2xl max-w-[85%] text-sm shadow-sm">${content}</div></div>`;
                 });
                 container.scrollTop = container.scrollHeight;
             });
         }
 
-        document.getElementById('btn-send').onclick = async () => {
-            const text = document.getElementById('message-input').value;
-            if (!text || !activeChatId) return;
+        document.getElementById('btn-send').onclick = () => sendMessage();
+
+        async function sendMessage(text = null, imgUrl = null) {
+            const msg = text || document.getElementById('message-input').value;
+            if ((!msg && !imgUrl) || !activeChatId) return;
+
+            const receiverId = activeChatId.replace(currentUserId, "").replace("_", "");
             
             await addDoc(collection(db, "Chats", activeChatId, "Messages"), {
                 senderId: currentUserId,
-                messageText: text,
+                messageText: msg,
+                imageUrl: imgUrl,
                 timestamp: serverTimestamp()
             });
+
+            await addDoc(collection(db, "Notifications"), {
+                receiverId: receiverId,
+                senderId: currentUserId,
+                read: false,
+                timestamp: serverTimestamp()
+            });
+
             document.getElementById('message-input').value = '';
+        }
+
+        document.getElementById('chat-img-input').onchange = async (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const url = await uploadToCloudinary(file);
+                sendMessage(null, url);
+            }
         };
 
-        // --- SEARCH & FILTER ---
+        document.getElementById('btn-clear-chat').onclick = async () => {
+            if(confirm("Are you sure you want to clear this entire chat history?")) {
+                const q = query(collection(db, "Chats", activeChatId, "Messages"));
+                const snap = await getDocs(q);
+                const batch = writeBatch(db);
+                snap.forEach(d => batch.delete(d.ref));
+                await batch.commit();
+                alert("Chat cleared.");
+            }
+        };
+
         document.getElementById('global-search').oninput = (e) => {
             const term = e.target.value.toLowerCase();
             document.querySelectorAll('#product-grid > div').forEach(card => {
