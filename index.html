@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SLIT-HUB | Campus Marketplace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --primary: #2563eb; }
+        .hidden { display: none; }
+        .active-nav { color: var(--primary); border-top: 2px solid var(--primary); }
+        body { padding-bottom: 70px; background-color: #f8fafc; }
+    </style>
+</head>
+<body>
+
+    <header class="bg-white shadow-sm sticky top-0 z-50 p-4">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-blue-600" onclick="showScreen('browse-screen')">SLIT-HUB</h1>
+            <div id="search-bar" class="flex-1 mx-4 hidden sm:block">
+                <input type="text" id="global-search" placeholder="Search products..." class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto p-4">
+        
+        <section id="browse-screen" class="screen">
+            <div class="flex gap-2 mb-6">
+                <select id="category-filter" class="border rounded-lg px-3 py-2 bg-white">
+                    <option value="All">All Categories</option>
+                    <option value="Electronics">Electronics</option>
+                    <option value="Books">Books</option>
+                    <option value="Fashion">Fashion</option>
+                    <option value="Home">Home</option>
+                </select>
+            </div>
+            <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                </div>
+        </section>
+
+        <section id="post-screen" class="screen hidden max-w-lg mx-auto bg-white p-6 rounded-xl shadow">
+            <h2 class="text-xl font-bold mb-4">Post New Product</h2>
+            <div class="space-y-4">
+                <div id="image-preview-container" class="w-full h-48 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center overflow-hidden">
+                    <img id="image-preview" class="hidden w-full h-full object-cover">
+                    <span id="preview-placeholder" class="text-gray-400">Tap to upload image</span>
+                </div>
+                <input type="file" id="file-input" accept="image/*" class="hidden">
+                <input type="text" id="post-title" placeholder="Product Title" class="w-full border p-2 rounded">
+                <textarea id="post-desc" placeholder="Description" class="w-full border p-2 rounded h-24"></textarea>
+                <div class="flex gap-2">
+                    <input type="number" id="post-price" placeholder="Price ($)" class="w-1/2 border p-2 rounded">
+                    <select id="post-category" class="w-1/2 border p-2 rounded">
+                        <option value="Electronics">Electronics</option>
+                        <option value="Books">Books</option>
+                        <option value="Fashion">Fashion</option>
+                    </select>
+                </div>
+                <input type="text" id="post-location" placeholder="Campus Location (e.g., Hostel A)" class="w-full border p-2 rounded">
+                <button id="btn-post" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition">Post Product</button>
+            </div>
+        </section>
+
+        <section id="details-screen" class="screen hidden bg-white rounded-xl shadow-lg overflow-hidden">
+            <div id="details-content"></div>
+        </section>
+
+        <section id="chats-screen" class="screen hidden">
+            <h2 class="text-xl font-bold mb-4">Your Conversations</h2>
+            <div id="chats-list" class="space-y-2"></div>
+        </section>
+
+        <section id="chatroom-screen" class="screen hidden flex flex-col h-[80vh]">
+            <div id="chat-header" class="p-4 border-b font-bold"></div>
+            <div id="messages-container" class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50"></div>
+            <div class="p-4 bg-white flex gap-2">
+                <input type="text" id="message-input" placeholder="Type a message..." class="flex-1 border rounded-full px-4 py-2">
+                <button id="btn-send" class="bg-blue-600 text-white p-2 rounded-full w-10 h-10"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </section>
+
+    </main>
+
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around py-3 text-gray-500">
+        <button onclick="showScreen('browse-screen')" class="nav-item flex flex-col items-center">
+            <i class="fas fa-home text-lg"></i><span class="text-xs">Browse</span>
+        </button>
+        <button onclick="showScreen('post-screen')" class="nav-item flex flex-col items-center">
+            <i class="fas fa-plus-circle text-lg"></i><span class="text-xs">Post</span>
+        </button>
+        <button onclick="showScreen('chats-screen')" class="nav-item flex flex-col items-center">
+            <i class="fas fa-comment-dots text-lg"></i><span class="text-xs">Chats</span>
+        </button>
+    </nav>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, where, serverTimestamp, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCpsDTN-NTkTFmbwg3T6vv9H4eE_YXQdZA",
+            authDomain: "slit-hub.firebaseapp.com",
+            projectId: "slit-hub",
+            storageBucket: "slit-hub.firebasestorage.app",
+            messagingSenderId: "347194010969",
+            appId: "1:347194010969:web:a45af2e8d1627ac2593048",
+            measurementId: "G-CLFWJSG5H1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --- GLOBAL STATE ---
+        let currentUserId = "user_" + Math.floor(Math.random() * 1000); // Mock User ID
+        let activeChatId = null;
+
+        // --- NAVIGATION LOGIC ---
+        window.showScreen = (screenId) => {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById(screenId).classList.remove('hidden');
+        };
+
+        // --- CLOUDINARY UPLOAD ---
+        async function uploadToCloudinary(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', 'SLIT-HUB');
+
+            const res = await fetch('https://api.cloudinary.com/v1_1/ddm87a9p2/image/upload', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            return data.secure_url;
+        }
+
+        // --- POST PRODUCT LOGIC ---
+        const imagePreview = document.getElementById('image-preview');
+        const fileInput = document.getElementById('file-input');
+        
+        document.getElementById('image-preview-container').onclick = () => fileInput.click();
+
+        fileInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    imagePreview.src = ev.target.result;
+                    imagePreview.classList.remove('hidden');
+                    document.getElementById('preview-placeholder').classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        document.getElementById('btn-post').onclick = async () => {
+            const btn = document.getElementById('btn-post');
+            btn.disabled = true;
+            btn.innerText = "Uploading...";
+
+            try {
+                const imageUrl = await uploadToCloudinary(fileInput.files[0]);
+                
+                await addDoc(collection(db, "Products"), {
+                    Title: document.getElementById('post-title').value,
+                    Description: document.getElementById('post-desc').value,
+                    Price: document.getElementById('post-price').value,
+                    Category: document.getElementById('post-category').value,
+                    Location: document.getElementById('post-location').value,
+                    ImageURL: imageUrl,
+                    CreatedAt: serverTimestamp(),
+                    SellerId: currentUserId
+                });
+
+                alert("Product posted!");
+                showScreen('browse-screen');
+            } catch (err) {
+                console.error(err);
+                alert("Error posting product.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Post Product";
+            }
+        };
+
+        // --- BROWSE PRODUCTS LOGIC ---
+        const renderProducts = (docs) => {
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = '';
+            docs.forEach(doc => {
+                const p = doc.data();
+                const card = `
+                    <div class="bg-white rounded-lg shadow overflow-hidden" onclick="viewProduct('${doc.id}')">
+                        <img src="${p.ImageURL}" class="w-full h-32 object-cover">
+                        <div class="p-3">
+                            <h3 class="font-bold truncate">${p.Title}</h3>
+                            <p class="text-blue-600 font-bold">$${p.Price}</p>
+                            <p class="text-gray-400 text-xs">${p.Location}</p>
+                        </div>
+                    </div>
+                `;
+                grid.innerHTML += card;
+            });
+        };
+
+        const loadProducts = () => {
+            onSnapshot(query(collection(db, "Products"), orderBy("CreatedAt", "desc")), (snapshot) => {
+                renderProducts(snapshot.docs);
+            });
+        };
+        loadProducts();
+
+        // --- PRODUCT DETAILS ---
+        window.viewProduct = async (id) => {
+            const docRef = doc(db, "Products", id);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                const p = docSnap.data();
+                document.getElementById('details-content').innerHTML = `
+                    <img src="${p.ImageURL}" class="w-full max-h-80 object-cover">
+                    <div class="p-6">
+                        <h2 class="text-2xl font-bold mb-2">${p.Title}</h2>
+                        <p class="text-blue-600 text-xl font-bold mb-4">$${p.Price}</p>
+                        <p class="text-gray-600 mb-6">${p.Description}</p>
+                        <div class="bg-gray-100 p-4 rounded-lg mb-6">
+                            <p class="text-sm"><b>Category:</b> ${p.Category}</p>
+                            <p class="text-sm"><b>Location:</b> ${p.Location}</p>
+                        </div>
+                        <button onclick="startChat('${p.SellerId}', '${p.Title}')" class="w-full bg-green-500 text-white font-bold py-3 rounded-lg">Message Seller</button>
+                    </div>
+                `;
+                showScreen('details-screen');
+            }
+        };
+
+        // --- CHAT SYSTEM ---
+        window.startChat = (sellerId, productTitle) => {
+            activeChatId = [currentUserId, sellerId].sort().join("_");
+            document.getElementById('chat-header').innerText = `Chat about: ${productTitle}`;
+            showScreen('chatroom-screen');
+            loadMessages();
+        };
+
+        function loadMessages() {
+            const q = query(collection(db, "Chats", activeChatId, "Messages"), orderBy("timestamp", "asc"));
+            onSnapshot(q, (snapshot) => {
+                const container = document.getElementById('messages-container');
+                container.innerHTML = '';
+                snapshot.docs.forEach(doc => {
+                    const m = doc.data();
+                    const isMe = m.senderId === currentUserId;
+                    container.innerHTML += `
+                        <div class="flex ${isMe ? 'justify-end' : 'justify-start'}">
+                            <div class="${isMe ? 'bg-blue-600 text-white' : 'bg-gray-200'} px-4 py-2 rounded-2xl max-w-[80%] text-sm">
+                                ${m.messageText}
+                            </div>
+                        </div>
+                    `;
+                });
+                container.scrollTop = container.scrollHeight;
+            });
+        }
+
+        document.getElementById('btn-send').onclick = async () => {
+            const text = document.getElementById('message-input').value;
+            if (!text || !activeChatId) return;
+            
+            await addDoc(collection(db, "Chats", activeChatId, "Messages"), {
+                senderId: currentUserId,
+                messageText: text,
+                timestamp: serverTimestamp()
+            });
+            document.getElementById('message-input').value = '';
+        };
+
+        // --- SEARCH & FILTER ---
+        document.getElementById('global-search').oninput = (e) => {
+            const term = e.target.value.toLowerCase();
+            document.querySelectorAll('#product-grid > div').forEach(card => {
+                const title = card.querySelector('h3').innerText.toLowerCase();
+                card.style.display = title.includes(term) ? 'block' : 'none';
+            });
+        };
+
+        document.getElementById('category-filter').onchange = (e) => {
+            const cat = e.target.value;
+            // For a production app, this would be a Firestore query. 
+            // For this version, we'll filter the UI elements.
+            onSnapshot(collection(db, "Products"), (snapshot) => {
+                const filtered = cat === "All" ? snapshot.docs : snapshot.docs.filter(d => d.data().Category === cat);
+                renderProducts(filtered);
+            });
+        };
+
+    </script>
+</body>
+</html>
+
