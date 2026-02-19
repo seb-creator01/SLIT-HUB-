@@ -85,7 +85,10 @@
         </section>
 
         <section id="my-items-screen" class="screen hidden">
-            <h2 class="text-xl font-bold mb-4">My Postings</h2>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">My Postings</h2>
+                <button onclick="toggleAdminMode()" id="admin-toggle-btn" class="text-[10px] bg-gray-200 px-2 py-1 rounded text-gray-600 font-bold uppercase">Admin Mode: OFF</button>
+            </div>
             <div id="my-items-grid" class="grid grid-cols-1 gap-4"></div>
         </section>
 
@@ -147,6 +150,7 @@
         }
         let currentUserId = localStorage.getItem('slit_user_id');
         let activeChatId = null;
+        let isAdminMode = false;
 
         // --- NAVIGATION LOGIC ---
         window.showScreen = (screenId) => {
@@ -224,17 +228,17 @@
         const renderProducts = (docs, containerId = 'product-grid', isOwner = false) => {
             const grid = document.getElementById(containerId);
             grid.innerHTML = '';
-            docs.forEach(doc => {
-                const p = doc.data();
+            docs.forEach(docSnap => {
+                const p = docSnap.data();
                 const card = `
                     <div class="bg-white rounded-lg shadow overflow-hidden relative">
                         <div class="absolute top-2 left-2 bg-blue-600 text-white text-[9px] px-2 py-1 rounded-full uppercase font-bold z-10">${p.Condition || 'Used'}</div>
-                        <img src="${p.ImageURL}" class="w-full h-32 object-cover" onclick="viewProduct('${doc.id}')">
+                        <img src="${p.ImageURL}" class="w-full h-32 object-cover" onclick="viewProduct('${docSnap.id}')">
                         <div class="p-3">
                             <h3 class="font-bold truncate text-sm">${p.Title}</h3>
                             <p class="text-blue-600 font-bold text-sm">₦${p.Price} <span class="text-[10px] text-gray-400 font-normal">(${p.Negotiable || 'Fixed'})</span></p>
-                            ${isOwner ? `
-                                <button onclick="deleteProduct('${doc.id}')" class="mt-2 w-full text-red-500 border border-red-500 py-1 rounded text-xs font-bold">Delete Post</button>
+                            ${(isOwner || isAdminMode) ? `
+                                <button onclick="deleteProduct('${docSnap.id}')" class="mt-2 w-full text-red-500 border border-red-500 py-1 rounded text-xs font-bold">Delete Post</button>
                             ` : `<p class="text-gray-400 text-xs mt-1">${p.Location}</p>`}
                         </div>
                     </div>
@@ -250,12 +254,30 @@
         };
         loadProducts();
 
+        // --- ADMIN MODE TOGGLE ---
+        window.toggleAdminMode = () => {
+            isAdminMode = !isAdminMode;
+            const btn = document.getElementById('admin-toggle-btn');
+            btn.innerText = `Admin Mode: ${isAdminMode ? 'ON' : 'OFF'}`;
+            btn.classList.toggle('bg-red-600');
+            btn.classList.toggle('text-white');
+            loadMyItems(); // Refresh view
+        };
+
         // --- MY ITEMS LOGIC ---
         window.loadMyItems = () => {
             showScreen('my-items-screen');
-            const q = query(collection(db, "Products"), where("SellerId", "==", currentUserId));
+            let q;
+            if (isAdminMode) {
+                // In Admin Mode, fetch ALL products so old ones can be deleted
+                q = query(collection(db, "Products"), orderBy("CreatedAt", "desc"));
+            } else {
+                // Normal mode, fetch only current user items
+                q = query(collection(db, "Products"), where("SellerId", "==", currentUserId));
+            }
+            
             onSnapshot(q, (snapshot) => {
-                renderProducts(snapshot.docs, 'my-items-grid', true);
+                renderProducts(snapshot.docs, 'my-items-grid', !isAdminMode);
             });
         };
 
