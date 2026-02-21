@@ -414,7 +414,10 @@
         let currentView = 'Product';
         let selectedCategory = 'All';
         let isUserBanned = false;
-        let optimisticItems = []; // To store items that are being posted right now
+        let optimisticItems = []; 
+        
+        // 🔥 ADD THIS AT THE TOP OF YOUR SCRIPT (outside any function)
+        let unsubscribeProducts = null;
 
         document.getElementById('display-user-id').innerText = currentUserId;
 
@@ -720,17 +723,40 @@
             btn.innerText = "PUBLISH NOW"; btn.disabled = false;
         };
 
+        // REPLACE YOUR EXISTING loadProducts FUNCTION WITH THIS
         const loadProducts = () => {
             const grid = document.getElementById('product-grid');
-            if(optimisticItems.length === 0) {
-                 grid.innerHTML = '<div class="skeleton-card animate-pulse"></div><div class="skeleton-card animate-pulse"></div><div class="skeleton-card animate-pulse"></div><div class="skeleton-card animate-pulse"></div>';
+
+            // 🔥 Unsubscribe previous Firestore listener if it exists
+            if (unsubscribeProducts) {
+                unsubscribeProducts();
             }
-            
-            let q = query(collection(db, "Products"), where("PostType", "==", currentView), orderBy("CreatedAt", "desc"));
-            onSnapshot(q, (snapshot) => {
-                let docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-                
-                // Merge optimistic items that match current view and category
+
+            // Loading skeleton (only if no optimistic items exist to show)
+            if(optimisticItems.length === 0) {
+                grid.innerHTML = `
+                    <div class="skeleton-card animate-pulse"></div>
+                    <div class="skeleton-card animate-pulse"></div>
+                    <div class="skeleton-card animate-pulse"></div>
+                    <div class="skeleton-card animate-pulse"></div>
+                `;
+            }
+
+            // Firestore query
+            let q = query(
+                collection(db, "Products"),
+                where("PostType", "==", currentView),
+                orderBy("CreatedAt", "desc")
+            );
+
+            // Store unsubscribe function
+            unsubscribeProducts = onSnapshot(q, (snapshot) => {
+                let docs = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+
+                // Merge optimistic items that match current view
                 let filteredOptimistic = optimisticItems.filter(item => {
                     const viewMatch = item.PostType === currentView;
                     const catMatch = selectedCategory === 'All' || item.Category === selectedCategory;
@@ -739,11 +765,14 @@
 
                 let combinedDocs = [...filteredOptimistic, ...docs];
 
+                // Category filter
                 if (selectedCategory !== 'All') {
-                    combinedDocs = combinedDocs.filter(d => d.Category === selectedCategory);
+                    combinedDocs = combinedDocs.filter(doc => doc.Category === selectedCategory);
                 }
-                
+
                 renderProducts(combinedDocs);
+            }, (error) => {
+                console.error("Error loading products:", error);
             });
         };
 
@@ -751,7 +780,6 @@
             const grid = document.getElementById(containerId);
             grid.innerHTML = '';
             
-            // --- NEW: IMMEDIATE VISIBILITY UPDATE ---
             // Clear existing preload tags
             document.querySelectorAll('link[rel="preload"][as="image"]').forEach(link => link.remove());
             
@@ -759,13 +787,11 @@
                 const isVer = verifiedSellers.includes(p.SellerId);
                 const avgRating = p.ReviewCount > 0 ? (p.Rating / p.ReviewCount).toFixed(1) : "0";
                 
-                // IMAGE OPTIMIZATION: If Cloudinary, request a smaller version for grid speed
                 let displayImage = p.ImageURL;
                 if(displayImage.includes('cloudinary.com')) {
                     displayImage = displayImage.replace('/upload/', '/upload/w_400,c_scale,q_auto,f_auto/');
                 }
 
-                // Add Preload Tag to Head for Immediate Fetch
                 const preload = document.createElement('link');
                 preload.rel = "preload";
                 preload.as = "image";
@@ -795,7 +821,7 @@
         };
 
         window.viewProduct = async (id) => {
-            if(id.startsWith('temp_')) return; // Can't view details of an item still uploading
+            if(id.startsWith('temp_')) return; 
             const snap = await getDoc(doc(db, "Products", id));
             const p = snap.data();
             const uSnap = await getDoc(doc(db, "Users", p.SellerId));
@@ -980,6 +1006,12 @@
                 document.getElementById('announcement-text').innerText = snap.data().message;
                 bar.style.background = 'linear-gradient(90deg, #2563eb, #7c3aed)';
             } else { bar.classList.add('hidden'); }
+        });
+
+        // 🔥 MAKE SURE THIS RUNS ON PAGE LOAD (if not already)
+        document.addEventListener("DOMContentLoaded", () => {
+            if (typeof renderCategoryChips === "function") renderCategoryChips();
+            loadProducts();
         });
 
         switchView('Product');
