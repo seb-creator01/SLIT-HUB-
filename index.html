@@ -750,6 +750,11 @@
         const renderProducts = (items, containerId = 'product-grid', isOwner = false) => {
             const grid = document.getElementById(containerId);
             grid.innerHTML = '';
+            
+            // --- NEW: IMMEDIATE VISIBILITY UPDATE ---
+            // Clear existing preload tags
+            document.querySelectorAll('link[rel="preload"][as="image"]').forEach(link => link.remove());
+            
             items.forEach(p => {
                 const isVer = verifiedSellers.includes(p.SellerId);
                 const avgRating = p.ReviewCount > 0 ? (p.Rating / p.ReviewCount).toFixed(1) : "0";
@@ -759,6 +764,13 @@
                 if(displayImage.includes('cloudinary.com')) {
                     displayImage = displayImage.replace('/upload/', '/upload/w_400,c_scale,q_auto,f_auto/');
                 }
+
+                // Add Preload Tag to Head for Immediate Fetch
+                const preload = document.createElement('link');
+                preload.rel = "preload";
+                preload.as = "image";
+                preload.href = displayImage;
+                document.head.appendChild(preload);
 
                 grid.innerHTML += `
                     <div class="product-card relative ${p.isOptimistic ? 'opacity-70 animate-pulse' : ''}">
