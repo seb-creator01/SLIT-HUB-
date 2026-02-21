@@ -414,6 +414,7 @@
         let currentView = 'Product';
         let selectedCategory = 'All';
         let isUserBanned = false;
+        let optimisticItems = []; // To store items that are being posted right now
 
         document.getElementById('display-user-id').innerText = currentUserId;
 
@@ -664,20 +665,43 @@
         document.getElementById('btn-post').onclick = async () => {
             if(isUserBanned) return;
             const btn = document.getElementById('btn-post');
+            const postType = document.querySelector('input[name="post-type"]:checked').value;
+            
+            // OPTIMISTIC UPDATE: Add to local screen immediately
+            const tempId = "temp_" + Date.now();
+            const optimisticData = {
+                id: tempId,
+                Title: document.getElementById('post-title').value,
+                Price: document.getElementById('post-price').value,
+                Location: document.getElementById('post-location').value,
+                ImageURL: imagePreview.src, // Use the local preview data URL
+                SellerId: currentUserId,
+                PostType: postType,
+                Category: document.getElementById('post-category').value,
+                CreatedAt: { seconds: Date.now() / 1000 },
+                IsSold: false,
+                isOptimistic: true // Mark so we can handle it specifically
+            };
+
+            // Switch screen immediately
+            showScreen('browse-screen');
+            optimisticItems.unshift(optimisticData);
+            loadProducts(); // Re-render with our new temporary item
+
             btn.innerText = "Publishing..."; btn.disabled = true;
             try {
                 let imageUrl = "https://placehold.co/600x400?text=Post";
                 if (fileInput.files[0]) imageUrl = await uploadToCloudinary(fileInput.files[0]);
-                const postType = document.querySelector('input[name="post-type"]:checked').value;
+                
                 await addDoc(collection(db, "Products"), {
-                    Title: document.getElementById('post-title').value,
+                    Title: optimisticData.Title,
                     Description: document.getElementById('post-desc').value,
-                    Price: document.getElementById('post-price').value,
+                    Price: optimisticData.Price,
                     Negotiable: document.getElementById('post-negotiable').value,
-                    Category: document.getElementById('post-category').value,
+                    Category: optimisticData.Category,
                     Condition: document.getElementById('post-condition').value,
                     Phone: document.getElementById('post-phone').value,
-                    Location: document.getElementById('post-location').value,
+                    Location: optimisticData.Location,
                     ImageURL: imageUrl,
                     SellerId: currentUserId,
                     PostType: postType,
@@ -685,35 +709,63 @@
                     CreatedAt: serverTimestamp(),
                     IsSold: false
                 });
-                showScreen('browse-screen');
-            } catch (e) { alert("Error!"); }
+
+                // Success! Remove the optimistic item as Firebase Snapshot will now provide the real one
+                optimisticItems = optimisticItems.filter(i => i.id !== tempId);
+            } catch (e) { 
+                alert("Error! Post failed."); 
+                optimisticItems = optimisticItems.filter(i => i.id !== tempId);
+                loadProducts();
+            }
             btn.innerText = "PUBLISH NOW"; btn.disabled = false;
         };
 
         const loadProducts = () => {
             const grid = document.getElementById('product-grid');
-            grid.innerHTML = '<div class="skeleton-card animate-pulse"></div><div class="skeleton-card animate-pulse"></div><div class="skeleton-card animate-pulse"></div><div class="skeleton-card animate-pulse"></div>';
+            if(optimisticItems.length === 0) {
+                 grid.innerHTML = '<div class="skeleton-card animate-pulse"></div><div class="skeleton-card animate-pulse"></div><div class="skeleton-card animate-pulse"></div><div class="skeleton-card animate-pulse"></div>';
+            }
             
             let q = query(collection(db, "Products"), where("PostType", "==", currentView), orderBy("CreatedAt", "desc"));
             onSnapshot(q, (snapshot) => {
-                let docs = snapshot.docs;
-                if (selectedCategory !== 'All') docs = docs.filter(d => d.data().Category === selectedCategory);
-                renderProducts(docs);
+                let docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                
+                // Merge optimistic items that match current view and category
+                let filteredOptimistic = optimisticItems.filter(item => {
+                    const viewMatch = item.PostType === currentView;
+                    const catMatch = selectedCategory === 'All' || item.Category === selectedCategory;
+                    return viewMatch && catMatch;
+                });
+
+                let combinedDocs = [...filteredOptimistic, ...docs];
+
+                if (selectedCategory !== 'All') {
+                    combinedDocs = combinedDocs.filter(d => d.Category === selectedCategory);
+                }
+                
+                renderProducts(combinedDocs);
             });
         };
 
-        const renderProducts = (docs, containerId = 'product-grid', isOwner = false) => {
+        const renderProducts = (items, containerId = 'product-grid', isOwner = false) => {
             const grid = document.getElementById(containerId);
             grid.innerHTML = '';
-            docs.forEach(docSnap => {
-                const p = docSnap.data();
+            items.forEach(p => {
                 const isVer = verifiedSellers.includes(p.SellerId);
                 const avgRating = p.ReviewCount > 0 ? (p.Rating / p.ReviewCount).toFixed(1) : "0";
+                
+                // IMAGE OPTIMIZATION: If Cloudinary, request a smaller version for grid speed
+                let displayImage = p.ImageURL;
+                if(displayImage.includes('cloudinary.com')) {
+                    displayImage = displayImage.replace('/upload/', '/upload/w_400,c_scale,q_auto,f_auto/');
+                }
+
                 grid.innerHTML += `
-                    <div class="product-card relative">
+                    <div class="product-card relative ${p.isOptimistic ? 'opacity-70 animate-pulse' : ''}">
                         ${p.IsSold ? `<div class="sold-overlay">SOLD</div>` : ''}
                         <div class="relative h-40 overflow-hidden">
-                             <img src="${p.ImageURL}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110" onclick="viewProduct('${docSnap.id}')">
+                             <img src="${displayImage}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110" onclick="viewProduct('${p.id}')">
+                             ${p.isOptimistic ? `<div class="absolute inset-0 flex items-center justify-center bg-black/20 text-white text-[9px] font-bold">UPLOADING...</div>` : ''}
                         </div>
                         <div class="p-3">
                             <h3 class="font-bold text-[11px] truncate mb-1">${p.Title} ${isVer ? '<i class="fas fa-check-circle text-blue-500 ml-1"></i>' : ''}</h3>
@@ -731,6 +783,7 @@
         };
 
         window.viewProduct = async (id) => {
+            if(id.startsWith('temp_')) return; // Can't view details of an item still uploading
             const snap = await getDoc(doc(db, "Products", id));
             const p = snap.data();
             const uSnap = await getDoc(doc(db, "Users", p.SellerId));
@@ -865,7 +918,10 @@
         window.loadMyItems = () => {
             showScreen('my-items-screen');
             const q = isAdminMode ? query(collection(db, "Products")) : query(collection(db, "Products"), where("SellerId", "==", currentUserId));
-            onSnapshot(q, (snap) => renderProducts(snap.docs, 'my-items-grid', true));
+            onSnapshot(q, (snap) => {
+                let docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderProducts(docs, 'my-items-grid', true);
+            });
         };
 
         window.openChats = () => showScreen('chats-screen');
