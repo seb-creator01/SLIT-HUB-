@@ -9,62 +9,234 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+
     <style>
-        :root { --primary: #2563eb; }
-        .hidden { display: none; }
-        .active-nav { color: var(--primary); border-top: 2px solid var(--primary); }
-        body { padding-bottom: 70px; background-color: #f8fafc; }
-        .sold-overlay { background: rgba(0,0,0,0.6); position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.2rem; transform: rotate(-15deg); border: 2px solid white; margin: 10px; z-index: 20; pointer-events: none; }
-        .verified-tick { color: #1d9bf0; margin-left: 5px; font-size: 0.9em; }
-        .trusted-badge { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: 800; display: inline-flex; align-items: center; gap: 3px; text-transform: uppercase; margin-left: 5px; }
-        .nav-item { position: relative; }
-        .notification-dot { position: absolute; top: -2px; right: 10px; width: 10px; height: 10px; background: red; border-radius: 50%; border: 2px solid white; display: none; }
-        .chat-img { max-width: 200px; border-radius: 12px; margin-top: 5px; cursor: pointer; }
-        .status-online { color: #22c55e; font-size: 0.75rem; font-weight: bold; }
-        .status-offline { color: #94a3b8; font-size: 0.75rem; }
-        .view-toggle { background: #e2e8f0; border-radius: 999px; padding: 4px; display: flex; gap: 4px; width: fit-content; margin: 0 auto 20px; }
-        .view-toggle button { padding: 8px 20px; border-radius: 999px; font-size: 0.85rem; font-weight: 600; transition: 0.3s; }
-        .view-toggle .active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .star-rating { display: flex; gap: 4px; color: #fbbf24; cursor: pointer; font-size: 1.25rem; }
-        .star-rating i.far { color: #d1d5db; }
-        .review-scroll { max-height: 200px; overflow-y: auto; }
-        #announcement-bar { background: linear-gradient(90deg, #2563eb, #3b82f6); transition: all 0.3s ease; }
-        .profile-img-large { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .cat-chip { transition: 0.2s; white-space: nowrap; }
-        .cat-chip:active { transform: scale(0.95); }
+        :root { 
+            --primary: #2563eb; 
+            --primary-glow: rgba(37, 99, 235, 0.2);
+            --bg: #f8fafc; 
+            --card: #ffffff; 
+            --text: #1e293b; 
+            --border: #e2e8f0; 
+        }
+        .dark { 
+            --bg: #0f172a; 
+            --card: #1e293b; 
+            --text: #f8fafc; 
+            --border: #334155; 
+        }
+
+        body { 
+            padding-bottom: 90px; 
+            background-color: var(--bg); 
+            color: var(--text); 
+            transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Professional Header Styling */
+        .brand-logo {
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 2px 4px rgba(37, 99, 235, 0.1));
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .brand-logo:active { transform: scale(0.95); }
+
+        /* Animations & Transitions */
+        .screen {
+            animation: fadeInSlide 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes fadeInSlide {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Skeleton Pulse Animation */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+        .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        
+        .skeleton-card { background: var(--border); border-radius: 20px; height: 220px; width: 100%; }
+
+        /* Global Button Click Feedback */
+        button, .nav-item, a, .chip {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            cursor: pointer;
+            outline: none;
+        }
+
+        button:active, .nav-item:active, .chip:active {
+            transform: scale(0.92) !important;
+            opacity: 0.8;
+        }
+
+        /* Glassmorphism Header & Nav */
+        .glass-header {
+            background: rgba(var(--card), 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .glass-nav {
+            background: rgba(var(--card), 0.85);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-top: 1px solid var(--border);
+            border-radius: 2rem 2rem 0 0;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.05);
+        }
+
+        /* Enhanced Card Design */
+        .product-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px -10px rgba(0,0,0,0.1);
+        }
+
+        .sold-overlay { 
+            background: rgba(0,0,0,0.7); 
+            position: absolute; inset: 0; 
+            display: flex; align-items: center; justify-content: center; 
+            color: white; font-weight: 900; font-size: 1.1rem; 
+            backdrop-filter: blur(3px); z-index: 20; 
+        }
+
+        .view-toggle { 
+            background: var(--border); 
+            border-radius: 20px; 
+            padding: 5px; 
+            display: flex; 
+            gap: 5px; 
+            width: fit-content; 
+            margin: 0 auto 25px; 
+        }
+        .view-toggle button { 
+            padding: 10px 24px; 
+            border-radius: 16px; 
+            font-size: 0.85rem; 
+            font-weight: 700; 
+            color: #64748b; 
+        }
+        .view-toggle .active { 
+            background: var(--card); 
+            color: var(--primary); 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
+        }
+
+        .active-nav { color: var(--primary) !important; font-weight: 800; }
+        .notification-dot { position: absolute; top: -2px; right: 10px; width: 10px; height: 10px; background: #ef4444; border-radius: 50%; border: 2px solid var(--card); }
+
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        /* Ban Screen Overlay */
-        .banned-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.98); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
+
+        /* Custom Modal */
+        .modal-content { 
+            background: var(--card); 
+            border-radius: 2.5rem; 
+            animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes modalPop {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .btn-premium {
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            color: white;
+            box-shadow: 0 4px 15px var(--primary-glow);
+        }
+
+        /* Profile Upload Spinner */
+        #profile-loader {
+            position: absolute;
+            inset: 0;
+            background: rgba(255,255,255,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            z-index: 10;
+        }
+        .dark #profile-loader { background: rgba(15, 23, 42, 0.7); }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--primary);
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <div id="ban-screen" class="hidden banned-overlay">
-        <i class="fas fa-user-slash text-6xl text-red-600 mb-4"></i>
-        <h1 class="text-2xl font-bold text-gray-800">Account Suspended</h1>
-        <p class="text-gray-500 mt-2 max-w-xs">Your account has been banned for violating campus community guidelines.</p>
-        <button onclick="contactDeveloper()" class="mt-6 bg-blue-600 text-white px-6 py-2 rounded-full font-bold">Contact Support</button>
+    <div id="terms-modal" class="modal-overlay hidden fixed inset-0 z-[10000] bg-black/60 backdrop-blur-sm flex items-center justify-center p-6">
+        <div class="modal-content p-8 max-w-sm w-full shadow-2xl border border-base">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-shield-halved text-2xl"></i>
+                </div>
+                <h2 class="text-2xl font-extrabold">Campus Rules</h2>
+                <p class="text-xs opacity-60 mt-2">To keep our campus safe, please agree to these terms.</p>
+            </div>
+            <div class="space-y-4 text-sm mb-8">
+                <div class="flex gap-3 items-start"><i class="fas fa-check-circle text-blue-500 mt-1"></i><p><b>Be Real:</b> Authentic posts only.</p></div>
+                <div class="flex gap-3 items-start"><i class="fas fa-check-circle text-blue-500 mt-1"></i><p><b>Safety:</b> Meet in public areas.</p></div>
+                <div class="flex gap-3 items-start"><i class="fas fa-check-circle text-blue-500 mt-1"></i><p><b>No Scams:</b> Immediate permanent ban.</p></div>
+            </div>
+            <button onclick="acceptTerms()" class="w-full btn-premium font-bold py-4 rounded-2xl shadow-lg transition-all">I AGREE & CONTINUE</button>
+        </div>
     </div>
 
-    <header class="bg-white shadow-sm sticky top-0 z-50 p-4">
-        <div class="max-w-5xl mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-blue-600" onclick="showScreen('browse-screen')">SLIT-HUB</h1>
-            <div id="search-bar" class="flex-1 mx-4">
-                <input type="text" id="global-search" placeholder="🔍 Search campus items..." class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+    <div id="ban-screen" class="hidden fixed inset-0 bg-white dark:bg-slate-950 z-[9999] flex flex-col items-center justify-center text-center p-10">
+        <div class="text-red-500 mb-6 bg-red-50 dark:bg-red-950/30 p-6 rounded-full">
+            <i class="fas fa-user-lock text-5xl"></i>
+        </div>
+        <h1 class="text-3xl font-extrabold">Account Suspended</h1>
+        <p class="opacity-60 mt-4 max-w-xs">You have been flagged for community violations. Please contact admin to appeal.</p>
+        <button onclick="contactDeveloper()" class="mt-8 bg-blue-600 text-white px-8 py-3 rounded-full font-bold shadow-lg">Appeal Access</button>
+    </div>
+
+    <header class="glass-header sticky top-0 z-50 p-4">
+        <div class="max-w-5xl mx-auto flex justify-between items-center gap-4">
+            <h1 class="brand-logo text-2xl" onclick="showScreen('browse-screen')">SLIT-HUB</h1>
+            <div class="flex-1 max-w-md relative">
+                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                <input type="text" id="global-search" placeholder="Search campus..." class="w-full bg-gray-100 dark:bg-slate-800 border-none rounded-2xl pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all">
             </div>
-            <button onclick="showScreen('settings-screen')" class="text-gray-500 hover:text-blue-600 ml-2">
-                <i class="fas fa-user-circle text-2xl"></i>
-            </button>
+            <div class="flex items-center gap-2">
+                <button onclick="toggleDarkMode()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-slate-800 transition-colors">
+                    <i class="fas fa-moon" id="dark-icon"></i>
+                </button>
+            </div>
         </div>
     </header>
 
-    <div id="announcement-bar" class="hidden text-white py-2 px-4 flex justify-between items-center text-xs font-bold shadow-md sticky top-[72px] z-40">
-        <div class="flex-1 text-center"><i class="fas fa-bullhorn mr-2"></i><span id="announcement-text">Welcome to SLIT-HUB!</span></div>
-        <button onclick="this.parentElement.classList.add('hidden')"><i class="fas fa-times"></i></button>
+    <div id="announcement-bar" class="hidden text-white py-3 px-4 flex justify-between items-center text-[11px] font-bold shadow-md sticky top-[73px] z-40">
+        <div class="flex-1 text-center flex items-center justify-center gap-2"><i class="fas fa-sparkles"></i><span id="announcement-text">Welcome!</span></div>
+        <button onclick="this.parentElement.classList.add('hidden')" class="opacity-70"><i class="fas fa-times"></i></button>
     </div>
 
-    <main class="max-w-5xl mx-auto p-4">
+    <main class="max-w-5xl mx-auto p-4 md:p-6">
         
         <section id="browse-screen" class="screen">
             <div class="view-toggle">
@@ -72,128 +244,137 @@
                 <button id="toggle-services" onclick="switchView('Service')">🛠️ Services</button>
                 <button id="toggle-requests" onclick="switchView('Request')">🙋‍♂️ Requests</button>
             </div>
-            
-            <div class="overflow-x-auto pb-4 no-scrollbar">
-                <div id="category-filter-chips" class="flex gap-2"></div>
-            </div>
-
-            <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+            <div class="overflow-x-auto pb-6 no-scrollbar"><div id="category-filter-chips" class="flex gap-2"></div></div>
+            <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                </div>
         </section>
 
-        <section id="settings-screen" class="screen hidden max-w-lg mx-auto bg-white p-6 rounded-xl shadow">
-            <div class="text-center mb-6">
-                <div class="relative inline-block">
-                    <img id="my-profile-pic" src="https://ui-avatars.com/api/?name=User&background=random" class="profile-img-large mx-auto mb-2">
-                    <button onclick="document.getElementById('profile-upload').click()" class="absolute bottom-0 right-0 bg-blue-600 text-white p-1 rounded-full text-xs border-2 border-white"><i class="fas fa-camera"></i></button>
-                    <input type="file" id="profile-upload" class="hidden" accept="image/*">
-                </div>
-                <h2 id="my-profile-name-display" class="font-bold text-lg">My Profile <span id="my-verified-badge"></span></h2>
-            </div>
-            
-            <div class="space-y-4">
-                <div class="p-4 bg-gray-50 rounded-lg border">
-                    <p class="text-[10px] text-gray-400 font-bold uppercase mb-2 text-center">Your ID: <span id="display-user-id" class="text-blue-700 font-mono"></span></p>
-                    <div class="space-y-3">
-                        <input type="text" id="set-profile-name" placeholder="👤 Full Name" class="w-full border p-2 rounded text-sm">
-                        <input type="text" id="set-profile-dept" placeholder="🎓 Dept (e.g. 200L CS)" class="w-full border p-2 rounded text-sm">
-                        <textarea id="set-profile-bio" placeholder="📝 About you..." class="w-full border p-2 rounded text-sm h-16"></textarea>
-                        <button onclick="saveUserProfile()" class="w-full bg-blue-600 text-white text-xs font-bold py-2 rounded-lg">💾 SAVE PROFILE</button>
+        <section id="settings-screen" class="screen hidden max-w-lg mx-auto">
+            <div class="bg-card p-8 rounded-[2.5rem] shadow-xl border border-base">
+                <div class="text-center mb-8">
+                    <div class="relative inline-block">
+                        <div id="profile-loader"><div class="spinner"></div></div>
+                        <img id="my-profile-pic" src="https://ui-avatars.com/api/?name=User&background=random" class="profile-img-large mx-auto mb-2 border-4 border-white shadow-lg w-24 h-24 rounded-full object-cover">
+                        <div class="flex gap-2 justify-center absolute -bottom-2 w-full">
+                            <button onclick="document.getElementById('profile-upload').click()" class="bg-blue-600 text-white p-2.5 rounded-full text-xs border-2 border-white shadow-md"><i class="fas fa-camera"></i></button>
+                            <button id="btn-remove-photo" onclick="removeProfilePic()" class="hidden bg-red-500 text-white p-2.5 rounded-full text-xs border-2 border-white shadow-md"><i class="fas fa-trash"></i></button>
+                        </div>
+                        <input type="file" id="profile-upload" class="hidden" accept="image/*">
                     </div>
+                    <h2 id="my-profile-name-display" class="font-extrabold text-xl mt-4">My Profile</h2>
+                    <p class="text-[10px] opacity-40 font-mono mt-1">ID: <span id="display-user-id" class="text-blue-600"></span></p>
                 </div>
+                
+                <div class="space-y-5">
+                    <input type="text" id="set-profile-name" placeholder="👤 Full Name" class="w-full bg-gray-50 dark:bg-slate-800 border border-base p-3.5 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="set-profile-dept" placeholder="🎓 Dept" class="w-full bg-gray-50 dark:bg-slate-800 border border-base p-3.5 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                    <textarea id="set-profile-bio" placeholder="📝 About you..." class="w-full bg-gray-50 dark:bg-slate-800 border border-base p-3.5 rounded-2xl text-sm h-24 outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    <button onclick="saveUserProfile()" class="w-full btn-premium font-bold py-4 rounded-2xl shadow-lg">SAVE PROFILE</button>
 
-                <div id="verification-card" class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p class="text-[11px] font-bold text-blue-800 mb-1">🛡️ CAMPUS VERIFICATION</p>
-                    <p class="text-[10px] text-gray-500 mb-3">Get a blue tick by uploading your School ID.</p>
-                    <div class="flex gap-2">
-                        <button onclick="requestVerification()" id="btn-verify-request" class="flex-1 bg-white border border-blue-600 text-blue-600 text-[10px] font-bold py-2 rounded-lg">UPLOAD ID</button>
-                        <button onclick="window.open('https://wa.me/2348053103234?text=I%20want%20to%20verify%20my%20account%20ID:%20' + currentUserId)" class="flex-1 bg-green-500 text-white text-[10px] font-bold py-2 rounded-lg">CHAT ADMIN</button>
+                    <div id="verification-card" class="p-5 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-3xl mt-6">
+                        <p class="text-[11px] font-extrabold text-blue-800 dark:text-blue-200 mb-3 tracking-wider">🛡️ CAMPUS VERIFICATION</p>
+                        <div class="flex gap-3">
+                            <button onclick="requestVerification()" id="btn-verify-request" class="flex-1 bg-white dark:bg-slate-800 border border-blue-600 text-blue-600 text-[10px] font-bold py-3 rounded-xl shadow-sm">UPLOAD ID</button>
+                            <button onclick="window.open('https://wa.me/2348053103234?text=I%20want%20to%20verify%20my%20account%20ID:%20' + currentUserId)" class="flex-1 bg-green-500 text-white text-[10px] font-bold py-3 rounded-xl shadow-sm">CHAT ADMIN</button>
+                        </div>
                     </div>
-                </div>
 
-                <button onclick="contactDeveloper()" class="w-full flex items-center justify-between p-4 bg-blue-50 rounded-lg text-blue-700">
-                    <div class="flex items-center gap-3"><i class="fab fa-whatsapp text-xl text-green-500"></i><p class="text-sm font-bold">Contact Developer</p></div>
-                    <i class="fas fa-chevron-right text-sm"></i>
-                </button>
-                <p class="text-[10px] text-center text-gray-400 pt-4">Version 2.3.0 | ✨ SLIT-HUB ✨</p>
+                    <button onclick="contactDeveloper()" class="w-full flex items-center justify-between p-5 bg-slate-100 dark:bg-slate-800 rounded-2xl">
+                        <div class="flex items-center gap-3"><i class="fab fa-whatsapp text-2xl text-green-500"></i><p class="text-sm font-bold">Contact Developer</p></div>
+                        <i class="fas fa-chevron-right text-xs opacity-30"></i>
+                    </button>
+                </div>
             </div>
         </section>
 
-        <section id="post-screen" class="screen hidden max-w-lg mx-auto bg-white p-6 rounded-xl shadow">
-            <h2 id="post-screen-title" class="text-xl font-bold mb-4">Post New</h2>
-            <div class="flex gap-2 mb-6">
-                <label class="flex-1 border p-2 rounded-lg text-center text-[10px] font-bold uppercase cursor-pointer"><input type="radio" name="post-type" value="Product" checked onclick="togglePostForm('Product')"> 🛍️ Product</label>
-                <label class="flex-1 border p-2 rounded-lg text-center text-[10px] font-bold uppercase cursor-pointer"><input type="radio" name="post-type" value="Service" onclick="togglePostForm('Service')"> 🛠️ Service</label>
-                <label class="flex-1 border p-2 rounded-lg text-center text-[10px] font-bold uppercase cursor-pointer"><input type="radio" name="post-type" value="Request" onclick="togglePostForm('Request')"> 🙋‍♂️ Request</label>
+        <section id="post-screen" class="screen hidden max-w-xl mx-auto bg-card p-8 rounded-[2.5rem] shadow-xl border border-base">
+            <h2 id="post-screen-title" class="text-2xl font-extrabold mb-6">Create New Listing</h2>
+            <div class="flex gap-2 mb-8 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl">
+                <label class="flex-1 py-3 rounded-xl text-center text-[11px] font-extrabold uppercase cursor-pointer transition-all"><input type="radio" name="post-type" value="Product" checked class="hidden" onclick="togglePostForm('Product')"><span>🛍️ Product</span></label>
+                <label class="flex-1 py-3 rounded-xl text-center text-[11px] font-extrabold uppercase cursor-pointer transition-all"><input type="radio" name="post-type" value="Service" class="hidden" onclick="togglePostForm('Service')"><span>🛠️ Service</span></label>
+                <label class="flex-1 py-3 rounded-xl text-center text-[11px] font-extrabold uppercase cursor-pointer transition-all"><input type="radio" name="post-type" value="Request" class="hidden" onclick="togglePostForm('Request')"><span>🙋‍♂️ Ask</span></label>
             </div>
-
-            <div class="space-y-4">
-                <div id="image-preview-container" class="w-full h-40 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center overflow-hidden cursor-pointer">
-                    <img id="image-preview" class="hidden w-full h-full object-cover"><span id="preview-placeholder" class="text-gray-400 text-xs">📸 Tap to upload photo</span>
+            <div class="space-y-5">
+                <div id="image-preview-container" class="w-full h-48 border-2 border-dashed border-base rounded-3xl flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all">
+                    <img id="image-preview" class="hidden w-full h-full object-cover">
+                    <div id="preview-placeholder" class="text-center">
+                        <i class="fas fa-cloud-arrow-up text-3xl text-blue-500 mb-2"></i>
+                        <p class="text-[11px] font-bold opacity-40">Tap to upload photo</p>
+                    </div>
                 </div>
                 <input type="file" id="file-input" class="hidden">
-                <input type="text" id="post-title" placeholder="Title..." class="w-full border p-2 rounded text-sm">
-                <textarea id="post-desc" placeholder="Details/Description..." class="w-full border p-2 rounded h-20 text-sm"></textarea>
-                <div class="flex gap-2">
-                    <input type="number" id="post-price" placeholder="Price (₦)" class="w-1/2 border p-2 rounded text-sm">
-                    <select id="post-negotiable" class="w-1/2 border p-2 rounded text-sm"><option value="Fixed">Fixed 💰</option><option value="Negotiable">Negotiable 🤝</option></select>
+                <input type="text" id="post-title" placeholder="What are you listing?" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base p-4 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                <textarea id="post-desc" placeholder="Details (Condition, size, etc.)..." class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base p-4 rounded-2xl text-sm h-32 outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold opacity-40">₦</span>
+                        <input type="number" id="post-price" placeholder="Price" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base pl-10 pr-4 py-4 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <select id="post-negotiable" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base px-4 rounded-2xl text-sm outline-none">
+                        <option value="Fixed">Fixed Price</option>
+                        <option value="Negotiable">Negotiable</option>
+                    </select>
                 </div>
-                <div class="flex gap-2">
-                    <select id="post-category" class="w-1/2 border p-2 rounded text-sm"></select>
-                    <select id="post-condition" class="w-1/2 border p-2 rounded text-sm"></select>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <select id="post-category" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base px-4 py-4 rounded-2xl text-sm outline-none"></select>
+                    <select id="post-condition" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base px-4 py-4 rounded-2xl text-sm outline-none"></select>
                 </div>
-                <input type="tel" id="post-phone" placeholder="📞 WhatsApp Number" class="w-full border p-2 rounded text-sm">
-                <input type="text" id="post-location" placeholder="📍 Campus Location" class="w-full border p-2 rounded text-sm">
-                <button id="btn-post" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg">🚀 POST NOW</button>
-                <button id="btn-cancel-edit" class="hidden w-full bg-gray-200 text-gray-600 font-bold py-2 rounded-lg mt-2">Cancel Edit</button>
+                
+                <input type="tel" id="post-phone" placeholder="📞 WhatsApp (e.g. 080...)" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base p-4 rounded-2xl text-sm outline-none">
+                <input type="text" id="post-location" placeholder="📍 Campus Location" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base p-4 rounded-2xl text-sm outline-none">
+                <button id="btn-post" class="w-full btn-premium font-extrabold py-4 rounded-2xl shadow-xl mt-4">PUBLISH NOW</button>
             </div>
         </section>
 
         <section id="my-items-screen" class="screen hidden">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold">📦 My Postings</h2>
-                <button onclick="toggleAdminMode()" id="admin-toggle-btn" class="text-[10px] bg-gray-200 px-2 py-1 rounded font-bold uppercase">Admin: OFF</button>
+             <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-extrabold">Manager</h2>
+                <button onclick="toggleAdminMode()" id="admin-toggle-btn" class="text-[9px] bg-slate-200 dark:bg-slate-800 px-3 py-1.5 rounded-full font-bold uppercase tracking-widest">Admin: OFF</button>
             </div>
-            <div id="admin-panel" class="hidden mb-6 space-y-4">
-                <div class="bg-blue-600 p-4 rounded-lg text-white">
-                    <h3 class="text-xs font-bold uppercase mb-2">📢 Campus Announcement</h3>
-                    <textarea id="admin-announcement-input" class="w-full p-2 rounded text-black text-sm h-12 mb-2"></textarea>
-                    <div class="flex gap-2"><button onclick="updateAnnouncement()" class="bg-white text-blue-600 px-3 py-1 rounded text-[10px] font-bold">SEND</button><button onclick="clearAnnouncement()" class="bg-red-500 text-white px-3 py-1 rounded text-[10px] font-bold">DELETE</button></div>
+            
+            <div id="admin-panel" class="hidden mb-10 space-y-6">
+                <div class="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 rounded-[2rem] text-white shadow-xl">
+                    <h3 class="text-xs font-extrabold uppercase mb-4 flex items-center gap-2">📢 Global Broadcast</h3>
+                    <textarea id="admin-announcement-input" class="w-full p-4 rounded-2xl text-slate-900 text-sm h-20 mb-3 outline-none" placeholder="Broadcast message..."></textarea>
+                    <button onclick="updateAnnouncement()" class="bg-white text-blue-600 px-8 py-2.5 rounded-xl text-[10px] font-bold shadow-lg">PUSH NOTIFICATION</button>
                 </div>
-                
-                <div class="bg-white p-4 border rounded-lg">
-                    <h3 class="text-xs font-bold uppercase mb-2 text-blue-600">Verification Requests</h3>
-                    <div id="admin-verify-list" class="space-y-2"></div>
+                <div class="bg-card p-6 border border-base rounded-[2rem] shadow-sm">
+                    <h3 class="text-xs font-extrabold uppercase mb-4 text-blue-600">Member Directory</h3>
+                    <div id="admin-user-list" class="space-y-3 max-h-80 overflow-y-auto no-scrollbar"></div>
                 </div>
-
-                <div class="bg-white p-4 border rounded-lg">
-                    <h3 class="text-xs font-bold uppercase mb-2 text-red-600">User Reports & Moderation</h3>
-                    <div id="admin-reports-list" class="space-y-2"></div>
-                </div>
-
-                <div class="grid grid-cols-1 text-center text-xs font-bold uppercase"><div class="bg-blue-100 p-2 rounded">Total Active Posts: <span id="stat-total-products">0</span></div></div>
+                <div class="bg-card p-6 border border-base rounded-[2rem] shadow-sm"><h3 class="text-xs font-extrabold uppercase mb-4 text-red-600">Reports & Flagged</h3><div id="admin-reports-list" class="space-y-3"></div></div>
             </div>
             <div id="my-items-grid" class="grid grid-cols-1 gap-4"></div>
         </section>
 
-        <section id="details-screen" class="screen hidden bg-white rounded-xl shadow overflow-hidden pb-10">
+        <section id="details-screen" class="screen hidden bg-card rounded-[2.5rem] shadow-2xl overflow-hidden pb-12 border border-base">
             <div id="details-content"></div>
         </section>
 
-        <section id="chats-screen" class="screen hidden"><h2 class="text-xl font-bold mb-4">💬 Inbox</h2><div id="chats-list" class="space-y-2"></div></section>
-        <section id="chatroom-screen" class="screen hidden flex flex-col h-[85vh]">
-            <div id="chat-header" class="p-4 border-b flex justify-between items-center bg-white"><div id="chat-title" class="font-bold text-sm"></div><button id="btn-clear-chat" class="text-xs text-red-500 font-bold uppercase">Clear</button></div>
-            <div id="messages-container" class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50"></div>
-            <div class="p-4 bg-white border-t flex gap-2 items-center"><button onclick="document.getElementById('chat-img-input').click()" class="text-gray-400"><i class="fas fa-plus-circle"></i></button><input type="file" id="chat-img-input" class="hidden" accept="image/*"><input type="text" id="message-input" placeholder="Type..." class="flex-1 border rounded-full px-4 py-2 text-sm"><button id="btn-send" class="bg-blue-600 text-white p-2 rounded-full w-10 h-10"><i class="fas fa-paper-plane"></i></button></div>
+        <section id="chats-screen" class="screen hidden"><h2 class="text-2xl font-extrabold mb-6">Messages</h2><div id="chats-list" class="space-y-3"></div></section>
+        
+        <section id="chatroom-screen" class="screen hidden flex flex-col h-[82vh] bg-card rounded-[2.5rem] border border-base shadow-2xl overflow-hidden">
+            <div id="chat-header" class="p-5 border-b border-base flex items-center gap-4 bg-card/50 backdrop-blur-md">
+                <button onclick="showScreen('chats-screen')" class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center"><i class="fas fa-chevron-left text-xs"></i></button>
+                <div id="chat-title" class="font-bold text-base"></div>
+            </div>
+            <div id="messages-container" class="flex-1 overflow-y-auto p-5 space-y-4 bg-slate-50 dark:bg-slate-950/50 no-scrollbar"></div>
+            <div class="p-4 bg-card border-t border-base flex gap-3">
+                <input type="text" id="message-input" placeholder="Aa" class="flex-1 bg-slate-100 dark:bg-slate-800 border-none rounded-2xl px-5 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                <button id="btn-send" class="btn-premium w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg"><i class="fas fa-paper-plane"></i></button>
+            </div>
         </section>
 
     </main>
 
-    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around py-3 text-gray-400 z-50">
-        <button onclick="showScreen('browse-screen')" class="nav-item flex flex-col items-center"><i class="fas fa-compass text-lg"></i><span class="text-[10px]">Explore</span></button>
-        <button onclick="startNewPost()" class="nav-item flex flex-col items-center"><i class="fas fa-plus-square text-lg text-blue-600"></i><span class="text-[10px]">Sell/Ask</span></button>
-        <button onclick="loadMyItems()" class="nav-item flex flex-col items-center"><i class="fas fa-box text-lg"></i><span class="text-[10px]">My Items</span></button>
-        <button onclick="openChats()" class="nav-item flex flex-col items-center"><div id="chat-notify" class="notification-dot"></div><i class="fas fa-comment-dots text-lg"></i><span class="text-[10px]">Inbox</span></button>
-        <button onclick="showScreen('settings-screen')" class="nav-item flex flex-col items-center"><i class="fas fa-user text-lg"></i><span class="text-[10px]">Profile</span></button>
+    <nav class="fixed bottom-0 left-0 right-0 glass-nav flex justify-around py-4 text-slate-400 z-50">
+        <button onclick="showScreen('browse-screen')" class="nav-item flex flex-col items-center"><i class="fas fa-house-chimney text-lg mb-1"></i><span class="text-[9px] font-bold">Home</span></button>
+        <button onclick="startNewPost()" class="nav-item flex flex-col items-center"><i class="fas fa-plus-circle text-2xl text-blue-600 mb-1"></i><span class="text-[9px] font-bold">Post</span></button>
+        <button onclick="loadMyItems()" class="nav-item flex flex-col items-center"><i class="fas fa-grid-2 text-lg mb-1"></i><span class="text-[9px] font-bold">Manager</span></button>
+        <button onclick="openChats()" class="nav-item flex flex-col items-center"><div id="chat-notify" class="notification-dot"></div><i class="fas fa-comment-dots text-lg mb-1"></i><span class="text-[9px] font-bold">Inbox</span></button>
+        <button onclick="showScreen('settings-screen')" class="nav-item flex flex-col items-center"><i class="fas fa-circle-user text-lg mb-1"></i><span class="text-[9px] font-bold">Me</span></button>
     </nav>
 
     <script type="module">
@@ -213,17 +394,25 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        if(!localStorage.getItem('slit_user_id')) {
-            localStorage.setItem('slit_user_id', "user_" + Math.floor(Math.random() * 1000000));
-        }
-        let currentUserId = localStorage.getItem('slit_user_id');
+        // --- DARK MODE LOGIC ---
+        window.toggleDarkMode = () => {
+            const isDark = document.body.classList.toggle('dark');
+            localStorage.setItem('dark-mode', isDark);
+            document.getElementById('dark-icon').className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+        };
+        if(localStorage.getItem('dark-mode') === 'true') toggleDarkMode();
+
+        // TERMS SYSTEM LOGIC
+        window.onload = () => { if(!localStorage.getItem('slit_terms_accepted')) document.getElementById('terms-modal').classList.remove('hidden'); };
+        window.acceptTerms = () => { localStorage.setItem('slit_terms_accepted', 'true'); document.getElementById('terms-modal').classList.add('hidden'); };
+
+        let currentUserId = localStorage.getItem('slit_user_id') || "user_" + Math.floor(Math.random() * 1000000);
+        localStorage.setItem('slit_user_id', currentUserId);
         let activeChatId = null;
         let isAdminMode = false;
-        let editingProductId = null; 
         let verifiedSellers = [];
         let currentView = 'Product';
         let selectedCategory = 'All';
-        let selectedReviewStars = 5;
         let isUserBanned = false;
 
         document.getElementById('display-user-id').innerText = currentUserId;
@@ -234,25 +423,52 @@
             Request: ["All", "💰 Buy Request", "🛠️ Service Needed", "🚑 Urgent Help", "👫 Study Partner", "➕ Others"]
         };
 
-        // REAL-TIME BAN CHECK
-        onSnapshot(doc(db, "BannedUsers", currentUserId), (snap) => {
-            if(snap.exists()) {
-                isUserBanned = true;
-                document.getElementById('ban-screen').classList.remove('hidden');
-            } else {
-                isUserBanned = false;
-                document.getElementById('ban-screen').classList.add('hidden');
+        // PROFILE PIC SYSTEM
+        document.getElementById('profile-upload').onchange = async (e) => {
+            const file = e.target.files[0];
+            if(!file) return;
+            
+            const loader = document.getElementById('profile-loader');
+            loader.style.display = 'flex';
+            
+            try {
+                const url = await uploadToCloudinary(file);
+                await updateDoc(doc(db, "Users", currentUserId), { photo: url });
+                document.getElementById('my-profile-pic').src = url;
+            } catch(e) { alert("Upload failed"); }
+            loader.style.display = 'none';
+        };
+
+        // PROFILE PIC REMOVAL
+        window.removeProfilePic = async () => {
+            if(confirm("Remove profile photo?")) {
+                await updateDoc(doc(db, "Users", currentUserId), { photo: null });
+                document.getElementById('my-profile-pic').src = `https://ui-avatars.com/api/?name=${currentUserId}`;
+                document.getElementById('btn-remove-photo').classList.add('hidden');
             }
+        };
+
+        // REAL-TIME UPDATES
+        onSnapshot(doc(db, "BannedUsers", currentUserId), (snap) => {
+            document.getElementById('ban-screen').classList.toggle('hidden', !snap.exists());
+            isUserBanned = snap.exists();
+        });
+
+        // Track Verified Sellers globally
+        onSnapshot(collection(db, "VerifiedUsers"), (snap) => {
+            verifiedSellers = snap.docs.map(d => d.id);
+            if(isAdminMode) loadAdminUserList();
         });
 
         onSnapshot(doc(db, "Users", currentUserId), (snap) => {
             if(snap.exists()) {
                 const data = snap.data();
                 document.getElementById('my-profile-pic').src = data.photo || `https://ui-avatars.com/api/?name=${currentUserId}`;
+                document.getElementById('btn-remove-photo').classList.toggle('hidden', !data.photo);
                 document.getElementById('set-profile-name').value = data.name || '';
                 document.getElementById('set-profile-dept').value = data.dept || '';
                 document.getElementById('set-profile-bio').value = data.bio || '';
-                if(data.name) document.getElementById('my-profile-name-display').innerHTML = `${data.name} <span id="my-verified-badge"></span>`;
+                if(data.name) document.getElementById('my-profile-name-display').innerText = data.name;
             }
         });
 
@@ -266,131 +482,115 @@
         };
 
         window.requestVerification = async () => {
-            if(isUserBanned) return;
             const input = document.createElement('input');
             input.type = 'file';
-            input.accept = 'image/*';
             input.onchange = async (e) => {
-                const file = e.target.files[0];
-                if(!file) return;
-                document.getElementById('btn-verify-request').innerText = "Uploading ID...";
-                const url = await uploadToCloudinary(file);
+                const url = await uploadToCloudinary(e.target.files[0]);
                 await setDoc(doc(db, "VerificationRequests", currentUserId), { userId: currentUserId, idImage: url, timestamp: serverTimestamp() });
-                alert("ID Uploaded! Admin will review it. 🚀");
+                alert("ID Uploaded! 🚀");
             };
             input.click();
         };
 
-        function loadVerificationRequests() {
-            onSnapshot(collection(db, "VerificationRequests"), (snap) => {
-                const list = document.getElementById('admin-verify-list');
-                list.innerHTML = snap.empty ? '<p class="text-[10px] text-gray-400">No requests.</p>' : '';
-                snap.forEach(d => {
-                    const req = d.data();
-                    list.innerHTML += `<div class="p-2 border rounded flex flex-col gap-2"><p class="text-[10px]">User: ${req.userId}</p><img src="${req.idImage}" class="h-24 object-cover rounded"><button onclick="approveUser('${req.userId}')" class="bg-blue-600 text-white text-[9px] py-2 rounded">APPROVE</button></div>`;
-                });
-            });
+        // --- ADMIN ENHANCEMENTS ---
+        window.toggleAdminMode = () => {
+            if(prompt("Passphrase:") === "junior123") {
+                isAdminMode = !isAdminMode;
+                document.getElementById('admin-panel').classList.toggle('hidden', !isAdminMode);
+                document.getElementById('admin-toggle-btn').innerText = `Admin Mode: ${isAdminMode ? 'ON' : 'OFF'}`;
+                if(isAdminMode) { loadReports(); loadAdminUserList(); }
+            }
+        };
+
+        async function loadAdminUserList() {
+            const container = document.getElementById('admin-user-list');
+            const usersSnap = await getDocs(collection(db, "Users"));
+            const bannedSnap = await getDocs(collection(db, "BannedUsers"));
+            const bannedIds = bannedSnap.docs.map(d => d.id);
+
+            container.innerHTML = '';
+            
+            for (const userDoc of usersSnap.docs) {
+                const u = userDoc.data();
+                const uid = userDoc.id;
+                const isVerified = verifiedSellers.includes(uid);
+                const isBanned = bannedIds.includes(uid);
+
+                // Find phone from products if not in user profile
+                let phone = "N/A";
+                const pQuery = query(collection(db, "Products"), where("SellerId", "==", uid));
+                const pSnap = await getDocs(pQuery);
+                if(!pSnap.empty) phone = pSnap.docs[0].data().Phone || "N/A";
+
+                container.innerHTML += `
+                    <div class="admin-user-card bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-base">
+                        <div class="flex justify-between items-start">
+                            <div class="text-[11px]">
+                                <p class="font-extrabold text-blue-600">${u.name || 'Anonymous User'} ${isVerified ? '✅' : ''}</p>
+                                <p class="opacity-50">ID: ${uid}</p>
+                                <p class="font-bold"><i class="fas fa-phone mr-1"></i>${phone}</p>
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <button onclick="startChat('${uid}', 'Admin Support')" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-[9px] font-bold">MESSAGE</button>
+                                ${isVerified ? 
+                                    `<button onclick="removeVerification('${uid}')" class="bg-orange-500 text-white px-3 py-1.5 rounded-lg text-[9px] font-bold">REMOVE TICK</button>` : 
+                                    `<button onclick="verifyUser('${uid}')" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-[9px] font-bold">VERIFY</button>`
+                                }
+                                ${isBanned ? 
+                                    `<button onclick="unbanUser('${uid}')" class="bg-blue-100 text-blue-600 px-3 py-1.5 rounded-lg text-[9px] font-bold">UNBAN</button>` : 
+                                    `<button onclick="banUser('${uid}')" class="bg-red-600 text-white px-3 py-1.5 rounded-lg text-[9px] font-bold">BAN</button>`
+                                }
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
         }
 
-        window.approveUser = async (uid) => {
-            await setDoc(doc(db, "VerifiedUsers", uid), { verified: true });
-            await deleteDoc(doc(db, "VerificationRequests", uid));
-            alert("Verified!");
-        };
-
-        // UPDATED: REPORT & BAN LOGIC
-        window.reportUser = async (reportedId, itemTitle) => {
-            const reason = prompt("Why are you reporting this user? (Scam, Rude, Fake Item, etc.)");
-            if(!reason) return;
-            await addDoc(collection(db, "Reports"), {
-                reporter: currentUserId,
-                reportedUser: reportedId,
-                reason: reason,
-                item: itemTitle,
-                timestamp: serverTimestamp()
-            });
-            alert("Thank you. Report sent to Admin for review.");
-        };
-
-        window.banUser = async (uid) => {
-            if(confirm(`Are you sure you want to BAN user ${uid}? They will be locked out immediately.`)) {
-                await setDoc(doc(db, "BannedUsers", uid), { bannedAt: serverTimestamp(), reason: "Reported behavior" });
-                alert("User has been banned.");
+        window.removeVerification = async (uid) => {
+            if(confirm("Remove verification tick for this user?")) {
+                await deleteDoc(doc(db, "VerifiedUsers", uid));
+                alert("Verification removed.");
+                loadAdminUserList();
             }
+        };
+
+        window.unbanUser = async (uid) => {
+            if(confirm("Restore this account?")) {
+                await deleteDoc(doc(db, "BannedUsers", uid));
+                alert("User Unbanned!");
+                loadAdminUserList();
+            }
+        };
+
+        window.verifyUser = async (uid) => {
+            await setDoc(doc(db, "VerifiedUsers", uid), { verifiedAt: serverTimestamp() });
+            loadAdminUserList();
+        };
+
+        window.updateAnnouncement = async () => {
+            const msg = document.getElementById('admin-announcement-input').value;
+            await setDoc(doc(db, "AppData", "Announcement"), { message: msg, active: msg.length > 0 });
+            alert("Announcement Updated!");
         };
 
         function loadReports() {
             onSnapshot(collection(db, "Reports"), (snap) => {
                 const list = document.getElementById('admin-reports-list');
-                list.innerHTML = snap.empty ? '<p class="text-[10px] text-gray-400">No reports.</p>' : '';
+                list.innerHTML = snap.empty ? '<p class="text-[10px] opacity-50">No reports.</p>' : '';
                 snap.forEach(d => {
                     const r = d.data();
-                    list.innerHTML += `
-                        <div class="p-2 border-l-4 border-red-500 bg-red-50 rounded text-[10px] mb-2">
-                            <b>Target:</b> ${r.reportedUser}<br>
-                            <b>Reason:</b> ${r.reason}<br>
-                            <b>Item:</b> ${r.item}<br>
-                            <div class="flex gap-2 mt-1">
-                                <button onclick="banUser('${r.reportedUser}')" class="bg-red-600 text-white px-2 py-1 rounded">BAN USER</button>
-                                <button onclick="deleteReport('${d.id}')" class="text-blue-600 font-bold px-2 py-1">DISMISS</button>
-                            </div>
-                        </div>`;
+                    list.innerHTML += `<div class="p-3 border-l-4 border-red-500 bg-red-50 dark:bg-red-950/20 rounded-xl text-[10px] mb-2"><b>Target:</b> ${r.reportedUser}<br><b>Reason:</b> ${r.reason}<br><button onclick="banUser('${r.reportedUser}')" class="bg-red-600 text-white px-3 py-1 rounded-lg mt-2 font-bold">BAN ACCOUNT</button></div>`;
                 });
             });
         }
 
-        window.deleteReport = async (id) => { await deleteDoc(doc(db, "Reports", id)); };
-
-        document.getElementById('profile-upload').onchange = async (e) => {
-            if(isUserBanned) return;
-            const file = e.target.files[0];
-            if(file) {
-                const url = await uploadToCloudinary(file);
-                await setDoc(doc(db, "Users", currentUserId), { photo: url }, { merge: true });
+        window.banUser = async (uid) => { 
+            if(confirm("Ban user?")) {
+                await setDoc(doc(db, "BannedUsers", uid), { bannedAt: serverTimestamp() });
+                loadAdminUserList();
             }
         };
-
-        onSnapshot(doc(db, "AppData", "Announcement"), (docSnap) => {
-            const bar = document.getElementById('announcement-bar');
-            const text = document.getElementById('announcement-text');
-            if (docSnap.exists() && docSnap.data().active) {
-                bar.classList.remove('hidden');
-                text.innerText = docSnap.data().message;
-            } else { bar.classList.add('hidden'); }
-        });
-
-        window.updateAnnouncement = async () => {
-            const msg = document.getElementById('admin-announcement-input').value;
-            await setDoc(doc(db, "AppData", "Announcement"), { message: msg, active: true, timestamp: serverTimestamp() });
-            alert("Sent!");
-        };
-
-        window.clearAnnouncement = async () => {
-            await updateDoc(doc(db, "AppData", "Announcement"), { active: false });
-            alert("Cleared.");
-        };
-
-        window.contactDeveloper = () => {
-            if (prompt("Enter developer passphrase:") === "junior123") {
-                window.open(`https://wa.me/2348053103234?text=Help%20ID:%20${currentUserId}`);
-            } else { alert("Denied."); }
-        };
-
-        async function updateMyPresence() {
-            if(isUserBanned) return;
-            await setDoc(doc(db, "UserStatus", currentUserId), { lastSeen: serverTimestamp() }, { merge: true });
-        }
-        updateMyPresence();
-        setInterval(updateMyPresence, 120000);
-
-        function formatLastSeen(timestamp) {
-            if (!timestamp) return '<span class="status-offline">Offline</span>';
-            const lastSeenDate = timestamp.toDate();
-            const now = new Date();
-            const diffInSeconds = Math.floor((now - lastSeenDate) / 1000);
-            if (diffInSeconds < 300) return `<span class="status-online">● Online</span>`;
-            return `<span class="status-offline">Last seen ${lastSeenDate.toLocaleTimeString()}</span>`;
-        }
 
         window.switchView = (view) => {
             currentView = view;
@@ -404,32 +604,41 @@
         function renderCategoryChips() {
             const container = document.getElementById('category-filter-chips');
             container.innerHTML = categories[currentView].map(c => `
-                <button onclick="setCategoryFilter('${c}')" class="cat-chip px-4 py-2 rounded-full text-xs font-bold border transition-all ${selectedCategory === c ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-200'}">
-                    ${c}
-                </button>
+                <button onclick="setCategoryFilter('${c}')" class="chip px-5 py-2.5 rounded-full text-[11px] font-bold border border-base ${selectedCategory === c ? 'bg-blue-600 text-white shadow-lg' : 'bg-card'}">${c}</button>
             `).join('');
         }
 
-        window.setCategoryFilter = (cat) => {
-            selectedCategory = cat;
-            renderCategoryChips();
-            loadProducts();
-        };
+        window.setCategoryFilter = (cat) => { selectedCategory = cat; renderCategoryChips(); loadProducts(); };
 
         window.togglePostForm = (type) => {
             const catSelect = document.getElementById('post-category');
             catSelect.innerHTML = categories[type].filter(c => c !== "All").map(c => `<option value="${c}">${c}</option>`).join('');
-            const condSelect = document.getElementById('post-condition');
-            condSelect.innerHTML = type === 'Product' 
-                ? '<option value="New">New ✨</option><option value="Used">Used 🛠️</option>'
-                : type === 'Request' ? '<option value="Urgent">Urgent 🚨</option><option value="Flexible">Flexible ✅</option>'
-                : '<option value="Expert">Expert 🎖️</option><option value="Student">Student 🎓</option>';
-            document.getElementById('image-preview-container').style.display = type === 'Request' ? 'none' : 'flex';
+            document.getElementById('post-condition').innerHTML = type === 'Product' ? '<option value="New">New</option><option value="Used">Used</option>' : '<option value="Standard">Standard</option>';
+            
+            // Highlight active radio visual
+            document.querySelectorAll('input[name="post-type"]').forEach(input => {
+                const parent = input.parentElement;
+                if(input.checked) {
+                    parent.classList.add('bg-white', 'dark:bg-slate-700', 'shadow-sm', 'text-blue-600');
+                } else {
+                    parent.classList.remove('bg-white', 'dark:bg-slate-700', 'shadow-sm', 'text-blue-600');
+                }
+            });
         };
 
         window.showScreen = (screenId) => {
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
             document.getElementById(screenId).classList.remove('hidden');
+            
+            // Update nav icons
+            document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active-nav'));
+            const screenToNav = {
+                'browse-screen': 0, 'post-screen': 1, 'my-items-screen': 2, 'chats-screen': 3, 'settings-screen': 4
+            };
+            if(screenToNav[screenId] !== undefined) {
+                document.querySelectorAll('nav button')[screenToNav[screenId]].classList.add('active-nav');
+            }
+            window.scrollTo(0,0);
         };
 
         async function uploadToCloudinary(file) {
@@ -441,43 +650,26 @@
             return data.secure_url;
         }
 
-        const imagePreview = document.getElementById('image-preview');
         const fileInput = document.getElementById('file-input');
+        const imagePreview = document.getElementById('image-preview');
         document.getElementById('image-preview-container').onclick = () => fileInput.click();
         fileInput.onchange = (e) => {
             const reader = new FileReader();
-            reader.onload = (ev) => {
-                imagePreview.src = ev.target.result;
-                imagePreview.classList.remove('hidden');
-                document.getElementById('preview-placeholder').classList.add('hidden');
-            };
+            reader.onload = (ev) => { imagePreview.src = ev.target.result; imagePreview.classList.remove('hidden'); document.getElementById('preview-placeholder').classList.add('hidden'); };
             reader.readAsDataURL(e.target.files[0]);
         };
 
-        window.startNewPost = () => {
-            if(isUserBanned) return;
-            editingProductId = null;
-            document.getElementById('post-screen-title').innerText = "Post New";
-            document.getElementById('btn-post').innerText = "Post Now";
-            document.getElementById('btn-cancel-edit').classList.add('hidden');
-            document.getElementById('post-title').value = '';
-            document.getElementById('post-desc').value = '';
-            imagePreview.classList.add('hidden');
-            document.getElementById('preview-placeholder').classList.remove('hidden');
-            togglePostForm('Product');
-            showScreen('post-screen');
-        };
+        window.startNewPost = () => { if(isUserBanned) return; togglePostForm('Product'); showScreen('post-screen'); };
 
         document.getElementById('btn-post').onclick = async () => {
             if(isUserBanned) return;
             const btn = document.getElementById('btn-post');
-            btn.innerText = "Posting..."; btn.disabled = true;
+            btn.innerText = "Publishing..."; btn.disabled = true;
             try {
-                let imageUrl = "https://placehold.co/600x400?text=Request";
+                let imageUrl = "https://placehold.co/600x400?text=Post";
                 if (fileInput.files[0]) imageUrl = await uploadToCloudinary(fileInput.files[0]);
-                else if (editingProductId) imageUrl = imagePreview.src;
                 const postType = document.querySelector('input[name="post-type"]:checked').value;
-                const data = {
+                await addDoc(collection(db, "Products"), {
                     Title: document.getElementById('post-title').value,
                     Description: document.getElementById('post-desc').value,
                     Price: document.getElementById('post-price').value,
@@ -489,20 +681,19 @@
                     ImageURL: imageUrl,
                     SellerId: currentUserId,
                     PostType: postType,
-                    Rating: 0, ReviewCount: 0
-                };
-                if (editingProductId) await updateDoc(doc(db, "Products", editingProductId), data);
-                else {
-                    data.CreatedAt = serverTimestamp();
-                    data.IsSold = false;
-                    await addDoc(collection(db, "Products"), data);
-                }
+                    Rating: 0, ReviewCount: 0,
+                    CreatedAt: serverTimestamp(),
+                    IsSold: false
+                });
                 showScreen('browse-screen');
             } catch (e) { alert("Error!"); }
-            btn.innerText = "Post Now"; btn.disabled = false;
+            btn.innerText = "PUBLISH NOW"; btn.disabled = false;
         };
 
         const loadProducts = () => {
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = '<div class="skeleton-card animate-pulse"></div><div class="skeleton-card animate-pulse"></div><div class="skeleton-card animate-pulse"></div><div class="skeleton-card animate-pulse"></div>';
+            
             let q = query(collection(db, "Products"), where("PostType", "==", currentView), orderBy("CreatedAt", "desc"));
             onSnapshot(q, (snapshot) => {
                 let docs = snapshot.docs;
@@ -516,22 +707,23 @@
             grid.innerHTML = '';
             docs.forEach(docSnap => {
                 const p = docSnap.data();
-                const isVerified = verifiedSellers.includes(p.SellerId);
+                const isVer = verifiedSellers.includes(p.SellerId);
                 const avgRating = p.ReviewCount > 0 ? (p.Rating / p.ReviewCount).toFixed(1) : "0";
                 grid.innerHTML += `
-                    <div class="bg-white rounded-lg shadow-sm overflow-hidden relative border border-gray-100">
-                        ${p.IsSold ? `<div class="sold-overlay">${p.PostType === 'Service' ? 'CLOSED' : 'SOLD'}</div>` : ''}
-                        <img src="${p.ImageURL}" class="w-full h-32 object-cover" onclick="viewProduct('${docSnap.id}')">
-                        <div class="p-2">
-                            <h3 class="font-bold text-xs truncate">${p.Title} ${isVerified ? '<i class="fas fa-check-circle verified-tick"></i>' : ''}</h3>
-                            <div class="flex items-center text-[9px] text-yellow-500"><i class="fas fa-star mr-1"></i>${avgRating}</div>
-                            <p class="text-blue-600 font-bold text-sm">₦${p.Price}</p>
-                            ${(isOwner || isAdminMode) ? `
-                                <div class="flex gap-1 mt-2">
-                                    <button onclick="editProduct('${docSnap.id}')" class="flex-1 bg-gray-100 text-[9px] py-1 rounded font-bold">EDIT</button>
-                                    <button onclick="deleteProduct('${docSnap.id}')" class="flex-1 text-red-500 border border-red-500 text-[9px] py-1 rounded font-bold">DEL</button>
-                                </div>
-                            ` : `<p class="text-gray-400 text-[9px] mt-1"><i class="fas fa-map-marker-alt mr-1"></i>${p.Location}</p>`}
+                    <div class="product-card relative">
+                        ${p.IsSold ? `<div class="sold-overlay">SOLD</div>` : ''}
+                        <div class="relative h-40 overflow-hidden">
+                             <img src="${p.ImageURL}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110" onclick="viewProduct('${docSnap.id}')">
+                        </div>
+                        <div class="p-3">
+                            <h3 class="font-bold text-[11px] truncate mb-1">${p.Title} ${isVer ? '<i class="fas fa-check-circle text-blue-500 ml-1"></i>' : ''}</h3>
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-blue-600 font-extrabold text-sm">₦${p.Price}</span>
+                                <div class="flex items-center text-[8px] text-yellow-500 font-bold bg-yellow-50 dark:bg-yellow-950/20 px-1.5 py-0.5 rounded"><i class="fas fa-star mr-1"></i>${avgRating}</div>
+                            </div>
+                            <div class="flex items-center text-[9px] opacity-40 uppercase font-bold">
+                                <i class="fas fa-location-dot mr-1 text-[7px]"></i> ${p.Location || 'Campus'}
+                            </div>
                         </div>
                     </div>
                 `;
@@ -543,114 +735,145 @@
             const p = snap.data();
             const uSnap = await getDoc(doc(db, "Users", p.SellerId));
             const u = uSnap.data() || {};
-            const statusSnap = await getDoc(doc(db, "UserStatus", p.SellerId));
-            const statusHtml = formatLastSeen(statusSnap.exists() ? statusSnap.data().lastSeen : null);
-            const isVerified = verifiedSellers.includes(p.SellerId);
+            const isMyProduct = p.SellerId === currentUserId;
+            const avgRating = p.ReviewCount > 0 ? (p.Rating / p.ReviewCount).toFixed(1) : "0";
+            const isVer = verifiedSellers.includes(p.SellerId);
 
             document.getElementById('details-content').innerHTML = `
-                <div class="relative"><img src="${p.ImageURL}" class="w-full max-h-64 object-cover"></div>
-                <div class="p-5">
-                    <div class="flex justify-between items-start">
-                        <h2 class="text-xl font-bold flex items-center">${p.Title} ${isVerified ? '<i class="fas fa-check-circle verified-tick"></i>' : ''}</h2>
-                        ${p.SellerId !== currentUserId ? `<button onclick="reportUser('${p.SellerId}', '${p.Title}')" class="text-red-500 text-[10px] font-bold uppercase border border-red-200 px-2 py-1 rounded">Report</button>` : ''}
-                    </div>
-                    <p class="text-blue-600 text-lg font-bold">₦${p.Price}</p>
-                    <div class="bg-gray-50 p-3 rounded-lg text-sm my-4">${p.Description}</div>
-                    <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-xl mb-4 border border-blue-100">
-                        <img src="${u.photo || 'https://ui-avatars.com/api/?name=User'}" class="w-10 h-10 rounded-full object-cover">
+                <div class="relative h-72">
+                    <img src="${p.ImageURL}" class="w-full h-full object-cover">
+                    <button onclick="showScreen('browse-screen')" class="absolute top-5 left-5 w-10 h-10 bg-white/30 backdrop-blur-md rounded-full text-white flex items-center justify-center"><i class="fas fa-chevron-left"></i></button>
+                </div>
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-6">
                         <div>
-                            <p class="text-xs font-bold">${u.name || 'Anonymous Student'} ${isVerified ? '<i class="fas fa-check-circle verified-tick"></i>' : ''}</p>
-                            <p class="text-[9px] text-blue-600 font-semibold">${u.dept || 'Department not set'}</p>
-                            <p class="mt-1">${statusHtml}</p>
+                            <h2 class="text-2xl font-extrabold flex items-center gap-2">${p.Title} ${isVer ? '<i class="fas fa-check-circle text-blue-500"></i>' : ''}</h2>
+                            <p class="text-[10px] opacity-50 font-bold uppercase tracking-widest mt-1">${p.Category}</p>
+                        </div>
+                        <p class="text-blue-600 text-2xl font-black">₦${p.Price}</p>
+                    </div>
+                    
+                    <div class="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl mb-8 border border-base relative">
+                        <img src="${u.photo || 'https://ui-avatars.com/api/?name=User'}" class="w-12 h-12 rounded-full border-2 border-white">
+                        <div class="flex-1">
+                            <p class="text-xs font-extrabold">${u.name || 'Campus Student'}</p> 
+                            <p class="text-[9px] text-yellow-500 font-bold"><i class="fas fa-star mr-1"></i>${avgRating} (${p.ReviewCount || 0} reviews)</p>
+                        </div>
+                        ${!isMyProduct ? `<button onclick="reportUser('${p.SellerId}')" class="text-[9px] font-bold text-red-500 bg-red-50 dark:bg-red-950/20 px-3 py-1.5 rounded-lg border border-red-100 dark:border-red-900/40">REPORT</button>` : ''}
+                    </div>
+                    
+                    <div class="mb-10">
+                        <h4 class="text-[10px] font-extrabold uppercase opacity-40 mb-2">Description</h4>
+                        <p class="text-sm leading-relaxed opacity-80">${p.Description}</p>
+                    </div>
+
+                    <div class="mt-8 mb-8">
+                        <h3 class="text-sm font-extrabold mb-4 uppercase tracking-wider opacity-60">Other listings from this user</h3>
+                        <div id="more-from-seller-grid" class="grid grid-cols-2 gap-4">
+                            <div class="animate-pulse bg-gray-200 dark:bg-slate-800 h-32 rounded-2xl"></div>
+                            <div class="animate-pulse bg-gray-200 dark:bg-slate-800 h-32 rounded-2xl"></div>
                         </div>
                     </div>
-                    <div class="flex gap-2 mb-6">
-                        <button onclick="startChat('${p.SellerId}', '${p.Title}')" class="flex-1 bg-blue-600 text-white font-bold py-3 rounded-lg">Message</button>
-                        ${p.Phone ? `<a href="tel:${p.Phone}" class="flex-1 bg-green-500 text-white font-bold py-3 rounded-lg text-center">Call</a>` : ''}
-                    </div>
-                    <hr class="mb-4">
-                    <h3 class="font-bold mb-2">Student Reviews</h3>
-                    <div id="review-list" class="review-scroll space-y-3 mb-4"></div>
-                    <div class="bg-gray-50 p-4 rounded-lg border">
-                        <div class="star-rating mb-2" id="rating-input"><i class="fas fa-star" data-val="1"></i><i class="fas fa-star" data-val="2"></i><i class="fas fa-star" data-val="3"></i><i class="fas fa-star" data-val="4"></i><i class="fas fa-star" data-val="5"></i></div>
-                        <textarea id="review-text" placeholder="Write a review..." class="w-full border p-2 text-sm h-16 mb-2"></textarea>
-                        <button onclick="submitReview('${id}')" class="w-full bg-black text-white text-xs py-2 rounded">Submit</button>
-                    </div>
+                    
+                    ${isMyProduct ? `
+                        <div class="p-5 bg-blue-50 dark:bg-blue-900/20 rounded-2xl text-center border border-blue-100 dark:border-blue-800">
+                           <p class="text-xs font-bold text-blue-700 dark:text-blue-300">You posted this listing.</p>
+                        </div>
+                    ` : `
+                        <div class="grid grid-cols-2 gap-4 mb-8">
+                            <button onclick="startChat('${p.SellerId}', '${p.Title}')" class="btn-premium font-extrabold py-4 rounded-2xl shadow-lg">MESSAGE</button>
+                            ${p.Phone ? `<a href="tel:${p.Phone}" class="bg-green-600 text-white font-extrabold py-4 rounded-2xl text-center shadow-lg flex items-center justify-center">CALL SELLER</a>` : ''}
+                        </div>
+                        <div class="bg-card p-6 rounded-[2rem] border border-base shadow-sm">
+                            <h3 class="font-extrabold text-sm mb-4">Rate & Review</h3>
+                            <div class="star-rating mb-4" id="rating-input">
+                                <i class="fas fa-star" data-val="1"></i>
+                                <i class="fas fa-star" data-val="2"></i>
+                                <i class="fas fa-star" data-val="3"></i>
+                                <i class="fas fa-star" data-val="4"></i>
+                                <i class="fas fa-star" data-val="5"></i>
+                            </div>
+                            <textarea id="review-text" placeholder="Share your experience..." class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base p-4 text-sm h-24 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                            <button onclick="submitReview('${id}')" class="w-full bg-slate-900 dark:bg-slate-700 text-white py-3.5 rounded-2xl mt-4 font-bold">SUBMIT REVIEW</button>
+                        </div>
+                    `}
                 </div>
             `;
             showScreen('details-screen');
-            loadReviews(id);
-            setupStarInput();
+            if(!isMyProduct) setupStarInput();
+            loadSellerOtherItems(p.SellerId, id);
         };
 
-        function setupStarInput() {
-            const stars = document.querySelectorAll('#rating-input i');
-            stars.forEach(s => s.onclick = () => {
-                selectedReviewStars = parseInt(s.dataset.val);
-                stars.forEach(st => st.classList.toggle('far', parseInt(st.dataset.val) > selectedReviewStars));
+        window.reportUser = async (targetUserId) => {
+            const reason = prompt("Why are you reporting this user?\n(e.g., Scam, Rude Behavior, Fake Item, Harassment)");
+            if (!reason) return;
+            try {
+                await addDoc(collection(db, "Reports"), {
+                    reportedUser: targetUserId,
+                    reporterUser: currentUserId,
+                    reason: reason,
+                    timestamp: serverTimestamp()
+                });
+                alert("Thank you. Our team will investigate this user immediately. 🛡️");
+            } catch (e) { alert("Could not send report. Try again."); }
+        };
+
+        async function loadSellerOtherItems(sellerId, currentProductId) {
+            const q = query(collection(db, "Products"), where("SellerId", "==", sellerId));
+            const snap = await getDocs(q);
+            const container = document.getElementById('more-from-seller-grid');
+            container.innerHTML = '';
+            const otherItems = snap.docs.filter(doc => doc.id !== currentProductId);
+            if(otherItems.length === 0) {
+                container.innerHTML = '<p class="text-[10px] opacity-40 italic col-span-2">No other items listed by this user.</p>';
+                return;
+            }
+            otherItems.forEach(docSnap => {
+                const item = docSnap.data();
+                container.innerHTML += `
+                    <div class="bg-slate-50 dark:bg-slate-800/40 rounded-2xl overflow-hidden border border-base" onclick="viewProduct('${docSnap.id}')">
+                        <img src="${item.ImageURL}" class="w-full h-24 object-cover">
+                        <div class="p-2">
+                            <p class="text-[10px] font-bold truncate">${item.Title}</p>
+                            <p class="text-blue-600 text-[10px] font-black">₦${item.Price}</p>
+                        </div>
+                    </div>
+                `;
             });
         }
 
-        async function loadReviews(productId) {
-            const snap = await getDocs(query(collection(db, "Products", productId, "Reviews"), orderBy("timestamp", "desc")));
-            const container = document.getElementById('review-list');
-            container.innerHTML = snap.empty ? '<p class="text-xs text-gray-400">No reviews.</p>' : '';
-            snap.forEach(d => {
-                const r = d.data();
-                container.innerHTML += `<div class="border-b pb-2"><p class="text-yellow-500 text-[10px]">${'★'.repeat(r.stars)}</p><p class="text-sm">${r.text}</p></div>`;
+        function setupStarInput() {
+            let selectedStars = 5;
+            const stars = document.querySelectorAll('#rating-input i');
+            stars.forEach(s => s.onclick = () => {
+                selectedStars = parseInt(s.dataset.val);
+                stars.forEach(st => st.classList.toggle('far', parseInt(st.dataset.val) > selectedStars));
             });
+            window.getCurrentStars = () => selectedStars;
         }
 
         window.submitReview = async (productId) => {
-            if(isUserBanned) return;
             const text = document.getElementById('review-text').value;
-            if(!text) return;
-            await addDoc(collection(db, "Products", productId, "Reviews"), { stars: selectedReviewStars, text, timestamp: serverTimestamp() });
+            const stars = window.getCurrentStars();
+            await addDoc(collection(db, "Products", productId, "Reviews"), { stars, text, timestamp: serverTimestamp() });
             const pRef = doc(db, "Products", productId);
             const pSnap = await getDoc(pRef);
-            await updateDoc(pRef, { Rating: (pSnap.data().Rating || 0) + selectedReviewStars, ReviewCount: (pSnap.data().ReviewCount || 0) + 1 });
-            viewProduct(productId);
-        };
-
-        window.toggleAdminMode = () => {
-            if(prompt("Passphrase:") === "junior123") {
-                isAdminMode = !isAdminMode;
-                document.getElementById('admin-panel').classList.toggle('hidden', !isAdminMode);
-                document.getElementById('admin-toggle-btn').innerText = `Admin Mode: ${isAdminMode ? 'ON' : 'OFF'}`;
-                if(isAdminMode) {
-                    loadVerificationRequests();
-                    loadReports();
-                }
-                loadMyItems();
-            }
+            await updateDoc(pRef, { Rating: (pSnap.data().Rating || 0) + stars, ReviewCount: (pSnap.data().ReviewCount || 0) + 1 });
+            alert("Review sent!"); viewProduct(productId);
         };
 
         window.loadMyItems = () => {
             showScreen('my-items-screen');
             const q = isAdminMode ? query(collection(db, "Products")) : query(collection(db, "Products"), where("SellerId", "==", currentUserId));
-            onSnapshot(q, (snap) => {
-                renderProducts(snap.docs, 'my-items-grid', !isAdminMode);
-                if(isAdminMode) document.getElementById('stat-total-products').innerText = snap.size;
-            });
+            onSnapshot(q, (snap) => renderProducts(snap.docs, 'my-items-grid', true));
         };
 
-        window.deleteProduct = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "Products", id)); };
-
-        window.openChats = async () => {
-            if(isUserBanned) return;
-            showScreen('chats-screen');
-            const snap = await getDocs(query(collection(db, "Notifications"), where("receiverId", "==", currentUserId)));
-            const batch = writeBatch(db);
-            snap.forEach(d => batch.update(d.ref, { read: true }));
-            await batch.commit();
-        };
-
-        window.startChat = (sellerId, productTitle) => {
-            if(isUserBanned) return;
-            activeChatId = [currentUserId, sellerId].sort().join("_");
-            document.getElementById('chat-title').innerText = productTitle;
-            showScreen('chatroom-screen');
-            loadMessages();
+        window.openChats = () => showScreen('chats-screen');
+        window.startChat = (targetId, title) => { 
+            activeChatId = [currentUserId, targetId].sort().join("_"); 
+            document.getElementById('chat-title').innerText = title; 
+            showScreen('chatroom-screen'); 
+            loadMessages(); 
         };
 
         function loadMessages() {
@@ -660,41 +883,39 @@
                 snapshot.docs.forEach(doc => {
                     const m = doc.data();
                     const isMe = m.senderId === currentUserId;
-                    const content = m.imageUrl ? `<img src="${m.imageUrl}" class="chat-img">` : `<p>${m.messageText}</p>`;
-                    container.innerHTML += `<div class="flex ${isMe ? 'justify-end' : 'justify-start'}"><div class="${isMe ? 'bg-blue-600 text-white' : 'bg-white border'} px-4 py-2 rounded-xl text-sm shadow-sm">${content}</div></div>`;
+                    container.innerHTML += `<div class="flex ${isMe ? 'justify-end' : 'justify-start'}"><div class="${isMe ? 'bg-blue-600 text-white' : 'bg-card border border-base'} px-4 py-2.5 rounded-2xl text-[13px] shadow-sm max-w-[80%]">${m.messageText}</div></div>`;
                 });
                 container.scrollTop = container.scrollHeight;
             });
         }
 
         document.getElementById('btn-send').onclick = async () => {
-            if(isUserBanned) return;
             const input = document.getElementById('message-input');
             if(!input.value) return;
-            const receiverId = activeChatId.replace(currentUserId, "").replace("_", "");
             await addDoc(collection(db, "Chats", activeChatId, "Messages"), { senderId: currentUserId, messageText: input.value, timestamp: serverTimestamp() });
-            await addDoc(collection(db, "Notifications"), { receiverId, senderId: currentUserId, read: false });
             input.value = '';
         };
 
         document.getElementById('global-search').oninput = (e) => {
             const term = e.target.value.toLowerCase();
             document.querySelectorAll('#product-grid > div').forEach(card => {
-                card.style.display = card.querySelector('h3').innerText.toLowerCase().includes(term) ? 'block' : 'none';
+                if(card.querySelector('h3')) {
+                   card.style.display = card.querySelector('h3').innerText.toLowerCase().includes(term) ? 'block' : 'none';
+                }
             });
         };
 
-        onSnapshot(collection(db, "VerifiedUsers"), (snap) => {
-            verifiedSellers = snap.docs.map(d => d.id);
-            const badge = '<i class="fas fa-check-circle verified-tick"></i>';
-            if(verifiedSellers.includes(currentUserId)) {
-                if(document.getElementById('my-verified-badge')) document.getElementById('my-verified-badge').innerHTML = badge;
-                document.getElementById('verification-card').classList.add('hidden');
-            }
-            loadProducts();
+        onSnapshot(doc(db, "AppData", "Announcement"), (snap) => {
+            const bar = document.getElementById('announcement-bar');
+            if (snap.exists() && snap.data().active) {
+                bar.classList.remove('hidden');
+                document.getElementById('announcement-text').innerText = snap.data().message;
+                bar.style.background = 'linear-gradient(90deg, #2563eb, #7c3aed)';
+            } else { bar.classList.add('hidden'); }
         });
-        
+
         switchView('Product');
+        showScreen('browse-screen');
     </script>
 </body>
 </html>
