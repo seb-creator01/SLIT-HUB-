@@ -328,6 +328,33 @@
             </div>
         </section>
 
+        <section id="edit-screen" class="screen hidden max-w-xl mx-auto bg-card p-8 rounded-[2.5rem] shadow-xl border border-base">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-extrabold">Edit Listing</h2>
+                <button onclick="showScreen('my-items-screen')" class="text-xs opacity-50 font-bold">CANCEL</button>
+            </div>
+            <div class="space-y-5">
+                <input type="hidden" id="edit-product-id">
+                <div id="edit-image-preview-container" class="w-full h-48 border-2 border-dashed border-base rounded-3xl flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all">
+                    <img id="edit-image-preview" class="w-full h-full object-cover">
+                </div>
+                <input type="file" id="edit-file-input" class="hidden">
+                <input type="text" id="edit-title" placeholder="Title" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base p-4 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                <textarea id="edit-desc" placeholder="Details..." class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base p-4 rounded-2xl text-sm h-32 outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold opacity-40">₦</span>
+                        <input type="number" id="edit-price" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base pl-10 pr-4 py-4 rounded-2xl text-sm outline-none">
+                    </div>
+                    <select id="edit-sold-status" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base px-4 rounded-2xl text-sm outline-none">
+                        <option value="false">Available</option>
+                        <option value="true">Mark as Sold</option>
+                    </select>
+                </div>
+                <button id="btn-update-post" onclick="processUpdateProduct()" class="w-full btn-premium font-extrabold py-4 rounded-2xl shadow-xl mt-4">SAVE CHANGES</button>
+            </div>
+        </section>
+
         <section id="my-items-screen" class="screen hidden">
              <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-extrabold">Manager</h2>
@@ -503,6 +530,8 @@
                 document.getElementById('admin-panel').classList.toggle('hidden', !isAdminMode);
                 document.getElementById('admin-toggle-btn').innerText = `Admin Mode: ${isAdminMode ? 'ON' : 'OFF'}`;
                 if(isAdminMode) { loadReports(); loadAdminUserList(); }
+                // Refresh my items view to show admin delete buttons
+                loadMyItems();
             }
         };
 
@@ -593,6 +622,66 @@
             if(confirm("Ban user?")) {
                 await setDoc(doc(db, "BannedUsers", uid), { bannedAt: serverTimestamp() });
                 loadAdminUserList();
+            }
+        };
+
+        // --- NEW EDIT & DELETE FUNCTIONS ---
+        window.openEditScreen = async (id) => {
+            const snap = await getDoc(doc(db, "Products", id));
+            if(!snap.exists()) return;
+            const p = snap.data();
+            
+            document.getElementById('edit-product-id').value = id;
+            document.getElementById('edit-title').value = p.Title;
+            document.getElementById('edit-desc').value = p.Description;
+            document.getElementById('edit-price').value = p.Price;
+            document.getElementById('edit-image-preview').src = p.ImageURL;
+            document.getElementById('edit-sold-status').value = p.IsSold.toString();
+            
+            showScreen('edit-screen');
+        };
+
+        // Edit Image Preview Logic
+        document.getElementById('edit-image-preview-container').onclick = () => document.getElementById('edit-file-input').click();
+        document.getElementById('edit-file-input').onchange = (e) => {
+            const reader = new FileReader();
+            reader.onload = (ev) => { document.getElementById('edit-image-preview').src = ev.target.result; };
+            reader.readAsDataURL(e.target.files[0]);
+        };
+
+        window.processUpdateProduct = async () => {
+            const btn = document.getElementById('btn-update-post');
+            const id = document.getElementById('edit-product-id').value;
+            btn.innerText = "Updating..."; btn.disabled = true;
+
+            try {
+                let imageUrl = document.getElementById('edit-image-preview').src;
+                const newFile = document.getElementById('edit-file-input').files[0];
+                
+                if (newFile) {
+                    imageUrl = await uploadToCloudinary(newFile);
+                }
+
+                await updateDoc(doc(db, "Products", id), {
+                    Title: document.getElementById('edit-title').value,
+                    Description: document.getElementById('edit-desc').value,
+                    Price: document.getElementById('edit-price').value,
+                    ImageURL: imageUrl,
+                    IsSold: document.getElementById('edit-sold-status').value === "true"
+                });
+
+                alert("Product updated! ✅");
+                showScreen('my-items-screen');
+            } catch (e) {
+                alert("Failed to update.");
+            }
+            btn.innerText = "SAVE CHANGES"; btn.disabled = false;
+        };
+
+        window.deleteProduct = async (id) => {
+            if(confirm("Are you sure you want to delete this listing? This cannot be undone.")) {
+                await deleteDoc(doc(db, "Products", id));
+                alert("Listing deleted.");
             }
         };
 
@@ -778,6 +867,7 @@
 
         window.viewProduct = async (id) => {
             const snap = await getDoc(doc(db, "Products", id));
+            if(!snap.exists()) return;
             const p = snap.data();
             const uSnap = await getDoc(doc(db, "Users", p.SellerId));
             const u = uSnap.data() || {};
@@ -910,21 +1000,30 @@
 
         window.loadMyItems = () => {
             showScreen('my-items-screen');
-            const q = isAdminMode ? query(collection(db, "Products")) : query(collection(db, "Products"), where("SellerId", "==", currentUserId));
+            const q = isAdminMode ? query(collection(db, "Products"), orderBy("CreatedAt", "desc")) : query(collection(db, "Products"), where("SellerId", "==", currentUserId), orderBy("CreatedAt", "desc"));
+            
             onSnapshot(q, (snap) => {
-                // Reuse logic to render my items
                 const grid = document.getElementById('my-items-grid');
                 grid.innerHTML = '';
+                if(snap.empty) {
+                    grid.innerHTML = '<div class="text-center py-10 opacity-40 text-sm">No items found.</div>';
+                    return;
+                }
                 snap.docs.forEach(docSnap => {
                     const p = docSnap.data();
+                    const id = docSnap.id;
                     grid.innerHTML += `
-                        <div class="bg-card p-4 rounded-2xl border border-base flex gap-4 items-center">
+                        <div class="bg-card p-4 rounded-2xl border border-base flex gap-4 items-center shadow-sm">
                             <img src="${p.ImageURL}" class="w-16 h-16 rounded-xl object-cover">
                             <div class="flex-1">
-                                <h3 class="font-bold text-sm">${p.Title}</h3>
+                                <h3 class="font-bold text-sm truncate">${p.Title}</h3>
                                 <p class="text-blue-600 font-bold text-xs">₦${p.Price}</p>
+                                <p class="text-[9px] opacity-40 uppercase font-bold">${p.PostType}</p>
                             </div>
-                            <button onclick="viewProduct('${docSnap.id}')" class="bg-slate-100 dark:bg-slate-800 p-2 rounded-lg"><i class="fas fa-edit"></i></button>
+                            <div class="flex gap-2">
+                                <button onclick="openEditScreen('${id}')" class="bg-blue-50 dark:bg-blue-900/30 text-blue-600 p-2.5 rounded-xl text-xs"><i class="fas fa-pen-to-square"></i></button>
+                                <button onclick="deleteProduct('${id}')" class="bg-red-50 dark:bg-red-900/30 text-red-600 p-2.5 rounded-xl text-xs"><i class="fas fa-trash"></i></button>
+                            </div>
                         </div>
                     `;
                 });
