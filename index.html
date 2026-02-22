@@ -473,7 +473,6 @@
             
             try {
                 const url = await uploadToCloudinary(file);
-                // Use setDoc with merge to ensure doc exists
                 await setDoc(doc(db, "Users", currentUserId), { photo: url }, { merge: true });
                 document.getElementById('my-profile-pic').src = url;
             } catch(e) { 
@@ -543,7 +542,6 @@
                 document.getElementById('admin-panel').classList.toggle('hidden', !isAdminMode);
                 document.getElementById('admin-toggle-btn').innerText = `Admin Mode: ${isAdminMode ? 'ON' : 'OFF'}`;
                 if(isAdminMode) { loadReports(); loadAdminUserList(); }
-                // Refresh my items view to show admin delete buttons
                 loadMyItems();
             }
         };
@@ -562,7 +560,6 @@
                 const isVerified = verifiedSellers.includes(uid);
                 const isBanned = bannedIds.includes(uid);
 
-                // Find phone from products if not in user profile
                 let phone = "N/A";
                 const pQuery = query(collection(db, "Products"), where("SellerId", "==", uid));
                 const pSnap = await getDocs(pQuery);
@@ -638,7 +635,6 @@
             }
         };
 
-        // --- NEW EDIT & DELETE FUNCTIONS ---
         window.openEditScreen = async (id) => {
             const snap = await getDoc(doc(db, "Products", id));
             if(!snap.exists()) return;
@@ -654,7 +650,6 @@
             showScreen('edit-screen');
         };
 
-        // Edit Image Preview Logic
         document.getElementById('edit-image-preview-container').onclick = () => document.getElementById('edit-file-input').click();
         document.getElementById('edit-file-input').onchange = (e) => {
             const reader = new FileReader();
@@ -721,7 +716,6 @@
             catSelect.innerHTML = categories[type].filter(c => c !== "All").map(c => `<option value="${c}">${c}</option>`).join('');
             document.getElementById('post-condition').innerHTML = type === 'Product' ? '<option value="New">New</option><option value="Used">Used</option>' : '<option value="Standard">Standard</option>';
             
-            // Highlight active radio visual
             document.querySelectorAll('input[name="post-type"]').forEach(input => {
                 const parent = input.parentElement;
                 if(input.checked) {
@@ -736,7 +730,6 @@
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
             document.getElementById(screenId).classList.remove('hidden');
             
-            // Update nav icons
             document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active-nav'));
             const screenToNav = {
                 'browse-screen': 0, 'post-screen': 1, 'my-items-screen': 2, 'chats-screen': 3, 'settings-screen': 4
@@ -794,7 +787,6 @@
                     CreatedAt: serverTimestamp(),
                     IsSold: false
                 });
-                // Reset form
                 document.getElementById('post-title').value = '';
                 document.getElementById('post-desc').value = '';
                 imagePreview.classList.add('hidden');
@@ -802,35 +794,24 @@
                 showScreen('browse-screen');
             } catch (e) { 
                 console.error(e);
-                alert("Error publishing. Check console for details."); 
+                alert("Error publishing."); 
             }
             btn.innerText = "PUBLISH NOW"; btn.disabled = false;
         };
 
-        // INTEGRATED LOADPRODUCTS FUNCTION
         function loadProducts() {
             const productsContainer = document.getElementById("product-grid");
             if (!productsContainer) return;
 
-            // Show skeletons while loading
             productsContainer.innerHTML = '<div class="skeleton-card animate-pulse"></div><div class="skeleton-card animate-pulse"></div><div class="skeleton-card animate-pulse"></div><div class="skeleton-card animate-pulse"></div>';
 
-            // Real-time listener
-            const q = query(
-                collection(db, "Products"),
-                orderBy("CreatedAt", "desc")
-            );
+            const q = query(collection(db, "Products"), orderBy("CreatedAt", "desc"));
 
             onSnapshot(q, (snapshot) => {
                 let docs = snapshot.docs
-                    .map(doc => ({
-                        id: doc.id,
-                        ...doc.data()
-                    }))
-                    // Filter manually instead of using Firestore where()
+                    .map(doc => ({ id: doc.id, ...doc.data() }))
                     .filter(doc => doc.PostType === currentView);
                 
-                // Also apply the category filter from the chips
                 if (selectedCategory !== 'All') {
                     docs = docs.filter(doc => doc.Category === selectedCategory);
                 }
@@ -841,7 +822,7 @@
                     productsContainer.innerHTML = `
                         <div class="col-span-full py-20 text-center opacity-40">
                             <i class="fas fa-box-open text-4xl mb-4"></i>
-                            <p class="font-bold">No items found in this category.</p>
+                            <p class="font-bold">No items found.</p>
                         </div>
                     `;
                     return;
@@ -870,11 +851,8 @@
                             </div>
                         </div>
                     `;
-
                     productsContainer.appendChild(productCard);
                 });
-            }, (error) => {
-                console.error("Error loading products:", error);
             });
         }
 
@@ -918,10 +896,7 @@
 
                     <div class="mt-8 mb-8">
                         <h3 class="text-sm font-extrabold mb-4 uppercase tracking-wider opacity-60">Other listings from this user</h3>
-                        <div id="more-from-seller-grid" class="grid grid-cols-2 gap-4">
-                            <div class="animate-pulse bg-gray-200 dark:bg-slate-800 h-32 rounded-2xl"></div>
-                            <div class="animate-pulse bg-gray-200 dark:bg-slate-800 h-32 rounded-2xl"></div>
-                        </div>
+                        <div id="more-from-seller-grid" class="grid grid-cols-2 gap-4"></div>
                     </div>
                     
                     ${isMyProduct ? `
@@ -954,17 +929,12 @@
         };
 
         window.reportUser = async (targetUserId) => {
-            const reason = prompt("Why are you reporting this user?\n(e.g., Scam, Rude Behavior, Fake Item, Harassment)");
+            const reason = prompt("Why are you reporting this user?");
             if (!reason) return;
             try {
-                await addDoc(collection(db, "Reports"), {
-                    reportedUser: targetUserId,
-                    reporterUser: currentUserId,
-                    reason: reason,
-                    timestamp: serverTimestamp()
-                });
-                alert("Thank you. Our team will investigate this user immediately. 🛡️");
-            } catch (e) { alert("Could not send report. Try again."); }
+                await addDoc(collection(db, "Reports"), { reportedUser: targetUserId, reporterUser: currentUserId, reason: reason, timestamp: serverTimestamp() });
+                alert("Report sent.");
+            } catch (e) { alert("Error reporting."); }
         };
 
         async function loadSellerOtherItems(sellerId, currentProductId) {
@@ -973,10 +943,6 @@
             const container = document.getElementById('more-from-seller-grid');
             container.innerHTML = '';
             const otherItems = snap.docs.filter(doc => doc.id !== currentProductId);
-            if(otherItems.length === 0) {
-                container.innerHTML = '<p class="text-[10px] opacity-40 italic col-span-2">No other items listed by this user.</p>';
-                return;
-            }
             otherItems.forEach(docSnap => {
                 const item = docSnap.data();
                 container.innerHTML += `
@@ -994,19 +960,13 @@
         function setupStarInput() {
             let selectedStars = 5;
             const stars = document.querySelectorAll('#rating-input i');
-            
             stars.forEach(s => {
                 s.onclick = () => {
                     selectedStars = parseInt(s.dataset.val);
                     stars.forEach(st => {
                         const val = parseInt(st.dataset.val);
-                        if(val <= selectedStars) {
-                            st.classList.add('active');
-                            st.classList.remove('opacity-20');
-                        } else {
-                            st.classList.remove('active');
-                            st.classList.add('opacity-20');
-                        }
+                        st.classList.toggle('active', val <= selectedStars);
+                        st.classList.toggle('opacity-20', val > selectedStars);
                     });
                 };
             });
@@ -1017,48 +977,17 @@
             const text = document.getElementById('review-text').value;
             const stars = window.getCurrentStars();
             const btn = document.getElementById('btn-submit-review');
-            const container = document.getElementById('rating-container');
-
-            if (btn.disabled) return; // Block double clicks
-            
-            // UI Feedback: Disable and show loading
-            btn.innerText = "Submitting Review...";
             btn.disabled = true;
-            container.style.opacity = "0.6";
-            container.style.pointerEvents = "none";
 
             try {
-                // 1. Add review record
-                await addDoc(collection(db, "Products", productId, "Reviews"), { 
-                    stars, 
-                    text, 
-                    userId: currentUserId,
-                    timestamp: serverTimestamp() 
-                });
-
-                // 2. Update aggregate ratings on product
+                await addDoc(collection(db, "Products", productId, "Reviews"), { stars, text, userId: currentUserId, timestamp: serverTimestamp() });
                 const pRef = doc(db, "Products", productId);
                 const pSnap = await getDoc(pRef);
-                const currentRating = pSnap.data().Rating || 0;
-                const currentCount = pSnap.data().ReviewCount || 0;
-
-                await updateDoc(pRef, { 
-                    Rating: currentRating + stars, 
-                    ReviewCount: currentCount + 1 
-                });
-
-                alert("Review Submitted! Thank you. ✨");
-                
-                // Refresh the view to show updated rating
+                await updateDoc(pRef, { Rating: (pSnap.data().Rating || 0) + stars, ReviewCount: (pSnap.data().ReviewCount || 0) + 1 });
+                alert("Review submitted!");
                 viewProduct(productId);
-            } catch (e) {
-                console.error(e);
-                alert("Failed to submit review. Please try again.");
-                btn.innerText = "SUBMIT REVIEW";
-                btn.disabled = false;
-                container.style.opacity = "1";
-                container.style.pointerEvents = "auto";
-            }
+            } catch (e) { alert("Error."); }
+            btn.disabled = false;
         };
 
         window.loadMyItems = () => {
@@ -1068,10 +997,6 @@
             onSnapshot(q, (snap) => {
                 const grid = document.getElementById('my-items-grid');
                 grid.innerHTML = '';
-                if(snap.empty) {
-                    grid.innerHTML = '<div class="text-center py-10 opacity-40 text-sm">No items found.</div>';
-                    return;
-                }
                 snap.docs.forEach(docSnap => {
                     const p = docSnap.data();
                     const id = docSnap.id;
@@ -1081,7 +1006,6 @@
                             <div class="flex-1">
                                 <h3 class="font-bold text-sm truncate">${p.Title}</h3>
                                 <p class="text-blue-600 font-bold text-xs">₦${p.Price}</p>
-                                <p class="text-[9px] opacity-40 uppercase font-bold">${p.PostType}</p>
                             </div>
                             <div class="flex gap-2">
                                 <button onclick="openEditScreen('${id}')" class="bg-blue-50 dark:bg-blue-900/30 text-blue-600 p-2.5 rounded-xl text-xs"><i class="fas fa-pen-to-square"></i></button>
@@ -1124,9 +1048,8 @@
         document.getElementById('global-search').oninput = (e) => {
             const term = e.target.value.toLowerCase();
             document.querySelectorAll('#product-grid > div').forEach(card => {
-                if(card.querySelector('h3')) {
-                   card.style.display = card.querySelector('h3').innerText.toLowerCase().includes(term) ? 'block' : 'none';
-                }
+                const title = card.querySelector('h3');
+                if(title) card.style.display = title.innerText.toLowerCase().includes(term) ? 'block' : 'none';
             });
         };
 
@@ -1139,7 +1062,6 @@
             } else { bar.classList.add('hidden'); }
         });
 
-        // Initialize view
         switchView('Product');
         showScreen('browse-screen');
     </script>
