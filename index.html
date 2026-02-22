@@ -36,6 +36,7 @@
             overflow-x: hidden;
         }
 
+        /* Professional Header Styling */
         .brand-logo {
             font-weight: 800;
             letter-spacing: -1.5px;
@@ -48,6 +49,7 @@
         }
         .brand-logo:active { transform: scale(0.95); }
 
+        /* Animations & Transitions */
         .screen {
             animation: fadeInSlide 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -57,6 +59,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* Skeleton Pulse Animation */
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: .5; }
@@ -65,6 +68,7 @@
         
         .skeleton-card { background: var(--border); border-radius: 20px; height: 220px; width: 100%; }
 
+        /* Global Button Click Feedback */
         button, .nav-item, a, .chip {
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
             cursor: pointer;
@@ -76,6 +80,7 @@
             opacity: 0.8;
         }
 
+        /* Glassmorphism Header & Nav */
         .glass-header {
             background: rgba(var(--card), 0.8);
             backdrop-filter: blur(12px);
@@ -92,6 +97,7 @@
             box-shadow: 0 -10px 30px rgba(0,0,0,0.05);
         }
 
+        /* Enhanced Card Design */
         .product-card {
             background: var(--card);
             border: 1px solid var(--border);
@@ -140,6 +146,7 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+        /* Custom Modal */
         .modal-content { 
             background: var(--card); 
             border-radius: 2.5rem; 
@@ -156,6 +163,7 @@
             box-shadow: 0 4px 15px var(--primary-glow);
         }
 
+        /* Profile Upload Spinner */
         #profile-loader {
             position: absolute;
             inset: 0;
@@ -238,7 +246,7 @@
             </div>
             <div class="overflow-x-auto pb-6 no-scrollbar"><div id="category-filter-chips" class="flex gap-2"></div></div>
             <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-            </div>
+                </div>
         </section>
 
         <section id="settings-screen" class="screen hidden max-w-lg mx-auto">
@@ -386,6 +394,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // --- DARK MODE LOGIC ---
         window.toggleDarkMode = () => {
             const isDark = document.body.classList.toggle('dark');
             localStorage.setItem('dark-mode', isDark);
@@ -393,6 +402,7 @@
         };
         if(localStorage.getItem('dark-mode') === 'true') toggleDarkMode();
 
+        // TERMS SYSTEM LOGIC
         window.onload = () => { if(!localStorage.getItem('slit_terms_accepted')) document.getElementById('terms-modal').classList.remove('hidden'); };
         window.acceptTerms = () => { localStorage.setItem('slit_terms_accepted', 'true'); document.getElementById('terms-modal').classList.add('hidden'); };
 
@@ -404,8 +414,6 @@
         let currentView = 'Product';
         let selectedCategory = 'All';
         let isUserBanned = false;
-        let optimisticItems = []; 
-        let unsubscribeProducts = null;
 
         document.getElementById('display-user-id').innerText = currentUserId;
 
@@ -415,11 +423,14 @@
             Request: ["All", "💰 Buy Request", "🛠️ Service Needed", "🚑 Urgent Help", "👫 Study Partner", "➕ Others"]
         };
 
+        // PROFILE PIC SYSTEM
         document.getElementById('profile-upload').onchange = async (e) => {
             const file = e.target.files[0];
             if(!file) return;
+            
             const loader = document.getElementById('profile-loader');
             loader.style.display = 'flex';
+            
             try {
                 const url = await uploadToCloudinary(file);
                 await updateDoc(doc(db, "Users", currentUserId), { photo: url });
@@ -428,6 +439,7 @@
             loader.style.display = 'none';
         };
 
+        // PROFILE PIC REMOVAL
         window.removeProfilePic = async () => {
             if(confirm("Remove profile photo?")) {
                 await updateDoc(doc(db, "Users", currentUserId), { photo: null });
@@ -436,11 +448,13 @@
             }
         };
 
+        // REAL-TIME UPDATES
         onSnapshot(doc(db, "BannedUsers", currentUserId), (snap) => {
             document.getElementById('ban-screen').classList.toggle('hidden', !snap.exists());
             isUserBanned = snap.exists();
         });
 
+        // Track Verified Sellers globally
         onSnapshot(collection(db, "VerifiedUsers"), (snap) => {
             verifiedSellers = snap.docs.map(d => d.id);
             if(isAdminMode) loadAdminUserList();
@@ -478,6 +492,7 @@
             input.click();
         };
 
+        // --- ADMIN ENHANCEMENTS ---
         window.toggleAdminMode = () => {
             if(prompt("Passphrase:") === "junior123") {
                 isAdminMode = !isAdminMode;
@@ -492,16 +507,21 @@
             const usersSnap = await getDocs(collection(db, "Users"));
             const bannedSnap = await getDocs(collection(db, "BannedUsers"));
             const bannedIds = bannedSnap.docs.map(d => d.id);
+
             container.innerHTML = '';
+            
             for (const userDoc of usersSnap.docs) {
                 const u = userDoc.data();
                 const uid = userDoc.id;
                 const isVerified = verifiedSellers.includes(uid);
                 const isBanned = bannedIds.includes(uid);
+
+                // Find phone from products if not in user profile
                 let phone = "N/A";
                 const pQuery = query(collection(db, "Products"), where("SellerId", "==", uid));
                 const pSnap = await getDocs(pQuery);
                 if(!pSnap.empty) phone = pSnap.docs[0].data().Phone || "N/A";
+
                 container.innerHTML += `
                     <div class="admin-user-card bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-base">
                         <div class="flex justify-between items-start">
@@ -594,19 +614,30 @@
             const catSelect = document.getElementById('post-category');
             catSelect.innerHTML = categories[type].filter(c => c !== "All").map(c => `<option value="${c}">${c}</option>`).join('');
             document.getElementById('post-condition').innerHTML = type === 'Product' ? '<option value="New">New</option><option value="Used">Used</option>' : '<option value="Standard">Standard</option>';
+            
+            // Highlight active radio visual
             document.querySelectorAll('input[name="post-type"]').forEach(input => {
                 const parent = input.parentElement;
-                if(input.checked) { parent.classList.add('bg-white', 'dark:bg-slate-700', 'shadow-sm', 'text-blue-600'); } 
-                else { parent.classList.remove('bg-white', 'dark:bg-slate-700', 'shadow-sm', 'text-blue-600'); }
+                if(input.checked) {
+                    parent.classList.add('bg-white', 'dark:bg-slate-700', 'shadow-sm', 'text-blue-600');
+                } else {
+                    parent.classList.remove('bg-white', 'dark:bg-slate-700', 'shadow-sm', 'text-blue-600');
+                }
             });
         };
 
         window.showScreen = (screenId) => {
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
             document.getElementById(screenId).classList.remove('hidden');
+            
+            // Update nav icons
             document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active-nav'));
-            const screenToNav = { 'browse-screen': 0, 'post-screen': 1, 'my-items-screen': 2, 'chats-screen': 3, 'settings-screen': 4 };
-            if(screenToNav[screenId] !== undefined) { document.querySelectorAll('nav button')[screenToNav[screenId]].classList.add('active-nav'); }
+            const screenToNav = {
+                'browse-screen': 0, 'post-screen': 1, 'my-items-screen': 2, 'chats-screen': 3, 'settings-screen': 4
+            };
+            if(screenToNav[screenId] !== undefined) {
+                document.querySelectorAll('nav button')[screenToNav[screenId]].classList.add('active-nav');
+            }
             window.scrollTo(0,0);
         };
 
@@ -633,37 +664,20 @@
         document.getElementById('btn-post').onclick = async () => {
             if(isUserBanned) return;
             const btn = document.getElementById('btn-post');
-            const postType = document.querySelector('input[name="post-type"]:checked').value;
-            const tempId = "temp_" + Date.now();
-            const optimisticData = {
-                id: tempId,
-                Title: document.getElementById('post-title').value,
-                Price: document.getElementById('post-price').value,
-                Location: document.getElementById('post-location').value,
-                ImageURL: imagePreview.src,
-                SellerId: currentUserId,
-                PostType: postType,
-                Category: document.getElementById('post-category').value,
-                CreatedAt: { seconds: Date.now() / 1000 },
-                IsSold: false,
-                isOptimistic: true
-            };
-            showScreen('browse-screen');
-            optimisticItems.unshift(optimisticData);
-            loadProducts();
             btn.innerText = "Publishing..."; btn.disabled = true;
             try {
                 let imageUrl = "https://placehold.co/600x400?text=Post";
                 if (fileInput.files[0]) imageUrl = await uploadToCloudinary(fileInput.files[0]);
+                const postType = document.querySelector('input[name="post-type"]:checked').value;
                 await addDoc(collection(db, "Products"), {
-                    Title: optimisticData.Title,
+                    Title: document.getElementById('post-title').value,
                     Description: document.getElementById('post-desc').value,
-                    Price: optimisticData.Price,
+                    Price: document.getElementById('post-price').value,
                     Negotiable: document.getElementById('post-negotiable').value,
-                    Category: optimisticData.Category,
+                    Category: document.getElementById('post-category').value,
                     Condition: document.getElementById('post-condition').value,
                     Phone: document.getElementById('post-phone').value,
-                    Location: optimisticData.Location,
+                    Location: document.getElementById('post-location').value,
                     ImageURL: imageUrl,
                     SellerId: currentUserId,
                     PostType: postType,
@@ -671,107 +685,83 @@
                     CreatedAt: serverTimestamp(),
                     IsSold: false
                 });
-                optimisticItems = optimisticItems.filter(i => i.id !== tempId);
-            } catch (e) { 
-                alert("Error! Post failed."); 
-                optimisticItems = optimisticItems.filter(i => i.id !== tempId);
-                loadProducts();
-            }
+                showScreen('browse-screen');
+            } catch (e) { alert("Error!"); }
             btn.innerText = "PUBLISH NOW"; btn.disabled = false;
         };
 
-        // INTEGRATED NEW loadProducts() WITH MANUAL FILTERING
+        // INTEGRATED LOADPRODUCTS FUNCTION
         function loadProducts() {
-            const grid = document.getElementById("product-grid");
-            if (!grid) return;
+            const productsContainer = document.getElementById("product-grid");
+            if (!productsContainer) return;
 
-            if (unsubscribeProducts) unsubscribeProducts();
+            // Show skeletons while loading
+            productsContainer.innerHTML = '<div class="skeleton-card animate-pulse"></div><div class="skeleton-card animate-pulse"></div><div class="skeleton-card animate-pulse"></div><div class="skeleton-card animate-pulse"></div>';
 
-            if(optimisticItems.length === 0) {
-                grid.innerHTML = `
-                    <div class="skeleton-card animate-pulse"></div>
-                    <div class="skeleton-card animate-pulse"></div>
-                    <div class="skeleton-card animate-pulse"></div>
-                    <div class="skeleton-card animate-pulse"></div>
-                `;
-            }
-
+            // Real-time listener
             const q = query(
                 collection(db, "Products"),
                 orderBy("CreatedAt", "desc")
             );
 
-            unsubscribeProducts = onSnapshot(q, (snapshot) => {
+            onSnapshot(q, (snapshot) => {
                 let docs = snapshot.docs
                     .map(doc => ({
                         id: doc.id,
                         ...doc.data()
                     }))
-                    // Manual filter by PostType (🛍️ Shop vs 🛠️ Services vs 🙋‍♂️ Ask)
+                    // Filter manually instead of using Firestore where()
                     .filter(doc => doc.PostType === currentView);
-
-                // Add Optimistic items to the list
-                let filteredOptimistic = optimisticItems.filter(item => {
-                    const viewMatch = item.PostType === currentView;
-                    const catMatch = selectedCategory === 'All' || item.Category === selectedCategory;
-                    return viewMatch && catMatch;
-                });
-
-                let combinedDocs = [...filteredOptimistic, ...docs];
-
-                // Manual filter by Category
+                
+                // Also apply the category filter from the chips
                 if (selectedCategory !== 'All') {
-                    combinedDocs = combinedDocs.filter(doc => doc.Category === selectedCategory);
+                    docs = docs.filter(doc => doc.Category === selectedCategory);
                 }
 
-                renderProducts(combinedDocs);
-                
+                productsContainer.innerHTML = "";
+
+                if (docs.length === 0) {
+                    productsContainer.innerHTML = `
+                        <div class="col-span-full py-20 text-center opacity-40">
+                            <i class="fas fa-box-open text-4xl mb-4"></i>
+                            <p class="font-bold">No items found in this category.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                docs.forEach(product => {
+                    const isVer = verifiedSellers.includes(product.SellerId);
+                    const avgRating = product.ReviewCount > 0 ? (product.Rating / product.ReviewCount).toFixed(1) : "0";
+                    
+                    const productCard = document.createElement("div");
+                    productCard.className = "product-card relative";
+
+                    productCard.innerHTML = `
+                        ${product.IsSold ? `<div class="sold-overlay">SOLD</div>` : ''}
+                        <div class="relative h-40 overflow-hidden">
+                             <img src="${product.ImageURL}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110" onclick="viewProduct('${product.id}')">
+                        </div>
+                        <div class="p-3">
+                            <h3 class="font-bold text-[11px] truncate mb-1">${product.Title} ${isVer ? '<i class="fas fa-check-circle text-blue-500 ml-1"></i>' : ''}</h3>
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-blue-600 font-extrabold text-sm">₦${product.Price}</span>
+                                <div class="flex items-center text-[8px] text-yellow-500 font-bold bg-yellow-50 dark:bg-yellow-950/20 px-1.5 py-0.5 rounded"><i class="fas fa-star mr-1"></i>${avgRating}</div>
+                            </div>
+                            <div class="flex items-center text-[9px] opacity-40 uppercase font-bold">
+                                <i class="fas fa-location-dot mr-1 text-[7px]"></i> ${product.Location || 'Campus'}
+                            </div>
+                        </div>
+                    `;
+
+                    productsContainer.appendChild(productCard);
+                });
             }, (error) => {
                 console.error("Error loading products:", error);
             });
         }
 
-        const renderProducts = (items, containerId = 'product-grid', isOwner = false) => {
-            const grid = document.getElementById(containerId);
-            grid.innerHTML = '';
-            
-            if (items.length === 0) {
-                grid.innerHTML = `<div class="col-span-full text-center py-20 opacity-40 font-bold">No listings found in this category.</div>`;
-                return;
-            }
-            
-            items.forEach(p => {
-                const isVer = verifiedSellers.includes(p.SellerId);
-                const avgRating = p.ReviewCount > 0 ? (p.Rating / p.ReviewCount).toFixed(1) : "0";
-                let displayImage = p.ImageURL || p.ImageUrl; // Support both naming conventions
-                if(displayImage && displayImage.includes('cloudinary.com')) {
-                    displayImage = displayImage.replace('/upload/', '/upload/w_400,c_scale,q_auto,f_auto/');
-                }
-
-                grid.innerHTML += `
-                    <div class="product-card relative ${p.isOptimistic ? 'opacity-70 animate-pulse' : ''}">
-                        ${p.IsSold ? `<div class="sold-overlay">SOLD</div>` : ''}
-                        <div class="relative h-40 overflow-hidden">
-                             <img src="${displayImage}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110" onclick="viewProduct('${p.id}')">
-                             ${p.isOptimistic ? `<div class="absolute inset-0 flex items-center justify-center bg-black/20 text-white text-[9px] font-bold">UPLOADING...</div>` : ''}
-                        </div>
-                        <div class="p-3">
-                            <h3 class="font-bold text-[11px] truncate mb-1">${p.Title} ${isVer ? '<i class="fas fa-check-circle text-blue-500 ml-1"></i>' : ''}</h3>
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="text-blue-600 font-extrabold text-sm">₦${p.Price}</span>
-                                <div class="flex items-center text-[8px] text-yellow-500 font-bold bg-yellow-50 dark:bg-yellow-950/20 px-1.5 py-0.5 rounded"><i class="fas fa-star mr-1"></i>${avgRating}</div>
-                            </div>
-                            <div class="flex items-center text-[9px] opacity-40 uppercase font-bold">
-                                <i class="fas fa-location-dot mr-1 text-[7px]"></i> ${p.Location || 'Campus'}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-        };
-
         window.viewProduct = async (id) => {
-            if(id.startsWith('temp_')) return; 
             const snap = await getDoc(doc(db, "Products", id));
             const p = snap.data();
             const uSnap = await getDoc(doc(db, "Users", p.SellerId));
@@ -779,9 +769,10 @@
             const isMyProduct = p.SellerId === currentUserId;
             const avgRating = p.ReviewCount > 0 ? (p.Rating / p.ReviewCount).toFixed(1) : "0";
             const isVer = verifiedSellers.includes(p.SellerId);
+
             document.getElementById('details-content').innerHTML = `
                 <div class="relative h-72">
-                    <img src="${p.ImageURL || p.ImageUrl}" class="w-full h-full object-cover">
+                    <img src="${p.ImageURL}" class="w-full h-full object-cover">
                     <button onclick="showScreen('browse-screen')" class="absolute top-5 left-5 w-10 h-10 bg-white/30 backdrop-blur-md rounded-full text-white flex items-center justify-center"><i class="fas fa-chevron-left"></i></button>
                 </div>
                 <div class="p-6">
@@ -792,6 +783,7 @@
                         </div>
                         <p class="text-blue-600 text-2xl font-black">₦${p.Price}</p>
                     </div>
+                    
                     <div class="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl mb-8 border border-base relative">
                         <img src="${u.photo || 'https://ui-avatars.com/api/?name=User'}" class="w-12 h-12 rounded-full border-2 border-white">
                         <div class="flex-1">
@@ -800,14 +792,20 @@
                         </div>
                         ${!isMyProduct ? `<button onclick="reportUser('${p.SellerId}')" class="text-[9px] font-bold text-red-500 bg-red-50 dark:bg-red-950/20 px-3 py-1.5 rounded-lg border border-red-100 dark:border-red-900/40">REPORT</button>` : ''}
                     </div>
+                    
                     <div class="mb-10">
                         <h4 class="text-[10px] font-extrabold uppercase opacity-40 mb-2">Description</h4>
                         <p class="text-sm leading-relaxed opacity-80">${p.Description}</p>
                     </div>
+
                     <div class="mt-8 mb-8">
                         <h3 class="text-sm font-extrabold mb-4 uppercase tracking-wider opacity-60">Other listings from this user</h3>
-                        <div id="more-from-seller-grid" class="grid grid-cols-2 gap-4"></div>
+                        <div id="more-from-seller-grid" class="grid grid-cols-2 gap-4">
+                            <div class="animate-pulse bg-gray-200 dark:bg-slate-800 h-32 rounded-2xl"></div>
+                            <div class="animate-pulse bg-gray-200 dark:bg-slate-800 h-32 rounded-2xl"></div>
+                        </div>
                     </div>
+                    
                     ${isMyProduct ? `
                         <div class="p-5 bg-blue-50 dark:bg-blue-900/20 rounded-2xl text-center border border-blue-100 dark:border-blue-800">
                            <p class="text-xs font-bold text-blue-700 dark:text-blue-300">You posted this listing.</p>
@@ -817,20 +815,38 @@
                             <button onclick="startChat('${p.SellerId}', '${p.Title}')" class="btn-premium font-extrabold py-4 rounded-2xl shadow-lg">MESSAGE</button>
                             ${p.Phone ? `<a href="tel:${p.Phone}" class="bg-green-600 text-white font-extrabold py-4 rounded-2xl text-center shadow-lg flex items-center justify-center">CALL SELLER</a>` : ''}
                         </div>
+                        <div class="bg-card p-6 rounded-[2rem] border border-base shadow-sm">
+                            <h3 class="font-extrabold text-sm mb-4">Rate & Review</h3>
+                            <div class="star-rating mb-4" id="rating-input">
+                                <i class="fas fa-star" data-val="1"></i>
+                                <i class="fas fa-star" data-val="2"></i>
+                                <i class="fas fa-star" data-val="3"></i>
+                                <i class="fas fa-star" data-val="4"></i>
+                                <i class="fas fa-star" data-val="5"></i>
+                            </div>
+                            <textarea id="review-text" placeholder="Share your experience..." class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base p-4 text-sm h-24 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                            <button onclick="submitReview('${id}')" class="w-full bg-slate-900 dark:bg-slate-700 text-white py-3.5 rounded-2xl mt-4 font-bold">SUBMIT REVIEW</button>
+                        </div>
                     `}
                 </div>
             `;
             showScreen('details-screen');
+            if(!isMyProduct) setupStarInput();
             loadSellerOtherItems(p.SellerId, id);
         };
 
         window.reportUser = async (targetUserId) => {
-            const reason = prompt("Why are you reporting this user?");
+            const reason = prompt("Why are you reporting this user?\n(e.g., Scam, Rude Behavior, Fake Item, Harassment)");
             if (!reason) return;
             try {
-                await addDoc(collection(db, "Reports"), { reportedUser: targetUserId, reporterUser: currentUserId, reason: reason, timestamp: serverTimestamp() });
-                alert("Thank you. Our team will investigate immediately. 🛡️");
-            } catch (e) { alert("Could not send report."); }
+                await addDoc(collection(db, "Reports"), {
+                    reportedUser: targetUserId,
+                    reporterUser: currentUserId,
+                    reason: reason,
+                    timestamp: serverTimestamp()
+                });
+                alert("Thank you. Our team will investigate this user immediately. 🛡️");
+            } catch (e) { alert("Could not send report. Try again."); }
         };
 
         async function loadSellerOtherItems(sellerId, currentProductId) {
@@ -840,14 +856,14 @@
             container.innerHTML = '';
             const otherItems = snap.docs.filter(doc => doc.id !== currentProductId);
             if(otherItems.length === 0) {
-                container.innerHTML = '<p class="text-[10px] opacity-40 italic col-span-2">No other items.</p>';
+                container.innerHTML = '<p class="text-[10px] opacity-40 italic col-span-2">No other items listed by this user.</p>';
                 return;
             }
             otherItems.forEach(docSnap => {
                 const item = docSnap.data();
                 container.innerHTML += `
                     <div class="bg-slate-50 dark:bg-slate-800/40 rounded-2xl overflow-hidden border border-base" onclick="viewProduct('${docSnap.id}')">
-                        <img src="${item.ImageURL || item.ImageUrl}" class="w-full h-24 object-cover">
+                        <img src="${item.ImageURL}" class="w-full h-24 object-cover">
                         <div class="p-2">
                             <p class="text-[10px] font-bold truncate">${item.Title}</p>
                             <p class="text-blue-600 text-[10px] font-black">₦${item.Price}</p>
@@ -857,12 +873,46 @@
             });
         }
 
+        function setupStarInput() {
+            let selectedStars = 5;
+            const stars = document.querySelectorAll('#rating-input i');
+            stars.forEach(s => s.onclick = () => {
+                selectedStars = parseInt(s.dataset.val);
+                stars.forEach(st => st.classList.toggle('far', parseInt(st.dataset.val) > selectedStars));
+            });
+            window.getCurrentStars = () => selectedStars;
+        }
+
+        window.submitReview = async (productId) => {
+            const text = document.getElementById('review-text').value;
+            const stars = window.getCurrentStars();
+            await addDoc(collection(db, "Products", productId, "Reviews"), { stars, text, timestamp: serverTimestamp() });
+            const pRef = doc(db, "Products", productId);
+            const pSnap = await getDoc(pRef);
+            await updateDoc(pRef, { Rating: (pSnap.data().Rating || 0) + stars, ReviewCount: (pSnap.data().ReviewCount || 0) + 1 });
+            alert("Review sent!"); viewProduct(productId);
+        };
+
         window.loadMyItems = () => {
             showScreen('my-items-screen');
             const q = isAdminMode ? query(collection(db, "Products")) : query(collection(db, "Products"), where("SellerId", "==", currentUserId));
             onSnapshot(q, (snap) => {
-                let docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                renderProducts(docs, 'my-items-grid', true);
+                // Reuse logic to render my items
+                const grid = document.getElementById('my-items-grid');
+                grid.innerHTML = '';
+                snap.docs.forEach(docSnap => {
+                    const p = docSnap.data();
+                    grid.innerHTML += `
+                        <div class="bg-card p-4 rounded-2xl border border-base flex gap-4 items-center">
+                            <img src="${p.ImageURL}" class="w-16 h-16 rounded-xl object-cover">
+                            <div class="flex-1">
+                                <h3 class="font-bold text-sm">${p.Title}</h3>
+                                <p class="text-blue-600 font-bold text-xs">₦${p.Price}</p>
+                            </div>
+                            <button onclick="viewProduct('${docSnap.id}')" class="bg-slate-100 dark:bg-slate-800 p-2 rounded-lg"><i class="fas fa-edit"></i></button>
+                        </div>
+                    `;
+                });
             });
         };
 
@@ -912,11 +962,7 @@
             } else { bar.classList.add('hidden'); }
         });
 
-        document.addEventListener("DOMContentLoaded", () => {
-            renderCategoryChips();
-            loadProducts();
-        });
-
+        // Initialize view
         switchView('Product');
         showScreen('browse-screen');
     </script>
