@@ -185,6 +185,19 @@
             animation: spin 0.8s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Star Rating Interactivity */
+        .star-rating i {
+            cursor: pointer;
+            transition: transform 0.2s, color 0.2s;
+            color: #e2e8f0;
+        }
+        .star-rating i.active {
+            color: #f59e0b;
+        }
+        .star-rating i:hover {
+            transform: scale(1.2);
+        }
     </style>
 </head>
 <body>
@@ -920,17 +933,17 @@
                             <button onclick="startChat('${p.SellerId}', '${p.Title}')" class="btn-premium font-extrabold py-4 rounded-2xl shadow-lg">MESSAGE</button>
                             ${p.Phone ? `<a href="tel:${p.Phone}" class="bg-green-600 text-white font-extrabold py-4 rounded-2xl text-center shadow-lg flex items-center justify-center">CALL SELLER</a>` : ''}
                         </div>
-                        <div class="bg-card p-6 rounded-[2rem] border border-base shadow-sm">
+                        <div class="bg-card p-6 rounded-[2rem] border border-base shadow-sm" id="rating-container">
                             <h3 class="font-extrabold text-sm mb-4">Rate & Review</h3>
-                            <div class="star-rating mb-4" id="rating-input">
-                                <i class="fas fa-star" data-val="1"></i>
-                                <i class="fas fa-star" data-val="2"></i>
-                                <i class="fas fa-star" data-val="3"></i>
-                                <i class="fas fa-star" data-val="4"></i>
-                                <i class="fas fa-star" data-val="5"></i>
+                            <div class="star-rating mb-4 flex gap-2" id="rating-input">
+                                <i class="fas fa-star text-2xl active" data-val="1"></i>
+                                <i class="fas fa-star text-2xl active" data-val="2"></i>
+                                <i class="fas fa-star text-2xl active" data-val="3"></i>
+                                <i class="fas fa-star text-2xl active" data-val="4"></i>
+                                <i class="fas fa-star text-2xl active" data-val="5"></i>
                             </div>
                             <textarea id="review-text" placeholder="Share your experience..." class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base p-4 text-sm h-24 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-                            <button onclick="submitReview('${id}')" class="w-full bg-slate-900 dark:bg-slate-700 text-white py-3.5 rounded-2xl mt-4 font-bold">SUBMIT REVIEW</button>
+                            <button id="btn-submit-review" onclick="submitReview('${id}')" class="w-full bg-slate-900 dark:bg-slate-700 text-white py-3.5 rounded-2xl mt-4 font-bold transition-all">SUBMIT REVIEW</button>
                         </div>
                     `}
                 </div>
@@ -981,9 +994,21 @@
         function setupStarInput() {
             let selectedStars = 5;
             const stars = document.querySelectorAll('#rating-input i');
-            stars.forEach(s => s.onclick = () => {
-                selectedStars = parseInt(s.dataset.val);
-                stars.forEach(st => st.classList.toggle('far', parseInt(st.dataset.val) > selectedStars));
+            
+            stars.forEach(s => {
+                s.onclick = () => {
+                    selectedStars = parseInt(s.dataset.val);
+                    stars.forEach(st => {
+                        const val = parseInt(st.dataset.val);
+                        if(val <= selectedStars) {
+                            st.classList.add('active');
+                            st.classList.remove('opacity-20');
+                        } else {
+                            st.classList.remove('active');
+                            st.classList.add('opacity-20');
+                        }
+                    });
+                };
             });
             window.getCurrentStars = () => selectedStars;
         }
@@ -991,11 +1016,49 @@
         window.submitReview = async (productId) => {
             const text = document.getElementById('review-text').value;
             const stars = window.getCurrentStars();
-            await addDoc(collection(db, "Products", productId, "Reviews"), { stars, text, timestamp: serverTimestamp() });
-            const pRef = doc(db, "Products", productId);
-            const pSnap = await getDoc(pRef);
-            await updateDoc(pRef, { Rating: (pSnap.data().Rating || 0) + stars, ReviewCount: (pSnap.data().ReviewCount || 0) + 1 });
-            alert("Review sent!"); viewProduct(productId);
+            const btn = document.getElementById('btn-submit-review');
+            const container = document.getElementById('rating-container');
+
+            if (btn.disabled) return; // Block double clicks
+            
+            // UI Feedback: Disable and show loading
+            btn.innerText = "Submitting Review...";
+            btn.disabled = true;
+            container.style.opacity = "0.6";
+            container.style.pointerEvents = "none";
+
+            try {
+                // 1. Add review record
+                await addDoc(collection(db, "Products", productId, "Reviews"), { 
+                    stars, 
+                    text, 
+                    userId: currentUserId,
+                    timestamp: serverTimestamp() 
+                });
+
+                // 2. Update aggregate ratings on product
+                const pRef = doc(db, "Products", productId);
+                const pSnap = await getDoc(pRef);
+                const currentRating = pSnap.data().Rating || 0;
+                const currentCount = pSnap.data().ReviewCount || 0;
+
+                await updateDoc(pRef, { 
+                    Rating: currentRating + stars, 
+                    ReviewCount: currentCount + 1 
+                });
+
+                alert("Review Submitted! Thank you. ✨");
+                
+                // Refresh the view to show updated rating
+                viewProduct(productId);
+            } catch (e) {
+                console.error(e);
+                alert("Failed to submit review. Please try again.");
+                btn.innerText = "SUBMIT REVIEW";
+                btn.disabled = false;
+                container.style.opacity = "1";
+                container.style.pointerEvents = "auto";
+            }
         };
 
         window.loadMyItems = () => {
