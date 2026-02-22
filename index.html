@@ -423,7 +423,7 @@
             Request: ["All", "💰 Buy Request", "🛠️ Service Needed", "🚑 Urgent Help", "👫 Study Partner", "➕ Others"]
         };
 
-        // PROFILE PIC SYSTEM
+        // PROFILE PIC SYSTEM - FIXED FOR UPDATING
         document.getElementById('profile-upload').onchange = async (e) => {
             const file = e.target.files[0];
             if(!file) return;
@@ -433,9 +433,13 @@
             
             try {
                 const url = await uploadToCloudinary(file);
-                await updateDoc(doc(db, "Users", currentUserId), { photo: url });
+                // Use setDoc with merge to ensure doc exists
+                await setDoc(doc(db, "Users", currentUserId), { photo: url }, { merge: true });
                 document.getElementById('my-profile-pic').src = url;
-            } catch(e) { alert("Upload failed"); }
+            } catch(e) { 
+                console.error(e);
+                alert("Upload failed. Check Cloudinary settings."); 
+            }
             loader.style.display = 'none';
         };
 
@@ -646,6 +650,7 @@
             formData.append('file', file);
             formData.append('upload_preset', 'SLIT-HUB');
             const res = await fetch('https://api.cloudinary.com/v1_1/ddm87a9p2/image/upload', { method: 'POST', body: formData });
+            if(!res.ok) throw new Error("Cloudinary upload failed");
             const data = await res.json();
             return data.secure_url;
         }
@@ -667,7 +672,9 @@
             btn.innerText = "Publishing..."; btn.disabled = true;
             try {
                 let imageUrl = "https://placehold.co/600x400?text=Post";
-                if (fileInput.files[0]) imageUrl = await uploadToCloudinary(fileInput.files[0]);
+                if (fileInput.files[0]) {
+                    imageUrl = await uploadToCloudinary(fileInput.files[0]);
+                }
                 const postType = document.querySelector('input[name="post-type"]:checked').value;
                 await addDoc(collection(db, "Products"), {
                     Title: document.getElementById('post-title').value,
@@ -685,8 +692,16 @@
                     CreatedAt: serverTimestamp(),
                     IsSold: false
                 });
+                // Reset form
+                document.getElementById('post-title').value = '';
+                document.getElementById('post-desc').value = '';
+                imagePreview.classList.add('hidden');
+                document.getElementById('preview-placeholder').classList.remove('hidden');
                 showScreen('browse-screen');
-            } catch (e) { alert("Error!"); }
+            } catch (e) { 
+                console.error(e);
+                alert("Error publishing. Check console for details."); 
+            }
             btn.innerText = "PUBLISH NOW"; btn.disabled = false;
         };
 
