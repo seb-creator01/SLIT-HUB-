@@ -36,6 +36,7 @@
             overflow-x: hidden;
         }
 
+        /* Professional Header Styling */
         .brand-logo {
             font-weight: 800;
             letter-spacing: -1.5px;
@@ -48,6 +49,7 @@
         }
         .brand-logo:active { transform: scale(0.95); }
 
+        /* Animations & Transitions */
         .screen {
             animation: fadeInSlide 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -57,6 +59,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* Skeleton Pulse Animation */
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: .5; }
@@ -65,6 +68,7 @@
         
         .skeleton-card { background: var(--border); border-radius: 20px; height: 220px; width: 100%; }
 
+        /* Global Button Click Feedback */
         button, .nav-item, a, .chip {
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
             cursor: pointer;
@@ -76,6 +80,7 @@
             opacity: 0.8;
         }
 
+        /* Glassmorphism Header & Nav */
         .glass-header {
             background: rgba(var(--card), 0.8);
             backdrop-filter: blur(12px);
@@ -92,6 +97,7 @@
             box-shadow: 0 -10px 30px rgba(0,0,0,0.05);
         }
 
+        /* Enhanced Card Design */
         .product-card {
             background: var(--card);
             border: 1px solid var(--border);
@@ -140,6 +146,7 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+        /* Custom Modal */
         .modal-content { 
             background: var(--card); 
             border-radius: 2.5rem; 
@@ -156,6 +163,7 @@
             box-shadow: 0 4px 15px var(--primary-glow);
         }
 
+        /* Profile Upload Spinner */
         #profile-loader {
             position: absolute;
             inset: 0;
@@ -178,6 +186,7 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
+        /* Star Rating Interactivity */
         .star-rating i {
             cursor: pointer;
             transition: transform 0.2s, color 0.2s;
@@ -188,44 +197,6 @@
         }
         .star-rating i:hover {
             transform: scale(1.2);
-        }
-
-        /* ===== SELLER REPLY STYLES ===== */
-        .seller-reply-box {
-            background: linear-gradient(135deg, #eff6ff, #f0fdf4);
-            border-left: 3px solid #2563eb;
-            border-radius: 0 12px 12px 12px;
-            padding: 10px 14px;
-            margin-top: 10px;
-        }
-        .dark .seller-reply-box {
-            background: linear-gradient(135deg, rgba(37,99,235,0.1), rgba(5,150,105,0.08));
-            border-left-color: #60a5fa;
-        }
-        .seller-reply-input-area {
-            margin-top: 10px;
-            background: var(--bg);
-            border: 1px dashed var(--border);
-            border-radius: 0 12px 12px 12px;
-            padding: 10px;
-        }
-        .reply-toggle-btn {
-            font-size: 10px;
-            font-weight: 700;
-            color: #2563eb;
-            background: #eff6ff;
-            border: 1px solid #bfdbfe;
-            border-radius: 8px;
-            padding: 4px 10px;
-            margin-top: 8px;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .dark .reply-toggle-btn {
-            background: rgba(37,99,235,0.12);
-            border-color: rgba(96,165,250,0.3);
-            color: #60a5fa;
         }
     </style>
 </head>
@@ -484,9 +455,6 @@
         let selectedCategory = 'All';
         let isUserBanned = false;
 
-        // Track current product seller for reply feature
-        let currentProductSellerId = null;
-
         document.getElementById('display-user-id').innerText = currentUserId;
 
         const categories = {
@@ -495,7 +463,7 @@
             Request: ["All", "💰 Buy Request", "🛠️ Service Needed", "🚑 Urgent Help", "👫 Study Partner", "➕ Others"]
         };
 
-        // PROFILE PIC SYSTEM
+        // PROFILE PIC SYSTEM - FIXED FOR UPDATING
         document.getElementById('profile-upload').onchange = async (e) => {
             const file = e.target.files[0];
             if(!file) return;
@@ -514,6 +482,7 @@
             loader.style.display = 'none';
         };
 
+        // PROFILE PIC REMOVAL
         window.removeProfilePic = async () => {
             if(confirm("Remove profile photo?")) {
                 await updateDoc(doc(db, "Users", currentUserId), { photo: null });
@@ -528,6 +497,7 @@
             isUserBanned = snap.exists();
         });
 
+        // Track Verified Sellers globally
         onSnapshot(collection(db, "VerifiedUsers"), (snap) => {
             verifiedSellers = snap.docs.map(d => d.id);
             if(isAdminMode) loadAdminUserList();
@@ -896,9 +866,6 @@
             const avgRating = p.ReviewCount > 0 ? (p.Rating / p.ReviewCount).toFixed(1) : "0";
             const isVer = verifiedSellers.includes(p.SellerId);
 
-            // Store seller ID so review system can check it
-            currentProductSellerId = p.SellerId;
-
             document.getElementById('details-content').innerHTML = `
                 <div class="relative h-72">
                     <img src="${p.ImageURL}" class="w-full h-full object-cover">
@@ -964,6 +931,7 @@
             showScreen('details-screen');
             if(!isMyProduct) {
                 setupStarInput();
+                // Check if user already reviewed to hide input
                 const checkReview = await getDocs(query(collection(db, "Products", id, "Reviews"), where("userId", "==", currentUserId)));
                 if (!checkReview.empty) {
                     document.getElementById('rating-container').innerHTML = `
@@ -975,66 +943,28 @@
                 }
             }
             loadSellerOtherItems(p.SellerId, id);
-            loadProductReviews(id, p.SellerId);
+            loadProductReviews(id);
         };
 
-        // ===================================================
-        // SELLER REPLY FEATURE - Load Reviews with Replies
-        // ===================================================
-        async function loadProductReviews(productId, sellerId) {
+        // NEW: Load Professional Reviews
+        async function loadProductReviews(productId) {
             const container = document.getElementById('reviews-placeholder');
-            const isSeller = (sellerId === currentUserId);
             const q = query(collection(db, "Products", productId, "Reviews"), orderBy("timestamp", "desc"));
             
-            onSnapshot(q, async (snap) => {
+            onSnapshot(q, (snap) => {
                 if(snap.empty) {
                     container.innerHTML = `<p class="text-[11px] opacity-30 text-center py-4 italic">No reviews yet. Be the first to share your experience!</p>`;
                     return;
                 }
                 container.innerHTML = '';
-
-                for (const docSnap of snap.docs) {
+                snap.forEach(docSnap => {
                     const r = docSnap.data();
-                    const reviewId = docSnap.id;
                     const date = r.timestamp ? new Date(r.timestamp.seconds * 1000).toLocaleDateString() : 'Recent';
-
-                    // Fetch seller reply if it exists
-                    let replyHTML = '';
-                    const replySnap = await getDoc(doc(db, "Products", productId, "Reviews", reviewId, "SellerReply", "reply"));
-                    if (replySnap.exists()) {
-                        const reply = replySnap.data();
-                        const replyDate = reply.timestamp ? new Date(reply.timestamp.seconds * 1000).toLocaleDateString() : 'Recent';
-                        replyHTML = `
-                            <div class="seller-reply-box">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <i class="fas fa-store text-blue-500 text-[9px]"></i>
-                                    <span class="text-[9px] font-extrabold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Seller's Reply</span>
-                                    <span class="text-[8px] opacity-30 ml-auto">${replyDate}</span>
-                                </div>
-                                <p class="text-xs opacity-80 leading-relaxed">${reply.text}</p>
-                            </div>
-                        `;
-                    } else if (isSeller) {
-                        // Seller hasn't replied yet — show reply button
-                        replyHTML = `
-                            <button class="reply-toggle-btn" onclick="toggleReplyInput('${reviewId}', '${productId}')">
-                                <i class="fas fa-reply text-[9px]"></i> Reply to this review
-                            </button>
-                            <div id="reply-input-${reviewId}" class="seller-reply-input-area hidden">
-                                <textarea id="reply-text-${reviewId}" placeholder="Write your reply..." class="w-full bg-white dark:bg-slate-800 border border-base p-3 text-xs rounded-xl outline-none focus:ring-2 focus:ring-blue-500 h-20 resize-none"></textarea>
-                                <div class="flex gap-2 mt-2">
-                                    <button onclick="submitSellerReply('${productId}', '${reviewId}')" class="flex-1 bg-blue-600 text-white text-[10px] font-bold py-2 rounded-xl">POST REPLY</button>
-                                    <button onclick="toggleReplyInput('${reviewId}', '${productId}')" class="text-[10px] font-bold opacity-50 px-3">CANCEL</button>
-                                </div>
-                            </div>
-                        `;
-                    }
-
                     container.innerHTML += `
                         <div class="bg-slate-50 dark:bg-slate-800/30 p-4 rounded-2xl border border-base">
                             <div class="flex justify-between items-center mb-3">
                                 <div class="flex items-center gap-2">
-                                    <div class="w-6 h-6 bg-blue-100 dark:bg-blue-900/40 rounded-full flex items-center justify-center text-[9px] font-bold text-blue-600">
+                                    <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-[9px] font-bold text-blue-600">
                                         ${r.userId.substring(5, 7).toUpperCase()}
                                     </div>
                                     <p class="text-[10px] font-bold opacity-60">User ${r.userId.substring(5, 9)}</p>
@@ -1045,44 +975,11 @@
                                 ${'<i class="fas fa-star"></i>'.repeat(r.stars)}${'<i class="far fa-star"></i>'.repeat(5 - r.stars)}
                             </div>
                             <p class="text-xs opacity-80 leading-relaxed">${r.text}</p>
-                            ${replyHTML}
                         </div>
                     `;
-                }
+                });
             });
         }
-
-        // Toggle reply input box open/closed
-        window.toggleReplyInput = (reviewId, productId) => {
-            const box = document.getElementById(`reply-input-${reviewId}`);
-            if (box) box.classList.toggle('hidden');
-        };
-
-        // Submit seller reply to a specific review
-        window.submitSellerReply = async (productId, reviewId) => {
-            const textEl = document.getElementById(`reply-text-${reviewId}`);
-            const text = textEl ? textEl.value.trim() : '';
-
-            if (text.length < 3) {
-                alert("Please write a proper reply before posting.");
-                return;
-            }
-
-            try {
-                // Store reply as a fixed doc ("reply") inside a SellerReply subcollection under the review
-                await setDoc(doc(db, "Products", productId, "Reviews", reviewId, "SellerReply", "reply"), {
-                    text,
-                    sellerId: currentUserId,
-                    timestamp: serverTimestamp()
-                });
-                // Reload reviews to show the reply
-                loadProductReviews(productId, currentProductSellerId);
-            } catch(e) {
-                console.error(e);
-                alert("Failed to post reply.");
-            }
-        };
-        // ===================================================
 
         window.reportUser = async (targetUserId) => {
             const reason = prompt("Why are you reporting this user?");
@@ -1129,6 +1026,7 @@
             window.getCurrentStars = () => selectedStars;
         }
 
+        // UPDATED: Submit Review with Duplicate Prevention & Character Minimum
         window.submitReview = async (productId) => {
             const text = document.getElementById('review-text').value.trim();
             const stars = window.getCurrentStars();
@@ -1143,6 +1041,7 @@
             btn.innerText = "Checking...";
 
             try {
+                // Check for existing review
                 const reviewsRef = collection(db, "Products", productId, "Reviews");
                 const qCheck = query(reviewsRef, where("userId", "==", currentUserId));
                 const checkSnap = await getDocs(qCheck);
@@ -1208,7 +1107,69 @@
             });
         };
 
-        window.openChats = () => showScreen('chats-screen');
+        // =============================================
+        // UPDATED: openChats — now shows conversation list
+        // =============================================
+        window.openChats = () => {
+            showScreen('chats-screen');
+            const chatsList = document.getElementById('chats-list');
+            chatsList.innerHTML = '<p class="text-[11px] opacity-40 text-center py-6">Loading messages...</p>';
+
+            onSnapshot(query(collection(db, "Chats")), async (snap) => {
+                // Filter only chats that involve the current user
+                const myChats = snap.docs.filter(d => d.id.includes(currentUserId));
+
+                if (myChats.length === 0) {
+                    chatsList.innerHTML = '<p class="text-[11px] opacity-40 text-center py-10 italic">No messages yet.<br>Message a seller to start a conversation.</p>';
+                    return;
+                }
+
+                // Build chat cards with last message info
+                const chatDataList = [];
+                for (const chatDoc of myChats) {
+                    const chatId = chatDoc.id;
+                    const otherId = chatId.split('_').find(id => id !== currentUserId);
+
+                    const msgSnap = await getDocs(query(collection(db, "Chats", chatId, "Messages"), orderBy("timestamp", "desc")));
+                    const lastMsgDoc = msgSnap.docs[0];
+                    const lastMsg = lastMsgDoc ? lastMsgDoc.data() : null;
+
+                    const uSnap = await getDoc(doc(db, "Users", otherId));
+                    const u = uSnap.exists() ? uSnap.data() : {};
+
+                    chatDataList.push({ chatId, otherId, lastMsg, u });
+                }
+
+                // Sort by most recent message
+                chatDataList.sort((a, b) => {
+                    const aTime = a.lastMsg?.timestamp?.seconds || 0;
+                    const bTime = b.lastMsg?.timestamp?.seconds || 0;
+                    return bTime - aTime;
+                });
+
+                chatsList.innerHTML = '';
+                chatDataList.forEach(({ chatId, otherId, lastMsg, u }) => {
+                    const isMe = lastMsg?.senderId === currentUserId;
+                    const preview = lastMsg ? (isMe ? '🗨 You: ' : '') + lastMsg.messageText : 'No messages yet';
+                    const timeStr = lastMsg?.timestamp ? new Date(lastMsg.timestamp.seconds * 1000).toLocaleDateString() : '';
+                    const displayName = u.name || 'Campus User';
+                    const photoSrc = u.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=random`;
+
+                    chatsList.innerHTML += `
+                        <div onclick="startChat('${otherId}', '${displayName}')"
+                            class="flex items-center gap-4 p-4 bg-card border border-base rounded-2xl cursor-pointer hover:shadow-md transition-all active:scale-95">
+                            <img src="${photoSrc}" class="w-12 h-12 rounded-full object-cover border-2 border-white shadow flex-shrink-0">
+                            <div class="flex-1 min-w-0">
+                                <p class="font-bold text-sm truncate">${displayName}</p>
+                                <p class="text-[11px] opacity-50 truncate">${preview}</p>
+                            </div>
+                            <span class="text-[9px] opacity-30 font-bold uppercase whitespace-nowrap flex-shrink-0">${timeStr}</span>
+                        </div>
+                    `;
+                });
+            });
+        };
+
         window.startChat = (targetId, title) => { 
             activeChatId = [currentUserId, targetId].sort().join("_"); 
             document.getElementById('chat-title').innerText = title; 
