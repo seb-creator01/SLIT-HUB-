@@ -288,7 +288,7 @@
                         <p class="text-[11px] font-extrabold text-blue-800 dark:text-blue-200 mb-3 tracking-wider">🛡️ CAMPUS VERIFICATION</p>
                         <div class="flex gap-3">
                             <button onclick="requestVerification()" id="btn-verify-request" class="flex-1 bg-white dark:bg-slate-800 border border-blue-600 text-blue-600 text-[10px] font-bold py-3 rounded-xl shadow-sm">UPLOAD ID</button>
-                            <button onclick="window.open('https://wa.me/2348053103234?text=I%20want%20to%20verify%20my%20account%20ID:%20' + currentUserId)" class="flex-1 bg-green-500 text-white text-[10px] font-bold py-3 rounded-xl shadow-sm">CHAT ADMIN</button>
+                            <button onclick="chatAdmin()" class="flex-1 bg-green-500 text-white text-[10px] font-bold py-3 rounded-xl shadow-sm">CHAT ADMIN</button>
                         </div>
                     </div>
 
@@ -1217,6 +1217,11 @@
         // CONTACT DEVELOPER / CHAT ADMIN
         window.contactDeveloper = () => {
             window.open('https://wa.me/2348053103234?text=Hi%20Developer!%20I%20need%20help%20with%20SLIT-HUB', '_blank');
+        };
+
+        // FIX: chatAdmin now properly accesses currentUserId from module scope
+        window.chatAdmin = () => {
+            window.open('https://wa.me/2348053103234?text=I%20want%20to%20verify%20my%20account%20ID:%20' + currentUserId, '_blank');
         };
 
         switchView('Product');
