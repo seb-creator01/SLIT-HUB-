@@ -29,7 +29,7 @@
 
         body { 
             padding-bottom: 90px; 
-            padding-top: 160px; /* Space for debug panel */
+            padding-top: 160px;
             background-color: var(--bg); 
             color: var(--text); 
             transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
@@ -37,7 +37,6 @@
             overflow-x: hidden;
         }
 
-        /* Debug panel - now at top */
         #phone-debug {
             position: fixed;
             top: 0;
@@ -100,7 +99,7 @@
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border);
-            top: 160px !important; /* Adjust for debug panel */
+            top: 160px !important;
         }
 
         .glass-nav {
@@ -155,6 +154,7 @@
         }
 
         .active-nav { color: var(--primary) !important; font-weight: 800; }
+        
         .notification-dot { 
             position: absolute; 
             top: -2px; 
@@ -165,6 +165,7 @@
             border-radius: 50%; 
             border: 2px solid var(--card); 
             display: none;
+            z-index: 100;
         }
         
         .unread-badge {
@@ -183,6 +184,7 @@
             justify-content: center;
             padding: 0 4px;
             border: 2px solid var(--card);
+            z-index: 100;
         }
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -238,7 +240,6 @@
             transform: scale(1.2);
         }
 
-        /* Toast notification styles */
         .toast-notification {
             position: fixed;
             bottom: 100px;
@@ -311,7 +312,6 @@
         <button onclick="contactDeveloper()" class="mt-8 bg-blue-600 text-white px-8 py-3 rounded-full font-bold shadow-lg">Appeal Access</button>
     </div>
 
-    <!-- Toast notification container -->
     <div id="toast-container" class="fixed bottom-24 right-4 z-[10000] space-y-2"></div>
 
     <header class="glass-header fixed top-[160px] left-0 right-0 z-50 p-4">
@@ -343,8 +343,7 @@
                 <button id="toggle-requests" onclick="switchView('Request')">🙋‍♂️ Requests</button>
             </div>
             <div class="overflow-x-auto pb-6 no-scrollbar"><div id="category-filter-chips" class="flex gap-2"></div></div>
-            <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-                </div>
+            <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5"></div>
         </section>
 
         <section id="settings-screen" class="screen hidden max-w-lg mx-auto">
@@ -459,7 +458,6 @@
                 <button onclick="toggleAdminMode()" id="admin-toggle-btn" class="text-[9px] bg-slate-200 dark:bg-slate-800 px-3 py-1.5 rounded-full font-bold uppercase tracking-widest">Admin: OFF</button>
             </div>
             
-            <!-- TEST BUTTON - Added for debugging -->
             <button onclick="testFirebaseAccess()" style="background:green; color:white; padding:15px; margin:10px 0; border-radius:10px; width:100%; font-weight:bold;">
                 🔍 TEST FIREBASE CONNECTION (Click First!)
             </button>
@@ -530,14 +528,34 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, updateDoc, query, orderBy, onSnapshot, where, doc, getDoc, deleteDoc, setDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        const firebaseConfig = {
+            apiKey: "AIzaSyCpsDTN-NTkTFmbwg3T6vv9H4eE_YXQdZA",
+            authDomain: "slit-hub.firebaseapp.com",
+            projectId: "slit-hub",
+            storageBucket: "slit-hub.firebasestorage.app",
+            messagingSenderId: "347194010969",
+            appId: "1:347194010969:web:a45af2e8d1627ac2593048",
+            measurementId: "G-CLFWJSG5H1"
+        };
+
+        console.log("Initializing Firebase...");
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        console.log("✅ Firebase initialized");
+
+        // Define currentUserId FIRST before anything else uses it
+        let currentUserId = localStorage.getItem('slit_user_id') || "user_" + Math.floor(Math.random() * 1000000);
+        localStorage.setItem('slit_user_id', currentUserId);
+        console.log("Current User ID:", currentUserId);
+
         // =============================================
-        // VISUAL DEBUGGER FOR PHONE - NOW AT TOP
+        // VISUAL DEBUGGER FOR PHONE - NOW AFTER currentUserId is defined
         // =============================================
         window.onerror = function(msg, url, lineNo) {
-            const debugDiv = document.getElementById('phone-debug') || document.createElement('div');
-            debugDiv.id = 'phone-debug';
-            document.body.appendChild(debugDiv);
-            debugDiv.innerHTML = `❌ ERROR: ${msg}<br>Line: ${lineNo}<br>${new Date().toLocaleTimeString()}`;
+            const debugDiv = document.getElementById('phone-debug');
+            if(debugDiv) {
+                debugDiv.innerHTML = `❌ ERROR: ${msg}<br>Line: ${lineNo}<br>${new Date().toLocaleTimeString()}`;
+            }
             return false;
         };
 
@@ -557,27 +575,12 @@
             }
         };
 
-        // Create debug div at TOP
+        // Create debug div
         const debugDiv = document.createElement('div');
         debugDiv.id = 'phone-debug';
         debugDiv.style.cssText = 'position:fixed; top:0; left:0; right:0; background:#1a1a1a; color:#00ff00; padding:10px; z-index:99999; font-size:11px; font-family:monospace; white-space:pre-wrap; max-height:150px; overflow:auto; border-bottom:2px solid #00ff00;';
         debugDiv.innerHTML = '🔍 Debugger started at ' + new Date().toLocaleTimeString();
         document.body.appendChild(debugDiv);
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyCpsDTN-NTkTFmbwg3T6vv9H4eE_YXQdZA",
-            authDomain: "slit-hub.firebaseapp.com",
-            projectId: "slit-hub",
-            storageBucket: "slit-hub.firebasestorage.app",
-            messagingSenderId: "347194010969",
-            appId: "1:347194010969:web:a45af2e8d1627ac2593048",
-            measurementId: "G-CLFWJSG5H1"
-        };
-
-        console.log("Initializing Firebase...");
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        console.log("✅ Firebase initialized");
 
         // =============================================
         // TEST FIREBASE FUNCTION
@@ -639,11 +642,17 @@
         };
         if(localStorage.getItem('dark-mode') === 'true') toggleDarkMode();
 
-        window.onload = () => { if(!localStorage.getItem('slit_terms_accepted')) document.getElementById('terms-modal').classList.remove('hidden'); };
-        window.acceptTerms = () => { localStorage.setItem('slit_terms_accepted', 'true'); document.getElementById('terms-modal').classList.add('hidden'); };
+        window.onload = () => { 
+            if(!localStorage.getItem('slit_terms_accepted')) {
+                document.getElementById('terms-modal').classList.remove('hidden');
+            }
+        };
+        
+        window.acceptTerms = () => { 
+            localStorage.setItem('slit_terms_accepted', 'true'); 
+            document.getElementById('terms-modal').classList.add('hidden'); 
+        };
 
-        let currentUserId = localStorage.getItem('slit_user_id') || "user_" + Math.floor(Math.random() * 1000000);
-        localStorage.setItem('slit_user_id', currentUserId);
         let activeChatId = null;
         let isAdminMode = false;
         let verifiedSellers = [];
@@ -651,7 +660,6 @@
         let selectedCategory = 'All';
         let isUserBanned = false;
 
-        console.log("Current User ID:", currentUserId);
         document.getElementById('display-user-id').innerText = currentUserId;
 
         const categories = {
@@ -737,26 +745,20 @@
         };
 
         // =============================================
-        // SIMPLIFIED WORKING CHAT SYSTEM
+        // IMPROVED CHAT SYSTEM WITH NOTIFICATIONS
         // =============================================
 
-        // Function to start a chat
         window.startChat = async (targetId, targetName) => {
             console.log("Starting chat with:", targetId, targetName);
             
             try {
-                // Create chat ID
                 activeChatId = [currentUserId, targetId].sort().join("_");
                 console.log("Chat ID:", activeChatId);
                 
-                // Update UI
                 document.getElementById('chat-title').innerText = targetName;
                 showScreen('chatroom-screen');
                 
-                // Load messages
                 loadMessages();
-                
-                // Register this chat for current user
                 await registerChat(currentUserId, targetId, targetName);
                 
                 console.log("✅ Chat started successfully");
@@ -767,13 +769,11 @@
             }
         };
 
-        // Admin chat function
         window.startAdminChat = async (targetId, targetName) => {
             console.log("Admin starting chat with:", targetId, targetName);
             await startChat(targetId, targetName);
         };
 
-        // Simple function to register a chat
         async function registerChat(userId, otherUserId, otherName) {
             console.log("Registering chat for user:", userId);
             
@@ -786,18 +786,15 @@
                     chats = inboxSnap.data().chats || [];
                 }
                 
-                // Check if chat already exists
                 const chatId = [userId, otherUserId].sort().join("_");
                 const existingChat = chats.find(c => c.chatId === chatId);
                 
                 if (!existingChat) {
                     console.log("Creating new chat entry");
                     
-                    // Get other user's info
                     const otherUserSnap = await getDoc(doc(db, "Users", otherUserId));
                     const otherUser = otherUserSnap.exists() ? otherUserSnap.data() : {};
                     
-                    // Add new chat
                     chats.push({
                         chatId: chatId,
                         otherUserId: otherUserId,
@@ -808,7 +805,6 @@
                         unreadCount: 0
                     });
                     
-                    // Save to Firestore
                     await setDoc(inboxRef, { chats: chats }, { merge: true });
                     console.log("✅ Chat registered for user:", userId);
                 } else {
@@ -820,7 +816,6 @@
             }
         }
 
-        // Function to load messages
         function loadMessages() {
             if (!activeChatId) return;
             
@@ -859,15 +854,12 @@
                 });
                 
                 container.scrollTop = container.scrollHeight;
-                
-                // Mark as read
                 markAsRead(activeChatId);
             }, (error) => {
                 console.error("Error loading messages:", error);
             });
         }
 
-        // Function to mark chat as read
         async function markAsRead(chatId) {
             try {
                 const inboxRef = doc(db, "UserInbox", currentUserId);
@@ -888,7 +880,6 @@
             }
         }
 
-        // Send message function
         document.getElementById('btn-send').onclick = async () => {
             const input = document.getElementById('message-input');
             const messageText = input.value.trim();
@@ -903,16 +894,13 @@
                 const otherUserId = activeChatId.split('_').find(id => id !== currentUserId);
                 console.log("Other user:", otherUserId);
                 
-                // Get other user's info
                 const otherUserSnap = await getDoc(doc(db, "Users", otherUserId));
                 const otherUser = otherUserSnap.exists() ? otherUserSnap.data() : {};
                 const otherName = otherUser.name || 'User';
                 
-                // Register chat for both users
                 await registerChat(currentUserId, otherUserId, otherName);
                 await registerChat(otherUserId, currentUserId, 'You');
                 
-                // Send message
                 const messageRef = await addDoc(collection(db, "Chats", activeChatId, "Messages"), {
                     senderId: currentUserId,
                     messageText: messageText,
@@ -921,22 +909,22 @@
                 
                 console.log("✅ Message sent:", messageRef.id);
                 
-                // Update last message for both users
-                await updateLastMessage(currentUserId, activeChatId, messageText);
-                await updateLastMessage(otherUserId, activeChatId, messageText);
+                // Update last message for both users with sender ID
+                await updateLastMessage(currentUserId, activeChatId, messageText, currentUserId);
+                await updateLastMessage(otherUserId, activeChatId, messageText, currentUserId);
                 
             } catch (error) {
                 console.error("Error sending message:", error);
                 alert("Failed to send: " + error.message);
-                input.value = messageText; // Restore message
+                input.value = messageText;
             } finally {
                 input.disabled = false;
                 input.focus();
             }
         };
 
-        // Update last message
-        async function updateLastMessage(userId, chatId, messageText) {
+        // IMPROVED updateLastMessage with proper unread counting
+        async function updateLastMessage(userId, chatId, messageText, senderId) {
             try {
                 const inboxRef = doc(db, "UserInbox", userId);
                 const inboxSnap = await getDoc(inboxRef);
@@ -949,9 +937,12 @@
                         chats[chatIndex].lastMessage = messageText;
                         chats[chatIndex].lastMessageTime = new Date().toISOString();
                         
-                        // Increment unread count for the other user
-                        if (userId !== currentUserId) {
+                        // Only increment unread count if:
+                        // 1. The message is for the other user (not the sender)
+                        // 2. The user is not currently viewing this chat
+                        if (userId !== currentUserId && activeChatId !== chatId) {
                             chats[chatIndex].unreadCount = (chats[chatIndex].unreadCount || 0) + 1;
+                            console.log(`Incrementing unread for ${userId} to ${chats[chatIndex].unreadCount}`);
                         }
                         
                         await setDoc(inboxRef, { chats: chats }, { merge: true });
@@ -959,8 +950,6 @@
                         if (userId === currentUserId) {
                             updateNotificationBadge();
                         }
-                        
-                        console.log("Updated last message for user:", userId);
                     }
                 }
             } catch (error) {
@@ -968,7 +957,52 @@
             }
         }
 
-        // Open chats list
+        // IMPROVED updateNotificationBadge with better visibility
+        async function updateNotificationBadge() {
+            try {
+                console.log("Checking for unread messages...");
+                const inboxRef = doc(db, "UserInbox", currentUserId);
+                const inboxSnap = await getDoc(inboxRef);
+                
+                if (inboxSnap.exists()) {
+                    const data = inboxSnap.data();
+                    const chats = data.chats || [];
+                    
+                    let totalUnread = 0;
+                    chats.forEach(chat => {
+                        if (chat.unreadCount > 0) {
+                            totalUnread += chat.unreadCount;
+                            console.log(`Chat with ${chat.otherUserName}: ${chat.unreadCount} unread`);
+                        }
+                    });
+                    
+                    console.log("Total unread:", totalUnread);
+                    
+                    const dot = document.getElementById('chat-notify');
+                    if (dot) {
+                        if (totalUnread > 0) {
+                            dot.style.display = 'block';
+                            dot.style.backgroundColor = '#ef4444';
+                            dot.style.width = '10px';
+                            dot.style.height = '10px';
+                            console.log("✅ Notification dot SHOULD be visible");
+                        } else {
+                            dot.style.display = 'none';
+                            console.log("No unread messages");
+                        }
+                    } else {
+                        console.error("Chat notify dot not found in DOM!");
+                    }
+                } else {
+                    console.log("No inbox data yet");
+                    const dot = document.getElementById('chat-notify');
+                    if (dot) dot.style.display = 'none';
+                }
+            } catch (error) {
+                console.error("Error updating badge:", error);
+            }
+        }
+
         window.openChats = async () => {
             console.log("Opening chats list");
             showScreen('chats-screen');
@@ -987,7 +1021,6 @@
                 const chats = inboxSnap.data().chats;
                 console.log("Found", chats.length, "chats");
                 
-                // Sort by last message time
                 chats.sort((a, b) => new Date(b.lastMessageTime) - new Date(a.lastMessageTime));
                 
                 chatsList.innerHTML = '';
@@ -998,20 +1031,23 @@
                     chatDiv.className = "flex items-center gap-4 p-4 bg-card border border-base rounded-2xl cursor-pointer mb-3 relative";
                     
                     const unreadBadge = chat.unreadCount > 0 ? 
-                        `<span class="absolute top-2 right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">${chat.unreadCount}</span>` : '';
+                        `<span class="unread-badge">${chat.unreadCount}</span>` : '';
                     
                     chatDiv.innerHTML = `
                         ${unreadBadge}
                         <img src="${chat.otherUserPhoto || 'https://ui-avatars.com/api/?name=' + chat.otherUserName}" 
                              class="w-12 h-12 rounded-full object-cover">
                         <div class="flex-1">
-                            <p class="font-bold">${chat.otherUserName}</p>
-                            <p class="text-sm opacity-70">${chat.lastMessage || 'No messages'}</p>
+                            <p class="font-bold ${chat.unreadCount > 0 ? 'text-blue-600' : ''}">${chat.otherUserName}</p>
+                            <p class="text-sm ${chat.unreadCount > 0 ? 'font-bold' : 'opacity-70'}">${chat.lastMessage || 'No messages'}</p>
                         </div>
                     `;
                     
                     chatsList.appendChild(chatDiv);
                 });
+                
+                // Update badge after loading chats
+                updateNotificationBadge();
                 
             } catch (error) {
                 console.error("Error loading chats:", error);
@@ -1019,28 +1055,9 @@
             }
         };
 
-        // Update notification badge
-        async function updateNotificationBadge() {
-            try {
-                const inboxRef = doc(db, "UserInbox", currentUserId);
-                const inboxSnap = await getDoc(inboxRef);
-                
-                if (inboxSnap.exists()) {
-                    const chats = inboxSnap.data().chats || [];
-                    const totalUnread = chats.reduce((sum, chat) => sum + (chat.unreadCount || 0), 0);
-                    const dot = document.getElementById('chat-notify');
-                    if (dot) {
-                        dot.style.display = totalUnread > 0 ? 'block' : 'none';
-                    }
-                }
-            } catch (error) {
-                console.error("Error updating badge:", error);
-            }
-        }
-
-        // Initialize
-        setInterval(updateNotificationBadge, 5000);
-        setTimeout(updateNotificationBadge, 2000);
+        // Initialize notification badge checking
+        setInterval(updateNotificationBadge, 3000);
+        setTimeout(updateNotificationBadge, 1000);
 
         window.banUser = async (uid) => { 
             if(confirm("Ban this user?")) {
