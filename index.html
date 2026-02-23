@@ -528,19 +528,21 @@
             }
         };
 
-        // FIXED: Moved banUser and unbanUser functions to global scope
+        // FIXED: banUser function with proper error handling and without serverTimestamp
         window.banUser = async (uid) => { 
             if(confirm("Ban this user?")) {
                 try {
+                    // Use JavaScript Date instead of serverTimestamp to avoid permission issues
                     await setDoc(doc(db, "BannedUsers", uid), { 
-                        bannedAt: serverTimestamp(),
-                        bannedBy: currentUserId
+                        bannedAt: new Date().toISOString(), // Use regular date instead of serverTimestamp
+                        bannedBy: currentUserId,
+                        reason: "Banned by admin"
                     });
                     alert("User has been banned successfully!");
                     if(isAdminMode) loadAdminUserList();
                 } catch (error) {
-                    console.error("Ban error:", error);
-                    alert("Failed to ban user. Check console for details.");
+                    console.error("Ban error details:", error);
+                    alert("Failed to ban user. Error: " + error.message);
                 }
             }
         };
@@ -552,8 +554,8 @@
                     alert("User Unbanned successfully!");
                     if(isAdminMode) loadAdminUserList();
                 } catch (error) {
-                    console.error("Unban error:", error);
-                    alert("Failed to unban user. Check console for details.");
+                    console.error("Unban error details:", error);
+                    alert("Failed to unban user. Error: " + error.message);
                 }
             }
         };
@@ -567,7 +569,7 @@
         };
 
         window.verifyUser = async (uid) => {
-            await setDoc(doc(db, "VerifiedUsers", uid), { verifiedAt: serverTimestamp() });
+            await setDoc(doc(db, "VerifiedUsers", uid), { verifiedAt: new Date().toISOString() }); // Fixed: removed serverTimestamp
             loadAdminUserList();
         };
 
@@ -781,7 +783,7 @@
                     SellerId: currentUserId,
                     PostType: postType,
                     Rating: 0, ReviewCount: 0,
-                    CreatedAt: serverTimestamp(),
+                    CreatedAt: new Date().toISOString(), // Fixed: replaced serverTimestamp
                     IsSold: false
                 });
                 document.getElementById('post-title').value = '';
@@ -983,7 +985,7 @@
             const reason = prompt("Why are you reporting this user?");
             if (!reason) return;
             try {
-                await addDoc(collection(db, "Reports"), { reportedUser: targetUserId, reporterUser: currentUserId, reason: reason, timestamp: serverTimestamp() });
+                await addDoc(collection(db, "Reports"), { reportedUser: targetUserId, reporterUser: currentUserId, reason: reason, timestamp: new Date().toISOString() }); // Fixed: replaced serverTimestamp
                 alert("Report sent.");
             } catch (e) { alert("Error reporting."); }
         };
@@ -1054,7 +1056,7 @@
                     stars, 
                     text, 
                     userId: currentUserId, 
-                    timestamp: serverTimestamp() 
+                    timestamp: new Date().toISOString() // Fixed: replaced serverTimestamp
                 });
 
                 const pRef = doc(db, "Products", productId);
@@ -1205,7 +1207,7 @@
             await addDoc(collection(db, "Chats", activeChatId, "Messages"), {
                 senderId: currentUserId,
                 messageText: msgText,
-                timestamp: serverTimestamp()
+                timestamp: new Date().toISOString() // Fixed: replaced serverTimestamp
             });
         };
 
