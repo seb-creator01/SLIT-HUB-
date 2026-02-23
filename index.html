@@ -543,13 +543,13 @@
         const db = getFirestore(app);
         console.log("✅ Firebase initialized");
 
-        // Define currentUserId FIRST before anything else uses it
+        // Define currentUserId FIRST
         let currentUserId = localStorage.getItem('slit_user_id') || "user_" + Math.floor(Math.random() * 1000000);
         localStorage.setItem('slit_user_id', currentUserId);
         console.log("Current User ID:", currentUserId);
 
         // =============================================
-        // VISUAL DEBUGGER FOR PHONE - NOW AFTER currentUserId is defined
+        // VISUAL DEBUGGER
         // =============================================
         window.onerror = function(msg, url, lineNo) {
             const debugDiv = document.getElementById('phone-debug');
@@ -575,7 +575,6 @@
             }
         };
 
-        // Create debug div
         const debugDiv = document.createElement('div');
         debugDiv.id = 'phone-debug';
         debugDiv.style.cssText = 'position:fixed; top:0; left:0; right:0; background:#1a1a1a; color:#00ff00; padding:10px; z-index:99999; font-size:11px; font-family:monospace; white-space:pre-wrap; max-height:150px; overflow:auto; border-bottom:2px solid #00ff00;';
@@ -589,49 +588,38 @@
             console.log("🔍 Starting Firebase test...");
             
             try {
-                // Test 1: Write to a test document
-                console.log("Test 1: Writing to TestCollection...");
                 await setDoc(doc(db, "TestCollection", "test"), {
                     message: "hello",
                     time: new Date().toISOString()
                 });
                 console.log("✅ Test 1 passed: Can write to Firestore");
                 
-                // Test 2: Read from test document
-                console.log("Test 2: Reading from TestCollection...");
                 const testDoc = await getDoc(doc(db, "TestCollection", "test"));
                 if (testDoc.exists()) {
                     console.log(`✅ Test 2 passed: Can read - ${testDoc.data().message}`);
                 }
                 
-                // Test 3: Write to UserInbox
-                console.log("Test 3: Writing to UserInbox...");
                 await setDoc(doc(db, "UserInbox", currentUserId), {
                     test: "working",
                     timestamp: new Date().toISOString()
                 }, { merge: true });
                 console.log("✅ Test 3 passed: Can write to UserInbox");
                 
-                // Test 4: Write to Chats
-                console.log("Test 4: Writing to Chats...");
                 const testChatId = "test-chat-" + Date.now();
                 await setDoc(doc(db, "Chats", testChatId), {
                     created: new Date().toISOString()
                 });
                 console.log("✅ Test 4 passed: Can write to Chats");
                 
-                console.log("🎉 ALL TESTS PASSED! Firebase is working correctly!");
+                console.log("🎉 ALL TESTS PASSED!");
                 alert("✅ All tests passed! Firebase is working!");
                 
-                // Clean up
                 await deleteDoc(doc(db, "TestCollection", "test"));
                 await deleteDoc(doc(db, "Chats", testChatId));
                 
             } catch (error) {
                 console.error("❌ TEST FAILED:", error);
-                console.error("Error code:", error.code);
-                console.error("Error message:", error.message);
-                alert(`❌ Test failed: ${error.message}\nCode: ${error.code}`);
+                alert(`❌ Test failed: ${error.message}`);
             }
         };
 
@@ -745,7 +733,7 @@
         };
 
         // =============================================
-        // IMPROVED CHAT SYSTEM WITH NOTIFICATIONS
+        // FIXED CHAT SYSTEM WITH REAL-TIME NOTIFICATIONS
         // =============================================
 
         window.startChat = async (targetId, targetName) => {
@@ -761,6 +749,9 @@
                 loadMessages();
                 await registerChat(currentUserId, targetId, targetName);
                 
+                // Mark messages as read when opening chat
+                await markAsRead(activeChatId);
+                
                 console.log("✅ Chat started successfully");
                 
             } catch (error) {
@@ -769,9 +760,11 @@
             }
         };
 
+        // FIXED: Admin chat function - now properly connected
         window.startAdminChat = async (targetId, targetName) => {
             console.log("Admin starting chat with:", targetId, targetName);
-            await startChat(targetId, targetName);
+            // Call the same startChat function
+            await startChat(targetId, targetName || 'Admin Support');
         };
 
         async function registerChat(userId, otherUserId, otherName) {
@@ -807,12 +800,9 @@
                     
                     await setDoc(inboxRef, { chats: chats }, { merge: true });
                     console.log("✅ Chat registered for user:", userId);
-                } else {
-                    console.log("Chat already exists");
                 }
             } catch (error) {
                 console.error("Error registering chat:", error);
-                throw error;
             }
         }
 
@@ -854,9 +844,6 @@
                 });
                 
                 container.scrollTop = container.scrollHeight;
-                markAsRead(activeChatId);
-            }, (error) => {
-                console.error("Error loading messages:", error);
             });
         }
 
@@ -869,9 +856,10 @@
                     let chats = inboxSnap.data().chats || [];
                     const chatIndex = chats.findIndex(c => c.chatId === chatId);
                     
-                    if (chatIndex !== -1) {
+                    if (chatIndex !== -1 && chats[chatIndex].unreadCount > 0) {
                         chats[chatIndex].unreadCount = 0;
                         await setDoc(inboxRef, { chats: chats }, { merge: true });
+                        console.log("Marked chat as read:", chatId);
                         updateNotificationBadge();
                     }
                 }
@@ -880,6 +868,7 @@
             }
         }
 
+        // FIXED: Send message with proper unread counting
         document.getElementById('btn-send').onclick = async () => {
             const input = document.getElementById('message-input');
             const messageText = input.value.trim();
@@ -898,18 +887,20 @@
                 const otherUser = otherUserSnap.exists() ? otherUserSnap.data() : {};
                 const otherName = otherUser.name || 'User';
                 
+                // Register chat for both users
                 await registerChat(currentUserId, otherUserId, otherName);
                 await registerChat(otherUserId, currentUserId, 'You');
                 
-                const messageRef = await addDoc(collection(db, "Chats", activeChatId, "Messages"), {
+                // Send message
+                await addDoc(collection(db, "Chats", activeChatId, "Messages"), {
                     senderId: currentUserId,
                     messageText: messageText,
                     timestamp: new Date().toISOString()
                 });
                 
-                console.log("✅ Message sent:", messageRef.id);
+                console.log("✅ Message sent");
                 
-                // Update last message for both users with sender ID
+                // Update last message for both users
                 await updateLastMessage(currentUserId, activeChatId, messageText, currentUserId);
                 await updateLastMessage(otherUserId, activeChatId, messageText, currentUserId);
                 
@@ -923,7 +914,7 @@
             }
         };
 
-        // IMPROVED updateLastMessage with proper unread counting
+        // FIXED: updateLastMessage with proper unread counting
         async function updateLastMessage(userId, chatId, messageText, senderId) {
             try {
                 const inboxRef = doc(db, "UserInbox", userId);
@@ -937,18 +928,28 @@
                         chats[chatIndex].lastMessage = messageText;
                         chats[chatIndex].lastMessageTime = new Date().toISOString();
                         
-                        // Only increment unread count if:
-                        // 1. The message is for the other user (not the sender)
-                        // 2. The user is not currently viewing this chat
+                        // CRITICAL FIX: Only increment unread count for the recipient
+                        // and only if they're not currently viewing this chat
                         if (userId !== currentUserId && activeChatId !== chatId) {
                             chats[chatIndex].unreadCount = (chats[chatIndex].unreadCount || 0) + 1;
-                            console.log(`Incrementing unread for ${userId} to ${chats[chatIndex].unreadCount}`);
+                            console.log(`🔴 Unread for ${userId}: ${chats[chatIndex].unreadCount}`);
                         }
                         
                         await setDoc(inboxRef, { chats: chats }, { merge: true });
                         
+                        // Always update badge for current user
                         if (userId === currentUserId) {
                             updateNotificationBadge();
+                        }
+                        
+                        // Also update badge for recipient if needed
+                        if (userId !== currentUserId) {
+                            // Force a badge update for the recipient by writing to their inbox
+                            // This triggers their onSnapshot listener
+                            setTimeout(() => {
+                                const tempRef = doc(db, "UserInbox", userId);
+                                setDoc(tempRef, { lastUpdate: new Date().toISOString() }, { merge: true });
+                            }, 100);
                         }
                     }
                 }
@@ -957,17 +958,19 @@
             }
         }
 
-        // IMPROVED updateNotificationBadge with better visibility
-        async function updateNotificationBadge() {
-            try {
-                console.log("Checking for unread messages...");
-                const inboxRef = doc(db, "UserInbox", currentUserId);
-                const inboxSnap = await getDoc(inboxRef);
-                
-                if (inboxSnap.exists()) {
-                    const data = inboxSnap.data();
+        // FIXED: Real-time inbox listener for notifications
+        function setupInboxListener() {
+            console.log("Setting up real-time inbox listener for:", currentUserId);
+            
+            const inboxRef = doc(db, "UserInbox", currentUserId);
+            
+            onSnapshot(inboxRef, (snapshot) => {
+                console.log("📨 Inbox updated!");
+                if (snapshot.exists()) {
+                    const data = snapshot.data();
                     const chats = data.chats || [];
                     
+                    // Calculate total unread
                     let totalUnread = 0;
                     chats.forEach(chat => {
                         if (chat.unreadCount > 0) {
@@ -978,34 +981,31 @@
                     
                     console.log("Total unread:", totalUnread);
                     
+                    // Update notification dot
                     const dot = document.getElementById('chat-notify');
                     if (dot) {
                         if (totalUnread > 0) {
                             dot.style.display = 'block';
-                            dot.style.backgroundColor = '#ef4444';
-                            dot.style.width = '10px';
-                            dot.style.height = '10px';
-                            console.log("✅ Notification dot SHOULD be visible");
+                            console.log("🔴 Showing notification dot");
                         } else {
                             dot.style.display = 'none';
-                            console.log("No unread messages");
+                            console.log("⚫ Hiding notification dot");
                         }
-                    } else {
-                        console.error("Chat notify dot not found in DOM!");
                     }
-                } else {
-                    console.log("No inbox data yet");
-                    const dot = document.getElementById('chat-notify');
-                    if (dot) dot.style.display = 'none';
+                    
+                    // If we're on the chats screen, refresh the list
+                    const currentScreen = document.querySelector('.screen:not(.hidden)')?.id;
+                    if (currentScreen === 'chats-screen') {
+                        loadChatsList();
+                    }
                 }
-            } catch (error) {
-                console.error("Error updating badge:", error);
-            }
+            }, (error) => {
+                console.error("Inbox listener error:", error);
+            });
         }
 
-        window.openChats = async () => {
-            console.log("Opening chats list");
-            showScreen('chats-screen');
+        // Function to load chats list
+        async function loadChatsList() {
             const chatsList = document.getElementById('chats-list');
             chatsList.innerHTML = '<p class="text-center py-6">Loading chats...</p>';
             
@@ -1046,19 +1046,48 @@
                     chatsList.appendChild(chatDiv);
                 });
                 
-                // Update badge after loading chats
-                updateNotificationBadge();
-                
             } catch (error) {
                 console.error("Error loading chats:", error);
                 chatsList.innerHTML = `<p class="text-center py-10 text-red-500">Error: ${error.message}</p>`;
             }
+        }
+
+        window.openChats = async () => {
+            console.log("Opening chats list");
+            showScreen('chats-screen');
+            await loadChatsList();
         };
 
-        // Initialize notification badge checking
-        setInterval(updateNotificationBadge, 3000);
-        setTimeout(updateNotificationBadge, 1000);
+        // Simple notification badge update (as backup)
+        async function updateNotificationBadge() {
+            try {
+                const inboxRef = doc(db, "UserInbox", currentUserId);
+                const inboxSnap = await getDoc(inboxRef);
+                
+                if (inboxSnap.exists()) {
+                    const chats = inboxSnap.data().chats || [];
+                    let totalUnread = chats.reduce((sum, chat) => sum + (chat.unreadCount || 0), 0);
+                    
+                    const dot = document.getElementById('chat-notify');
+                    if (dot) {
+                        dot.style.display = totalUnread > 0 ? 'block' : 'none';
+                    }
+                }
+            } catch (error) {
+                console.error("Error updating badge:", error);
+            }
+        }
 
+        // Initialize listeners
+        setTimeout(() => {
+            setupInboxListener();
+            updateNotificationBadge();
+        }, 1000);
+
+        // Regular badge check as backup
+        setInterval(updateNotificationBadge, 2000);
+
+        // Rest of your existing functions (banUser, unbanUser, etc.) remain the same
         window.banUser = async (uid) => { 
             if(confirm("Ban this user?")) {
                 try {
