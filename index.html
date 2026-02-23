@@ -135,7 +135,35 @@
         }
 
         .active-nav { color: var(--primary) !important; font-weight: 800; }
-        .notification-dot { position: absolute; top: -2px; right: 10px; width: 10px; height: 10px; background: #ef4444; border-radius: 50%; border: 2px solid var(--card); }
+        .notification-dot { 
+            position: absolute; 
+            top: -2px; 
+            right: 10px; 
+            width: 10px; 
+            height: 10px; 
+            background: #ef4444; 
+            border-radius: 50%; 
+            border: 2px solid var(--card); 
+            display: none;
+        }
+        
+        .unread-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ef4444;
+            color: white;
+            font-size: 9px;
+            font-weight: bold;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+            border: 2px solid var(--card);
+        }
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -189,6 +217,49 @@
         .star-rating i:hover {
             transform: scale(1.2);
         }
+
+        /* Toast notification styles */
+        .toast-notification {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            background: var(--card);
+            border-left: 4px solid #2563eb;
+            border-radius: 12px;
+            padding: 12px 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            z-index: 10000;
+            max-width: 300px;
+            animation: slideIn 0.3s ease;
+            border: 1px solid var(--border);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .toast-notification .sender {
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 12px;
+        }
+
+        .toast-notification .message-preview {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+
+        .toast-close {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            cursor: pointer;
+            opacity: 0.5;
+            font-size: 10px;
+        }
+        .toast-close:hover { opacity: 1; }
     </style>
 </head>
 <body>
@@ -219,6 +290,9 @@
         <p class="opacity-60 mt-4 max-w-xs">You have been flagged for community violations. Please contact admin to appeal.</p>
         <button onclick="contactDeveloper()" class="mt-8 bg-blue-600 text-white px-8 py-3 rounded-full font-bold shadow-lg">Appeal Access</button>
     </div>
+
+    <!-- Toast notification container -->
+    <div id="toast-container" class="fixed bottom-24 right-4 z-[10000] space-y-2"></div>
 
     <header class="glass-header sticky top-0 z-50 p-4">
         <div class="max-w-5xl mx-auto flex justify-between items-center gap-4">
@@ -384,7 +458,10 @@
             <div id="details-content"></div>
         </section>
 
-        <section id="chats-screen" class="screen hidden"><h2 class="text-2xl font-extrabold mb-6">Messages</h2><div id="chats-list" class="space-y-3"></div></section>
+        <section id="chats-screen" class="screen hidden">
+            <h2 class="text-2xl font-extrabold mb-6">Messages</h2>
+            <div id="chats-list" class="space-y-3"></div>
+        </section>
         
         <section id="chatroom-screen" class="screen hidden flex flex-col h-[82vh] bg-card rounded-[2.5rem] border border-base shadow-2xl overflow-hidden">
             <div id="chat-header" class="p-5 border-b border-base flex items-center gap-4 bg-card/50 backdrop-blur-md">
@@ -401,11 +478,27 @@
     </main>
 
     <nav class="fixed bottom-0 left-0 right-0 glass-nav flex justify-around py-4 text-slate-400 z-50">
-        <button onclick="showScreen('browse-screen')" class="nav-item flex flex-col items-center"><i class="fas fa-house-chimney text-lg mb-1"></i><span class="text-[9px] font-bold">Home</span></button>
-        <button onclick="startNewPost()" class="nav-item flex flex-col items-center"><i class="fas fa-plus-circle text-2xl text-blue-600 mb-1"></i><span class="text-[9px] font-bold">Post</span></button>
-        <button onclick="loadMyItems()" class="nav-item flex flex-col items-center"><i class="fas fa-grid-2 text-lg mb-1"></i><span class="text-[9px] font-bold">Manager</span></button>
-        <button onclick="openChats()" class="nav-item flex flex-col items-center"><div id="chat-notify" class="notification-dot"></div><i class="fas fa-comment-dots text-lg mb-1"></i><span class="text-[9px] font-bold">Inbox</span></button>
-        <button onclick="showScreen('settings-screen')" class="nav-item flex flex-col items-center"><i class="fas fa-circle-user text-lg mb-1"></i><span class="text-[9px] font-bold">Me</span></button>
+        <button onclick="showScreen('browse-screen')" class="nav-item flex flex-col items-center relative">
+            <i class="fas fa-house-chimney text-lg mb-1"></i>
+            <span class="text-[9px] font-bold">Home</span>
+        </button>
+        <button onclick="startNewPost()" class="nav-item flex flex-col items-center relative">
+            <i class="fas fa-plus-circle text-2xl text-blue-600 mb-1"></i>
+            <span class="text-[9px] font-bold">Post</span>
+        </button>
+        <button onclick="loadMyItems()" class="nav-item flex flex-col items-center relative">
+            <i class="fas fa-grid-2 text-lg mb-1"></i>
+            <span class="text-[9px] font-bold">Manager</span>
+        </button>
+        <button onclick="openChats()" class="nav-item flex flex-col items-center relative">
+            <div id="chat-notify" class="notification-dot"></div>
+            <i class="fas fa-comment-dots text-lg mb-1"></i>
+            <span class="text-[9px] font-bold">Inbox</span>
+        </button>
+        <button onclick="showScreen('settings-screen')" class="nav-item flex flex-col items-center relative">
+            <i class="fas fa-circle-user text-lg mb-1"></i>
+            <span class="text-[9px] font-bold">Me</span>
+        </button>
     </nav>
 
     <script type="module">
@@ -443,6 +536,7 @@
         let currentView = 'Product';
         let selectedCategory = 'All';
         let isUserBanned = false;
+        let lastMessageTimestamps = {}; // Track last message timestamps for notifications
 
         document.getElementById('display-user-id').innerText = currentUserId;
 
@@ -528,13 +622,12 @@
             }
         };
 
-        // FIXED: banUser function with proper error handling and without serverTimestamp
+        // FIXED: banUser function with proper error handling
         window.banUser = async (uid) => { 
             if(confirm("Ban this user?")) {
                 try {
-                    // Use JavaScript Date instead of serverTimestamp to avoid permission issues
                     await setDoc(doc(db, "BannedUsers", uid), { 
-                        bannedAt: new Date().toISOString(), // Use regular date instead of serverTimestamp
+                        bannedAt: new Date().toISOString(),
                         bannedBy: currentUserId,
                         reason: "Banned by admin"
                     });
@@ -618,7 +711,7 @@
                                 <p class="font-bold"><i class="fas fa-phone mr-1"></i>${phone}</p>
                             </div>
                             <div class="flex flex-col gap-2">
-                                <button onclick="startChat('${uid}', 'Admin Support')" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-[9px] font-bold">MESSAGE</button>
+                                <button onclick="startAdminChat('${uid}', '${(u.name || 'Admin Support').replace(/'/g, "\\'")}')" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-[9px] font-bold">MESSAGE</button>
                                 ${isVerified ? 
                                     `<button onclick="removeVerification('${uid}')" class="bg-orange-500 text-white px-3 py-1.5 rounded-lg text-[9px] font-bold">REMOVE TICK</button>` : 
                                     `<button onclick="verifyUser('${uid}')" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-[9px] font-bold">VERIFY</button>`
@@ -633,6 +726,345 @@
                 `;
             }
         }
+
+        // FIXED: Admin chat function
+        window.startAdminChat = async (targetId, title) => {
+            activeChatId = [currentUserId, targetId].sort().join("_");
+            document.getElementById('chat-title').innerText = title || 'Admin Support';
+            
+            // Register both users for this chat
+            await registerChatForUser(currentUserId, activeChatId, targetId, title || 'Admin Support');
+            await registerChatForUser(targetId, activeChatId, currentUserId, 'Admin');
+            
+            showScreen('chatroom-screen');
+            loadMessages();
+            markChatAsRead(activeChatId);
+        };
+
+        // Function to show toast notification
+        function showToastNotification(senderName, messagePreview, chatId, senderId) {
+            const container = document.getElementById('toast-container');
+            const toastId = 'toast-' + Date.now();
+            
+            const toast = document.createElement('div');
+            toast.id = toastId;
+            toast.className = 'toast-notification';
+            toast.innerHTML = `
+                <div class="toast-close" onclick="this.parentElement.remove()">✕</div>
+                <div class="sender">📨 ${senderName}</div>
+                <div class="message-preview">${messagePreview.substring(0, 50)}${messagePreview.length > 50 ? '...' : ''}</div>
+                <button onclick="openChatFromNotification('${senderId}', '${senderName.replace(/'/g, "\\'")}')" class="text-[9px] bg-blue-600 text-white px-3 py-1 rounded-lg mt-2 font-bold w-full">REPLY</button>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                const toastEl = document.getElementById(toastId);
+                if (toastEl) toastEl.remove();
+            }, 5000);
+        }
+
+        // Function to open chat from notification
+        window.openChatFromNotification = (senderId, senderName) => {
+            startChat(senderId, senderName);
+            document.getElementById('toast-container').innerHTML = ''; // Clear toasts
+        };
+
+        // Function to register chat for user
+        async function registerChatForUser(userId, chatId, otherUserId, otherUserName) {
+            if (!userId || !chatId) return;
+            
+            try {
+                const inboxRef = doc(db, "UserInbox", userId);
+                const inboxSnap = await getDoc(inboxRef);
+                
+                let userChats = inboxSnap.exists() ? (inboxSnap.data().chats || []) : [];
+                const chatExists = userChats.some(chat => chat.chatId === chatId);
+                
+                if (!chatExists) {
+                    const otherUserSnap = await getDoc(doc(db, "Users", otherUserId));
+                    const otherUser = otherUserSnap.exists() ? otherUserSnap.data() : {};
+                    
+                    userChats.push({
+                        chatId: chatId,
+                        otherUserId: otherUserId,
+                        otherUserName: otherUser.name || otherUserName || 'Campus User',
+                        otherUserPhoto: otherUser.photo || null,
+                        lastMessage: '',
+                        lastMessageTime: new Date().toISOString(),
+                        unreadCount: 0
+                    });
+                    
+                    await setDoc(inboxRef, { chats: userChats }, { merge: true });
+                }
+            } catch (error) {
+                console.error("Error registering chat for user:", error);
+            }
+        }
+
+        // Function to update last message
+        async function updateChatLastMessage(userId, chatId, messageText, senderId) {
+            if (!userId || !chatId) return;
+            
+            try {
+                const inboxRef = doc(db, "UserInbox", userId);
+                const inboxSnap = await getDoc(inboxRef);
+                
+                if (inboxSnap.exists()) {
+                    let userChats = inboxSnap.data().chats || [];
+                    const chatIndex = userChats.findIndex(chat => chat.chatId === chatId);
+                    
+                    if (chatIndex !== -1) {
+                        userChats[chatIndex].lastMessage = messageText;
+                        userChats[chatIndex].lastMessageTime = new Date().toISOString();
+                        
+                        // Only increment unread count if the message is from someone else AND user is not currently in this chat
+                        if (senderId !== userId && activeChatId !== chatId) {
+                            userChats[chatIndex].unreadCount = (userChats[chatIndex].unreadCount || 0) + 1;
+                        }
+                    }
+                    
+                    await setDoc(inboxRef, { chats: userChats }, { merge: true });
+                    updateChatNotificationBadge();
+                }
+            } catch (error) {
+                console.error("Error updating last message:", error);
+            }
+        }
+
+        // Function to update notification badge
+        async function updateChatNotificationBadge() {
+            try {
+                const inboxRef = doc(db, "UserInbox", currentUserId);
+                const inboxSnap = await getDoc(inboxRef);
+                
+                if (inboxSnap.exists()) {
+                    const chats = inboxSnap.data().chats || [];
+                    const totalUnread = chats.reduce((sum, chat) => sum + (chat.unreadCount || 0), 0);
+                    const notifyDot = document.getElementById('chat-notify');
+                    if (notifyDot) {
+                        notifyDot.style.display = totalUnread > 0 ? 'block' : 'none';
+                    }
+                }
+            } catch (error) {
+                console.error("Error updating notification badge:", error);
+            }
+        }
+
+        // Function to mark chat as read
+        async function markChatAsRead(chatId) {
+            try {
+                const inboxRef = doc(db, "UserInbox", currentUserId);
+                const inboxSnap = await getDoc(inboxRef);
+                
+                if (inboxSnap.exists()) {
+                    let userChats = inboxSnap.data().chats || [];
+                    const chatIndex = userChats.findIndex(chat => chat.chatId === chatId);
+                    
+                    if (chatIndex !== -1) {
+                        userChats[chatIndex].unreadCount = 0;
+                        await setDoc(inboxRef, { chats: userChats }, { merge: true });
+                        updateChatNotificationBadge();
+                    }
+                }
+            } catch (error) {
+                console.error("Error marking chat as read:", error);
+            }
+        }
+
+        // Function to listen for new messages (for notifications)
+        function setupMessageListener() {
+            // Listen to all chats where current user is a participant
+            onSnapshot(collection(db, "UserInbox", currentUserId, "chats"), async (snapshot) => {
+                snapshot.docChanges().forEach(async (change) => {
+                    if (change.type === 'modified') {
+                        const chatData = change.doc.data();
+                        const chatId = chatData.chatId;
+                        const otherUserId = chatData.otherUserId;
+                        
+                        // Check for new messages
+                        const messagesRef = collection(db, "Chats", chatId, "Messages");
+                        const q = query(messagesRef, orderBy("timestamp", "desc"), where("senderId", "==", otherUserId));
+                        
+                        onSnapshot(q, (msgSnap) => {
+                            msgSnap.docChanges().forEach((msgChange) => {
+                                if (msgChange.type === 'added') {
+                                    const message = msgChange.doc.data();
+                                    const messageTime = new Date(message.timestamp).getTime();
+                                    
+                                    // Check if this is a new message (within last 2 seconds) and not from self
+                                    if (message.senderId !== currentUserId && 
+                                        Date.now() - messageTime < 5000 && 
+                                        activeChatId !== chatId) {
+                                        
+                                        // Show notification
+                                        showToastNotification(
+                                            chatData.otherUserName || 'Someone',
+                                            message.messageText,
+                                            chatId,
+                                            otherUserId
+                                        );
+                                    }
+                                }
+                            });
+                        }, { once: true });
+                    }
+                });
+            });
+        }
+
+        // Updated openChats function
+        window.openChats = async () => {
+            showScreen('chats-screen');
+            const chatsList = document.getElementById('chats-list');
+            chatsList.innerHTML = '<p class="text-[11px] opacity-40 text-center py-6">Loading your conversations...</p>';
+
+            try {
+                const inboxRef = doc(db, "UserInbox", currentUserId);
+                const inboxSnap = await getDoc(inboxRef);
+                
+                if (!inboxSnap.exists() || !inboxSnap.data().chats || inboxSnap.data().chats.length === 0) {
+                    chatsList.innerHTML = '<p class="text-[11px] opacity-40 text-center py-10 italic">No messages yet.<br>Message a seller to start a conversation.</p>';
+                    return;
+                }
+
+                let userChats = inboxSnap.data().chats;
+                
+                // Sort by last message time (newest first)
+                userChats.sort((a, b) => {
+                    return new Date(b.lastMessageTime || 0) - new Date(a.lastMessageTime || 0);
+                });
+
+                chatsList.innerHTML = '';
+                
+                for (const chat of userChats) {
+                    const otherUserId = chat.otherUserId;
+                    const displayName = chat.otherUserName || 'Campus User';
+                    const photoSrc = chat.otherUserPhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=random`;
+                    const lastMessage = chat.lastMessage || 'No messages yet';
+                    const timeStr = chat.lastMessageTime ? new Date(chat.lastMessageTime).toLocaleDateString() : '';
+                    const unreadCount = chat.unreadCount || 0;
+                    
+                    const chatElement = document.createElement('div');
+                    chatElement.onclick = () => startChat(otherUserId, displayName);
+                    chatElement.className = "flex items-center gap-4 p-4 bg-card border border-base rounded-2xl cursor-pointer hover:shadow-md transition-all active:scale-95 relative";
+                    
+                    chatElement.innerHTML = `
+                        <div class="relative">
+                            <img src="${photoSrc}" class="w-12 h-12 rounded-full object-cover border-2 border-white shadow flex-shrink-0">
+                            ${unreadCount > 0 ? `<span class="unread-badge">${unreadCount}</span>` : ''}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-center">
+                                <p class="font-bold text-sm truncate ${unreadCount > 0 ? 'text-blue-600' : ''}">${displayName}</p>
+                                <span class="text-[9px] opacity-30 font-bold uppercase whitespace-nowrap ml-2">${timeStr}</span>
+                            </div>
+                            <p class="text-[11px] ${unreadCount > 0 ? 'font-bold text-gray-900 dark:text-gray-100' : 'opacity-50'} truncate">
+                                ${lastMessage.substring(0, 30)}${lastMessage.length > 30 ? '...' : ''}
+                            </p>
+                        </div>
+                    `;
+                    
+                    chatsList.appendChild(chatElement);
+                }
+
+            } catch(e) {
+                console.error('Inbox error:', e);
+                chatsList.innerHTML = `<p class="text-[11px] text-red-400 text-center py-10">Error loading messages: ${e.message}</p>`;
+            }
+        };
+
+        // Updated startChat function
+        window.startChat = async (targetId, title) => {
+            activeChatId = [currentUserId, targetId].sort().join("_");
+            document.getElementById('chat-title').innerText = title;
+            
+            await registerChatForUser(currentUserId, activeChatId, targetId, title);
+            await registerChatForUser(targetId, activeChatId, currentUserId, 'You');
+            
+            showScreen('chatroom-screen');
+            loadMessages();
+            markChatAsRead(activeChatId);
+        };
+
+        // Updated loadMessages function
+        function loadMessages() {
+            onSnapshot(query(collection(db, "Chats", activeChatId, "Messages"), orderBy("timestamp", "asc")), (snapshot) => {
+                const container = document.getElementById('messages-container');
+                container.innerHTML = '';
+                
+                snapshot.docs.forEach(d => {
+                    const m = d.data();
+                    const isMe = m.senderId === currentUserId;
+                    const time = m.timestamp ? new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+                    
+                    container.innerHTML += `
+                        <div class="flex ${isMe ? 'justify-end' : 'justify-start'} mb-3">
+                            <div class="max-w-[70%]">
+                                <div class="${isMe ? 'bg-blue-600 text-white' : 'bg-card border border-base'} px-4 py-2.5 rounded-2xl text-[13px] shadow-sm">
+                                    ${m.messageText}
+                                </div>
+                                <div class="text-[8px] opacity-30 mt-1 ${isMe ? 'text-right' : 'text-left'}">
+                                    ${time}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                container.scrollTop = container.scrollHeight;
+                markChatAsRead(activeChatId);
+            });
+        }
+
+        // Updated send message function
+        document.getElementById('btn-send').onclick = async () => {
+            const input = document.getElementById('message-input');
+            const msgText = input.value.trim();
+            if (!msgText) return;
+            
+            input.value = '';
+            input.disabled = true;
+            
+            try {
+                const otherUserId = activeChatId.split('_').find(id => id !== currentUserId);
+                
+                const otherUserSnap = await getDoc(doc(db, "Users", otherUserId));
+                const otherUser = otherUserSnap.exists() ? otherUserSnap.data() : {};
+                const otherUserName = otherUser.name || 'Campus User';
+                
+                await registerChatForUser(currentUserId, activeChatId, otherUserId, otherUserName);
+                await registerChatForUser(otherUserId, activeChatId, currentUserId, 'You');
+                
+                // Send the message
+                await addDoc(collection(db, "Chats", activeChatId, "Messages"), {
+                    senderId: currentUserId,
+                    messageText: msgText,
+                    timestamp: new Date().toISOString()
+                });
+                
+                // Update last message for both users
+                await updateChatLastMessage(currentUserId, activeChatId, msgText, currentUserId);
+                await updateChatLastMessage(otherUserId, activeChatId, msgText, currentUserId);
+                
+            } catch (error) {
+                console.error("Error sending message:", error);
+                alert("Failed to send message. Please try again.");
+            } finally {
+                input.disabled = false;
+                input.focus();
+            }
+        };
+
+        // Initialize message listener for notifications
+        setTimeout(() => {
+            setupMessageListener();
+            updateChatNotificationBadge();
+        }, 2000);
+        
+        // Update notification badge every 5 seconds
+        setInterval(updateChatNotificationBadge, 5000);
 
         window.openEditScreen = async (id) => {
             const snap = await getDoc(doc(db, "Products", id));
@@ -865,7 +1297,6 @@
             const avgRating = p.ReviewCount > 0 ? (p.Rating / p.ReviewCount).toFixed(1) : "0";
             const isVer = verifiedSellers.includes(p.SellerId);
 
-            // Store seller ID for chat
             window._currentProductSellerId = p.SellerId;
 
             document.getElementById('details-content').innerHTML = `
@@ -1104,290 +1535,6 @@
                 });
             });
         };
-
-        // =============================================
-        // FIXED CHAT SYSTEM - Messages now appear in inbox for both users
-        // =============================================
-
-        // Function to ensure chat appears in user's inbox
-        async function registerChatForUser(userId, chatId, otherUserId, otherUserName) {
-            if (!userId || !chatId) return;
-            
-            try {
-                const inboxRef = doc(db, "UserInbox", userId);
-                const inboxSnap = await getDoc(inboxRef);
-                
-                // Get existing chats or create new array
-                let userChats = inboxSnap.exists() ? (inboxSnap.data().chats || []) : [];
-                
-                // Check if this chat already exists in user's inbox
-                const chatExists = userChats.some(chat => chat.chatId === chatId);
-                
-                if (!chatExists) {
-                    // Get other user's info for display
-                    const otherUserSnap = await getDoc(doc(db, "Users", otherUserId));
-                    const otherUser = otherUserSnap.exists() ? otherUserSnap.data() : {};
-                    
-                    // Add chat to user's inbox with metadata
-                    userChats.push({
-                        chatId: chatId,
-                        otherUserId: otherUserId,
-                        otherUserName: otherUser.name || otherUserName || 'Campus User',
-                        otherUserPhoto: otherUser.photo || null,
-                        lastMessage: '',
-                        lastMessageTime: new Date().toISOString(),
-                        unreadCount: 0
-                    });
-                    
-                    // Save back to Firestore
-                    await setDoc(inboxRef, { chats: userChats }, { merge: true });
-                    console.log(`Chat ${chatId} registered for user ${userId}`);
-                }
-            } catch (error) {
-                console.error("Error registering chat for user:", error);
-            }
-        }
-
-        // Function to update last message in user's inbox
-        async function updateChatLastMessage(userId, chatId, messageText) {
-            if (!userId || !chatId) return;
-            
-            try {
-                const inboxRef = doc(db, "UserInbox", userId);
-                const inboxSnap = await getDoc(inboxRef);
-                
-                if (inboxSnap.exists()) {
-                    let userChats = inboxSnap.data().chats || [];
-                    const chatIndex = userChats.findIndex(chat => chat.chatId === chatId);
-                    
-                    if (chatIndex !== -1) {
-                        // Update existing chat
-                        userChats[chatIndex].lastMessage = messageText;
-                        userChats[chatIndex].lastMessageTime = new Date().toISOString();
-                        userChats[chatIndex].unreadCount = (userChats[chatIndex].unreadCount || 0) + 1;
-                    } else {
-                        // This shouldn't happen, but just in case
-                        const otherUserId = chatId.split('_').find(id => id !== userId);
-                        if (otherUserId) {
-                            const otherUserSnap = await getDoc(doc(db, "Users", otherUserId));
-                            const otherUser = otherUserSnap.exists() ? otherUserSnap.data() : {};
-                            userChats.push({
-                                chatId: chatId,
-                                otherUserId: otherUserId,
-                                otherUserName: otherUser.name || 'Campus User',
-                                otherUserPhoto: otherUser.photo || null,
-                                lastMessage: messageText,
-                                lastMessageTime: new Date().toISOString(),
-                                unreadCount: 1
-                            });
-                        }
-                    }
-                    
-                    await setDoc(inboxRef, { chats: userChats }, { merge: true });
-                }
-            } catch (error) {
-                console.error("Error updating last message:", error);
-            }
-        }
-
-        // Updated openChats function
-        window.openChats = async () => {
-            showScreen('chats-screen');
-            const chatsList = document.getElementById('chats-list');
-            chatsList.innerHTML = '<p class="text-[11px] opacity-40 text-center py-6">Loading your conversations...</p>';
-
-            try {
-                const inboxRef = doc(db, "UserInbox", currentUserId);
-                const inboxSnap = await getDoc(inboxRef);
-                
-                if (!inboxSnap.exists() || !inboxSnap.data().chats || inboxSnap.data().chats.length === 0) {
-                    chatsList.innerHTML = '<p class="text-[11px] opacity-40 text-center py-10 italic">No messages yet.<br>Message a seller to start a conversation.</p>';
-                    return;
-                }
-
-                const userChats = inboxSnap.data().chats;
-                
-                // Sort by last message time (newest first)
-                userChats.sort((a, b) => {
-                    return new Date(b.lastMessageTime || 0) - new Date(a.lastMessageTime || 0);
-                });
-
-                chatsList.innerHTML = '';
-                
-                for (const chat of userChats) {
-                    const otherUserId = chat.otherUserId;
-                    const displayName = chat.otherUserName || 'Campus User';
-                    const photoSrc = chat.otherUserPhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=random`;
-                    const lastMessage = chat.lastMessage || 'No messages yet';
-                    const timeStr = chat.lastMessageTime ? new Date(chat.lastMessageTime).toLocaleDateString() : '';
-                    const unreadCount = chat.unreadCount || 0;
-                    
-                    const chatElement = document.createElement('div');
-                    chatElement.onclick = () => startChat(otherUserId, displayName);
-                    chatElement.className = "flex items-center gap-4 p-4 bg-card border border-base rounded-2xl cursor-pointer hover:shadow-md transition-all active:scale-95 relative";
-                    
-                    chatElement.innerHTML = `
-                        <div class="relative">
-                            <img src="${photoSrc}" class="w-12 h-12 rounded-full object-cover border-2 border-white shadow flex-shrink-0">
-                            ${unreadCount > 0 ? `<span class="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold rounded-full w-5 h-5 flex items-center justify-center">${unreadCount}</span>` : ''}
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex justify-between items-center">
-                                <p class="font-bold text-sm truncate">${displayName}</p>
-                                <span class="text-[9px] opacity-30 font-bold uppercase whitespace-nowrap ml-2">${timeStr}</span>
-                            </div>
-                            <p class="text-[11px] opacity-50 truncate">${lastMessage.substring(0, 30)}${lastMessage.length > 30 ? '...' : ''}</p>
-                        </div>
-                    `;
-                    
-                    chatsList.appendChild(chatElement);
-                }
-
-            } catch(e) {
-                console.error('Inbox error:', e);
-                chatsList.innerHTML = `<p class="text-[11px] text-red-400 text-center py-10">Error loading messages: ${e.message}</p>`;
-            }
-        };
-
-        // Updated startChat function
-        window.startChat = async (targetId, title) => {
-            activeChatId = [currentUserId, targetId].sort().join("_");
-            document.getElementById('chat-title').innerText = title;
-            
-            // Register both users for this chat when starting
-            await registerChatForUser(currentUserId, activeChatId, targetId, title);
-            await registerChatForUser(targetId, activeChatId, currentUserId, 'You');
-            
-            showScreen('chatroom-screen');
-            loadMessages();
-            
-            // Mark messages as read when opening chat
-            markChatAsRead(activeChatId);
-        };
-
-        // Function to mark chat as read
-        async function markChatAsRead(chatId) {
-            try {
-                const inboxRef = doc(db, "UserInbox", currentUserId);
-                const inboxSnap = await getDoc(inboxRef);
-                
-                if (inboxSnap.exists()) {
-                    let userChats = inboxSnap.data().chats || [];
-                    const chatIndex = userChats.findIndex(chat => chat.chatId === chatId);
-                    
-                    if (chatIndex !== -1) {
-                        userChats[chatIndex].unreadCount = 0;
-                        await setDoc(inboxRef, { chats: userChats }, { merge: true });
-                        
-                        // Update notification dot
-                        updateChatNotificationBadge();
-                    }
-                }
-            } catch (error) {
-                console.error("Error marking chat as read:", error);
-            }
-        }
-
-        // Updated loadMessages function
-        function loadMessages() {
-            onSnapshot(query(collection(db, "Chats", activeChatId, "Messages"), orderBy("timestamp", "asc")), (snapshot) => {
-                const container = document.getElementById('messages-container');
-                container.innerHTML = '';
-                
-                snapshot.docs.forEach(d => {
-                    const m = d.data();
-                    const isMe = m.senderId === currentUserId;
-                    const time = m.timestamp ? new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
-                    
-                    container.innerHTML += `
-                        <div class="flex ${isMe ? 'justify-end' : 'justify-start'} mb-3">
-                            <div class="max-w-[70%]">
-                                <div class="${isMe ? 'bg-blue-600 text-white' : 'bg-card border border-base'} px-4 py-2.5 rounded-2xl text-[13px] shadow-sm">
-                                    ${m.messageText}
-                                </div>
-                                <div class="text-[8px] opacity-30 mt-1 ${isMe ? 'text-right' : 'text-left'}">
-                                    ${time}
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-                
-                container.scrollTop = container.scrollHeight;
-                
-                // Mark as read when messages are loaded
-                markChatAsRead(activeChatId);
-            });
-        }
-
-        // Updated send message function
-        document.getElementById('btn-send').onclick = async () => {
-            const input = document.getElementById('message-input');
-            const msgText = input.value.trim();
-            if (!msgText) return;
-            
-            input.value = '';
-            input.disabled = true;
-            
-            try {
-                const otherUserId = activeChatId.split('_').find(id => id !== currentUserId);
-                
-                // Get other user's info
-                const otherUserSnap = await getDoc(doc(db, "Users", otherUserId));
-                const otherUser = otherUserSnap.exists() ? otherUserSnap.data() : {};
-                const otherUserName = otherUser.name || 'Campus User';
-                
-                // Ensure both users have this chat in their inbox BEFORE sending message
-                await registerChatForUser(currentUserId, activeChatId, otherUserId, otherUserName);
-                await registerChatForUser(otherUserId, activeChatId, currentUserId, 'You');
-                
-                // Send the message
-                await addDoc(collection(db, "Chats", activeChatId, "Messages"), {
-                    senderId: currentUserId,
-                    messageText: msgText,
-                    timestamp: new Date().toISOString()
-                });
-                
-                // Update last message for both users
-                await updateChatLastMessage(currentUserId, activeChatId, msgText);
-                await updateChatLastMessage(otherUserId, activeChatId, msgText);
-                
-                // Update notification badge
-                updateChatNotificationBadge();
-                
-                console.log("Message sent successfully");
-                
-            } catch (error) {
-                console.error("Error sending message:", error);
-                alert("Failed to send message. Please try again.");
-            } finally {
-                input.disabled = false;
-                input.focus();
-            }
-        };
-
-        // Function to update notification badge
-        async function updateChatNotificationBadge() {
-            try {
-                const inboxRef = doc(db, "UserInbox", currentUserId);
-                const inboxSnap = await getDoc(inboxRef);
-                
-                if (inboxSnap.exists()) {
-                    const chats = inboxSnap.data().chats || [];
-                    const totalUnread = chats.reduce((sum, chat) => sum + (chat.unreadCount || 0), 0);
-                    const notifyDot = document.getElementById('chat-notify');
-                    if (notifyDot) {
-                        notifyDot.style.display = totalUnread > 0 ? 'block' : 'none';
-                    }
-                }
-            } catch (error) {
-                console.error("Error updating notification badge:", error);
-            }
-        }
-
-        // Call notification update on app start and periodically
-        setTimeout(updateChatNotificationBadge, 2000);
-        setInterval(updateChatNotificationBadge, 10000);
 
         document.getElementById('global-search').oninput = (e) => {
             const term = e.target.value.toLowerCase();
