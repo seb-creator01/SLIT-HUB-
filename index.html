@@ -898,6 +898,11 @@
                         <h3 class="text-sm font-extrabold mb-4 uppercase tracking-wider opacity-60">Other listings from this user</h3>
                         <div id="more-from-seller-grid" class="grid grid-cols-2 gap-4"></div>
                     </div>
+
+                    <div id="reviews-list-container" class="mt-10 border-t border-base pt-6 mb-12">
+                        <h3 class="font-extrabold text-sm mb-6 uppercase tracking-widest opacity-60">Student Reviews</h3>
+                        <div id="reviews-placeholder" class="space-y-4"></div>
+                    </div>
                     
                     ${isMyProduct ? `
                         <div class="p-5 bg-blue-50 dark:bg-blue-900/20 rounded-2xl text-center border border-blue-100 dark:border-blue-800">
@@ -924,9 +929,57 @@
                 </div>
             `;
             showScreen('details-screen');
-            if(!isMyProduct) setupStarInput();
+            if(!isMyProduct) {
+                setupStarInput();
+                // Check if user already reviewed to hide input
+                const checkReview = await getDocs(query(collection(db, "Products", id, "Reviews"), where("userId", "==", currentUserId)));
+                if (!checkReview.empty) {
+                    document.getElementById('rating-container').innerHTML = `
+                        <div class="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-3xl text-center border border-blue-100 dark:border-blue-800/40">
+                            <i class="fas fa-circle-check text-blue-600 mb-2 text-xl"></i>
+                            <p class="text-[11px] font-bold text-blue-800 dark:text-blue-300 uppercase tracking-tighter">You've already reviewed this item!</p>
+                        </div>
+                    `;
+                }
+            }
             loadSellerOtherItems(p.SellerId, id);
+            loadProductReviews(id);
         };
+
+        // NEW: Load Professional Reviews
+        async function loadProductReviews(productId) {
+            const container = document.getElementById('reviews-placeholder');
+            const q = query(collection(db, "Products", productId, "Reviews"), orderBy("timestamp", "desc"));
+            
+            onSnapshot(q, (snap) => {
+                if(snap.empty) {
+                    container.innerHTML = `<p class="text-[11px] opacity-30 text-center py-4 italic">No reviews yet. Be the first to share your experience!</p>`;
+                    return;
+                }
+                container.innerHTML = '';
+                snap.forEach(docSnap => {
+                    const r = docSnap.data();
+                    const date = r.timestamp ? new Date(r.timestamp.seconds * 1000).toLocaleDateString() : 'Recent';
+                    container.innerHTML += `
+                        <div class="bg-slate-50 dark:bg-slate-800/30 p-4 rounded-2xl border border-base">
+                            <div class="flex justify-between items-center mb-3">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-[9px] font-bold text-blue-600">
+                                        ${r.userId.substring(5, 7).toUpperCase()}
+                                    </div>
+                                    <p class="text-[10px] font-bold opacity-60">User ${r.userId.substring(5, 9)}</p>
+                                </div>
+                                <span class="text-[8px] opacity-30 font-bold uppercase">${date}</span>
+                            </div>
+                            <div class="flex text-yellow-500 text-[10px] mb-2">
+                                ${'<i class="fas fa-star"></i>'.repeat(r.stars)}${'<i class="far fa-star"></i>'.repeat(5 - r.stars)}
+                            </div>
+                            <p class="text-xs opacity-80 leading-relaxed">${r.text}</p>
+                        </div>
+                    `;
+                });
+            });
+        }
 
         window.reportUser = async (targetUserId) => {
             const reason = prompt("Why are you reporting this user?");
@@ -973,21 +1026,58 @@
             window.getCurrentStars = () => selectedStars;
         }
 
+        // UPDATED: Submit Review with Duplicate Prevention & Character Minimum
         window.submitReview = async (productId) => {
-            const text = document.getElementById('review-text').value;
+            const text = document.getElementById('review-text').value.trim();
             const stars = window.getCurrentStars();
             const btn = document.getElementById('btn-submit-review');
+
+            if (text.length < 10) {
+                alert("Please write at least 10 characters to help other students! 📝");
+                return;
+            }
+
             btn.disabled = true;
+            btn.innerText = "Checking...";
 
             try {
-                await addDoc(collection(db, "Products", productId, "Reviews"), { stars, text, userId: currentUserId, timestamp: serverTimestamp() });
+                // Check for existing review
+                const reviewsRef = collection(db, "Products", productId, "Reviews");
+                const qCheck = query(reviewsRef, where("userId", "==", currentUserId));
+                const checkSnap = await getDocs(qCheck);
+
+                if (!checkSnap.empty) {
+                    alert("You have already reviewed this item! 👋");
+                    btn.disabled = false;
+                    btn.innerText = "SUBMIT REVIEW";
+                    return;
+                }
+
+                btn.innerText = "Posting...";
+                await addDoc(reviewsRef, { 
+                    stars, 
+                    text, 
+                    userId: currentUserId, 
+                    timestamp: serverTimestamp() 
+                });
+
                 const pRef = doc(db, "Products", productId);
                 const pSnap = await getDoc(pRef);
-                await updateDoc(pRef, { Rating: (pSnap.data().Rating || 0) + stars, ReviewCount: (pSnap.data().ReviewCount || 0) + 1 });
-                alert("Review submitted!");
+                const pData = pSnap.data();
+
+                await updateDoc(pRef, { 
+                    Rating: (pData.Rating || 0) + stars, 
+                    ReviewCount: (pData.ReviewCount || 0) + 1 
+                });
+
+                alert("Review published! Thank you for the feedback. ✨");
                 viewProduct(productId);
-            } catch (e) { alert("Error."); }
+            } catch (e) { 
+                console.error(e);
+                alert("Submit failed."); 
+            }
             btn.disabled = false;
+            btn.innerText = "SUBMIT REVIEW";
         };
 
         window.loadMyItems = () => {
