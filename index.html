@@ -36,7 +36,6 @@
             overflow-x: hidden;
         }
 
-        /* Professional Header Styling */
         .brand-logo {
             font-weight: 800;
             letter-spacing: -1.5px;
@@ -49,38 +48,30 @@
         }
         .brand-logo:active { transform: scale(0.95); }
 
-        /* Animations & Transitions */
-        .screen {
-            animation: fadeInSlide 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+        .screen { animation: fadeInSlide 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
 
         @keyframes fadeInSlide {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Skeleton Pulse Animation */
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: .5; }
         }
         .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-        
         .skeleton-card { background: var(--border); border-radius: 20px; height: 220px; width: 100%; }
 
-        /* Global Button Click Feedback */
         button, .nav-item, a, .chip {
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
             cursor: pointer;
             outline: none;
         }
-
         button:active, .nav-item:active, .chip:active {
             transform: scale(0.92) !important;
             opacity: 0.8;
         }
 
-        /* Glassmorphism Header & Nav */
         .glass-header {
             background: rgba(var(--card), 0.8);
             backdrop-filter: blur(12px);
@@ -97,7 +88,6 @@
             box-shadow: 0 -10px 30px rgba(0,0,0,0.05);
         }
 
-        /* Enhanced Card Design */
         .product-card {
             background: var(--card);
             border: 1px solid var(--border);
@@ -146,7 +136,6 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Custom Modal */
         .modal-content { 
             background: var(--card); 
             border-radius: 2.5rem; 
@@ -163,7 +152,6 @@
             box-shadow: 0 4px 15px var(--primary-glow);
         }
 
-        /* Profile Upload Spinner */
         #profile-loader {
             position: absolute;
             inset: 0;
@@ -186,18 +174,13 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Star Rating Interactivity */
         .star-rating i {
             cursor: pointer;
             transition: transform 0.2s, color 0.2s;
             color: #e2e8f0;
         }
-        .star-rating i.active {
-            color: #f59e0b;
-        }
-        .star-rating i:hover {
-            transform: scale(1.2);
-        }
+        .star-rating i.active { color: #f59e0b; }
+        .star-rating i:hover { transform: scale(1.2); }
     </style>
 </head>
 <body>
@@ -258,8 +241,7 @@
                 <button id="toggle-requests" onclick="switchView('Request')">🙋‍♂️ Requests</button>
             </div>
             <div class="overflow-x-auto pb-6 no-scrollbar"><div id="category-filter-chips" class="flex gap-2"></div></div>
-            <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-                </div>
+            <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5"></div>
         </section>
 
         <section id="settings-screen" class="screen hidden max-w-lg mx-auto">
@@ -318,7 +300,6 @@
                 <input type="file" id="file-input" class="hidden">
                 <input type="text" id="post-title" placeholder="What are you listing?" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base p-4 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
                 <textarea id="post-desc" placeholder="Details (Condition, size, etc.)..." class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base p-4 rounded-2xl text-sm h-32 outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-                
                 <div class="grid grid-cols-2 gap-4">
                     <div class="relative">
                         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold opacity-40">₦</span>
@@ -329,12 +310,10 @@
                         <option value="Negotiable">Negotiable</option>
                     </select>
                 </div>
-                
                 <div class="grid grid-cols-2 gap-4">
                     <select id="post-category" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base px-4 py-4 rounded-2xl text-sm outline-none"></select>
                     <select id="post-condition" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base px-4 py-4 rounded-2xl text-sm outline-none"></select>
                 </div>
-                
                 <input type="tel" id="post-phone" placeholder="📞 WhatsApp (e.g. 080...)" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base p-4 rounded-2xl text-sm outline-none">
                 <input type="text" id="post-location" placeholder="📍 Campus Location" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base p-4 rounded-2xl text-sm outline-none">
                 <button id="btn-post" class="w-full btn-premium font-extrabold py-4 rounded-2xl shadow-xl mt-4">PUBLISH NOW</button>
@@ -373,7 +352,6 @@
                 <h2 class="text-2xl font-extrabold">Manager</h2>
                 <button onclick="toggleAdminMode()" id="admin-toggle-btn" class="text-[9px] bg-slate-200 dark:bg-slate-800 px-3 py-1.5 rounded-full font-bold uppercase tracking-widest">Admin: OFF</button>
             </div>
-            
             <div id="admin-panel" class="hidden mb-10 space-y-6">
                 <div class="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 rounded-[2rem] text-white shadow-xl">
                     <h3 class="text-xs font-extrabold uppercase mb-4 flex items-center gap-2">📢 Global Broadcast</h3>
@@ -434,7 +412,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // --- DARK MODE LOGIC ---
         window.toggleDarkMode = () => {
             const isDark = document.body.classList.toggle('dark');
             localStorage.setItem('dark-mode', isDark);
@@ -442,7 +419,6 @@
         };
         if(localStorage.getItem('dark-mode') === 'true') toggleDarkMode();
 
-        // TERMS SYSTEM LOGIC
         window.onload = () => { if(!localStorage.getItem('slit_terms_accepted')) document.getElementById('terms-modal').classList.remove('hidden'); };
         window.acceptTerms = () => { localStorage.setItem('slit_terms_accepted', 'true'); document.getElementById('terms-modal').classList.add('hidden'); };
 
@@ -463,14 +439,11 @@
             Request: ["All", "💰 Buy Request", "🛠️ Service Needed", "🚑 Urgent Help", "👫 Study Partner", "➕ Others"]
         };
 
-        // PROFILE PIC SYSTEM - FIXED FOR UPDATING
         document.getElementById('profile-upload').onchange = async (e) => {
             const file = e.target.files[0];
             if(!file) return;
-            
             const loader = document.getElementById('profile-loader');
             loader.style.display = 'flex';
-            
             try {
                 const url = await uploadToCloudinary(file);
                 await setDoc(doc(db, "Users", currentUserId), { photo: url }, { merge: true });
@@ -482,7 +455,6 @@
             loader.style.display = 'none';
         };
 
-        // PROFILE PIC REMOVAL
         window.removeProfilePic = async () => {
             if(confirm("Remove profile photo?")) {
                 await updateDoc(doc(db, "Users", currentUserId), { photo: null });
@@ -491,13 +463,11 @@
             }
         };
 
-        // REAL-TIME UPDATES
         onSnapshot(doc(db, "BannedUsers", currentUserId), (snap) => {
             document.getElementById('ban-screen').classList.toggle('hidden', !snap.exists());
             isUserBanned = snap.exists();
         });
 
-        // Track Verified Sellers globally
         onSnapshot(collection(db, "VerifiedUsers"), (snap) => {
             verifiedSellers = snap.docs.map(d => d.id);
             if(isAdminMode) loadAdminUserList();
@@ -535,7 +505,6 @@
             input.click();
         };
 
-        // --- ADMIN ENHANCEMENTS ---
         window.toggleAdminMode = () => {
             if(prompt("Passphrase:") === "junior123") {
                 isAdminMode = !isAdminMode;
@@ -551,20 +520,16 @@
             const usersSnap = await getDocs(collection(db, "Users"));
             const bannedSnap = await getDocs(collection(db, "BannedUsers"));
             const bannedIds = bannedSnap.docs.map(d => d.id);
-
             container.innerHTML = '';
-            
             for (const userDoc of usersSnap.docs) {
                 const u = userDoc.data();
                 const uid = userDoc.id;
                 const isVerified = verifiedSellers.includes(uid);
                 const isBanned = bannedIds.includes(uid);
-
                 let phone = "N/A";
                 const pQuery = query(collection(db, "Products"), where("SellerId", "==", uid));
                 const pSnap = await getDocs(pQuery);
                 if(!pSnap.empty) phone = pSnap.docs[0].data().Phone || "N/A";
-
                 container.innerHTML += `
                     <div class="admin-user-card bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-base">
                         <div class="flex justify-between items-start">
@@ -639,14 +604,12 @@
             const snap = await getDoc(doc(db, "Products", id));
             if(!snap.exists()) return;
             const p = snap.data();
-            
             document.getElementById('edit-product-id').value = id;
             document.getElementById('edit-title').value = p.Title;
             document.getElementById('edit-desc').value = p.Description;
             document.getElementById('edit-price').value = p.Price;
             document.getElementById('edit-image-preview').src = p.ImageURL;
             document.getElementById('edit-sold-status').value = p.IsSold.toString();
-            
             showScreen('edit-screen');
         };
 
@@ -661,15 +624,10 @@
             const btn = document.getElementById('btn-update-post');
             const id = document.getElementById('edit-product-id').value;
             btn.innerText = "Updating..."; btn.disabled = true;
-
             try {
                 let imageUrl = document.getElementById('edit-image-preview').src;
                 const newFile = document.getElementById('edit-file-input').files[0];
-                
-                if (newFile) {
-                    imageUrl = await uploadToCloudinary(newFile);
-                }
-
+                if (newFile) { imageUrl = await uploadToCloudinary(newFile); }
                 await updateDoc(doc(db, "Products", id), {
                     Title: document.getElementById('edit-title').value,
                     Description: document.getElementById('edit-desc').value,
@@ -677,12 +635,9 @@
                     ImageURL: imageUrl,
                     IsSold: document.getElementById('edit-sold-status').value === "true"
                 });
-
                 alert("Product updated! ✅");
                 showScreen('my-items-screen');
-            } catch (e) {
-                alert("Failed to update.");
-            }
+            } catch (e) { alert("Failed to update."); }
             btn.innerText = "SAVE CHANGES"; btn.disabled = false;
         };
 
@@ -715,25 +670,18 @@
             const catSelect = document.getElementById('post-category');
             catSelect.innerHTML = categories[type].filter(c => c !== "All").map(c => `<option value="${c}">${c}</option>`).join('');
             document.getElementById('post-condition').innerHTML = type === 'Product' ? '<option value="New">New</option><option value="Used">Used</option>' : '<option value="Standard">Standard</option>';
-            
             document.querySelectorAll('input[name="post-type"]').forEach(input => {
                 const parent = input.parentElement;
-                if(input.checked) {
-                    parent.classList.add('bg-white', 'dark:bg-slate-700', 'shadow-sm', 'text-blue-600');
-                } else {
-                    parent.classList.remove('bg-white', 'dark:bg-slate-700', 'shadow-sm', 'text-blue-600');
-                }
+                if(input.checked) { parent.classList.add('bg-white', 'dark:bg-slate-700', 'shadow-sm', 'text-blue-600'); }
+                else { parent.classList.remove('bg-white', 'dark:bg-slate-700', 'shadow-sm', 'text-blue-600'); }
             });
         };
 
         window.showScreen = (screenId) => {
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
             document.getElementById(screenId).classList.remove('hidden');
-            
             document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active-nav'));
-            const screenToNav = {
-                'browse-screen': 0, 'post-screen': 1, 'my-items-screen': 2, 'chats-screen': 3, 'settings-screen': 4
-            };
+            const screenToNav = { 'browse-screen': 0, 'post-screen': 1, 'my-items-screen': 2, 'chats-screen': 3, 'settings-screen': 4 };
             if(screenToNav[screenId] !== undefined) {
                 document.querySelectorAll('nav button')[screenToNav[screenId]].classList.add('active-nav');
             }
@@ -767,9 +715,7 @@
             btn.innerText = "Publishing..."; btn.disabled = true;
             try {
                 let imageUrl = "https://placehold.co/600x400?text=Post";
-                if (fileInput.files[0]) {
-                    imageUrl = await uploadToCloudinary(fileInput.files[0]);
-                }
+                if (fileInput.files[0]) { imageUrl = await uploadToCloudinary(fileInput.files[0]); }
                 const postType = document.querySelector('input[name="post-type"]:checked').value;
                 await addDoc(collection(db, "Products"), {
                     Title: document.getElementById('post-title').value,
@@ -792,49 +738,30 @@
                 imagePreview.classList.add('hidden');
                 document.getElementById('preview-placeholder').classList.remove('hidden');
                 showScreen('browse-screen');
-            } catch (e) { 
-                console.error(e);
-                alert("Error publishing."); 
-            }
+            } catch (e) { console.error(e); alert("Error publishing."); }
             btn.innerText = "PUBLISH NOW"; btn.disabled = false;
         };
 
         function loadProducts() {
             const productsContainer = document.getElementById("product-grid");
             if (!productsContainer) return;
-
             productsContainer.innerHTML = '<div class="skeleton-card animate-pulse"></div><div class="skeleton-card animate-pulse"></div><div class="skeleton-card animate-pulse"></div><div class="skeleton-card animate-pulse"></div>';
-
             const q = query(collection(db, "Products"), orderBy("CreatedAt", "desc"));
-
             onSnapshot(q, (snapshot) => {
                 let docs = snapshot.docs
                     .map(doc => ({ id: doc.id, ...doc.data() }))
                     .filter(doc => doc.PostType === currentView);
-                
-                if (selectedCategory !== 'All') {
-                    docs = docs.filter(doc => doc.Category === selectedCategory);
-                }
-
+                if (selectedCategory !== 'All') { docs = docs.filter(doc => doc.Category === selectedCategory); }
                 productsContainer.innerHTML = "";
-
                 if (docs.length === 0) {
-                    productsContainer.innerHTML = `
-                        <div class="col-span-full py-20 text-center opacity-40">
-                            <i class="fas fa-box-open text-4xl mb-4"></i>
-                            <p class="font-bold">No items found.</p>
-                        </div>
-                    `;
+                    productsContainer.innerHTML = `<div class="col-span-full py-20 text-center opacity-40"><i class="fas fa-box-open text-4xl mb-4"></i><p class="font-bold">No items found.</p></div>`;
                     return;
                 }
-
                 docs.forEach(product => {
                     const isVer = verifiedSellers.includes(product.SellerId);
                     const avgRating = product.ReviewCount > 0 ? (product.Rating / product.ReviewCount).toFixed(1) : "0";
-                    
                     const productCard = document.createElement("div");
                     productCard.className = "product-card relative";
-
                     productCard.innerHTML = `
                         ${product.IsSold ? `<div class="sold-overlay">SOLD</div>` : ''}
                         <div class="relative h-40 overflow-hidden">
@@ -879,7 +806,6 @@
                         </div>
                         <p class="text-blue-600 text-2xl font-black">₦${p.Price}</p>
                     </div>
-                    
                     <div class="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl mb-8 border border-base relative">
                         <img src="${u.photo || 'https://ui-avatars.com/api/?name=User'}" class="w-12 h-12 rounded-full border-2 border-white">
                         <div class="flex-1">
@@ -888,22 +814,18 @@
                         </div>
                         ${!isMyProduct ? `<button onclick="reportUser('${p.SellerId}')" class="text-[9px] font-bold text-red-500 bg-red-50 dark:bg-red-950/20 px-3 py-1.5 rounded-lg border border-red-100 dark:border-red-900/40">REPORT</button>` : ''}
                     </div>
-                    
                     <div class="mb-10">
                         <h4 class="text-[10px] font-extrabold uppercase opacity-40 mb-2">Description</h4>
                         <p class="text-sm leading-relaxed opacity-80">${p.Description}</p>
                     </div>
-
                     <div class="mt-8 mb-8">
                         <h3 class="text-sm font-extrabold mb-4 uppercase tracking-wider opacity-60">Other listings from this user</h3>
                         <div id="more-from-seller-grid" class="grid grid-cols-2 gap-4"></div>
                     </div>
-
                     <div id="reviews-list-container" class="mt-10 border-t border-base pt-6 mb-12">
                         <h3 class="font-extrabold text-sm mb-6 uppercase tracking-widest opacity-60">Student Reviews</h3>
                         <div id="reviews-placeholder" class="space-y-4"></div>
                     </div>
-                    
                     ${isMyProduct ? `
                         <div class="p-5 bg-blue-50 dark:bg-blue-900/20 rounded-2xl text-center border border-blue-100 dark:border-blue-800">
                            <p class="text-xs font-bold text-blue-700 dark:text-blue-300">You posted this listing.</p>
@@ -931,7 +853,6 @@
             showScreen('details-screen');
             if(!isMyProduct) {
                 setupStarInput();
-                // Check if user already reviewed to hide input
                 const checkReview = await getDocs(query(collection(db, "Products", id, "Reviews"), where("userId", "==", currentUserId)));
                 if (!checkReview.empty) {
                     document.getElementById('rating-container').innerHTML = `
@@ -946,11 +867,9 @@
             loadProductReviews(id);
         };
 
-        // NEW: Load Professional Reviews
         async function loadProductReviews(productId) {
             const container = document.getElementById('reviews-placeholder');
             const q = query(collection(db, "Products", productId, "Reviews"), orderBy("timestamp", "desc"));
-            
             onSnapshot(q, (snap) => {
                 if(snap.empty) {
                     container.innerHTML = `<p class="text-[11px] opacity-30 text-center py-4 italic">No reviews yet. Be the first to share your experience!</p>`;
@@ -964,9 +883,7 @@
                         <div class="bg-slate-50 dark:bg-slate-800/30 p-4 rounded-2xl border border-base">
                             <div class="flex justify-between items-center mb-3">
                                 <div class="flex items-center gap-2">
-                                    <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-[9px] font-bold text-blue-600">
-                                        ${r.userId.substring(5, 7).toUpperCase()}
-                                    </div>
+                                    <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-[9px] font-bold text-blue-600">${r.userId.substring(5, 7).toUpperCase()}</div>
                                     <p class="text-[10px] font-bold opacity-60">User ${r.userId.substring(5, 9)}</p>
                                 </div>
                                 <span class="text-[8px] opacity-30 font-bold uppercase">${date}</span>
@@ -1026,64 +943,32 @@
             window.getCurrentStars = () => selectedStars;
         }
 
-        // UPDATED: Submit Review with Duplicate Prevention & Character Minimum
         window.submitReview = async (productId) => {
             const text = document.getElementById('review-text').value.trim();
             const stars = window.getCurrentStars();
             const btn = document.getElementById('btn-submit-review');
-
-            if (text.length < 10) {
-                alert("Please write at least 10 characters to help other students! 📝");
-                return;
-            }
-
-            btn.disabled = true;
-            btn.innerText = "Checking...";
-
+            if (text.length < 10) { alert("Please write at least 10 characters to help other students! 📝"); return; }
+            btn.disabled = true; btn.innerText = "Checking...";
             try {
-                // Check for existing review
                 const reviewsRef = collection(db, "Products", productId, "Reviews");
                 const qCheck = query(reviewsRef, where("userId", "==", currentUserId));
                 const checkSnap = await getDocs(qCheck);
-
-                if (!checkSnap.empty) {
-                    alert("You have already reviewed this item! 👋");
-                    btn.disabled = false;
-                    btn.innerText = "SUBMIT REVIEW";
-                    return;
-                }
-
+                if (!checkSnap.empty) { alert("You have already reviewed this item! 👋"); btn.disabled = false; btn.innerText = "SUBMIT REVIEW"; return; }
                 btn.innerText = "Posting...";
-                await addDoc(reviewsRef, { 
-                    stars, 
-                    text, 
-                    userId: currentUserId, 
-                    timestamp: serverTimestamp() 
-                });
-
+                await addDoc(reviewsRef, { stars, text, userId: currentUserId, timestamp: serverTimestamp() });
                 const pRef = doc(db, "Products", productId);
                 const pSnap = await getDoc(pRef);
                 const pData = pSnap.data();
-
-                await updateDoc(pRef, { 
-                    Rating: (pData.Rating || 0) + stars, 
-                    ReviewCount: (pData.ReviewCount || 0) + 1 
-                });
-
+                await updateDoc(pRef, { Rating: (pData.Rating || 0) + stars, ReviewCount: (pData.ReviewCount || 0) + 1 });
                 alert("Review published! Thank you for the feedback. ✨");
                 viewProduct(productId);
-            } catch (e) { 
-                console.error(e);
-                alert("Submit failed."); 
-            }
-            btn.disabled = false;
-            btn.innerText = "SUBMIT REVIEW";
+            } catch (e) { console.error(e); alert("Submit failed."); }
+            btn.disabled = false; btn.innerText = "SUBMIT REVIEW";
         };
 
         window.loadMyItems = () => {
             showScreen('my-items-screen');
             const q = isAdminMode ? query(collection(db, "Products"), orderBy("CreatedAt", "desc")) : query(collection(db, "Products"), where("SellerId", "==", currentUserId), orderBy("CreatedAt", "desc"));
-            
             onSnapshot(q, (snap) => {
                 const grid = document.getElementById('my-items-grid');
                 grid.innerHTML = '';
@@ -1108,39 +993,33 @@
         };
 
         // =============================================
-        // UPDATED: openChats — now shows conversation list
+        // FIXED: openChats — queries by participants array so chats appear in Inbox
         // =============================================
         window.openChats = () => {
             showScreen('chats-screen');
             const chatsList = document.getElementById('chats-list');
             chatsList.innerHTML = '<p class="text-[11px] opacity-40 text-center py-6">Loading messages...</p>';
 
-            onSnapshot(query(collection(db, "Chats")), async (snap) => {
-                // Filter only chats that involve the current user
-                const myChats = snap.docs.filter(d => d.id.includes(currentUserId));
+            onSnapshot(query(collection(db, "Chats"), where("participants", "array-contains", currentUserId)), async (snap) => {
+                const myChats = snap.docs;
 
                 if (myChats.length === 0) {
                     chatsList.innerHTML = '<p class="text-[11px] opacity-40 text-center py-10 italic">No messages yet.<br>Message a seller to start a conversation.</p>';
                     return;
                 }
 
-                // Build chat cards with last message info
                 const chatDataList = [];
                 for (const chatDoc of myChats) {
                     const chatId = chatDoc.id;
                     const otherId = chatId.split('_').find(id => id !== currentUserId);
-
                     const msgSnap = await getDocs(query(collection(db, "Chats", chatId, "Messages"), orderBy("timestamp", "desc")));
                     const lastMsgDoc = msgSnap.docs[0];
                     const lastMsg = lastMsgDoc ? lastMsgDoc.data() : null;
-
                     const uSnap = await getDoc(doc(db, "Users", otherId));
                     const u = uSnap.exists() ? uSnap.data() : {};
-
                     chatDataList.push({ chatId, otherId, lastMsg, u });
                 }
 
-                // Sort by most recent message
                 chatDataList.sort((a, b) => {
                     const aTime = a.lastMsg?.timestamp?.seconds || 0;
                     const bTime = b.lastMsg?.timestamp?.seconds || 0;
@@ -1154,7 +1033,6 @@
                     const timeStr = lastMsg?.timestamp ? new Date(lastMsg.timestamp.seconds * 1000).toLocaleDateString() : '';
                     const displayName = u.name || 'Campus User';
                     const photoSrc = u.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=random`;
-
                     chatsList.innerHTML += `
                         <div onclick="startChat('${otherId}', '${displayName}')"
                             class="flex items-center gap-4 p-4 bg-card border border-base rounded-2xl cursor-pointer hover:shadow-md transition-all active:scale-95">
@@ -1190,9 +1068,15 @@
             });
         }
 
+        // FIXED: Create parent Chat document on send so it shows up in Inbox
         document.getElementById('btn-send').onclick = async () => {
             const input = document.getElementById('message-input');
             if(!input.value) return;
+            // Create/update the parent Chat doc with participants array — this is what makes chats queryable
+            await setDoc(doc(db, "Chats", activeChatId), {
+                participants: activeChatId.split('_'),
+                lastUpdated: serverTimestamp()
+            }, { merge: true });
             await addDoc(collection(db, "Chats", activeChatId, "Messages"), { senderId: currentUserId, messageText: input.value, timestamp: serverTimestamp() });
             input.value = '';
         };
