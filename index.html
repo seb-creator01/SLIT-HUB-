@@ -528,6 +528,66 @@
             }
         };
 
+        // FIXED: Moved banUser and unbanUser functions to global scope
+        window.banUser = async (uid) => { 
+            if(confirm("Ban this user?")) {
+                try {
+                    await setDoc(doc(db, "BannedUsers", uid), { 
+                        bannedAt: serverTimestamp(),
+                        bannedBy: currentUserId
+                    });
+                    alert("User has been banned successfully!");
+                    if(isAdminMode) loadAdminUserList();
+                } catch (error) {
+                    console.error("Ban error:", error);
+                    alert("Failed to ban user. Check console for details.");
+                }
+            }
+        };
+
+        window.unbanUser = async (uid) => {
+            if(confirm("Restore this account?")) {
+                try {
+                    await deleteDoc(doc(db, "BannedUsers", uid));
+                    alert("User Unbanned successfully!");
+                    if(isAdminMode) loadAdminUserList();
+                } catch (error) {
+                    console.error("Unban error:", error);
+                    alert("Failed to unban user. Check console for details.");
+                }
+            }
+        };
+
+        window.removeVerification = async (uid) => {
+            if(confirm("Remove verification tick for this user?")) {
+                await deleteDoc(doc(db, "VerifiedUsers", uid));
+                alert("Verification removed.");
+                loadAdminUserList();
+            }
+        };
+
+        window.verifyUser = async (uid) => {
+            await setDoc(doc(db, "VerifiedUsers", uid), { verifiedAt: serverTimestamp() });
+            loadAdminUserList();
+        };
+
+        window.updateAnnouncement = async () => {
+            const msg = document.getElementById('admin-announcement-input').value;
+            await setDoc(doc(db, "AppData", "Announcement"), { message: msg, active: msg.length > 0 });
+            alert("Announcement Updated!");
+        };
+
+        function loadReports() {
+            onSnapshot(collection(db, "Reports"), (snap) => {
+                const list = document.getElementById('admin-reports-list');
+                list.innerHTML = snap.empty ? '<p class="text-[10px] opacity-50">No reports.</p>' : '';
+                snap.forEach(d => {
+                    const r = d.data();
+                    list.innerHTML += `<div class="p-3 border-l-4 border-red-500 bg-red-50 dark:bg-red-950/20 rounded-xl text-[10px] mb-2"><b>Target:</b> ${r.reportedUser}<br><b>Reason:</b> ${r.reason}<br><button onclick="banUser('${r.reportedUser}')" class="bg-red-600 text-white px-3 py-1 rounded-lg mt-2 font-bold">BAN ACCOUNT</button></div>`;
+                });
+            });
+        }
+
         async function loadAdminUserList() {
             const container = document.getElementById('admin-user-list');
             const usersSnap = await getDocs(collection(db, "Users"));
@@ -571,51 +631,6 @@
                 `;
             }
         }
-
-        window.removeVerification = async (uid) => {
-            if(confirm("Remove verification tick for this user?")) {
-                await deleteDoc(doc(db, "VerifiedUsers", uid));
-                alert("Verification removed.");
-                loadAdminUserList();
-            }
-        };
-
-        window.unbanUser = async (uid) => {
-            if(confirm("Restore this account?")) {
-                await deleteDoc(doc(db, "BannedUsers", uid));
-                alert("User Unbanned!");
-                loadAdminUserList();
-            }
-        };
-
-        window.verifyUser = async (uid) => {
-            await setDoc(doc(db, "VerifiedUsers", uid), { verifiedAt: serverTimestamp() });
-            loadAdminUserList();
-        };
-
-        window.updateAnnouncement = async () => {
-            const msg = document.getElementById('admin-announcement-input').value;
-            await setDoc(doc(db, "AppData", "Announcement"), { message: msg, active: msg.length > 0 });
-            alert("Announcement Updated!");
-        };
-
-        function loadReports() {
-            onSnapshot(collection(db, "Reports"), (snap) => {
-                const list = document.getElementById('admin-reports-list');
-                list.innerHTML = snap.empty ? '<p class="text-[10px] opacity-50">No reports.</p>' : '';
-                snap.forEach(d => {
-                    const r = d.data();
-                    list.innerHTML += `<div class="p-3 border-l-4 border-red-500 bg-red-50 dark:bg-red-950/20 rounded-xl text-[10px] mb-2"><b>Target:</b> ${r.reportedUser}<br><b>Reason:</b> ${r.reason}<br><button onclick="banUser('${r.reportedUser}')" class="bg-red-600 text-white px-3 py-1 rounded-lg mt-2 font-bold">BAN ACCOUNT</button></div>`;
-                });
-            });
-        }
-
-        window.banUser = async (uid) => { 
-            if(confirm("Ban user?")) {
-                await setDoc(doc(db, "BannedUsers", uid), { bannedAt: serverTimestamp() });
-                loadAdminUserList();
-            }
-        };
 
         window.openEditScreen = async (id) => {
             const snap = await getDoc(doc(db, "Products", id));
