@@ -48,7 +48,9 @@
         }
         .brand-logo:active { transform: scale(0.95); }
 
-        .screen { animation: fadeInSlide 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .screen {
+            animation: fadeInSlide 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
         @keyframes fadeInSlide {
             from { opacity: 0; transform: translateY(20px); }
@@ -60,6 +62,7 @@
             50% { opacity: .5; }
         }
         .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        
         .skeleton-card { background: var(--border); border-radius: 20px; height: 220px; width: 100%; }
 
         button, .nav-item, a, .chip {
@@ -67,6 +70,7 @@
             cursor: pointer;
             outline: none;
         }
+
         button:active, .nav-item:active, .chip:active {
             transform: scale(0.92) !important;
             opacity: 0.8;
@@ -179,8 +183,50 @@
             transition: transform 0.2s, color 0.2s;
             color: #e2e8f0;
         }
-        .star-rating i.active { color: #f59e0b; }
-        .star-rating i:hover { transform: scale(1.2); }
+        .star-rating i.active {
+            color: #f59e0b;
+        }
+        .star-rating i:hover {
+            transform: scale(1.2);
+        }
+
+        /* ===== SELLER REPLY STYLES ===== */
+        .seller-reply-box {
+            background: linear-gradient(135deg, #eff6ff, #f0fdf4);
+            border-left: 3px solid #2563eb;
+            border-radius: 0 12px 12px 12px;
+            padding: 10px 14px;
+            margin-top: 10px;
+        }
+        .dark .seller-reply-box {
+            background: linear-gradient(135deg, rgba(37,99,235,0.1), rgba(5,150,105,0.08));
+            border-left-color: #60a5fa;
+        }
+        .seller-reply-input-area {
+            margin-top: 10px;
+            background: var(--bg);
+            border: 1px dashed var(--border);
+            border-radius: 0 12px 12px 12px;
+            padding: 10px;
+        }
+        .reply-toggle-btn {
+            font-size: 10px;
+            font-weight: 700;
+            color: #2563eb;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 4px 10px;
+            margin-top: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .dark .reply-toggle-btn {
+            background: rgba(37,99,235,0.12);
+            border-color: rgba(96,165,250,0.3);
+            color: #60a5fa;
+        }
     </style>
 </head>
 <body>
@@ -241,7 +287,8 @@
                 <button id="toggle-requests" onclick="switchView('Request')">🙋‍♂️ Requests</button>
             </div>
             <div class="overflow-x-auto pb-6 no-scrollbar"><div id="category-filter-chips" class="flex gap-2"></div></div>
-            <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5"></div>
+            <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                </div>
         </section>
 
         <section id="settings-screen" class="screen hidden max-w-lg mx-auto">
@@ -270,7 +317,7 @@
                         <p class="text-[11px] font-extrabold text-blue-800 dark:text-blue-200 mb-3 tracking-wider">🛡️ CAMPUS VERIFICATION</p>
                         <div class="flex gap-3">
                             <button onclick="requestVerification()" id="btn-verify-request" class="flex-1 bg-white dark:bg-slate-800 border border-blue-600 text-blue-600 text-[10px] font-bold py-3 rounded-xl shadow-sm">UPLOAD ID</button>
-                            <button onclick="chatAdmin()" class="flex-1 bg-green-500 text-white text-[10px] font-bold py-3 rounded-xl shadow-sm">CHAT ADMIN</button>
+                            <button onclick="window.open('https://wa.me/2348053103234?text=I%20want%20to%20verify%20my%20account%20ID:%20' + currentUserId)" class="flex-1 bg-green-500 text-white text-[10px] font-bold py-3 rounded-xl shadow-sm">CHAT ADMIN</button>
                         </div>
                     </div>
 
@@ -300,6 +347,7 @@
                 <input type="file" id="file-input" class="hidden">
                 <input type="text" id="post-title" placeholder="What are you listing?" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base p-4 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
                 <textarea id="post-desc" placeholder="Details (Condition, size, etc.)..." class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base p-4 rounded-2xl text-sm h-32 outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                
                 <div class="grid grid-cols-2 gap-4">
                     <div class="relative">
                         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold opacity-40">₦</span>
@@ -310,10 +358,12 @@
                         <option value="Negotiable">Negotiable</option>
                     </select>
                 </div>
+                
                 <div class="grid grid-cols-2 gap-4">
                     <select id="post-category" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base px-4 py-4 rounded-2xl text-sm outline-none"></select>
                     <select id="post-condition" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base px-4 py-4 rounded-2xl text-sm outline-none"></select>
                 </div>
+                
                 <input type="tel" id="post-phone" placeholder="📞 WhatsApp (e.g. 080...)" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base p-4 rounded-2xl text-sm outline-none">
                 <input type="text" id="post-location" placeholder="📍 Campus Location" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base p-4 rounded-2xl text-sm outline-none">
                 <button id="btn-post" class="w-full btn-premium font-extrabold py-4 rounded-2xl shadow-xl mt-4">PUBLISH NOW</button>
@@ -352,6 +402,7 @@
                 <h2 class="text-2xl font-extrabold">Manager</h2>
                 <button onclick="toggleAdminMode()" id="admin-toggle-btn" class="text-[9px] bg-slate-200 dark:bg-slate-800 px-3 py-1.5 rounded-full font-bold uppercase tracking-widest">Admin: OFF</button>
             </div>
+            
             <div id="admin-panel" class="hidden mb-10 space-y-6">
                 <div class="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 rounded-[2rem] text-white shadow-xl">
                     <h3 class="text-xs font-extrabold uppercase mb-4 flex items-center gap-2">📢 Global Broadcast</h3>
@@ -412,6 +463,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // --- DARK MODE LOGIC ---
         window.toggleDarkMode = () => {
             const isDark = document.body.classList.toggle('dark');
             localStorage.setItem('dark-mode', isDark);
@@ -419,6 +471,7 @@
         };
         if(localStorage.getItem('dark-mode') === 'true') toggleDarkMode();
 
+        // TERMS SYSTEM LOGIC
         window.onload = () => { if(!localStorage.getItem('slit_terms_accepted')) document.getElementById('terms-modal').classList.remove('hidden'); };
         window.acceptTerms = () => { localStorage.setItem('slit_terms_accepted', 'true'); document.getElementById('terms-modal').classList.add('hidden'); };
 
@@ -431,6 +484,9 @@
         let selectedCategory = 'All';
         let isUserBanned = false;
 
+        // Track current product seller for reply feature
+        let currentProductSellerId = null;
+
         document.getElementById('display-user-id').innerText = currentUserId;
 
         const categories = {
@@ -439,11 +495,14 @@
             Request: ["All", "💰 Buy Request", "🛠️ Service Needed", "🚑 Urgent Help", "👫 Study Partner", "➕ Others"]
         };
 
+        // PROFILE PIC SYSTEM
         document.getElementById('profile-upload').onchange = async (e) => {
             const file = e.target.files[0];
             if(!file) return;
+            
             const loader = document.getElementById('profile-loader');
             loader.style.display = 'flex';
+            
             try {
                 const url = await uploadToCloudinary(file);
                 await setDoc(doc(db, "Users", currentUserId), { photo: url }, { merge: true });
@@ -463,6 +522,7 @@
             }
         };
 
+        // REAL-TIME UPDATES
         onSnapshot(doc(db, "BannedUsers", currentUserId), (snap) => {
             document.getElementById('ban-screen').classList.toggle('hidden', !snap.exists());
             isUserBanned = snap.exists();
@@ -505,6 +565,7 @@
             input.click();
         };
 
+        // --- ADMIN ENHANCEMENTS ---
         window.toggleAdminMode = () => {
             if(prompt("Passphrase:") === "junior123") {
                 isAdminMode = !isAdminMode;
@@ -520,16 +581,20 @@
             const usersSnap = await getDocs(collection(db, "Users"));
             const bannedSnap = await getDocs(collection(db, "BannedUsers"));
             const bannedIds = bannedSnap.docs.map(d => d.id);
+
             container.innerHTML = '';
+            
             for (const userDoc of usersSnap.docs) {
                 const u = userDoc.data();
                 const uid = userDoc.id;
                 const isVerified = verifiedSellers.includes(uid);
                 const isBanned = bannedIds.includes(uid);
+
                 let phone = "N/A";
                 const pQuery = query(collection(db, "Products"), where("SellerId", "==", uid));
                 const pSnap = await getDocs(pQuery);
                 if(!pSnap.empty) phone = pSnap.docs[0].data().Phone || "N/A";
+
                 container.innerHTML += `
                     <div class="admin-user-card bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-base">
                         <div class="flex justify-between items-start">
@@ -604,12 +669,14 @@
             const snap = await getDoc(doc(db, "Products", id));
             if(!snap.exists()) return;
             const p = snap.data();
+            
             document.getElementById('edit-product-id').value = id;
             document.getElementById('edit-title').value = p.Title;
             document.getElementById('edit-desc').value = p.Description;
             document.getElementById('edit-price').value = p.Price;
             document.getElementById('edit-image-preview').src = p.ImageURL;
             document.getElementById('edit-sold-status').value = p.IsSold.toString();
+            
             showScreen('edit-screen');
         };
 
@@ -624,10 +691,15 @@
             const btn = document.getElementById('btn-update-post');
             const id = document.getElementById('edit-product-id').value;
             btn.innerText = "Updating..."; btn.disabled = true;
+
             try {
                 let imageUrl = document.getElementById('edit-image-preview').src;
                 const newFile = document.getElementById('edit-file-input').files[0];
-                if (newFile) { imageUrl = await uploadToCloudinary(newFile); }
+                
+                if (newFile) {
+                    imageUrl = await uploadToCloudinary(newFile);
+                }
+
                 await updateDoc(doc(db, "Products", id), {
                     Title: document.getElementById('edit-title').value,
                     Description: document.getElementById('edit-desc').value,
@@ -635,9 +707,12 @@
                     ImageURL: imageUrl,
                     IsSold: document.getElementById('edit-sold-status').value === "true"
                 });
+
                 alert("Product updated! ✅");
                 showScreen('my-items-screen');
-            } catch (e) { alert("Failed to update."); }
+            } catch (e) {
+                alert("Failed to update.");
+            }
             btn.innerText = "SAVE CHANGES"; btn.disabled = false;
         };
 
@@ -670,18 +745,25 @@
             const catSelect = document.getElementById('post-category');
             catSelect.innerHTML = categories[type].filter(c => c !== "All").map(c => `<option value="${c}">${c}</option>`).join('');
             document.getElementById('post-condition').innerHTML = type === 'Product' ? '<option value="New">New</option><option value="Used">Used</option>' : '<option value="Standard">Standard</option>';
+            
             document.querySelectorAll('input[name="post-type"]').forEach(input => {
                 const parent = input.parentElement;
-                if(input.checked) { parent.classList.add('bg-white', 'dark:bg-slate-700', 'shadow-sm', 'text-blue-600'); }
-                else { parent.classList.remove('bg-white', 'dark:bg-slate-700', 'shadow-sm', 'text-blue-600'); }
+                if(input.checked) {
+                    parent.classList.add('bg-white', 'dark:bg-slate-700', 'shadow-sm', 'text-blue-600');
+                } else {
+                    parent.classList.remove('bg-white', 'dark:bg-slate-700', 'shadow-sm', 'text-blue-600');
+                }
             });
         };
 
         window.showScreen = (screenId) => {
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
             document.getElementById(screenId).classList.remove('hidden');
+            
             document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active-nav'));
-            const screenToNav = { 'browse-screen': 0, 'post-screen': 1, 'my-items-screen': 2, 'chats-screen': 3, 'settings-screen': 4 };
+            const screenToNav = {
+                'browse-screen': 0, 'post-screen': 1, 'my-items-screen': 2, 'chats-screen': 3, 'settings-screen': 4
+            };
             if(screenToNav[screenId] !== undefined) {
                 document.querySelectorAll('nav button')[screenToNav[screenId]].classList.add('active-nav');
             }
@@ -715,7 +797,9 @@
             btn.innerText = "Publishing..."; btn.disabled = true;
             try {
                 let imageUrl = "https://placehold.co/600x400?text=Post";
-                if (fileInput.files[0]) { imageUrl = await uploadToCloudinary(fileInput.files[0]); }
+                if (fileInput.files[0]) {
+                    imageUrl = await uploadToCloudinary(fileInput.files[0]);
+                }
                 const postType = document.querySelector('input[name="post-type"]:checked').value;
                 await addDoc(collection(db, "Products"), {
                     Title: document.getElementById('post-title').value,
@@ -738,30 +822,49 @@
                 imagePreview.classList.add('hidden');
                 document.getElementById('preview-placeholder').classList.remove('hidden');
                 showScreen('browse-screen');
-            } catch (e) { console.error(e); alert("Error publishing."); }
+            } catch (e) { 
+                console.error(e);
+                alert("Error publishing."); 
+            }
             btn.innerText = "PUBLISH NOW"; btn.disabled = false;
         };
 
         function loadProducts() {
             const productsContainer = document.getElementById("product-grid");
             if (!productsContainer) return;
+
             productsContainer.innerHTML = '<div class="skeleton-card animate-pulse"></div><div class="skeleton-card animate-pulse"></div><div class="skeleton-card animate-pulse"></div><div class="skeleton-card animate-pulse"></div>';
+
             const q = query(collection(db, "Products"), orderBy("CreatedAt", "desc"));
+
             onSnapshot(q, (snapshot) => {
                 let docs = snapshot.docs
                     .map(doc => ({ id: doc.id, ...doc.data() }))
                     .filter(doc => doc.PostType === currentView);
-                if (selectedCategory !== 'All') { docs = docs.filter(doc => doc.Category === selectedCategory); }
+                
+                if (selectedCategory !== 'All') {
+                    docs = docs.filter(doc => doc.Category === selectedCategory);
+                }
+
                 productsContainer.innerHTML = "";
+
                 if (docs.length === 0) {
-                    productsContainer.innerHTML = `<div class="col-span-full py-20 text-center opacity-40"><i class="fas fa-box-open text-4xl mb-4"></i><p class="font-bold">No items found.</p></div>`;
+                    productsContainer.innerHTML = `
+                        <div class="col-span-full py-20 text-center opacity-40">
+                            <i class="fas fa-box-open text-4xl mb-4"></i>
+                            <p class="font-bold">No items found.</p>
+                        </div>
+                    `;
                     return;
                 }
+
                 docs.forEach(product => {
                     const isVer = verifiedSellers.includes(product.SellerId);
                     const avgRating = product.ReviewCount > 0 ? (product.Rating / product.ReviewCount).toFixed(1) : "0";
+                    
                     const productCard = document.createElement("div");
                     productCard.className = "product-card relative";
+
                     productCard.innerHTML = `
                         ${product.IsSold ? `<div class="sold-overlay">SOLD</div>` : ''}
                         <div class="relative h-40 overflow-hidden">
@@ -793,6 +896,9 @@
             const avgRating = p.ReviewCount > 0 ? (p.Rating / p.ReviewCount).toFixed(1) : "0";
             const isVer = verifiedSellers.includes(p.SellerId);
 
+            // Store seller ID so review system can check it
+            currentProductSellerId = p.SellerId;
+
             document.getElementById('details-content').innerHTML = `
                 <div class="relative h-72">
                     <img src="${p.ImageURL}" class="w-full h-full object-cover">
@@ -806,6 +912,7 @@
                         </div>
                         <p class="text-blue-600 text-2xl font-black">₦${p.Price}</p>
                     </div>
+                    
                     <div class="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl mb-8 border border-base relative">
                         <img src="${u.photo || 'https://ui-avatars.com/api/?name=User'}" class="w-12 h-12 rounded-full border-2 border-white">
                         <div class="flex-1">
@@ -814,18 +921,22 @@
                         </div>
                         ${!isMyProduct ? `<button onclick="reportUser('${p.SellerId}')" class="text-[9px] font-bold text-red-500 bg-red-50 dark:bg-red-950/20 px-3 py-1.5 rounded-lg border border-red-100 dark:border-red-900/40">REPORT</button>` : ''}
                     </div>
+                    
                     <div class="mb-10">
                         <h4 class="text-[10px] font-extrabold uppercase opacity-40 mb-2">Description</h4>
                         <p class="text-sm leading-relaxed opacity-80">${p.Description}</p>
                     </div>
+
                     <div class="mt-8 mb-8">
                         <h3 class="text-sm font-extrabold mb-4 uppercase tracking-wider opacity-60">Other listings from this user</h3>
                         <div id="more-from-seller-grid" class="grid grid-cols-2 gap-4"></div>
                     </div>
+
                     <div id="reviews-list-container" class="mt-10 border-t border-base pt-6 mb-12">
                         <h3 class="font-extrabold text-sm mb-6 uppercase tracking-widest opacity-60">Student Reviews</h3>
                         <div id="reviews-placeholder" class="space-y-4"></div>
                     </div>
+                    
                     ${isMyProduct ? `
                         <div class="p-5 bg-blue-50 dark:bg-blue-900/20 rounded-2xl text-center border border-blue-100 dark:border-blue-800">
                            <p class="text-xs font-bold text-blue-700 dark:text-blue-300">You posted this listing.</p>
@@ -864,26 +975,68 @@
                 }
             }
             loadSellerOtherItems(p.SellerId, id);
-            loadProductReviews(id);
+            loadProductReviews(id, p.SellerId);
         };
 
-        async function loadProductReviews(productId) {
+        // ===================================================
+        // SELLER REPLY FEATURE - Load Reviews with Replies
+        // ===================================================
+        async function loadProductReviews(productId, sellerId) {
             const container = document.getElementById('reviews-placeholder');
+            const isSeller = (sellerId === currentUserId);
             const q = query(collection(db, "Products", productId, "Reviews"), orderBy("timestamp", "desc"));
-            onSnapshot(q, (snap) => {
+            
+            onSnapshot(q, async (snap) => {
                 if(snap.empty) {
                     container.innerHTML = `<p class="text-[11px] opacity-30 text-center py-4 italic">No reviews yet. Be the first to share your experience!</p>`;
                     return;
                 }
                 container.innerHTML = '';
-                snap.forEach(docSnap => {
+
+                for (const docSnap of snap.docs) {
                     const r = docSnap.data();
+                    const reviewId = docSnap.id;
                     const date = r.timestamp ? new Date(r.timestamp.seconds * 1000).toLocaleDateString() : 'Recent';
+
+                    // Fetch seller reply if it exists
+                    let replyHTML = '';
+                    const replySnap = await getDoc(doc(db, "Products", productId, "Reviews", reviewId, "SellerReply", "reply"));
+                    if (replySnap.exists()) {
+                        const reply = replySnap.data();
+                        const replyDate = reply.timestamp ? new Date(reply.timestamp.seconds * 1000).toLocaleDateString() : 'Recent';
+                        replyHTML = `
+                            <div class="seller-reply-box">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <i class="fas fa-store text-blue-500 text-[9px]"></i>
+                                    <span class="text-[9px] font-extrabold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Seller's Reply</span>
+                                    <span class="text-[8px] opacity-30 ml-auto">${replyDate}</span>
+                                </div>
+                                <p class="text-xs opacity-80 leading-relaxed">${reply.text}</p>
+                            </div>
+                        `;
+                    } else if (isSeller) {
+                        // Seller hasn't replied yet — show reply button
+                        replyHTML = `
+                            <button class="reply-toggle-btn" onclick="toggleReplyInput('${reviewId}', '${productId}')">
+                                <i class="fas fa-reply text-[9px]"></i> Reply to this review
+                            </button>
+                            <div id="reply-input-${reviewId}" class="seller-reply-input-area hidden">
+                                <textarea id="reply-text-${reviewId}" placeholder="Write your reply..." class="w-full bg-white dark:bg-slate-800 border border-base p-3 text-xs rounded-xl outline-none focus:ring-2 focus:ring-blue-500 h-20 resize-none"></textarea>
+                                <div class="flex gap-2 mt-2">
+                                    <button onclick="submitSellerReply('${productId}', '${reviewId}')" class="flex-1 bg-blue-600 text-white text-[10px] font-bold py-2 rounded-xl">POST REPLY</button>
+                                    <button onclick="toggleReplyInput('${reviewId}', '${productId}')" class="text-[10px] font-bold opacity-50 px-3">CANCEL</button>
+                                </div>
+                            </div>
+                        `;
+                    }
+
                     container.innerHTML += `
                         <div class="bg-slate-50 dark:bg-slate-800/30 p-4 rounded-2xl border border-base">
                             <div class="flex justify-between items-center mb-3">
                                 <div class="flex items-center gap-2">
-                                    <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-[9px] font-bold text-blue-600">${r.userId.substring(5, 7).toUpperCase()}</div>
+                                    <div class="w-6 h-6 bg-blue-100 dark:bg-blue-900/40 rounded-full flex items-center justify-center text-[9px] font-bold text-blue-600">
+                                        ${r.userId.substring(5, 7).toUpperCase()}
+                                    </div>
                                     <p class="text-[10px] font-bold opacity-60">User ${r.userId.substring(5, 9)}</p>
                                 </div>
                                 <span class="text-[8px] opacity-30 font-bold uppercase">${date}</span>
@@ -892,11 +1045,44 @@
                                 ${'<i class="fas fa-star"></i>'.repeat(r.stars)}${'<i class="far fa-star"></i>'.repeat(5 - r.stars)}
                             </div>
                             <p class="text-xs opacity-80 leading-relaxed">${r.text}</p>
+                            ${replyHTML}
                         </div>
                     `;
-                });
+                }
             });
         }
+
+        // Toggle reply input box open/closed
+        window.toggleReplyInput = (reviewId, productId) => {
+            const box = document.getElementById(`reply-input-${reviewId}`);
+            if (box) box.classList.toggle('hidden');
+        };
+
+        // Submit seller reply to a specific review
+        window.submitSellerReply = async (productId, reviewId) => {
+            const textEl = document.getElementById(`reply-text-${reviewId}`);
+            const text = textEl ? textEl.value.trim() : '';
+
+            if (text.length < 3) {
+                alert("Please write a proper reply before posting.");
+                return;
+            }
+
+            try {
+                // Store reply as a fixed doc ("reply") inside a SellerReply subcollection under the review
+                await setDoc(doc(db, "Products", productId, "Reviews", reviewId, "SellerReply", "reply"), {
+                    text,
+                    sellerId: currentUserId,
+                    timestamp: serverTimestamp()
+                });
+                // Reload reviews to show the reply
+                loadProductReviews(productId, currentProductSellerId);
+            } catch(e) {
+                console.error(e);
+                alert("Failed to post reply.");
+            }
+        };
+        // ===================================================
 
         window.reportUser = async (targetUserId) => {
             const reason = prompt("Why are you reporting this user?");
@@ -947,28 +1133,58 @@
             const text = document.getElementById('review-text').value.trim();
             const stars = window.getCurrentStars();
             const btn = document.getElementById('btn-submit-review');
-            if (text.length < 10) { alert("Please write at least 10 characters to help other students! 📝"); return; }
-            btn.disabled = true; btn.innerText = "Checking...";
+
+            if (text.length < 10) {
+                alert("Please write at least 10 characters to help other students! 📝");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Checking...";
+
             try {
                 const reviewsRef = collection(db, "Products", productId, "Reviews");
                 const qCheck = query(reviewsRef, where("userId", "==", currentUserId));
                 const checkSnap = await getDocs(qCheck);
-                if (!checkSnap.empty) { alert("You have already reviewed this item! 👋"); btn.disabled = false; btn.innerText = "SUBMIT REVIEW"; return; }
+
+                if (!checkSnap.empty) {
+                    alert("You have already reviewed this item! 👋");
+                    btn.disabled = false;
+                    btn.innerText = "SUBMIT REVIEW";
+                    return;
+                }
+
                 btn.innerText = "Posting...";
-                await addDoc(reviewsRef, { stars, text, userId: currentUserId, timestamp: serverTimestamp() });
+                await addDoc(reviewsRef, { 
+                    stars, 
+                    text, 
+                    userId: currentUserId, 
+                    timestamp: serverTimestamp() 
+                });
+
                 const pRef = doc(db, "Products", productId);
                 const pSnap = await getDoc(pRef);
                 const pData = pSnap.data();
-                await updateDoc(pRef, { Rating: (pData.Rating || 0) + stars, ReviewCount: (pData.ReviewCount || 0) + 1 });
+
+                await updateDoc(pRef, { 
+                    Rating: (pData.Rating || 0) + stars, 
+                    ReviewCount: (pData.ReviewCount || 0) + 1 
+                });
+
                 alert("Review published! Thank you for the feedback. ✨");
                 viewProduct(productId);
-            } catch (e) { console.error(e); alert("Submit failed."); }
-            btn.disabled = false; btn.innerText = "SUBMIT REVIEW";
+            } catch (e) { 
+                console.error(e);
+                alert("Submit failed."); 
+            }
+            btn.disabled = false;
+            btn.innerText = "SUBMIT REVIEW";
         };
 
         window.loadMyItems = () => {
             showScreen('my-items-screen');
             const q = isAdminMode ? query(collection(db, "Products"), orderBy("CreatedAt", "desc")) : query(collection(db, "Products"), where("SellerId", "==", currentUserId), orderBy("CreatedAt", "desc"));
+            
             onSnapshot(q, (snap) => {
                 const grid = document.getElementById('my-items-grid');
                 grid.innerHTML = '';
@@ -993,46 +1209,64 @@
         };
 
         // =============================================
-        // FIXED: openChats — queries by participants array so chats appear in Inbox
+        // CHAT SYSTEM — reads inbox from Firestore
+        // UserInbox/{userId} doc has chatIds array
+        // Both sender + receiver are registered on send
         // =============================================
-        window.openChats = () => {
+
+        async function registerChatForUser(userId, chatId) {
+            // Merge chatId into the user's inbox doc (single doc, array field)
+            const inboxRef = doc(db, "UserInbox", userId);
+            const snap = await getDoc(inboxRef);
+            const existing = snap.exists() ? (snap.data().chatIds || []) : [];
+            if (!existing.includes(chatId)) {
+                await setDoc(inboxRef, { chatIds: [...existing, chatId] }, { merge: true });
+            }
+        }
+
+        window.openChats = async () => {
             showScreen('chats-screen');
             const chatsList = document.getElementById('chats-list');
-            chatsList.innerHTML = '<p class="text-[11px] opacity-40 text-center py-6">Loading messages...</p>';
+            chatsList.innerHTML = '<p class="text-[11px] opacity-40 text-center py-6">Loading...</p>';
 
-            onSnapshot(query(collection(db, "Chats"), where("participants", "array-contains", currentUserId)), async (snap) => {
-                const myChats = snap.docs;
+            try {
+                // Read this user's inbox doc — direct path, always allowed
+                const inboxSnap = await getDoc(doc(db, "UserInbox", currentUserId));
+                const chatIds = inboxSnap.exists() ? (inboxSnap.data().chatIds || []) : [];
 
-                if (myChats.length === 0) {
+                if (chatIds.length === 0) {
                     chatsList.innerHTML = '<p class="text-[11px] opacity-40 text-center py-10 italic">No messages yet.<br>Message a seller to start a conversation.</p>';
                     return;
                 }
 
                 const chatDataList = [];
-                for (const chatDoc of myChats) {
-                    const chatId = chatDoc.id;
-                    const otherId = chatId.split('_').find(id => id !== currentUserId);
+                for (const chatId of chatIds) {
+                    const parts = chatId.split('_');
+                    const otherId = parts.find(id => id !== currentUserId);
+                    if (!otherId) continue;
+
+                    // Get last message
                     const msgSnap = await getDocs(query(collection(db, "Chats", chatId, "Messages"), orderBy("timestamp", "desc")));
-                    const lastMsgDoc = msgSnap.docs[0];
-                    const lastMsg = lastMsgDoc ? lastMsgDoc.data() : null;
+                    const lastMsg = msgSnap.docs[0] ? msgSnap.docs[0].data() : null;
+
+                    // Get other user's profile
                     const uSnap = await getDoc(doc(db, "Users", otherId));
                     const u = uSnap.exists() ? uSnap.data() : {};
+
                     chatDataList.push({ chatId, otherId, lastMsg, u });
                 }
 
-                chatDataList.sort((a, b) => {
-                    const aTime = a.lastMsg?.timestamp?.seconds || 0;
-                    const bTime = b.lastMsg?.timestamp?.seconds || 0;
-                    return bTime - aTime;
-                });
+                // Sort by most recent
+                chatDataList.sort((a, b) => (b.lastMsg?.timestamp?.seconds || 0) - (a.lastMsg?.timestamp?.seconds || 0));
 
                 chatsList.innerHTML = '';
-                chatDataList.forEach(({ chatId, otherId, lastMsg, u }) => {
+                chatDataList.forEach(({ otherId, lastMsg, u }) => {
                     const isMe = lastMsg?.senderId === currentUserId;
-                    const preview = lastMsg ? (isMe ? '🗨 You: ' : '') + lastMsg.messageText : 'No messages yet';
+                    const preview = lastMsg ? (isMe ? 'You: ' : '') + lastMsg.messageText : 'No messages yet';
                     const timeStr = lastMsg?.timestamp ? new Date(lastMsg.timestamp.seconds * 1000).toLocaleDateString() : '';
-                    const displayName = u.name || 'Campus User';
+                    const displayName = u.name || otherId;
                     const photoSrc = u.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=random`;
+
                     chatsList.innerHTML += `
                         <div onclick="startChat('${otherId}', '${displayName}')"
                             class="flex items-center gap-4 p-4 bg-card border border-base rounded-2xl cursor-pointer hover:shadow-md transition-all active:scale-95">
@@ -1045,40 +1279,51 @@
                         </div>
                     `;
                 });
-            });
+
+            } catch(e) {
+                console.error('openChats error:', e);
+                chatsList.innerHTML = `<p class="text-[11px] text-red-400 text-center py-10">Error: ${e.message}</p>`;
+            }
         };
 
-        window.startChat = (targetId, title) => { 
-            activeChatId = [currentUserId, targetId].sort().join("_"); 
-            document.getElementById('chat-title').innerText = title; 
-            showScreen('chatroom-screen'); 
-            loadMessages(); 
+        window.startChat = (targetId, title) => {
+            activeChatId = [currentUserId, targetId].sort().join("_");
+            document.getElementById('chat-title').innerText = title;
+            showScreen('chatroom-screen');
+            loadMessages();
         };
 
         function loadMessages() {
             onSnapshot(query(collection(db, "Chats", activeChatId, "Messages"), orderBy("timestamp", "asc")), (snapshot) => {
                 const container = document.getElementById('messages-container');
                 container.innerHTML = '';
-                snapshot.docs.forEach(doc => {
-                    const m = doc.data();
+                snapshot.docs.forEach(d => {
+                    const m = d.data();
                     const isMe = m.senderId === currentUserId;
-                    container.innerHTML += `<div class="flex ${isMe ? 'justify-end' : 'justify-start'}"><div class="${isMe ? 'bg-blue-600 text-white' : 'bg-card border border-base'} px-4 py-2.5 rounded-2xl text-[13px] shadow-sm max-w-[80%]">${m.messageText}</div></div>`;
+                    container.innerHTML += `<div class="flex ${isMe ? 'justify-end' : 'justify-start'} mb-2"><div class="${isMe ? 'bg-blue-600 text-white' : 'bg-card border border-base'} px-4 py-2.5 rounded-2xl text-[13px] shadow-sm max-w-[80%]">${m.messageText}</div></div>`;
                 });
                 container.scrollTop = container.scrollHeight;
             });
         }
 
-        // FIXED: Create parent Chat document on send so it shows up in Inbox
         document.getElementById('btn-send').onclick = async () => {
             const input = document.getElementById('message-input');
-            if(!input.value) return;
-            // Create/update the parent Chat doc with participants array — this is what makes chats queryable
-            await setDoc(doc(db, "Chats", activeChatId), {
-                participants: activeChatId.split('_'),
-                lastUpdated: serverTimestamp()
-            }, { merge: true });
-            await addDoc(collection(db, "Chats", activeChatId, "Messages"), { senderId: currentUserId, messageText: input.value, timestamp: serverTimestamp() });
+            if (!input.value.trim()) return;
+            const msgText = input.value.trim();
             input.value = '';
+
+            const otherUserId = activeChatId.split('_').find(id => id !== currentUserId);
+
+            // Register chat in BOTH users' inboxes so both see it
+            await registerChatForUser(currentUserId, activeChatId);
+            await registerChatForUser(otherUserId, activeChatId);
+
+            // Send the message
+            await addDoc(collection(db, "Chats", activeChatId, "Messages"), {
+                senderId: currentUserId,
+                messageText: msgText,
+                timestamp: serverTimestamp()
+            });
         };
 
         document.getElementById('global-search').oninput = (e) => {
@@ -1097,16 +1342,6 @@
                 bar.style.background = 'linear-gradient(90deg, #2563eb, #7c3aed)';
             } else { bar.classList.add('hidden'); }
         });
-
-        // CONTACT DEVELOPER / CHAT ADMIN
-        window.contactDeveloper = () => {
-            window.open('https://wa.me/2348053103234?text=Hi%20Developer!%20I%20need%20help%20with%20SLIT-HUB', '_blank');
-        };
-
-        // FIX: chatAdmin now properly accesses currentUserId from module scope
-        window.chatAdmin = () => {
-            window.open('https://wa.me/2348053103234?text=I%20want%20to%20verify%20my%20account%20ID:%20' + currentUserId, '_blank');
-        };
 
         switchView('Product');
         showScreen('browse-screen');
