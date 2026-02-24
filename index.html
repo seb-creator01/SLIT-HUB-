@@ -19,14 +19,18 @@
             --card: #ffffff; 
             --text: #1e293b; 
             --text-light: #334155;
+            --text-muted: #64748b;
             --border: #e2e8f0; 
+            --input-bg: #f1f5f9;
         }
         .dark { 
             --bg: #0f172a; 
             --card: #1e293b; 
             --text: #f8fafc; 
             --text-light: #cbd5e1;
+            --text-muted: #94a3b8;
             --border: #334155; 
+            --input-bg: #1e293b;
         }
 
         body { 
@@ -38,11 +42,24 @@
             overflow-x: hidden;
         }
 
-        /* Fix for text visibility in both modes */
-        .text-default { color: var(--text); }
-        .text-muted { color: var(--text-light); }
-        .bg-card { background-color: var(--card); }
-        .border-base { border-color: var(--border); }
+        /* Text color classes for both modes */
+        .text-default { color: var(--text) !important; }
+        .text-light { color: var(--text-light) !important; }
+        .text-muted { color: var(--text-muted) !important; }
+        .bg-card { background-color: var(--card) !important; }
+        .border-base { border-color: var(--border) !important; }
+        .bg-input { background-color: var(--input-bg) !important; }
+
+        /* Input styles */
+        input, textarea, select {
+            background-color: var(--input-bg) !important;
+            color: var(--text) !important;
+            border-color: var(--border) !important;
+        }
+        input::placeholder, textarea::placeholder {
+            color: var(--text-muted) !important;
+            opacity: 0.7;
+        }
 
         .brand-logo {
             font-weight: 800;
@@ -134,7 +151,7 @@
             border-radius: 16px; 
             font-size: 0.85rem; 
             font-weight: 700; 
-            color: #64748b; 
+            color: var(--text-muted); 
         }
         .view-toggle .active { 
             background: var(--card); 
@@ -262,6 +279,15 @@
         .safety-warning i {
             font-size: 20px;
         }
+        .safety-warning .close-btn {
+            margin-left: auto;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+        .safety-warning .close-btn:hover {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
@@ -274,7 +300,7 @@
                     <i class="fas fa-shield-halved text-2xl"></i>
                 </div>
                 <h2 class="text-2xl font-extrabold text-default">Campus Rules</h2>
-                <p class="text-xs opacity-60 mt-2 text-muted">To keep our campus safe, please agree to these terms.</p>
+                <p class="text-xs opacity-60 mt-2 text-light">To keep our campus safe, please agree to these terms.</p>
             </div>
             <div class="space-y-4 text-sm mb-8">
                 <div class="flex gap-3 items-start"><i class="fas fa-check-circle text-blue-500 mt-1"></i><p class="text-default"><b>Be Real:</b> Authentic posts only.</p></div>
@@ -291,7 +317,7 @@
             <i class="fas fa-user-lock text-5xl"></i>
         </div>
         <h1 class="text-3xl font-extrabold text-default">Account Suspended</h1>
-        <p class="opacity-60 mt-4 max-w-xs text-muted">You have been flagged for community violations. Please contact admin to appeal.</p>
+        <p class="opacity-60 mt-4 max-w-xs text-light">You have been flagged for community violations. Please contact admin to appeal.</p>
         <button onclick="contactDeveloper()" class="mt-8 bg-blue-600 text-white px-8 py-3 rounded-full font-bold shadow-lg">Appeal Access</button>
     </div>
 
@@ -300,11 +326,11 @@
         <div class="max-w-5xl mx-auto flex justify-between items-center gap-4">
             <h1 class="brand-logo text-2xl" onclick="showScreen('browse-screen')">SLIT-HUB</h1>
             <div class="flex-1 max-w-md relative">
-                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-                <input type="text" id="global-search" placeholder="Search campus..." class="w-full bg-gray-100 dark:bg-slate-800 border-none rounded-2xl pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all text-default">
+                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-muted text-xs"></i>
+                <input type="text" id="global-search" placeholder="Search campus..." class="w-full bg-input border-none rounded-2xl pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all text-default placeholder:text-muted">
             </div>
-            <button onclick="toggleDarkMode()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-slate-800 transition-colors">
-                <i class="fas fa-moon" id="dark-icon"></i>
+            <button onclick="toggleDarkMode()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-input transition-colors">
+                <i class="fas fa-moon" id="dark-icon" style="color: var(--text);"></i>
             </button>
         </div>
     </header>
@@ -315,16 +341,19 @@
             <i class="fas fa-sparkles"></i>
             <span id="announcement-text">Welcome!</span>
         </div>
-        <button onclick="this.parentElement.classList.add('hidden')" class="opacity-70"><i class="fas fa-times"></i></button>
+        <button onclick="this.parentElement.classList.add('hidden')" class="opacity-70 hover:opacity-100"><i class="fas fa-times"></i></button>
     </div>
 
-    <!-- Safety Warning Banner (Always visible on browse screen) -->
+    <!-- Safety Warning Banner (Can be closed) -->
     <div id="safety-banner" class="max-w-5xl mx-auto px-4 mt-4">
         <div class="safety-warning">
             <i class="fas fa-shield-alt"></i>
-            <div>
+            <div class="flex-1">
                 <strong>⚠️ SAFETY ALERT:</strong> Never pay before seeing the product! Meet in public places like the library, cafeteria, or security post. Report suspicious users immediately.
             </div>
+            <button onclick="document.getElementById('safety-banner').style.display = 'none'" class="close-btn">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
     </div>
 
@@ -355,18 +384,18 @@
                         <input type="file" id="profile-upload" class="hidden" accept="image/*">
                     </div>
                     <h2 id="my-profile-name-display" class="font-extrabold text-xl text-default mt-4">My Profile</h2>
-                    <p class="text-[10px] opacity-40 font-mono mt-1 text-muted">ID: <span id="display-user-id" class="text-blue-600"></span></p>
+                    <p class="text-[10px] opacity-40 font-mono mt-1 text-light">ID: <span id="display-user-id" class="text-blue-600"></span></p>
                 </div>
                 <div class="space-y-5">
-                    <input type="text" id="set-profile-name" placeholder="👤 Full Name" class="w-full bg-gray-50 dark:bg-slate-800 border border-base p-3.5 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500 text-default placeholder:text-muted">
-                    <input type="text" id="set-profile-dept" placeholder="🎓 Dept" class="w-full bg-gray-50 dark:bg-slate-800 border border-base p-3.5 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500 text-default placeholder:text-muted">
-                    <textarea id="set-profile-bio" placeholder="📝 About you..." class="w-full bg-gray-50 dark:bg-slate-800 border border-base p-3.5 rounded-2xl text-sm h-24 outline-none focus:ring-2 focus:ring-blue-500 text-default placeholder:text-muted"></textarea>
+                    <input type="text" id="set-profile-name" placeholder="👤 Full Name" class="w-full bg-input border border-base p-3.5 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500 text-default placeholder:text-muted">
+                    <input type="text" id="set-profile-dept" placeholder="🎓 Dept" class="w-full bg-input border border-base p-3.5 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500 text-default placeholder:text-muted">
+                    <textarea id="set-profile-bio" placeholder="📝 About you..." class="w-full bg-input border border-base p-3.5 rounded-2xl text-sm h-24 outline-none focus:ring-2 focus:ring-blue-500 text-default placeholder:text-muted"></textarea>
                     <button onclick="saveUserProfile()" class="w-full btn-premium font-bold py-4 rounded-2xl shadow-lg">SAVE PROFILE</button>
                     
                     <!-- Safety Tips in Profile -->
                     <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-2xl">
                         <p class="text-[11px] font-extrabold text-yellow-800 dark:text-yellow-200 mb-2">🛡️ SAFETY TIPS</p>
-                        <ul class="text-[10px] space-y-1 text-muted">
+                        <ul class="text-[10px] space-y-1 text-light">
                             <li>• NEVER pay before seeing the item</li>
                             <li>• Meet in public places (library, cafeteria)</li>
                             <li>• Bring a friend if possible</li>
@@ -379,12 +408,14 @@
                         <p class="text-[11px] font-extrabold text-blue-800 dark:text-blue-200 mb-3 tracking-wider">🛡️ CAMPUS VERIFICATION</p>
                         <div class="flex gap-3">
                             <button onclick="requestVerification()" class="flex-1 bg-white dark:bg-slate-800 border border-blue-600 text-blue-600 text-[10px] font-bold py-3 rounded-xl shadow-sm">UPLOAD ID</button>
-                            <button onclick="window.open('https://wa.me/2348053103234?text=I%20want%20to%20verify%20my%20account%20ID:%20' + currentUserId, '_blank')" class="flex-1 bg-green-500 text-white text-[10px] font-bold py-3 rounded-xl shadow-sm">CHAT ADMIN</button>
+                            <button onclick="window.open('https://wa.me/2348053103234?text=Hello%20Admin%2C%20I%20want%20to%20verify%20my%20account.%20My%20ID%3A%20' + currentUserId, '_blank')" class="flex-1 bg-green-500 text-white text-[10px] font-bold py-3 rounded-xl shadow-sm hover:bg-green-600 transition-colors">
+                                <i class="fab fa-whatsapp mr-1"></i>CHAT ADMIN
+                            </button>
                         </div>
                     </div>
-                    <button onclick="contactDeveloper()" class="w-full flex items-center justify-between p-5 bg-slate-100 dark:bg-slate-800 rounded-2xl">
+                    <button onclick="contactDeveloper()" class="w-full flex items-center justify-between p-5 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-base hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
                         <div class="flex items-center gap-3"><i class="fab fa-whatsapp text-2xl text-green-500"></i><p class="text-sm font-bold text-default">Contact Developer</p></div>
-                        <i class="fas fa-chevron-right text-xs opacity-30 text-muted"></i>
+                        <i class="fas fa-chevron-right text-xs text-muted"></i>
                     </button>
                 </div>
             </div>
@@ -402,41 +433,41 @@
                 </p>
             </div>
             
-            <div class="flex gap-2 mb-8 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl">
+            <div class="flex gap-2 mb-8 bg-input p-1.5 rounded-2xl">
                 <label class="flex-1 py-3 rounded-xl text-center text-[11px] font-extrabold uppercase cursor-pointer transition-all"><input type="radio" name="post-type" value="Product" checked class="hidden" onclick="togglePostForm('Product')"><span class="text-default">🛍️ Product</span></label>
                 <label class="flex-1 py-3 rounded-xl text-center text-[11px] font-extrabold uppercase cursor-pointer transition-all"><input type="radio" name="post-type" value="Service" class="hidden" onclick="togglePostForm('Service')"><span class="text-default">🛠️ Service</span></label>
                 <label class="flex-1 py-3 rounded-xl text-center text-[11px] font-extrabold uppercase cursor-pointer transition-all"><input type="radio" name="post-type" value="Request" class="hidden" onclick="togglePostForm('Request')"><span class="text-default">🙋‍♂️ Ask</span></label>
             </div>
             <div class="space-y-5">
-                <div id="image-preview-container" class="w-full h-48 border-2 border-dashed border-base rounded-3xl flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all">
+                <div id="image-preview-container" class="w-full h-48 border-2 border-dashed border-base rounded-3xl flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:bg-input transition-all">
                     <img id="image-preview" class="hidden w-full h-full object-cover">
                     <div id="preview-placeholder" class="text-center">
                         <i class="fas fa-cloud-arrow-up text-3xl text-blue-500 mb-2"></i>
-                        <p class="text-[11px] font-bold opacity-40 text-muted">Tap to upload photo</p>
+                        <p class="text-[11px] font-bold text-muted">Tap to upload photo</p>
                     </div>
                 </div>
                 <input type="file" id="file-input" class="hidden">
-                <input type="text" id="post-title" placeholder="What are you listing?" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base p-4 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500 text-default placeholder:text-muted">
-                <textarea id="post-desc" placeholder="Details (Condition, size, etc.)..." class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base p-4 rounded-2xl text-sm h-32 outline-none focus:ring-2 focus:ring-blue-500 text-default placeholder:text-muted"></textarea>
+                <input type="text" id="post-title" placeholder="What are you listing?" class="w-full bg-input border border-base p-4 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500 text-default placeholder:text-muted">
+                <textarea id="post-desc" placeholder="Details (Condition, size, etc.)..." class="w-full bg-input border border-base p-4 rounded-2xl text-sm h-32 outline-none focus:ring-2 focus:ring-blue-500 text-default placeholder:text-muted"></textarea>
                 <div class="grid grid-cols-2 gap-4">
                     <div class="relative">
-                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold opacity-40 text-muted">₦</span>
-                        <input type="number" id="post-price" placeholder="Price" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base pl-10 pr-4 py-4 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500 text-default placeholder:text-muted">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-muted">₦</span>
+                        <input type="number" id="post-price" placeholder="Price" class="w-full bg-input border border-base pl-10 pr-4 py-4 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500 text-default placeholder:text-muted">
                     </div>
-                    <select id="post-negotiable" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base px-4 py-4 rounded-2xl text-sm outline-none text-default">
+                    <select id="post-negotiable" class="w-full bg-input border border-base px-4 py-4 rounded-2xl text-sm outline-none text-default">
                         <option value="Fixed">Fixed Price</option>
                         <option value="Negotiable">Negotiable</option>
                     </select>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
-                    <select id="post-category" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base px-4 py-4 rounded-2xl text-sm outline-none text-default"></select>
-                    <select id="post-condition" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base px-4 py-4 rounded-2xl text-sm outline-none text-default"></select>
+                    <select id="post-category" class="w-full bg-input border border-base px-4 py-4 rounded-2xl text-sm outline-none text-default"></select>
+                    <select id="post-condition" class="w-full bg-input border border-base px-4 py-4 rounded-2xl text-sm outline-none text-default"></select>
                 </div>
                 <div class="relative">
                     <span class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-blue-600">+234</span>
-                    <input type="tel" id="post-phone" placeholder="Phone number (e.g. 8051234567)" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base pl-16 pr-4 py-4 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500 text-default placeholder:text-muted">
+                    <input type="tel" id="post-phone" placeholder="Phone number (e.g. 8051234567)" class="w-full bg-input border border-base pl-16 pr-4 py-4 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500 text-default placeholder:text-muted">
                 </div>
-                <input type="text" id="post-location" placeholder="📍 Campus Location" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base p-4 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500 text-default placeholder:text-muted">
+                <input type="text" id="post-location" placeholder="📍 Campus Location" class="w-full bg-input border border-base p-4 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500 text-default placeholder:text-muted">
                 <button id="btn-post" class="w-full btn-premium font-extrabold py-4 rounded-2xl shadow-xl mt-4">PUBLISH NOW</button>
             </div>
         </section>
@@ -445,7 +476,7 @@
         <section id="edit-screen" class="screen hidden max-w-xl mx-auto bg-card p-8 rounded-[2.5rem] shadow-xl border border-base">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-extrabold text-default">Edit Listing</h2>
-                <button onclick="showScreen('my-items-screen')" class="text-xs opacity-50 font-bold text-muted">CANCEL</button>
+                <button onclick="showScreen('my-items-screen')" class="text-xs opacity-50 font-bold text-muted hover:opacity-100">CANCEL</button>
             </div>
             <div class="space-y-5">
                 <input type="hidden" id="edit-product-id">
@@ -453,14 +484,14 @@
                     <img id="edit-image-preview" class="w-full h-full object-cover">
                 </div>
                 <input type="file" id="edit-file-input" class="hidden">
-                <input type="text" id="edit-title" placeholder="Title" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base p-4 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500 text-default placeholder:text-muted">
-                <textarea id="edit-desc" placeholder="Details..." class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base p-4 rounded-2xl text-sm h-32 outline-none focus:ring-2 focus:ring-blue-500 text-default placeholder:text-muted"></textarea>
+                <input type="text" id="edit-title" placeholder="Title" class="w-full bg-input border border-base p-4 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500 text-default placeholder:text-muted">
+                <textarea id="edit-desc" placeholder="Details..." class="w-full bg-input border border-base p-4 rounded-2xl text-sm h-32 outline-none focus:ring-2 focus:ring-blue-500 text-default placeholder:text-muted"></textarea>
                 <div class="grid grid-cols-2 gap-4">
                     <div class="relative">
-                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold opacity-40 text-muted">₦</span>
-                        <input type="number" id="edit-price" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base pl-10 pr-4 py-4 rounded-2xl text-sm outline-none text-default">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-muted">₦</span>
+                        <input type="number" id="edit-price" class="w-full bg-input border border-base pl-10 pr-4 py-4 rounded-2xl text-sm outline-none text-default">
                     </div>
-                    <select id="edit-sold-status" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base px-4 py-4 rounded-2xl text-sm outline-none text-default">
+                    <select id="edit-sold-status" class="w-full bg-input border border-base px-4 py-4 rounded-2xl text-sm outline-none text-default">
                         <option value="false">Available</option>
                         <option value="true">Mark as Sold</option>
                     </select>
@@ -473,13 +504,13 @@
         <section id="my-items-screen" class="screen hidden">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-extrabold text-default">Manager</h2>
-                <button onclick="toggleAdminMode()" id="admin-toggle-btn" class="text-[9px] bg-slate-200 dark:bg-slate-800 px-3 py-1.5 rounded-full font-bold uppercase tracking-widest text-default">Admin: OFF</button>
+                <button onclick="toggleAdminMode()" id="admin-toggle-btn" class="text-[9px] bg-input px-3 py-1.5 rounded-full font-bold uppercase tracking-widest text-default">Admin: OFF</button>
             </div>
             <div id="admin-panel" class="hidden mb-10 space-y-6">
                 <div class="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 rounded-[2rem] text-white shadow-xl">
                     <h3 class="text-xs font-extrabold uppercase mb-4">📢 Global Broadcast</h3>
                     <textarea id="admin-announcement-input" class="w-full p-4 rounded-2xl text-slate-900 text-sm h-20 mb-3 outline-none" placeholder="Broadcast message..."></textarea>
-                    <button onclick="updateAnnouncement()" class="bg-white text-blue-600 px-8 py-2.5 rounded-xl text-[10px] font-bold shadow-lg">PUSH NOTIFICATION</button>
+                    <button onclick="updateAnnouncement()" class="bg-white text-blue-600 px-8 py-2.5 rounded-xl text-[10px] font-bold shadow-lg hover:bg-gray-100 transition-colors">PUSH NOTIFICATION</button>
                 </div>
                 <div class="bg-card p-6 border border-base rounded-[2rem] shadow-sm">
                     <h3 class="text-xs font-extrabold uppercase mb-4 text-blue-600">Member Directory</h3>
@@ -501,26 +532,26 @@
     </main>
 
     <!-- Bottom Nav -->
-    <nav class="fixed bottom-0 left-0 right-0 glass-nav flex justify-around py-4 text-slate-400 z-50">
+    <nav class="fixed bottom-0 left-0 right-0 glass-nav flex justify-around py-4 z-50">
         <button onclick="showScreen('browse-screen')" class="nav-item flex flex-col items-center relative">
-            <i class="fas fa-house-chimney text-lg mb-1"></i>
-            <span class="text-[9px] font-bold">Home</span>
+            <i class="fas fa-house-chimney text-lg mb-1" style="color: var(--text-muted);"></i>
+            <span class="text-[9px] font-bold text-muted">Home</span>
         </button>
         <button onclick="startNewPost()" class="nav-item flex flex-col items-center relative">
             <i class="fas fa-plus-circle text-2xl text-blue-600 mb-1"></i>
-            <span class="text-[9px] font-bold">Post</span>
+            <span class="text-[9px] font-bold text-muted">Post</span>
         </button>
         <button onclick="loadMyItems()" class="nav-item flex flex-col items-center relative">
-            <i class="fas fa-grid-2 text-lg mb-1"></i>
-            <span class="text-[9px] font-bold">Manager</span>
+            <i class="fas fa-grid-2 text-lg mb-1" style="color: var(--text-muted);"></i>
+            <span class="text-[9px] font-bold text-muted">Manager</span>
         </button>
-        <button onclick="window.open('https://wa.me/2348053103234?text=Hello%20Admin%2C%20I%20need%20help%20with%20SLIT-HUB', '_blank')" class="nav-item flex flex-col items-center relative">
+        <button onclick="window.open('https://wa.me/2348053103234?text=Hello%20Admin%2C%20I%20need%20help%20with%20SLIT-HUB.%20My%20ID%3A%20' + currentUserId, '_blank')" class="nav-item flex flex-col items-center relative">
             <i class="fas fa-comment-dots text-lg mb-1 text-green-500"></i>
-            <span class="text-[9px] font-bold">Admin</span>
+            <span class="text-[9px] font-bold text-muted">Admin</span>
         </button>
         <button onclick="showScreen('settings-screen')" class="nav-item flex flex-col items-center relative">
-            <i class="fas fa-circle-user text-lg mb-1"></i>
-            <span class="text-[9px] font-bold">Me</span>
+            <i class="fas fa-circle-user text-lg mb-1" style="color: var(--text-muted);"></i>
+            <span class="text-[9px] font-bold text-muted">Me</span>
         </button>
     </nav>
 
@@ -572,7 +603,8 @@
         window.toggleDarkMode = () => {
             const isDark = document.body.classList.toggle('dark');
             localStorage.setItem('dark-mode', isDark);
-            document.getElementById('dark-icon').className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+            const icon = document.getElementById('dark-icon');
+            icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
         };
         if (localStorage.getItem('dark-mode') === 'true') toggleDarkMode();
 
@@ -856,7 +888,7 @@
 
                     container.innerHTML = '';
                     if (docs.length === 0) {
-                        container.innerHTML = `<div class="col-span-full py-20 text-center opacity-40"><i class="fas fa-box-open text-4xl mb-4 text-muted"></i><p class="font-bold text-default">No items found.</p></div>`;
+                        container.innerHTML = `<div class="col-span-full py-20 text-center opacity-40"><i class="fas fa-box-open text-4xl text-muted"></i><p class="font-bold text-default">No items found.</p></div>`;
                         return;
                     }
                     docs.forEach(product => {
@@ -919,7 +951,7 @@
                         </div>
                         <p class="text-blue-600 text-2xl font-black">₦${p.Price}</p>
                     </div>
-                    <div class="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl mb-8 border border-base">
+                    <div class="flex items-center gap-4 p-4 bg-input rounded-2xl mb-8 border border-base">
                         <img src="${u.photo || 'https://ui-avatars.com/api/?name=User'}" class="w-12 h-12 rounded-full border-2 border-white">
                         <div class="flex-1">
                             <p class="text-xs font-extrabold text-default">${u.name || 'Campus Student'}</p>
@@ -929,7 +961,7 @@
                     </div>
                     <div class="mb-10">
                         <h4 class="text-[10px] font-extrabold uppercase opacity-40 mb-2 text-muted">Description</h4>
-                        <p class="text-sm leading-relaxed opacity-80 text-default">${p.Description}</p>
+                        <p class="text-sm leading-relaxed text-default">${p.Description}</p>
                     </div>
                     <div class="mt-8 mb-8">
                         <h3 class="text-sm font-extrabold mb-4 uppercase tracking-wider opacity-60 text-muted">Other listings from this seller</h3>
@@ -955,7 +987,7 @@
                             <div class="star-rating mb-4 flex gap-2" id="rating-input">
                                 ${[1,2,3,4,5].map(v => `<i class="fas fa-star text-2xl active" data-val="${v}"></i>`).join('')}
                             </div>
-                            <textarea id="review-text" placeholder="Share your experience..." class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base p-4 text-sm h-24 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 text-default placeholder:text-muted"></textarea>
+                            <textarea id="review-text" placeholder="Share your experience..." class="w-full bg-input border border-base p-4 text-sm h-24 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 text-default placeholder:text-muted"></textarea>
                             <button id="btn-submit-review" onclick="submitReview('${id}')" class="w-full bg-slate-900 dark:bg-slate-700 text-white py-3.5 rounded-2xl mt-4 font-bold">SUBMIT REVIEW</button>
                         </div>
                     `}
@@ -987,7 +1019,7 @@
             others.forEach(d => {
                 const item = d.data();
                 container.innerHTML += `
-                    <div class="bg-slate-50 dark:bg-slate-800/40 rounded-2xl overflow-hidden border border-base cursor-pointer" onclick="viewProduct('${d.id}')">
+                    <div class="bg-input rounded-2xl overflow-hidden border border-base cursor-pointer" onclick="viewProduct('${d.id}')">
                         <img src="${item.ImageURL}" class="w-full h-24 object-cover">
                         <div class="p-2">
                             <p class="text-[10px] font-bold truncate text-default">${item.Title}</p>
@@ -1037,7 +1069,7 @@
                     });
                     
                     container.innerHTML += `
-                        <div class="bg-slate-50 dark:bg-slate-800/30 p-4 rounded-2xl border border-base" id="review-${reviewId}">
+                        <div class="bg-input p-4 rounded-2xl border border-base" id="review-${reviewId}">
                             <div class="flex justify-between items-center mb-3">
                                 <div class="flex items-center gap-2">
                                     <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-[9px] font-bold text-blue-600">${r.userId.substring(5,7).toUpperCase()}</div>
@@ -1048,11 +1080,11 @@
                             <div class="flex text-yellow-500 text-[10px] mb-2">
                                 ${'<i class="fas fa-star"></i>'.repeat(r.stars)}${'<i class="far fa-star"></i>'.repeat(5 - r.stars)}
                             </div>
-                            <p class="text-xs opacity-80 leading-relaxed text-default">${r.text}</p>
+                            <p class="text-xs leading-relaxed text-default">${r.text}</p>
                             ${repliesHtml}
                             ${isSeller ? `
                                 <button onclick="replyToReview('${productId}', '${reviewId}', '${r.userName || 'User'}')" 
-                                    class="mt-2 text-[9px] bg-blue-100 dark:bg-blue-900/30 text-blue-600 px-3 py-1 rounded-full font-bold">
+                                    class="mt-2 text-[9px] bg-blue-100 dark:bg-blue-900/30 text-blue-600 px-3 py-1 rounded-full font-bold hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors">
                                     REPLY
                                 </button>
                             ` : ''}
@@ -1174,8 +1206,8 @@
                                 <p class="text-blue-600 font-bold text-xs">₦${p.Price}</p>
                             </div>
                             <div class="flex gap-2 flex-shrink-0">
-                                <button onclick="openEditScreen('${d.id}')" class="bg-blue-50 dark:bg-blue-900/30 text-blue-600 p-2.5 rounded-xl text-xs"><i class="fas fa-pen-to-square"></i></button>
-                                <button onclick="deleteProduct('${d.id}')" class="bg-red-50 dark:bg-red-900/30 text-red-600 p-2.5 rounded-xl text-xs"><i class="fas fa-trash"></i></button>
+                                <button onclick="openEditScreen('${d.id}')" class="bg-blue-50 dark:bg-blue-900/30 text-blue-600 p-2.5 rounded-xl text-xs hover:bg-blue-100 dark:hover:bg-blue-800 transition-colors"><i class="fas fa-pen-to-square"></i></button>
+                                <button onclick="deleteProduct('${d.id}')" class="bg-red-50 dark:bg-red-900/30 text-red-600 p-2.5 rounded-xl text-xs hover:bg-red-100 dark:hover:bg-red-800 transition-colors"><i class="fas fa-trash"></i></button>
                             </div>
                         </div>
                     `;
@@ -1271,8 +1303,8 @@
                             <p class="text-default mt-1"><b>Target:</b> ${r.reportedUser}</p>
                             <p class="text-default"><b>Reason:</b> ${r.reason}</p>
                             <div class="flex gap-2 mt-2">
-                                <button onclick="banUser('${r.reportedUser}')" class="bg-red-600 text-white px-3 py-1 rounded-lg text-[9px] font-bold">BAN</button>
-                                <button onclick="window.open('https://wa.me/2348053103234?text=Regarding%20report%20on%20user%20${r.reportedUser}', '_blank')" class="bg-green-600 text-white px-3 py-1 rounded-lg text-[9px] font-bold">CONTACT</button>
+                                <button onclick="banUser('${r.reportedUser}')" class="bg-red-600 text-white px-3 py-1 rounded-lg text-[9px] font-bold hover:bg-red-700 transition-colors">BAN</button>
+                                <button onclick="window.open('https://wa.me/2348053103234?text=Regarding%20report%20on%20user%20${r.reportedUser}', '_blank')" class="bg-green-600 text-white px-3 py-1 rounded-lg text-[9px] font-bold hover:bg-green-700 transition-colors">CONTACT</button>
                             </div>
                         </div>
                     `;
@@ -1309,7 +1341,7 @@
                 }
                 
                 container.innerHTML += `
-                    <div class="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-base">
+                    <div class="bg-input p-4 rounded-2xl border border-base">
                         <div class="flex justify-between items-start">
                             <div class="text-[11px] min-w-0 flex-1 mr-2">
                                 <p class="font-extrabold text-blue-600 truncate text-default">${u.name || 'Anonymous'} ${isVerified ? '✅' : ''}</p>
@@ -1318,17 +1350,17 @@
                             </div>
                             <div class="flex flex-col gap-2 flex-shrink-0">
                                 ${whatsappPhone !== 'N/A' ? `
-                                    <button onclick="window.open('https://wa.me/${whatsappPhone}', '_blank')" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-[9px] font-bold">
+                                    <button onclick="window.open('https://wa.me/${whatsappPhone}', '_blank')" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-[9px] font-bold hover:bg-green-700 transition-colors">
                                         <i class="fab fa-whatsapp mr-1"></i>WHATSAPP
                                     </button>
                                 ` : ''}
                                 ${isVerified
-                                    ? `<button onclick="removeVerification('${uid}')" class="bg-orange-500 text-white px-3 py-1.5 rounded-lg text-[9px] font-bold">REMOVE TICK</button>`
-                                    : `<button onclick="verifyUser('${uid}')" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-[9px] font-bold">VERIFY</button>`
+                                    ? `<button onclick="removeVerification('${uid}')" class="bg-orange-500 text-white px-3 py-1.5 rounded-lg text-[9px] font-bold hover:bg-orange-600 transition-colors">REMOVE TICK</button>`
+                                    : `<button onclick="verifyUser('${uid}')" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-[9px] font-bold hover:bg-green-700 transition-colors">VERIFY</button>`
                                 }
                                 ${isBanned
-                                    ? `<button onclick="unbanUser('${uid}')" class="bg-blue-100 text-blue-600 px-3 py-1.5 rounded-lg text-[9px] font-bold">UNBAN</button>`
-                                    : `<button onclick="banUser('${uid}')" class="bg-red-600 text-white px-3 py-1.5 rounded-lg text-[9px] font-bold">BAN</button>`
+                                    ? `<button onclick="unbanUser('${uid}')" class="bg-blue-100 text-blue-600 px-3 py-1.5 rounded-lg text-[9px] font-bold hover:bg-blue-200 transition-colors">UNBAN</button>`
+                                    : `<button onclick="banUser('${uid}')" class="bg-red-600 text-white px-3 py-1.5 rounded-lg text-[9px] font-bold hover:bg-red-700 transition-colors">BAN</button>`
                                 }
                             </div>
                         </div>
@@ -1381,9 +1413,9 @@
             });
         };
 
-        // ── Contact developer (now opens WhatsApp) ─────────────────
+        // ── Contact developer ─────────────────────────────────
         window.contactDeveloper = () => {
-            window.open('https://wa.me/2348053103234?text=Hi%20Developer!%20I%20need%20help%20with%20SLIT-HUB', '_blank');
+            window.open('https://wa.me/2348053103234?text=Hi%20Developer!%20I%20need%20help%20with%20SLIT-HUB.%20My%20ID%3A%20' + currentUserId, '_blank');
         };
 
         // ── Init ───────────────────────────────────────────────────
