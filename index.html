@@ -498,7 +498,6 @@
         const db = getFirestore(app);
 
         // ── State ──────────────────────────────────────────────────
-        // Ensure userId is always valid (never just "user" or short broken values)
         let currentUserId = localStorage.getItem('slit_user_id');
         if (!currentUserId || currentUserId.length < 8 || !currentUserId.startsWith('user_')) {
             currentUserId = "user_" + Date.now() + "_" + Math.floor(Math.random() * 9999);
@@ -506,7 +505,7 @@
         }
 
         let activeChatId = null;
-        let activeMessageListener = null; // track listener so we can unsubscribe
+        let activeMessageListener = null;
         let activeProductListener = null;
         let activeMyItemsListener = null;
         let isAdminMode = false;
@@ -546,18 +545,15 @@
         };
 
         // ── Real-time listeners on app start ───────────────────────
-        // Ban check
         onSnapshot(doc(db, "BannedUsers", currentUserId), snap => {
             document.getElementById('ban-screen').classList.toggle('hidden', !snap.exists());
             isUserBanned = snap.exists();
         });
 
-        // Verified sellers
         onSnapshot(collection(db, "VerifiedUsers"), snap => {
             verifiedSellers = snap.docs.map(d => d.id);
         });
 
-        // My profile
         onSnapshot(doc(db, "Users", currentUserId), snap => {
             if (snap.exists()) {
                 const d = snap.data();
@@ -570,7 +566,6 @@
             }
         });
 
-        // Announcements
         onSnapshot(doc(db, "AppData", "Announcement"), snap => {
             const bar = document.getElementById('announcement-bar');
             if (snap.exists() && snap.data().active) {
@@ -582,7 +577,6 @@
         });
 
         // ── Unread message watcher ─────────────────────────────────
-        // Watches UserInbox and counts messages newer than last-seen per chat
         function startUnreadWatcher() {
             onSnapshot(doc(db, "UserInbox", currentUserId), async inboxSnap => {
                 if (!inboxSnap.exists()) return;
@@ -651,11 +645,9 @@
             setTimeout(() => toast.remove(), 300);
         }
 
-        // ── Incoming message listener (runs in background) ─────────
-        // Watches all my chats for new messages from others while inbox is NOT open
+        // ── Incoming message listener ─────────────────────────
         let incomingListeners = {};
         function watchIncomingMessages(chatIds) {
-            // Unsubscribe old listeners not in new list
             Object.keys(incomingListeners).forEach(id => {
                 if (!chatIds.includes(id)) {
                     incomingListeners[id]();
@@ -664,11 +656,14 @@
             });
 
             chatIds.forEach(async chatId => {
-                if (incomingListeners[chatId]) return; // already watching
+                if (incomingListeners[chatId]) return;
 
-                // Safely extract otherId from chatId (both userIds contain underscores)
-                const chatParts = chatId.replace(currentUserId + '_', '').replace('_' + currentUserId, '');
-                const otherId = chatParts !== chatId ? chatParts : null;
+                // Extract other participant ID safely
+                const parts = chatId.split('_');
+                const otherId = parts.find(id => id !== currentUserId) || null;
+                
+                if (!otherId) return;
+                
                 const uSnap = await getDoc(doc(db, "Users", otherId));
                 const senderName = uSnap.exists() ? (uSnap.data().name || 'Campus User') : 'Campus User';
 
@@ -676,7 +671,7 @@
                 incomingListeners[chatId] = onSnapshot(
                     query(collection(db, "Chats", chatId, "Messages"), orderBy("timestamp", "asc")),
                     snap => {
-                        if (!initialized) { initialized = true; return; } // skip first load
+                        if (!initialized) { initialized = true; return; }
                         snap.docChanges().forEach(change => {
                             if (change.type === 'added') {
                                 const m = change.doc.data();
@@ -694,7 +689,6 @@
             });
         }
 
-        // Watch inbox for chat list changes and start message watchers
         onSnapshot(doc(db, "UserInbox", currentUserId), snap => {
             if (snap.exists()) {
                 const chatIds = snap.data().chatIds || [];
@@ -863,7 +857,6 @@
             if (!container) return;
             container.innerHTML = '<div class="skeleton-card animate-pulse"></div>'.repeat(4);
 
-            // Unsubscribe previous listener
             if (activeProductListener) { activeProductListener(); activeProductListener = null; }
 
             activeProductListener = onSnapshot(
@@ -1265,56 +1258,99 @@
             }
         };
 
-        // ── CHAT SYSTEM ────────────────────────────────────────────
+        // ── FIXED CHAT SYSTEM ────────────────────────────────────────────
 
-        // Register a chat in a user's inbox doc, storing participants too
+        // Register a chat in a user's inbox doc
         async function registerChatForUser(userId, chatId, participantA, participantB) {
             const ref = doc(db, "UserInbox", userId);
             const snap = await getDoc(ref);
-            const existingChats = snap.exists() ? (snap.data().chats || []) : [];
+            
+            let existingData = snap.exists() ? snap.data() : {};
+            let existingChats = existingData.chats || [];
+            
+            // Check if chat already exists
             const alreadyExists = existingChats.some(c => c.chatId === chatId);
+            
             if (!alreadyExists) {
-                const newChat = { chatId, participants: [participantA, participantB] };
-                await setDoc(ref, { chats: [...existingChats, newChat] }, { merge: true });
+                // Add new chat with proper structure
+                const newChat = { 
+                    chatId, 
+                    participants: [participantA, participantB],
+                    lastUpdated: serverTimestamp()
+                };
+                
+                existingChats.push(newChat);
+                
+                // Save with both formats for backward compatibility
+                await setDoc(ref, { 
+                    chats: existingChats,
+                    chatIds: existingChats.map(c => c.chatId)
+                }, { merge: true });
             }
         }
 
-        // Open a chat (called from product page, admin panel, or inbox)
+        // FIXED: Open a chat with proper ID generation and self-chat prevention
         window.startChat = async (targetId, targetName) => {
+            // 🛑 IMPORTANT: Prevent users from messaging themselves
             if (!targetId || targetId === currentUserId) {
-                alert("Cannot open this chat.");
+                alert("You cannot start a chat with yourself!");
                 return;
             }
-            activeChatId = [currentUserId, targetId].sort().join("_");
+            
+            // Create consistent chat ID by sorting both IDs
+            // This ensures both users access the same chat collection
+            const chatId = [currentUserId, targetId].sort().join("_");
+            activeChatId = chatId;
+            
             document.getElementById('chat-title').innerText = targetName || 'Chat';
             showScreen('chatroom-screen');
+            
+            // Update last seen timestamp
             lastSeenTimestamps[activeChatId] = Date.now();
             localStorage.setItem('slit_last_seen', JSON.stringify(lastSeenTimestamps));
             updateNotificationBadge();
+            
             try {
+                // Register chat for both users
                 await registerChatForUser(currentUserId, activeChatId, currentUserId, targetId);
                 await registerChatForUser(targetId, activeChatId, currentUserId, targetId);
             } catch(e) {
                 console.error("registerChat failed:", e);
             }
+            
             loadMessages();
         };
 
+        // FIXED: Load messages with validation
         function loadMessages() {
             if (!activeChatId) return;
+            
+            // 🛑 FIX: Don't load messages if it's a self-chat
+            const participants = activeChatId.split('_');
+            if (participants[0] === participants[1]) {
+                console.log("Invalid self-chat detected");
+                return;
+            }
+            
             // Unsubscribe previous message listener
-            if (activeMessageListener) { activeMessageListener(); activeMessageListener = null; }
+            if (activeMessageListener) { 
+                activeMessageListener(); 
+                activeMessageListener = null; 
+            }
 
             activeMessageListener = onSnapshot(
                 query(collection(db, "Chats", activeChatId, "Messages"), orderBy("timestamp", "asc")),
                 snapshot => {
                     const container = document.getElementById('messages-container');
                     if (!container) return;
+                    
                     container.innerHTML = '';
+                    
                     snapshot.forEach(d => {
                         const m = d.data();
                         const isMe = m.senderId === currentUserId;
                         const ts = m.timestamp?.seconds ? new Date(m.timestamp.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+                        
                         const div = document.createElement('div');
                         div.className = `flex ${isMe ? 'justify-end' : 'justify-start'} mb-2`;
                         div.innerHTML = `
@@ -1325,6 +1361,7 @@
                         `;
                         container.appendChild(div);
                     });
+                    
                     container.scrollTop = container.scrollHeight;
 
                     // Update seen timestamp
@@ -1362,7 +1399,7 @@
             }
         });
 
-        // Open inbox — reads from UserInbox
+        // FIXED: Open inbox with better participant detection
         window.openChats = async () => {
             showScreen('chats-screen');
             const chatsList = document.getElementById('chats-list');
@@ -1370,7 +1407,6 @@
             try {
                 const inboxSnap = await getDoc(doc(db, "UserInbox", currentUserId));
                 const inboxData = inboxSnap.exists() ? inboxSnap.data() : {};
-                // Support both old format (chatIds array) and new format (chats array with participants)
                 const chatIds = inboxData.chats 
                     ? inboxData.chats.map(c => c.chatId)
                     : (inboxData.chatIds || []);
@@ -1382,24 +1418,23 @@
 
                 const chatDataList = [];
                 for (const chatId of chatIds) {
-                    // Find the other participant safely using stored participants array
+                    // Find the other participant safely
                     const chatMeta = inboxData.chats ? inboxData.chats.find(c => c.chatId === chatId) : null;
                     let otherId = null;
+                    
                     if (chatMeta && chatMeta.participants) {
                         otherId = chatMeta.participants.find(id => id !== currentUserId);
                     }
-                    // Fallback for old chats: try to parse chatId by finding second userId
+                    
+                    // Fallback: try to parse from chatId
                     if (!otherId) {
-                        const parts = chatId.split('_user_');
-                        otherId = parts[0] === currentUserId.replace('user_','') 
-                            ? 'user_' + parts[1] 
-                            : 'user_' + parts[0];
-                        // Safer fallback: just pick whichever full segment isn't us
-                        const segs = chatId.match(/user_[^_]+(?:_[^u][^s][^e][^r])?/g) || [];
-                        const other = segs.find(s => s !== currentUserId);
-                        if (other) otherId = other;
+                        const parts = chatId.split('_');
+                        otherId = parts.find(id => id !== currentUserId);
                     }
+                    
+                    // Skip if no valid other participant or it's self
                     if (!otherId || otherId === currentUserId) continue;
+                    
                     const msgSnap = await getDocs(query(collection(db, "Chats", chatId, "Messages"), orderBy("timestamp", "desc")));
                     const lastMsg = msgSnap.docs[0] ? msgSnap.docs[0].data() : null;
                     const uSnap = await getDoc(doc(db, "Users", otherId));
