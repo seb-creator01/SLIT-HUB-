@@ -576,7 +576,37 @@
             }
         });
 
-        // ── COMPLETE WORKING FIREBASE CHAT SYSTEM ─────────────────────────────
+        // ── COMPLETE WORKING FIREBASE CHAT SYSTEM WITH USER INBOX ─────────────
+
+        // Helper function to add chat to user's inbox
+        async function addToUserInbox(userId, chatId, otherUserId) {
+            try {
+                const inboxRef = doc(db, "userInbox", userId);
+                const inboxSnap = await getDoc(inboxRef);
+                
+                let chats = [];
+                if (inboxSnap.exists()) {
+                    chats = inboxSnap.data().chats || [];
+                }
+                
+                // Check if chat already exists in inbox
+                const chatExists = chats.some(chat => chat.chatId === chatId);
+                
+                if (!chatExists) {
+                    chats.push({
+                        chatId: chatId,
+                        otherUserId: otherUserId,
+                        lastUpdated: serverTimestamp(),
+                        unreadCount: 0
+                    });
+                    
+                    await setDoc(inboxRef, { chats: chats }, { merge: true });
+                    console.log(`✅ Added chat to inbox for user ${userId}`);
+                }
+            } catch (e) {
+                console.error("Error adding to inbox:", e);
+            }
+        }
 
         // Start a chat
         window.startChat = async (targetId, targetName) => {
@@ -588,29 +618,36 @@
             // Create consistent chat ID (sorted so both users access same room)
             activeChatId = [currentUserId, targetId].sort().join('_');
             
-            // Create the chat document in Firestore (this is the key fix!)
             try {
+                // Create or update chat document
                 const chatRef = doc(db, "chats", activeChatId);
                 const chatSnap = await getDoc(chatRef);
                 
-                // If chat doesn't exist, create it with participants
                 if (!chatSnap.exists()) {
+                    // Create the chat document
                     await setDoc(chatRef, {
                         participants: [currentUserId, targetId],
                         createdAt: serverTimestamp(),
-                        lastMessageAt: serverTimestamp()
+                        lastMessageAt: serverTimestamp(),
+                        lastMessage: "Chat started"
                     });
                     console.log("✅ Chat document created");
+                    
+                    // Add to both users' inboxes
+                    await addToUserInbox(currentUserId, activeChatId, targetId);
+                    await addToUserInbox(targetId, activeChatId, currentUserId);
                 }
+                
+                document.getElementById('chat-title').innerText = targetName || 'Chat';
+                showScreen('chatroom-screen');
+                
+                // Load messages
+                loadFirebaseMessages();
+                
             } catch (e) {
-                console.error("Error creating chat:", e);
+                console.error("Error starting chat:", e);
+                alert("Error starting chat: " + e.message);
             }
-            
-            document.getElementById('chat-title').innerText = targetName || 'Chat';
-            showScreen('chatroom-screen');
-            
-            // Load messages
-            loadFirebaseMessages();
         };
 
         // Load messages from Firestore
@@ -675,6 +712,12 @@
                     });
                     
                     container.scrollTop = container.scrollHeight;
+                    
+                    // Update last seen timestamp
+                    if (activeChatId) {
+                        lastSeenTimestamps[activeChatId] = Date.now();
+                        localStorage.setItem('slit_last_seen', JSON.stringify(lastSeenTimestamps));
+                    }
                 },
                 (error) => {
                     console.error("Message listener error:", error);
@@ -710,7 +753,8 @@
                 // Update chat's last message time
                 const chatRef = doc(db, "chats", activeChatId);
                 await updateDoc(chatRef, {
-                    lastMessageAt: serverTimestamp()
+                    lastMessageAt: serverTimestamp(),
+                    lastMessage: text
                 });
                 
                 console.log("✅ Message sent successfully!");
@@ -733,32 +777,34 @@
             }
         });
 
-        // Open chats list - FIXED to find chats by participants
+        // Open chats list
         window.openChats = async () => {
             showScreen('chats-screen');
             const container = document.getElementById('chats-list');
             container.innerHTML = '<p class="text-[11px] opacity-40 text-center py-8">Loading conversations...</p>';
             
             try {
-                // Query chats where current user is a participant
-                const chatsRef = collection(db, "chats");
-                const chatsQuery = query(chatsRef, where("participants", "array-contains", currentUserId));
-                const chatsSnap = await getDocs(chatsQuery);
+                // Get user's inbox
+                const inboxRef = doc(db, "userInbox", currentUserId);
+                const inboxSnap = await getDoc(inboxRef);
                 
-                if (chatsSnap.empty) {
+                if (!inboxSnap.exists() || !inboxSnap.data().chats || inboxSnap.data().chats.length === 0) {
                     container.innerHTML = '<p class="text-[11px] opacity-40 text-center py-12 italic">No messages yet.<br>Message a seller to start a conversation.</p>';
                     return;
                 }
                 
+                const inboxChats = inboxSnap.data().chats;
                 const myChats = [];
                 
-                for (const chatDoc of chatsSnap.docs) {
-                    const chatData = chatDoc.data();
-                    const chatId = chatDoc.id;
+                for (const inboxChat of inboxChats) {
+                    const chatId = inboxChat.chatId;
+                    const otherId = inboxChat.otherUserId;
                     
-                    // Find the other participant
-                    const otherId = chatData.participants.find(id => id !== currentUserId);
-                    if (!otherId) continue;
+                    // Get chat details
+                    const chatRef = doc(db, "chats", chatId);
+                    const chatSnap = await getDoc(chatRef);
+                    
+                    if (!chatSnap.exists()) continue;
                     
                     // Get last message
                     const messagesRef = collection(db, "chats", chatId, "messages");
@@ -772,13 +818,23 @@
                     const userSnap = await getDoc(doc(db, "Users", otherId));
                     const userData = userSnap.exists() ? userSnap.data() : { name: 'Campus User' };
                     
+                    // Check for unread messages
+                    const lastSeen = lastSeenTimestamps[chatId] || 0;
+                    let unread = 0;
+                    
+                    if (lastMsg && lastMsg.senderId !== currentUserId) {
+                        const msgTime = lastMsg.timestamp?.seconds * 1000 || 0;
+                        if (msgTime > lastSeen) unread = 1;
+                    }
+                    
                     myChats.push({
                         chatId,
                         otherId,
                         otherName: userData.name || 'Campus User',
                         otherPhoto: userData.photo,
                         lastMsg,
-                        lastMsgTime: lastMsg?.timestamp || chatData.lastMessageAt
+                        lastMsgTime: lastMsg?.timestamp || chatSnap.data().lastMessageAt,
+                        unread: unread
                     });
                 }
                 
@@ -788,6 +844,10 @@
                     const bTime = b.lastMsgTime?.seconds || 0;
                     return bTime - aTime;
                 });
+                
+                // Update unread count for badge
+                unreadCount = myChats.reduce((total, chat) => total + (chat.unread || 0), 0);
+                updateNotificationBadge();
                 
                 container.innerHTML = '';
                 
@@ -800,14 +860,15 @@
                     
                     container.innerHTML += `
                         <div onclick="startChat('${chat.otherId}', '${chat.otherName.replace(/'/g, "\\'")}')"
-                            class="flex items-center gap-4 p-4 bg-card border border-base rounded-2xl cursor-pointer hover:shadow-md transition-all active:scale-95 mb-2">
+                            class="flex items-center gap-4 p-4 bg-card border ${chat.unread ? 'border-blue-300 dark:border-blue-700' : 'border-base'} rounded-2xl cursor-pointer hover:shadow-md transition-all active:scale-95 mb-2">
                             <div class="relative flex-shrink-0">
                                 <img src="${chat.otherPhoto || `https://ui-avatars.com/api/?name=${chat.otherName}`}" 
                                      class="w-12 h-12 rounded-full object-cover border-2 border-white shadow">
+                                ${chat.unread ? '<div class="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full border-2 border-white"></div>' : ''}
                             </div>
                             <div class="flex-1 min-w-0">
-                                <p class="font-bold text-sm truncate">${chat.otherName}</p>
-                                <p class="text-[11px] opacity-50 truncate">${preview}</p>
+                                <p class="font-bold text-sm truncate ${chat.unread ? 'text-blue-600' : ''}">${chat.otherName}</p>
+                                <p class="text-[11px] opacity-50 truncate ${chat.unread ? 'font-semibold opacity-80' : ''}">${preview}</p>
                             </div>
                             <span class="text-[9px] opacity-30 font-bold uppercase whitespace-nowrap flex-shrink-0">${timeStr}</span>
                         </div>
@@ -825,6 +886,17 @@
                 `;
             }
         };
+
+        function updateNotificationBadge() {
+            const dot = document.getElementById('chat-notify');
+            if (unreadCount > 0) {
+                dot.style.display = 'flex';
+                dot.innerText = unreadCount > 99 ? '99+' : unreadCount;
+            } else {
+                dot.style.display = 'none';
+                dot.innerText = '';
+            }
+        }
 
         // ── Screen navigation ──────────────────────────────────────
         window.showScreen = screenId => {
