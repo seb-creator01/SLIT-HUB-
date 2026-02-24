@@ -586,7 +586,8 @@
         function startUnreadWatcher() {
             onSnapshot(doc(db, "UserInbox", currentUserId), async inboxSnap => {
                 if (!inboxSnap.exists()) return;
-                const chatIds = inboxSnap.data().chatIds || [];
+                const inboxD = inboxSnap.data();
+                const chatIds = inboxD.chats ? inboxD.chats.map(c => c.chatId) : (inboxD.chatIds || []);
                 let total = 0;
 
                 for (const chatId of chatIds) {
@@ -665,7 +666,9 @@
             chatIds.forEach(async chatId => {
                 if (incomingListeners[chatId]) return; // already watching
 
-                const otherId = chatId.split('_').find(id => id !== currentUserId);
+                // Safely extract otherId from chatId (both userIds contain underscores)
+                const chatParts = chatId.replace(currentUserId + '_', '').replace('_' + currentUserId, '');
+                const otherId = chatParts !== chatId ? chatParts : null;
                 const uSnap = await getDoc(doc(db, "Users", otherId));
                 const senderName = uSnap.exists() ? (uSnap.data().name || 'Campus User') : 'Campus User';
 
@@ -1264,13 +1267,15 @@
 
         // ── CHAT SYSTEM ────────────────────────────────────────────
 
-        // Register a chat ID in a user's inbox doc
-        async function registerChatForUser(userId, chatId) {
+        // Register a chat in a user's inbox doc, storing participants too
+        async function registerChatForUser(userId, chatId, participantA, participantB) {
             const ref = doc(db, "UserInbox", userId);
             const snap = await getDoc(ref);
-            const existing = snap.exists() ? (snap.data().chatIds || []) : [];
-            if (!existing.includes(chatId)) {
-                await setDoc(ref, { chatIds: [...existing, chatId] }, { merge: true });
+            const existingChats = snap.exists() ? (snap.data().chats || []) : [];
+            const alreadyExists = existingChats.some(c => c.chatId === chatId);
+            if (!alreadyExists) {
+                const newChat = { chatId, participants: [participantA, participantB] };
+                await setDoc(ref, { chats: [...existingChats, newChat] }, { merge: true });
             }
         }
 
@@ -1287,8 +1292,8 @@
             localStorage.setItem('slit_last_seen', JSON.stringify(lastSeenTimestamps));
             updateNotificationBadge();
             try {
-                await registerChatForUser(currentUserId, activeChatId);
-                await registerChatForUser(targetId, activeChatId);
+                await registerChatForUser(currentUserId, activeChatId, currentUserId, targetId);
+                await registerChatForUser(targetId, activeChatId, currentUserId, targetId);
             } catch(e) {
                 console.error("registerChat failed:", e);
             }
@@ -1364,7 +1369,11 @@
             chatsList.innerHTML = '<p class="text-[11px] opacity-40 text-center py-8">Loading messages...</p>';
             try {
                 const inboxSnap = await getDoc(doc(db, "UserInbox", currentUserId));
-                const chatIds = inboxSnap.exists() ? (inboxSnap.data().chatIds || []) : [];
+                const inboxData = inboxSnap.exists() ? inboxSnap.data() : {};
+                // Support both old format (chatIds array) and new format (chats array with participants)
+                const chatIds = inboxData.chats 
+                    ? inboxData.chats.map(c => c.chatId)
+                    : (inboxData.chatIds || []);
 
                 if (chatIds.length === 0) {
                     chatsList.innerHTML = '<p class="text-[11px] opacity-40 text-center py-12 italic">No messages yet.<br>Message a seller to start a conversation.</p>';
@@ -1373,8 +1382,24 @@
 
                 const chatDataList = [];
                 for (const chatId of chatIds) {
-                    const otherId = chatId.split('_').find(id => id !== currentUserId);
-                    if (!otherId) continue;
+                    // Find the other participant safely using stored participants array
+                    const chatMeta = inboxData.chats ? inboxData.chats.find(c => c.chatId === chatId) : null;
+                    let otherId = null;
+                    if (chatMeta && chatMeta.participants) {
+                        otherId = chatMeta.participants.find(id => id !== currentUserId);
+                    }
+                    // Fallback for old chats: try to parse chatId by finding second userId
+                    if (!otherId) {
+                        const parts = chatId.split('_user_');
+                        otherId = parts[0] === currentUserId.replace('user_','') 
+                            ? 'user_' + parts[1] 
+                            : 'user_' + parts[0];
+                        // Safer fallback: just pick whichever full segment isn't us
+                        const segs = chatId.match(/user_[^_]+(?:_[^u][^s][^e][^r])?/g) || [];
+                        const other = segs.find(s => s !== currentUserId);
+                        if (other) otherId = other;
+                    }
+                    if (!otherId || otherId === currentUserId) continue;
                     const msgSnap = await getDocs(query(collection(db, "Chats", chatId, "Messages"), orderBy("timestamp", "desc")));
                     const lastMsg = msgSnap.docs[0] ? msgSnap.docs[0].data() : null;
                     const uSnap = await getDoc(doc(db, "Users", otherId));
