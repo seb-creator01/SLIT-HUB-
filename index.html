@@ -227,10 +227,20 @@
         @keyframes toastOut {
             to { transform: translateX(120%); opacity: 0; }
         }
+
+        /* Review reply styles */
+        .review-reply {
+            margin-left: 30px;
+            padding: 10px;
+            background: rgba(37, 99, 235, 0.05);
+            border-radius: 12px;
+            border-left: 3px solid var(--primary);
+        }
     </style>
 </head>
 <body>
 
+    <!-- Terms Modal -->
     <div id="terms-modal" class="hidden fixed inset-0 z-[10000] bg-black/60 backdrop-blur-sm flex items-center justify-center p-6">
         <div class="modal-content p-8 max-w-sm w-full shadow-2xl border border-base">
             <div class="text-center mb-6">
@@ -249,6 +259,7 @@
         </div>
     </div>
 
+    <!-- Ban Screen -->
     <div id="ban-screen" class="hidden fixed inset-0 bg-white dark:bg-slate-950 z-[9999] flex flex-col items-center justify-center text-center p-10">
         <div class="text-red-500 mb-6 bg-red-50 dark:bg-red-950/30 p-6 rounded-full">
             <i class="fas fa-user-lock text-5xl"></i>
@@ -258,8 +269,7 @@
         <button onclick="contactDeveloper()" class="mt-8 bg-blue-600 text-white px-8 py-3 rounded-full font-bold shadow-lg">Appeal Access</button>
     </div>
 
-    <div id="toast-container" class="fixed bottom-24 right-4 z-[10000] space-y-2 pointer-events-none"></div>
-
+    <!-- Header -->
     <header class="glass-header sticky top-0 z-50 p-4">
         <div class="max-w-5xl mx-auto flex justify-between items-center gap-4">
             <h1 class="brand-logo text-2xl" onclick="showScreen('browse-screen')">SLIT-HUB</h1>
@@ -273,6 +283,7 @@
         </div>
     </header>
 
+    <!-- Announcement Bar -->
     <div id="announcement-bar" class="hidden text-white py-3 px-4 flex justify-between items-center text-[11px] font-bold shadow-md sticky top-[73px] z-40" style="background: linear-gradient(90deg, #2563eb, #7c3aed);">
         <div class="flex-1 text-center flex items-center justify-center gap-2">
             <i class="fas fa-sparkles"></i>
@@ -283,6 +294,7 @@
 
     <main class="max-w-5xl mx-auto p-4 md:p-6">
 
+        <!-- Browse Screen -->
         <section id="browse-screen" class="screen">
             <div class="view-toggle">
                 <button id="toggle-products" class="active" onclick="switchView('Product')">🛍️ Shop</button>
@@ -293,6 +305,7 @@
             <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5"></div>
         </section>
 
+        <!-- Settings/Profile Screen -->
         <section id="settings-screen" class="screen hidden max-w-lg mx-auto">
             <div class="bg-card p-8 rounded-[2.5rem] shadow-xl border border-base">
                 <div class="text-center mb-8">
@@ -328,6 +341,7 @@
             </div>
         </section>
 
+        <!-- Post Screen -->
         <section id="post-screen" class="screen hidden max-w-xl mx-auto bg-card p-8 rounded-[2.5rem] shadow-xl border border-base">
             <h2 class="text-2xl font-extrabold mb-6">Create New Listing</h2>
             <div class="flex gap-2 mb-8 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl">
@@ -360,12 +374,16 @@
                     <select id="post-category" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base px-4 py-4 rounded-2xl text-sm outline-none"></select>
                     <select id="post-condition" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base px-4 py-4 rounded-2xl text-sm outline-none"></select>
                 </div>
-                <input type="tel" id="post-phone" placeholder="📞 WhatsApp (e.g. 080...)" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base p-4 rounded-2xl text-sm outline-none">
-                <input type="text" id="post-location" placeholder="📍 Campus Location" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base p-4 rounded-2xl text-sm outline-none">
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-blue-600">+234</span>
+                    <input type="tel" id="post-phone" placeholder="Phone number (e.g. 8051234567)" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base pl-16 pr-4 py-4 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <input type="text" id="post-location" placeholder="📍 Campus Location" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base p-4 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
                 <button id="btn-post" class="w-full btn-premium font-extrabold py-4 rounded-2xl shadow-xl mt-4">PUBLISH NOW</button>
             </div>
         </section>
 
+        <!-- Edit Screen -->
         <section id="edit-screen" class="screen hidden max-w-xl mx-auto bg-card p-8 rounded-[2.5rem] shadow-xl border border-base">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-extrabold">Edit Listing</h2>
@@ -393,6 +411,7 @@
             </div>
         </section>
 
+        <!-- Manager Screen -->
         <section id="my-items-screen" class="screen hidden">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-extrabold">Manager</h2>
@@ -416,33 +435,14 @@
             <div id="my-items-grid" class="grid grid-cols-1 gap-4"></div>
         </section>
 
+        <!-- Product Details Screen -->
         <section id="details-screen" class="screen hidden bg-card rounded-[2.5rem] shadow-2xl overflow-hidden pb-12 border border-base">
             <div id="details-content"></div>
         </section>
 
-        <section id="chats-screen" class="screen hidden">
-            <h2 class="text-2xl font-extrabold mb-6">Messages</h2>
-            <div id="chats-list" class="space-y-3"></div>
-        </section>
-
-        <section id="chatroom-screen" class="screen hidden flex flex-col h-[82vh] bg-card rounded-[2.5rem] border border-base shadow-2xl overflow-hidden">
-            <div class="p-5 border-b border-base flex items-center gap-4 bg-card/50 backdrop-blur-md">
-                <button onclick="showScreen('chats-screen')" class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                    <i class="fas fa-chevron-left text-xs"></i>
-                </button>
-                <div id="chat-title" class="font-bold text-base flex-1 truncate"></div>
-            </div>
-            <div id="messages-container" class="flex-1 overflow-y-auto p-5 space-y-2 bg-slate-50 dark:bg-slate-950/50 no-scrollbar"></div>
-            <div class="p-4 bg-card border-t border-base flex gap-3">
-                <input type="text" id="message-input" placeholder="Type a message..." class="flex-1 bg-slate-100 dark:bg-slate-800 border-none rounded-2xl px-5 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                <button id="btn-send" class="btn-premium w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
-            </div>
-        </section>
-
     </main>
 
+    <!-- Bottom Nav -->
     <nav class="fixed bottom-0 left-0 right-0 glass-nav flex justify-around py-4 text-slate-400 z-50">
         <button onclick="showScreen('browse-screen')" class="nav-item flex flex-col items-center relative">
             <i class="fas fa-house-chimney text-lg mb-1"></i>
@@ -456,10 +456,9 @@
             <i class="fas fa-grid-2 text-lg mb-1"></i>
             <span class="text-[9px] font-bold">Manager</span>
         </button>
-        <button onclick="openChats()" class="nav-item flex flex-col items-center relative">
-            <div id="chat-notify" class="notification-dot"></div>
-            <i class="fas fa-comment-dots text-lg mb-1"></i>
-            <span class="text-[9px] font-bold">Inbox</span>
+        <button onclick="window.open('https://wa.me/2348053103234', '_blank')" class="nav-item flex flex-col items-center relative">
+            <i class="fas fa-comment-dots text-lg mb-1 text-green-500"></i>
+            <span class="text-[9px] font-bold">Admin</span>
         </button>
         <button onclick="showScreen('settings-screen')" class="nav-item flex flex-col items-center relative">
             <i class="fas fa-circle-user text-lg mb-1"></i>
@@ -469,7 +468,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, updateDoc, query, orderBy, onSnapshot, where, serverTimestamp, doc, getDoc, deleteDoc, setDoc, getDocs, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, updateDoc, query, orderBy, onSnapshot, where, serverTimestamp, doc, getDoc, deleteDoc, setDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         // ── Firebase init ──────────────────────────────────────────
         const firebaseConfig = {
@@ -490,8 +489,6 @@
             localStorage.setItem('slit_user_id', currentUserId);
         }
 
-        let activeChatId = null;
-        let activeMessageListener = null;
         let activeProductListener = null;
         let activeMyItemsListener = null;
         let isAdminMode = false;
@@ -499,8 +496,6 @@
         let currentView = 'Product';
         let selectedCategory = 'All';
         let isUserBanned = false;
-        let unreadCount = 0;
-        let lastSeenTimestamps = JSON.parse(localStorage.getItem('slit_last_seen') || '{}');
 
         document.getElementById('display-user-id').innerText = currentUserId;
 
@@ -509,7 +504,6 @@
             if (!localStorage.getItem('slit_terms_accepted')) {
                 document.getElementById('terms-modal').classList.remove('hidden');
             }
-            startNotificationListener();
         };
         window.acceptTerms = () => {
             localStorage.setItem('slit_terms_accepted', 'true');
@@ -563,230 +557,61 @@
             }
         });
 
-        // ── Notification System ────────────────────────────────────
-        function startNotificationListener() {
-            onSnapshot(doc(db, "userInbox", currentUserId), async (snap) => {
-                if (!snap.exists()) return;
-                const chats = snap.data().chats || [];
-                let totalUnread = 0;
-                
-                for (const chatInfo of chats) {
-                    const chatRef = doc(db, "chats", chatInfo.chatId);
-                    const chatSnap = await getDoc(chatRef);
-                    
-                    if (chatSnap.exists()) {
-                        const data = chatSnap.data();
-                        const lastMsgTime = data.lastMessageAt?.toMillis() || 0;
-                        const lastSeen = lastSeenTimestamps[chatInfo.chatId] || 0;
-                        
-                        // If there's a new message since we last looked
-                        if (lastMsgTime > lastSeen && data.lastMessageSender !== currentUserId) {
-                            totalUnread++;
-                            
-                            // Show toast if we are NOT in that specific chat room
-                            if (activeChatId !== chatInfo.chatId) {
-                                showToast(chatInfo.otherUserId, data.lastMessage);
-                            }
-                        }
-                    }
-                }
-                unreadCount = totalUnread;
-                updateNotificationBadge();
-            });
-        }
-
-        function showToast(senderId, message) {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.style.pointerEvents = 'auto';
-            toast.innerHTML = `
-                <div class="flex items-center gap-3">
-                    <div class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-[10px] font-bold uppercase opacity-40">New Message</p>
-                        <p class="text-xs font-bold truncate">${message}</p>
-                    </div>
-                </div>
-            `;
-            toast.onclick = () => {
-                toast.remove();
-                openChats();
-            };
-            container.appendChild(toast);
-            setTimeout(() => {
-                toast.classList.add('toast-out');
-                setTimeout(() => toast.remove(), 300);
-            }, 4000);
-        }
-
-        // ── Firebase Chat System ───────────────────────────────────
-        async function addToUserInbox(userId, chatId, otherUserId) {
-            try {
-                const inboxRef = doc(db, "userInbox", userId);
-                const inboxSnap = await getDoc(inboxRef);
-                let chats = inboxSnap.exists() ? (inboxSnap.data().chats || []) : [];
-                
-                if (!chats.some(c => c.chatId === chatId)) {
-                    chats.push({ chatId, otherUserId, lastUpdated: serverTimestamp() });
-                    await setDoc(inboxRef, { chats }, { merge: true });
-                }
-            } catch (e) { console.error(e); }
-        }
-
-        window.startChat = async (targetId, targetName) => {
-            if (!targetId || targetId === currentUserId) return;
-            activeChatId = [currentUserId, targetId].sort().join('_');
-            try {
-                const chatRef = doc(db, "chats", activeChatId);
-                const chatSnap = await getDoc(chatRef);
-                if (!chatSnap.exists()) {
-                    await setDoc(chatRef, {
-                        participants: [currentUserId, targetId],
-                        createdAt: serverTimestamp(),
-                        lastMessageAt: serverTimestamp(),
-                        lastMessage: "Chat started"
-                    });
-                    await addToUserInbox(currentUserId, activeChatId, targetId);
-                    await addToUserInbox(targetId, activeChatId, currentUserId);
-                }
-                document.getElementById('chat-title').innerText = targetName || 'Chat';
-                showScreen('chatroom-screen');
-                loadFirebaseMessages();
-            } catch (e) { console.error(e); }
-        };
-
-        function loadFirebaseMessages() {
-            if (!activeChatId) return;
-            if (activeMessageListener) activeMessageListener();
-            
-            // Mark as seen immediately
-            lastSeenTimestamps[activeChatId] = Date.now();
-            localStorage.setItem('slit_last_seen', JSON.stringify(lastSeenTimestamps));
-            updateNotificationBadge();
-
-            const messagesRef = collection(db, "chats", activeChatId, "messages");
-            activeMessageListener = onSnapshot(query(messagesRef, orderBy("timestamp", "asc")), (snapshot) => {
-                const container = document.getElementById('messages-container');
-                container.innerHTML = '';
-                snapshot.forEach(doc => {
-                    const msg = doc.data();
-                    const isMe = msg.senderId === currentUserId;
-                    const timeStr = msg.timestamp ? new Date(msg.timestamp.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
-                    const div = document.createElement('div');
-                    div.className = `flex ${isMe ? 'justify-end' : 'justify-start'} mb-3`;
-                    div.innerHTML = `
-                        <div class="max-w-[75%]">
-                            <div class="${isMe ? 'bg-blue-600 text-white' : 'bg-white dark:bg-slate-800 border border-base'} px-4 py-2.5 rounded-2xl text-[13px] shadow-sm">
-                                ${msg.text}
-                            </div>
-                            <div class="text-[8px] opacity-40 mt-1 ${isMe ? 'text-right' : 'text-left'}">${timeStr}</div>
-                        </div>
-                    `;
-                    container.appendChild(div);
-                });
-                container.scrollTop = container.scrollHeight;
-                
-                // Keep seen while in room
-                lastSeenTimestamps[activeChatId] = Date.now();
-                localStorage.setItem('slit_last_seen', JSON.stringify(lastSeenTimestamps));
-            });
-        }
-
-        document.getElementById('btn-send').onclick = async () => {
-            const input = document.getElementById('message-input');
-            const text = input.value.trim();
-            if (!text || !activeChatId) return;
-            input.value = '';
-            try {
-                const userSnap = await getDoc(doc(db, "Users", currentUserId));
-                const userName = userSnap.exists() ? userSnap.data().name : 'User';
-                await addDoc(collection(db, "chats", activeChatId, "messages"), {
-                    senderId: currentUserId, senderName: userName, text, timestamp: serverTimestamp()
-                });
-                await updateDoc(doc(db, "chats", activeChatId), {
-                    lastMessageAt: serverTimestamp(),
-                    lastMessage: text,
-                    lastMessageSender: currentUserId
-                });
-            } catch (e) { console.error(e); }
-        };
-
-        document.getElementById('message-input').addEventListener('keydown', e => {
-            if (e.key === 'Enter') document.getElementById('btn-send').click();
-        });
-
-        window.openChats = async () => {
-            showScreen('chats-screen');
-            const container = document.getElementById('chats-list');
-            container.innerHTML = '<p class="text-[11px] opacity-40 text-center py-8">Loading conversations...</p>';
-            try {
-                const inboxSnap = await getDoc(doc(db, "userInbox", currentUserId));
-                if (!inboxSnap.exists() || !inboxSnap.data().chats?.length) {
-                    container.innerHTML = '<p class="text-center py-12 opacity-40 text-xs">No messages yet.</p>';
-                    return;
-                }
-                const myChats = [];
-                for (const inboxChat of inboxSnap.data().chats) {
-                    const chatSnap = await getDoc(doc(db, "chats", inboxChat.chatId));
-                    if (!chatSnap.exists()) continue;
-                    const userSnap = await getDoc(doc(db, "Users", inboxChat.otherUserId));
-                    const userData = userSnap.exists() ? userSnap.data() : { name: 'Campus User' };
-                    const lastSeen = lastSeenTimestamps[inboxChat.chatId] || 0;
-                    const chatData = chatSnap.data();
-                    const isUnread = (chatData.lastMessageAt?.toMillis() || 0) > lastSeen && chatData.lastMessageSender !== currentUserId;
-                    
-                    myChats.push({
-                        ...inboxChat,
-                        otherName: userData.name || 'Campus User',
-                        otherPhoto: userData.photo,
-                        lastMsg: chatData.lastMessage,
-                        lastTime: chatData.lastMessageAt,
-                        unread: isUnread
-                    });
-                }
-                myChats.sort((a, b) => (b.lastTime?.seconds || 0) - (a.lastTime?.seconds || 0));
-                container.innerHTML = '';
-                myChats.forEach(chat => {
-                    container.innerHTML += `
-                        <div onclick="startChat('${chat.otherUserId}', '${chat.otherName.replace(/'/g, "\\'")}')"
-                            class="flex items-center gap-4 p-4 bg-card border ${chat.unread ? 'border-blue-500 bg-blue-50/50' : 'border-base'} rounded-2xl cursor-pointer active:scale-95 mb-2">
-                            <div class="relative">
-                                <img src="${chat.otherPhoto || `https://ui-avatars.com/api/?name=${chat.otherName}`}" class="w-12 h-12 rounded-full object-cover">
-                                ${chat.unread ? '<div class="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full border-2 border-white"></div>' : ''}
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <p class="font-bold text-sm truncate">${chat.otherName}</p>
-                                <p class="text-[11px] opacity-50 truncate ${chat.unread ? 'font-bold opacity-100 text-blue-600' : ''}">${chat.lastMsg || ''}</p>
-                            </div>
-                        </div>
-                    `;
-                });
-            } catch (e) { container.innerHTML = '<p class="text-center text-xs opacity-40">Error loading chats.</p>'; }
-        };
-
-        function updateNotificationBadge() {
-            const dot = document.getElementById('chat-notify');
-            if (unreadCount > 0) {
-                dot.style.display = 'flex';
-                dot.innerText = unreadCount;
-            } else {
-                dot.style.display = 'none';
+        // ── WHATSAPP CHAT FUNCTION ─────────────────────────────
+        window.startChat = (phone, sellerName, productTitle, productPrice) => {
+            if (!phone) {
+                alert("This seller hasn't provided a phone number.");
+                return;
             }
-        }
+            
+            // Clean the phone number
+            let cleanPhone = phone.replace(/[^0-9]/g, '');
+            
+            // If it starts with 0, remove the 0 and add +234
+            if (cleanPhone.startsWith('0')) {
+                cleanPhone = '234' + cleanPhone.substring(1);
+            } else if (!cleanPhone.startsWith('234')) {
+                cleanPhone = '234' + cleanPhone;
+            }
+            
+            // Create the message
+            const message = encodeURIComponent(
+                `Hello ${sellerName || 'Seller'}, I'm interested in your product: *${productTitle}* for ₦${productPrice}. Is it still available?`
+            );
+            
+            // Open WhatsApp
+            window.open(`https://wa.me/${cleanPhone}?text=${message}`, '_blank');
+        };
+
+        // ── REPLY TO REVIEW FUNCTION ─────────────────────────────
+        window.replyToReview = async (productId, reviewId, reviewerName) => {
+            const replyText = prompt(`Reply to ${reviewerName}:`);
+            if (!replyText) return;
+            
+            try {
+                const replyRef = collection(db, "Products", productId, "Reviews", reviewId, "Replies");
+                await addDoc(replyRef, {
+                    text: replyText,
+                    sellerId: currentUserId,
+                    sellerName: document.getElementById('set-profile-name').value || 'Seller',
+                    timestamp: serverTimestamp()
+                });
+                alert("Reply posted successfully!");
+            } catch (e) {
+                console.error("Error posting reply:", e);
+                alert("Failed to post reply.");
+            }
+        };
 
         // ── Screen navigation ──────────────────────────────────────
         window.showScreen = screenId => {
-            if (activeMessageListener && screenId !== 'chatroom-screen') {
-                activeMessageListener();
-                activeMessageListener = null;
-                activeChatId = null;
-            }
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
             document.getElementById(screenId).classList.remove('hidden');
             document.querySelectorAll('nav button').forEach(b => b.classList.remove('active-nav'));
-            const map = { 'browse-screen': 0, 'post-screen': 1, 'my-items-screen': 2, 'chats-screen': 3, 'settings-screen': 4 };
-            if (map[screenId] !== undefined) document.querySelectorAll('nav button')[map[screenId]].classList.add('active-nav');
+            const map = { 'browse-screen': 0, 'post-screen': 1, 'my-items-screen': 2, 'settings-screen': 4 };
+            if (map[screenId] !== undefined) {
+                document.querySelectorAll('nav button')[map[screenId]].classList.add('active-nav');
+            }
             window.scrollTo(0, 0);
         };
 
@@ -800,7 +625,9 @@
                 const url = await uploadToCloudinary(file);
                 await setDoc(doc(db, "Users", currentUserId), { photo: url }, { merge: true });
                 document.getElementById('my-profile-pic').src = url;
-            } catch (err) { alert("Upload failed."); }
+            } catch (err) {
+                alert("Upload failed. Check Cloudinary settings.");
+            }
             loader.style.display = 'none';
         };
 
@@ -878,6 +705,14 @@
 
         document.getElementById('btn-post').onclick = async () => {
             if (isUserBanned) return;
+            
+            // Validate phone number
+            const phone = document.getElementById('post-phone').value.trim();
+            if (!phone) {
+                alert("Please enter your phone number for buyers to contact you!");
+                return;
+            }
+            
             const btn = document.getElementById('btn-post');
             btn.innerText = "Publishing..."; btn.disabled = true;
             try {
@@ -891,7 +726,7 @@
                     Negotiable: document.getElementById('post-negotiable').value,
                     Category: document.getElementById('post-category').value,
                     Condition: document.getElementById('post-condition').value,
-                    Phone: document.getElementById('post-phone').value,
+                    Phone: phone,
                     Location: document.getElementById('post-location').value,
                     ImageURL: imageUrl,
                     SellerId: currentUserId,
@@ -908,7 +743,9 @@
                 imagePreview.classList.add('hidden');
                 document.getElementById('preview-placeholder').classList.remove('hidden');
                 showScreen('browse-screen');
-            } catch (e) { alert("Error publishing."); }
+            } catch (e) {
+                alert("Error publishing.");
+            }
             btn.innerText = "PUBLISH NOW"; btn.disabled = false;
         };
 
@@ -934,35 +771,49 @@
             const container = document.getElementById("product-grid");
             if (!container) return;
             container.innerHTML = '<div class="skeleton-card animate-pulse"></div>'.repeat(4);
-            if (activeProductListener) activeProductListener();
-            activeProductListener = onSnapshot(query(collection(db, "Products"), orderBy("CreatedAt", "desc")), snapshot => {
-                let docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() })).filter(d => d.PostType === currentView);
-                if (selectedCategory !== 'All') docs = docs.filter(d => d.Category === selectedCategory);
-                container.innerHTML = '';
-                if (docs.length === 0) {
-                    container.innerHTML = `<div class="col-span-full py-20 text-center opacity-40"><p class="font-bold">No items found.</p></div>`;
-                    return;
-                }
-                docs.forEach(product => {
-                    const isVer = verifiedSellers.includes(product.SellerId);
-                    const avgRating = product.ReviewCount > 0 ? (product.Rating / product.ReviewCount).toFixed(1) : "0";
-                    container.innerHTML += `
-                        <div class="product-card relative">
+
+            if (activeProductListener) { activeProductListener(); activeProductListener = null; }
+
+            activeProductListener = onSnapshot(
+                query(collection(db, "Products"), orderBy("CreatedAt", "desc")),
+                snapshot => {
+                    let docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }))
+                        .filter(d => d.PostType === currentView);
+                    if (selectedCategory !== 'All') docs = docs.filter(d => d.Category === selectedCategory);
+
+                    container.innerHTML = '';
+                    if (docs.length === 0) {
+                        container.innerHTML = `<div class="col-span-full py-20 text-center opacity-40"><i class="fas fa-box-open text-4xl mb-4"></i><p class="font-bold">No items found.</p></div>`;
+                        return;
+                    }
+                    docs.forEach(product => {
+                        const isVer = verifiedSellers.includes(product.SellerId);
+                        const avgRating = product.ReviewCount > 0 ? (product.Rating / product.ReviewCount).toFixed(1) : "0";
+                        const card = document.createElement("div");
+                        card.className = "product-card relative";
+                        card.innerHTML = `
                             ${product.IsSold ? '<div class="sold-overlay">SOLD</div>' : ''}
-                            <div class="relative h-40 overflow-hidden"><img src="${product.ImageURL}" class="w-full h-full object-cover" onclick="viewProduct('${product.id}')"></div>
+                            <div class="relative h-40 overflow-hidden">
+                                <img src="${product.ImageURL}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110" onclick="viewProduct('${product.id}')">
+                            </div>
                             <div class="p-3">
                                 <h3 class="font-bold text-[11px] truncate mb-1">${product.Title}${isVer ? ' <i class="fas fa-check-circle text-blue-500"></i>' : ''}</h3>
                                 <div class="flex items-center gap-2 mb-2">
                                     <span class="text-blue-600 font-extrabold text-sm">₦${product.Price}</span>
-                                    <div class="flex items-center text-[8px] text-yellow-500 font-bold px-1.5 py-0.5 rounded"><i class="fas fa-star mr-1"></i>${avgRating}</div>
+                                    <div class="flex items-center text-[8px] text-yellow-500 font-bold bg-yellow-50 dark:bg-yellow-950/20 px-1.5 py-0.5 rounded"><i class="fas fa-star mr-1"></i>${avgRating}</div>
+                                </div>
+                                <div class="flex items-center text-[9px] opacity-40 uppercase font-bold">
+                                    <i class="fas fa-location-dot mr-1 text-[7px]"></i>${product.Location || 'Campus'}
                                 </div>
                             </div>
-                        </div>
-                    `;
-                });
-            });
+                        `;
+                        container.appendChild(card);
+                    });
+                }
+            );
         }
 
+        // ── View product details with review replies ───────────────
         window.viewProduct = async id => {
             const snap = await getDoc(doc(db, "Products", id));
             if (!snap.exists()) return;
@@ -970,40 +821,275 @@
             const uSnap = await getDoc(doc(db, "Users", p.SellerId));
             const u = uSnap.exists() ? uSnap.data() : {};
             const isMyProduct = p.SellerId === currentUserId;
+            const avgRating = p.ReviewCount > 0 ? (p.Rating / p.ReviewCount).toFixed(1) : "0";
+            const isVer = verifiedSellers.includes(p.SellerId);
             const sellerName = (u.name || 'Campus Student').replace(/'/g, "\\'");
+
             document.getElementById('details-content').innerHTML = `
-                <div class="relative h-72"><img src="${p.ImageURL}" class="w-full h-full object-cover"><button onclick="showScreen('browse-screen')" class="absolute top-5 left-5 w-10 h-10 bg-white/30 rounded-full text-white"><i class="fas fa-chevron-left"></i></button></div>
+                <div class="relative h-72">
+                    <img src="${p.ImageURL}" class="w-full h-full object-cover">
+                    <button onclick="showScreen('browse-screen')" class="absolute top-5 left-5 w-10 h-10 bg-white/30 backdrop-blur-md rounded-full text-white flex items-center justify-center"><i class="fas fa-chevron-left"></i></button>
+                </div>
                 <div class="p-6">
-                    <h2 class="text-2xl font-extrabold">${p.Title}</h2>
-                    <p class="text-blue-600 text-2xl font-black mb-6">₦${p.Price}</p>
-                    <div class="mb-10"><p class="text-sm opacity-80">${p.Description}</p></div>
-                    ${isMyProduct ? '<p class="text-center text-xs font-bold py-4">This is your post.</p>' : `
-                        <div class="grid grid-cols-2 gap-4">
-                            <button onclick="startChat('${p.SellerId}', '${sellerName}')" class="btn-premium font-extrabold py-4 rounded-2xl">MESSAGE</button>
-                            ${p.Phone ? `<a href="tel:${p.Phone}" class="bg-green-600 text-white font-extrabold py-4 rounded-2xl text-center flex items-center justify-center">CALL</a>` : ''}
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <h2 class="text-2xl font-extrabold">${p.Title}${isVer ? ' <i class="fas fa-check-circle text-blue-500"></i>' : ''}</h2>
+                            <p class="text-[10px] opacity-50 font-bold uppercase tracking-widest mt-1">${p.Category}</p>
+                        </div>
+                        <p class="text-blue-600 text-2xl font-black">₦${p.Price}</p>
+                    </div>
+                    <div class="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl mb-8 border border-base">
+                        <img src="${u.photo || 'https://ui-avatars.com/api/?name=User'}" class="w-12 h-12 rounded-full border-2 border-white">
+                        <div class="flex-1">
+                            <p class="text-xs font-extrabold">${u.name || 'Campus Student'}</p>
+                            <p class="text-[9px] text-yellow-500 font-bold"><i class="fas fa-star mr-1"></i>${avgRating} (${p.ReviewCount || 0} reviews)</p>
+                        </div>
+                        ${!isMyProduct ? `<button onclick="reportUser('${p.SellerId}')" class="text-[9px] font-bold text-red-500 bg-red-50 dark:bg-red-950/20 px-3 py-1.5 rounded-lg border border-red-100 dark:border-red-900/40">REPORT</button>` : ''}
+                    </div>
+                    <div class="mb-10">
+                        <h4 class="text-[10px] font-extrabold uppercase opacity-40 mb-2">Description</h4>
+                        <p class="text-sm leading-relaxed opacity-80">${p.Description}</p>
+                    </div>
+                    <div class="mt-8 mb-8">
+                        <h3 class="text-sm font-extrabold mb-4 uppercase tracking-wider opacity-60">Other listings from this seller</h3>
+                        <div id="more-from-seller-grid" class="grid grid-cols-2 gap-4"></div>
+                    </div>
+                    <div class="mt-10 border-t border-base pt-6 mb-12">
+                        <h3 class="font-extrabold text-sm mb-6 uppercase tracking-widest opacity-60">Student Reviews</h3>
+                        <div id="reviews-placeholder" class="space-y-4"></div>
+                    </div>
+                    ${isMyProduct ? `
+                        <div class="p-5 bg-blue-50 dark:bg-blue-900/20 rounded-2xl text-center border border-blue-100 dark:border-blue-800">
+                            <p class="text-xs font-bold text-blue-700 dark:text-blue-300">You posted this listing.</p>
+                        </div>
+                    ` : `
+                        <div class="grid grid-cols-2 gap-4 mb-8">
+                            <button onclick="startChat('${p.Phone}', '${sellerName}', '${p.Title.replace(/'/g, "\\'")}', '${p.Price}')" class="btn-premium font-extrabold py-4 rounded-2xl shadow-lg">
+                                <i class="fab fa-whatsapp mr-2"></i>MESSAGE SELLER
+                            </button>
+                            ${p.Phone ? `<a href="tel:${p.Phone}" class="bg-green-600 text-white font-extrabold py-4 rounded-2xl text-center shadow-lg flex items-center justify-center"><i class="fas fa-phone mr-2"></i>CALL SELLER</a>` : ''}
+                        </div>
+                        <div class="bg-card p-6 rounded-[2rem] border border-base shadow-sm" id="rating-container">
+                            <h3 class="font-extrabold text-sm mb-4">Rate & Review</h3>
+                            <div class="star-rating mb-4 flex gap-2" id="rating-input">
+                                ${[1,2,3,4,5].map(v => `<i class="fas fa-star text-2xl active" data-val="${v}"></i>`).join('')}
+                            </div>
+                            <textarea id="review-text" placeholder="Share your experience..." class="w-full bg-slate-50 dark:bg-slate-800/50 border border-base p-4 text-sm h-24 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                            <button id="btn-submit-review" onclick="submitReview('${id}')" class="w-full bg-slate-900 dark:bg-slate-700 text-white py-3.5 rounded-2xl mt-4 font-bold">SUBMIT REVIEW</button>
                         </div>
                     `}
                 </div>
             `;
             showScreen('details-screen');
+            if (!isMyProduct) {
+                setupStarInput();
+                const existing = await getDocs(query(collection(db, "Products", id, "Reviews"), where("userId", "==", currentUserId)));
+                if (!existing.empty) {
+                    document.getElementById('rating-container').innerHTML = `
+                        <div class="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-3xl text-center border border-blue-100 dark:border-blue-800/40">
+                            <i class="fas fa-circle-check text-blue-600 mb-2 text-xl"></i>
+                            <p class="text-[11px] font-bold text-blue-800 dark:text-blue-300 uppercase">You've already reviewed this item!</p>
+                        </div>
+                    `;
+                }
+            }
+            loadSellerOtherItems(p.SellerId, id);
+            loadProductReviews(id);
         };
 
+        async function loadSellerOtherItems(sellerId, currentProductId) {
+            const snap = await getDocs(query(collection(db, "Products"), where("SellerId", "==", sellerId)));
+            const container = document.getElementById('more-from-seller-grid');
+            if (!container) return;
+            const others = snap.docs.filter(d => d.id !== currentProductId);
+            container.innerHTML = others.length === 0 ? '<p class="text-[10px] opacity-40 col-span-2">No other listings.</p>' : '';
+            others.forEach(d => {
+                const item = d.data();
+                container.innerHTML += `
+                    <div class="bg-slate-50 dark:bg-slate-800/40 rounded-2xl overflow-hidden border border-base cursor-pointer" onclick="viewProduct('${d.id}')">
+                        <img src="${item.ImageURL}" class="w-full h-24 object-cover">
+                        <div class="p-2">
+                            <p class="text-[10px] font-bold truncate">${item.Title}</p>
+                            <p class="text-blue-600 text-[10px] font-black">₦${item.Price}</p>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function loadProductReviews(productId) {
+            const container = document.getElementById('reviews-placeholder');
+            if (!container) return;
+            
+            // Load reviews
+            onSnapshot(query(collection(db, "Products", productId, "Reviews"), orderBy("timestamp", "desc")), async (snap) => {
+                if (!container) return;
+                if (snap.empty) {
+                    container.innerHTML = '<p class="text-[11px] opacity-30 text-center py-4 italic">No reviews yet.</p>';
+                    return;
+                }
+                
+                container.innerHTML = '';
+                
+                for (const reviewDoc of snap.docs) {
+                    const r = reviewDoc.data();
+                    const reviewId = reviewDoc.id;
+                    const date = r.timestamp?.seconds ? new Date(r.timestamp.seconds * 1000).toLocaleDateString() : 'Recent';
+                    
+                    // Check if current user is the seller
+                    const productSnap = await getDoc(doc(db, "Products", productId));
+                    const isSeller = productSnap.exists() && productSnap.data().SellerId === currentUserId;
+                    
+                    // Load replies for this review
+                    let repliesHtml = '';
+                    const repliesSnap = await getDocs(collection(db, "Products", productId, "Reviews", reviewId, "Replies"));
+                    
+                    repliesSnap.forEach(replyDoc => {
+                        const reply = replyDoc.data();
+                        repliesHtml += `
+                            <div class="review-reply mt-2">
+                                <p class="text-[10px] font-bold text-blue-600">${reply.sellerName || 'Seller'} replied:</p>
+                                <p class="text-[11px] mt-1">${reply.text}</p>
+                                <p class="text-[8px] opacity-40 mt-1">${reply.timestamp ? new Date(reply.timestamp.seconds * 1000).toLocaleDateString() : ''}</p>
+                            </div>
+                        `;
+                    });
+                    
+                    container.innerHTML += `
+                        <div class="bg-slate-50 dark:bg-slate-800/30 p-4 rounded-2xl border border-base" id="review-${reviewId}">
+                            <div class="flex justify-between items-center mb-3">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-[9px] font-bold text-blue-600">${r.userId.substring(5,7).toUpperCase()}</div>
+                                    <p class="text-[10px] font-bold opacity-60">${r.userName || 'User'}</p>
+                                </div>
+                                <span class="text-[8px] opacity-30 font-bold uppercase">${date}</span>
+                            </div>
+                            <div class="flex text-yellow-500 text-[10px] mb-2">
+                                ${'<i class="fas fa-star"></i>'.repeat(r.stars)}${'<i class="far fa-star"></i>'.repeat(5 - r.stars)}
+                            </div>
+                            <p class="text-xs opacity-80 leading-relaxed">${r.text}</p>
+                            ${repliesHtml}
+                            ${isSeller ? `
+                                <button onclick="replyToReview('${productId}', '${reviewId}', '${r.userName || 'User'}')" 
+                                    class="mt-2 text-[9px] bg-blue-100 dark:bg-blue-900/30 text-blue-600 px-3 py-1 rounded-full font-bold">
+                                    REPLY
+                                </button>
+                            ` : ''}
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        function setupStarInput() {
+            let selected = 5;
+            const stars = document.querySelectorAll('#rating-input i');
+            stars.forEach(s => {
+                s.onclick = () => {
+                    selected = parseInt(s.dataset.val);
+                    stars.forEach(st => {
+                        st.classList.toggle('active', parseInt(st.dataset.val) <= selected);
+                    });
+                };
+            });
+            window.getCurrentStars = () => selected;
+        }
+
+        window.submitReview = async productId => {
+            const text = document.getElementById('review-text').value.trim();
+            const stars = window.getCurrentStars();
+            const btn = document.getElementById('btn-submit-review');
+            
+            if (text.length < 10) { 
+                alert("Write at least 10 characters! 📝"); 
+                return; 
+            }
+            
+            btn.disabled = true; 
+            btn.innerText = "Posting...";
+            
+            try {
+                // Get user name
+                const userSnap = await getDoc(doc(db, "Users", currentUserId));
+                const userName = userSnap.exists() ? userSnap.data().name : 'User';
+                
+                const ref = collection(db, "Products", productId, "Reviews");
+                const existing = await getDocs(query(ref, where("userId", "==", currentUserId)));
+                
+                if (!existing.empty) { 
+                    alert("Already reviewed! 👋"); 
+                    return; 
+                }
+                
+                await addDoc(ref, { 
+                    stars, 
+                    text, 
+                    userId: currentUserId,
+                    userName: userName,
+                    timestamp: serverTimestamp() 
+                });
+                
+                const pRef = doc(db, "Products", productId);
+                const pSnap = await getDoc(pRef);
+                const pData = pSnap.data();
+                
+                await updateDoc(pRef, { 
+                    Rating: (pData.Rating || 0) + stars, 
+                    ReviewCount: (pData.ReviewCount || 0) + 1 
+                });
+                
+                alert("Review published! ✨");
+                viewProduct(productId);
+            } catch (e) { 
+                alert("Submit failed."); 
+            }
+            
+            btn.disabled = false; 
+            btn.innerText = "SUBMIT REVIEW";
+        };
+
+        window.reportUser = async targetUserId => {
+            const reason = prompt("Why are you reporting this user?");
+            if (!reason) return;
+            try {
+                await addDoc(collection(db, "Reports"), { 
+                    reportedUser: targetUserId, 
+                    reporterUser: currentUserId, 
+                    reason, 
+                    timestamp: serverTimestamp() 
+                });
+                alert("Report sent.");
+            } catch (e) { 
+                alert("Error reporting."); 
+            }
+        };
+
+        // ── My Items / Manager ─────────────────────────────────────
         window.loadMyItems = () => {
             showScreen('my-items-screen');
-            if (activeMyItemsListener) activeMyItemsListener();
-            const q = isAdminMode ? query(collection(db, "Products"), orderBy("CreatedAt", "desc")) : query(collection(db, "Products"), where("SellerId", "==", currentUserId), orderBy("CreatedAt", "desc"));
+            if (activeMyItemsListener) { activeMyItemsListener(); activeMyItemsListener = null; }
+            const q = isAdminMode
+                ? query(collection(db, "Products"), orderBy("CreatedAt", "desc"))
+                : query(collection(db, "Products"), where("SellerId", "==", currentUserId), orderBy("CreatedAt", "desc"));
             activeMyItemsListener = onSnapshot(q, snap => {
                 const grid = document.getElementById('my-items-grid');
-                grid.innerHTML = snap.empty ? '<p class="text-center opacity-40 py-10">No items.</p>' : '';
-                snap.forEach(d => {
+                grid.innerHTML = '';
+                if (snap.empty) {
+                    grid.innerHTML = '<p class="text-center opacity-40 py-10">No listings yet.</p>';
+                    return;
+                }
+                snap.docs.forEach(d => {
                     const p = d.data();
                     grid.innerHTML += `
-                        <div class="bg-card p-4 rounded-2xl border border-base flex gap-4 items-center">
-                            <img src="${p.ImageURL}" class="w-12 h-12 rounded-xl object-cover">
-                            <div class="flex-1 truncate"><h3 class="font-bold text-sm truncate">${p.Title}</h3></div>
-                            <div class="flex gap-2">
-                                <button onclick="openEditScreen('${d.id}')" class="text-blue-600 p-2"><i class="fas fa-pen"></i></button>
-                                <button onclick="deleteProduct('${d.id}')" class="text-red-600 p-2"><i class="fas fa-trash"></i></button>
+                        <div class="bg-card p-4 rounded-2xl border border-base flex gap-4 items-center shadow-sm">
+                            <img src="${p.ImageURL}" class="w-16 h-16 rounded-xl object-cover flex-shrink-0">
+                            <div class="flex-1 min-w-0">
+                                <h3 class="font-bold text-sm truncate">${p.Title}</h3>
+                                <p class="text-blue-600 font-bold text-xs">₦${p.Price}</p>
+                            </div>
+                            <div class="flex gap-2 flex-shrink-0">
+                                <button onclick="openEditScreen('${d.id}')" class="bg-blue-50 dark:bg-blue-900/30 text-blue-600 p-2.5 rounded-xl text-xs"><i class="fas fa-pen-to-square"></i></button>
+                                <button onclick="deleteProduct('${d.id}')" class="bg-red-50 dark:bg-red-900/30 text-red-600 p-2.5 rounded-xl text-xs"><i class="fas fa-trash"></i></button>
                             </div>
                         </div>
                     `;
@@ -1020,29 +1106,51 @@
             document.getElementById('edit-desc').value = p.Description;
             document.getElementById('edit-price').value = p.Price;
             document.getElementById('edit-image-preview').src = p.ImageURL;
+            document.getElementById('edit-sold-status').value = p.IsSold.toString();
             showScreen('edit-screen');
         };
 
-        window.processUpdateProduct = async () => {
-            const id = document.getElementById('edit-product-id').value;
-            await updateDoc(doc(db, "Products", id), {
-                Title: document.getElementById('edit-title').value,
-                Description: document.getElementById('edit-desc').value,
-                Price: document.getElementById('edit-price').value,
-                IsSold: document.getElementById('edit-sold-status').value === "true"
-            });
-            alert("Updated!");
-            showScreen('my-items-screen');
+        document.getElementById('edit-image-preview-container').onclick = () => document.getElementById('edit-file-input').click();
+        document.getElementById('edit-file-input').onchange = e => {
+            const reader = new FileReader();
+            reader.onload = ev => { document.getElementById('edit-image-preview').src = ev.target.result; };
+            reader.readAsDataURL(e.target.files[0]);
         };
 
-        window.deleteProduct = async id => { if (confirm("Delete?")) await deleteDoc(doc(db, "Products", id)); };
+        window.processUpdateProduct = async () => {
+            const btn = document.getElementById('btn-update-post');
+            const id = document.getElementById('edit-product-id').value;
+            btn.innerText = "Updating..."; btn.disabled = true;
+            try {
+                let imageUrl = document.getElementById('edit-image-preview').src;
+                const newFile = document.getElementById('edit-file-input').files[0];
+                if (newFile) imageUrl = await uploadToCloudinary(newFile);
+                await updateDoc(doc(db, "Products", id), {
+                    Title: document.getElementById('edit-title').value,
+                    Description: document.getElementById('edit-desc').value,
+                    Price: document.getElementById('edit-price').value,
+                    ImageURL: imageUrl,
+                    IsSold: document.getElementById('edit-sold-status').value === "true"
+                });
+                alert("Product updated! ✅");
+                showScreen('my-items-screen');
+            } catch (e) { alert("Failed to update."); }
+            btn.innerText = "SAVE CHANGES"; btn.disabled = false;
+        };
+
+        window.deleteProduct = async id => {
+            if (confirm("Delete this listing? This cannot be undone.")) {
+                await deleteDoc(doc(db, "Products", id));
+                alert("Listing deleted.");
+            }
+        };
 
         // ── Admin ──────────────────────────────────────────────────
         window.toggleAdminMode = () => {
             if (prompt("Passphrase:") === "junior123") {
                 isAdminMode = !isAdminMode;
                 document.getElementById('admin-panel').classList.toggle('hidden', !isAdminMode);
-                document.getElementById('admin-toggle-btn').innerText = `Admin: ${isAdminMode ? 'ON' : 'OFF'}`;
+                document.getElementById('admin-toggle-btn').innerText = `Admin Mode: ${isAdminMode ? 'ON' : 'OFF'}`;
                 if (isAdminMode) { loadReports(); loadAdminUserList(); }
                 loadMyItems();
             }
@@ -1050,44 +1158,126 @@
 
         window.updateAnnouncement = async () => {
             const msg = document.getElementById('admin-announcement-input').value;
-            await setDoc(doc(db, "AppData", "Announcement"), { message: msg, active: !!msg });
-            alert("Broadcasted!");
+            await setDoc(doc(db, "AppData", "Announcement"), { message: msg, active: msg.length > 0 });
+            alert("Announcement Updated!");
         };
 
         function loadReports() {
             onSnapshot(collection(db, "Reports"), snap => {
                 const list = document.getElementById('admin-reports-list');
-                list.innerHTML = '';
+                list.innerHTML = snap.empty ? '<p class="text-[10px] opacity-50">No reports.</p>' : '';
                 snap.forEach(d => {
                     const r = d.data();
-                    list.innerHTML += `<div class="p-3 bg-red-50 dark:bg-red-900/20 text-[10px] rounded-xl mb-2">${r.reason} <button onclick="banUser('${r.reportedUser}')" class="text-red-600 font-bold">BAN</button></div>`;
+                    list.innerHTML += `
+                        <div class="p-3 border-l-4 border-red-500 bg-red-50 dark:bg-red-950/20 rounded-xl text-[10px] mb-2">
+                            <b>Target:</b> ${r.reportedUser}<br>
+                            <b>Reason:</b> ${r.reason}
+                            <br><button onclick="banUser('${r.reportedUser}')" class="bg-red-600 text-white px-3 py-1 rounded-lg mt-2 font-bold">BAN ACCOUNT</button>
+                        </div>
+                    `;
                 });
             });
         }
 
         async function loadAdminUserList() {
             const container = document.getElementById('admin-user-list');
+            container.innerHTML = '<p class="text-[10px] opacity-40">Loading...</p>';
             const usersSnap = await getDocs(collection(db, "Users"));
+            const bannedSnap = await getDocs(collection(db, "BannedUsers"));
+            const bannedIds = bannedSnap.docs.map(d => d.id);
             container.innerHTML = '';
-            usersSnap.forEach(userDoc => {
+            
+            for (const userDoc of usersSnap.docs) {
                 const u = userDoc.data();
-                container.innerHTML += `<div class="p-3 border-b border-base text-xs flex justify-between"><span>${u.name || userDoc.id}</span> <button onclick="verifyUser('${userDoc.id}')" class="text-blue-600">Verify</button></div>`;
-            });
+                const uid = userDoc.id;
+                const isVerified = verifiedSellers.includes(uid);
+                const isBanned = bannedIds.includes(uid);
+                let phone = "N/A";
+                
+                const pSnap = await getDocs(query(collection(db, "Products"), where("SellerId", "==", uid)));
+                if (!pSnap.empty) phone = pSnap.docs[0].data().Phone || "N/A";
+                
+                const safeName = (u.name || 'Admin Support').replace(/'/g, "\\'");
+                
+                // Format phone for WhatsApp
+                let whatsappPhone = phone.replace(/[^0-9]/g, '');
+                if (whatsappPhone.startsWith('0')) {
+                    whatsappPhone = '234' + whatsappPhone.substring(1);
+                } else if (!whatsappPhone.startsWith('234')) {
+                    whatsappPhone = '234' + whatsappPhone;
+                }
+                
+                container.innerHTML += `
+                    <div class="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-base">
+                        <div class="flex justify-between items-start">
+                            <div class="text-[11px] min-w-0 flex-1 mr-2">
+                                <p class="font-extrabold text-blue-600 truncate">${u.name || 'Anonymous'} ${isVerified ? '✅' : ''}</p>
+                                <p class="opacity-50 truncate">ID: ${uid}</p>
+                                <p class="font-bold"><i class="fas fa-phone mr-1"></i>${phone}</p>
+                            </div>
+                            <div class="flex flex-col gap-2 flex-shrink-0">
+                                <button onclick="window.open('https://wa.me/${whatsappPhone}', '_blank')" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-[9px] font-bold">
+                                    <i class="fab fa-whatsapp mr-1"></i>WHATSAPP
+                                </button>
+                                ${isVerified
+                                    ? `<button onclick="removeVerification('${uid}')" class="bg-orange-500 text-white px-3 py-1.5 rounded-lg text-[9px] font-bold">REMOVE TICK</button>`
+                                    : `<button onclick="verifyUser('${uid}')" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-[9px] font-bold">VERIFY</button>`
+                                }
+                                ${isBanned
+                                    ? `<button onclick="unbanUser('${uid}')" class="bg-blue-100 text-blue-600 px-3 py-1.5 rounded-lg text-[9px] font-bold">UNBAN</button>`
+                                    : `<button onclick="banUser('${uid}')" class="bg-red-600 text-white px-3 py-1.5 rounded-lg text-[9px] font-bold">BAN</button>`
+                                }
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
         }
 
-        window.verifyUser = async uid => { await setDoc(doc(db, "VerifiedUsers", uid), { verifiedAt: serverTimestamp() }); };
-        window.banUser = async uid => { await setDoc(doc(db, "BannedUsers", uid), { bannedAt: serverTimestamp() }); };
+        window.verifyUser = async uid => {
+            await setDoc(doc(db, "VerifiedUsers", uid), { verifiedAt: serverTimestamp() });
+            loadAdminUserList();
+        };
+        
+        window.removeVerification = async uid => {
+            if (confirm("Remove verification tick?")) {
+                await deleteDoc(doc(db, "VerifiedUsers", uid));
+                alert("Verification removed.");
+                loadAdminUserList();
+            }
+        };
+        
+        window.banUser = async uid => {
+            if (confirm("Ban this user?")) {
+                await setDoc(doc(db, "BannedUsers", uid), { bannedAt: serverTimestamp(), bannedBy: currentUserId });
+                alert("User banned.");
+                if (isAdminMode) loadAdminUserList();
+            }
+        };
+        
+        window.unbanUser = async uid => {
+            if (confirm("Restore this account?")) {
+                await deleteDoc(doc(db, "BannedUsers", uid));
+                alert("User unbanned!");
+                if (isAdminMode) loadAdminUserList();
+            }
+        };
 
+        // ── Search ─────────────────────────────────────────────────
         document.getElementById('global-search').oninput = e => {
             const term = e.target.value.toLowerCase();
-            document.querySelectorAll('.product-card').forEach(card => {
-                const title = card.querySelector('h3').innerText.toLowerCase();
-                card.style.display = title.includes(term) ? 'block' : 'none';
+            document.querySelectorAll('#product-grid > div').forEach(card => {
+                const title = card.querySelector('h3');
+                if (title) card.style.display = title.innerText.toLowerCase().includes(term) ? 'block' : 'none';
             });
         };
 
-        window.contactDeveloper = () => window.open('https://wa.me/2348053103234');
+        // ── Contact developer (now opens WhatsApp) ─────────────────
+        window.contactDeveloper = () => {
+            window.open('https://wa.me/2348053103234?text=Hi%20Developer!%20I%20need%20help%20with%20SLIT-HUB', '_blank');
+        };
 
+        // ── Init ───────────────────────────────────────────────────
         togglePostForm('Product');
         switchView('Product');
         showScreen('browse-screen');
