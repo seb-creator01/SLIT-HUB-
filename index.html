@@ -498,8 +498,12 @@
         const db = getFirestore(app);
 
         // ── State ──────────────────────────────────────────────────
-        let currentUserId = localStorage.getItem('slit_user_id') || "user_" + Math.floor(Math.random() * 1000000);
-        localStorage.setItem('slit_user_id', currentUserId);
+        // Ensure userId is always valid (never just "user" or short broken values)
+        let currentUserId = localStorage.getItem('slit_user_id');
+        if (!currentUserId || currentUserId.length < 8 || !currentUserId.startsWith('user_')) {
+            currentUserId = "user_" + Date.now() + "_" + Math.floor(Math.random() * 9999);
+            localStorage.setItem('slit_user_id', currentUserId);
+        }
 
         let activeChatId = null;
         let activeMessageListener = null; // track listener so we can unsubscribe
@@ -1270,43 +1274,25 @@
             }
         }
 
-        // ── On-screen diagnostic (close with X) ──────────────────
-        function diagLog(msg, color) {
-            let box = document.getElementById('diag-box');
-            if (!box) {
-                box = document.createElement('div');
-                box.id = 'diag-box';
-                box.style.cssText = 'position:fixed;top:80px;left:8px;right:8px;background:#0f0f1a;color:#00ff88;font-size:10px;font-family:monospace;padding:10px 12px;border-radius:14px;z-index:99999;max-height:220px;overflow-y:auto;border:2px solid #00ff88;line-height:1.6;';
-                box.innerHTML = '<div style="display:flex;justify-content:space-between;margin-bottom:6px"><b style="color:#fff">🔍 SLIT-HUB DIAGNOSTIC</b><span onclick="this.parentElement.parentElement.remove()" style="cursor:pointer;color:#ff4444;font-size:14px">✕</span></div>';
-                document.body.appendChild(box);
-            }
-            const line = document.createElement('div');
-            line.style.color = color || '#00ff88';
-            line.innerText = new Date().toLocaleTimeString() + ' › ' + msg;
-            box.appendChild(line);
-            box.scrollTop = box.scrollHeight;
-        }
-
         // Open a chat (called from product page, admin panel, or inbox)
         window.startChat = async (targetId, targetName) => {
-            diagLog('startChat → targetId: ' + targetId);
-            try {
-                activeChatId = [currentUserId, targetId].sort().join("_");
-                diagLog('chatId: ' + activeChatId);
-                document.getElementById('chat-title').innerText = targetName || 'Chat';
-                showScreen('chatroom-screen');
-                lastSeenTimestamps[activeChatId] = Date.now();
-                localStorage.setItem('slit_last_seen', JSON.stringify(lastSeenTimestamps));
-                updateNotificationBadge();
-                diagLog('Registering chat for: ' + currentUserId);
-                await registerChatForUser(currentUserId, activeChatId);
-                diagLog('Registering chat for: ' + targetId);
-                await registerChatForUser(targetId, activeChatId);
-                diagLog('✅ Registered. Loading messages...');
-                loadMessages();
-            } catch(err) {
-                diagLog('❌ startChat FAILED: ' + err.code + ' — ' + err.message, '#ff4444');
+            if (!targetId || targetId === currentUserId) {
+                alert("Cannot open this chat.");
+                return;
             }
+            activeChatId = [currentUserId, targetId].sort().join("_");
+            document.getElementById('chat-title').innerText = targetName || 'Chat';
+            showScreen('chatroom-screen');
+            lastSeenTimestamps[activeChatId] = Date.now();
+            localStorage.setItem('slit_last_seen', JSON.stringify(lastSeenTimestamps));
+            updateNotificationBadge();
+            try {
+                await registerChatForUser(currentUserId, activeChatId);
+                await registerChatForUser(targetId, activeChatId);
+            } catch(e) {
+                console.error("registerChat failed:", e);
+            }
+            loadMessages();
         };
 
         function loadMessages() {
@@ -1346,23 +1332,16 @@
         document.getElementById('btn-send').onclick = async () => {
             const input = document.getElementById('message-input');
             const text = input.value.trim();
-            diagLog('Send clicked. text="' + text + '" chatId=' + activeChatId);
-            if (!text || !activeChatId) {
-                diagLog('⚠️ Blocked: text empty=' + (!text) + ' chatId empty=' + (!activeChatId), '#ffaa00');
-                return;
-            }
+            if (!text || !activeChatId) return;
             input.value = '';
             input.disabled = true;
             try {
-                diagLog('Writing to Chats/' + activeChatId + '/Messages...');
                 await addDoc(collection(db, "Chats", activeChatId, "Messages"), {
                     senderId: currentUserId,
                     messageText: text,
                     timestamp: serverTimestamp()
                 });
-                diagLog('✅ Message sent!');
             } catch (e) {
-                diagLog('❌ Send FAILED: ' + e.code + ' — ' + e.message, '#ff4444');
                 alert("Failed to send: " + e.message);
                 input.value = text;
             }
@@ -1383,8 +1362,6 @@
             showScreen('chats-screen');
             const chatsList = document.getElementById('chats-list');
             chatsList.innerHTML = '<p class="text-[11px] opacity-40 text-center py-8">Loading messages...</p>';
-            diagLog('openChats → reading UserInbox/' + currentUserId);
-
             try {
                 const inboxSnap = await getDoc(doc(db, "UserInbox", currentUserId));
                 const chatIds = inboxSnap.exists() ? (inboxSnap.data().chatIds || []) : [];
