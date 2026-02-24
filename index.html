@@ -576,7 +576,7 @@
             }
         });
 
-        // ── SIMPLE FIREBASE CHAT SYSTEM ─────────────────────────────
+        // ── COMPLETE WORKING FIREBASE CHAT SYSTEM ─────────────────────────────
 
         // Start a chat
         window.startChat = async (targetId, targetName) => {
@@ -587,6 +587,24 @@
             
             // Create consistent chat ID (sorted so both users access same room)
             activeChatId = [currentUserId, targetId].sort().join('_');
+            
+            // Create the chat document in Firestore (this is the key fix!)
+            try {
+                const chatRef = doc(db, "chats", activeChatId);
+                const chatSnap = await getDoc(chatRef);
+                
+                // If chat doesn't exist, create it with participants
+                if (!chatSnap.exists()) {
+                    await setDoc(chatRef, {
+                        participants: [currentUserId, targetId],
+                        createdAt: serverTimestamp(),
+                        lastMessageAt: serverTimestamp()
+                    });
+                    console.log("✅ Chat document created");
+                }
+            } catch (e) {
+                console.error("Error creating chat:", e);
+            }
             
             document.getElementById('chat-title').innerText = targetName || 'Chat';
             showScreen('chatroom-screen');
@@ -614,6 +632,18 @@
                     
                     container.innerHTML = '';
                     
+                    if (snapshot.empty) {
+                        // Show welcome message for empty chat
+                        container.innerHTML = `
+                            <div class="text-center py-10 opacity-50">
+                                <i class="fas fa-comment-dots text-3xl mb-2"></i>
+                                <p class="text-sm">No messages yet</p>
+                                <p class="text-xs">Send a message to start chatting</p>
+                            </div>
+                        `;
+                        return;
+                    }
+                    
                     snapshot.forEach(doc => {
                         const msg = doc.data();
                         const isMe = msg.senderId === currentUserId;
@@ -624,6 +654,10 @@
                             senderName = msg.senderName ? `<span class="text-[9px] font-bold opacity-60 mr-2">${msg.senderName}</span>` : '';
                         }
                         
+                        const timeStr = msg.timestamp ? 
+                            new Date(msg.timestamp.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 
+                            '';
+                        
                         const div = document.createElement('div');
                         div.className = `flex ${isMe ? 'justify-end' : 'justify-start'} mb-3`;
                         div.innerHTML = `
@@ -633,7 +667,7 @@
                                     ${msg.text}
                                 </div>
                                 <div class="text-[8px] opacity-40 mt-1 ${isMe ? 'text-right' : 'text-left'}">
-                                    ${msg.timestamp ? new Date(msg.timestamp.seconds * 1000).toLocaleTimeString() : ''}
+                                    ${timeStr}
                                 </div>
                             </div>
                         `;
@@ -641,6 +675,9 @@
                     });
                     
                     container.scrollTop = container.scrollHeight;
+                },
+                (error) => {
+                    console.error("Message listener error:", error);
                 }
             );
         }
@@ -652,6 +689,7 @@
             
             if (!text || !activeChatId) return;
             
+            const originalText = text;
             input.value = '';
             input.disabled = true;
             
@@ -660,6 +698,7 @@
                 const userSnap = await getDoc(doc(db, "Users", currentUserId));
                 const userName = userSnap.exists() ? userSnap.data().name : 'User';
                 
+                // Send message
                 const messagesRef = collection(db, "chats", activeChatId, "messages");
                 await addDoc(messagesRef, {
                     senderId: currentUserId,
@@ -667,10 +706,19 @@
                     text: text,
                     timestamp: serverTimestamp()
                 });
+                
+                // Update chat's last message time
+                const chatRef = doc(db, "chats", activeChatId);
+                await updateDoc(chatRef, {
+                    lastMessageAt: serverTimestamp()
+                });
+                
+                console.log("✅ Message sent successfully!");
+                
             } catch (e) {
                 console.error("Send error:", e);
-                alert("Failed to send message");
-                input.value = text;
+                alert("Failed to send message: " + e.message);
+                input.value = originalText;
             }
             
             input.disabled = false;
@@ -685,51 +733,53 @@
             }
         });
 
-        // Open chats list
+        // Open chats list - FIXED to find chats by participants
         window.openChats = async () => {
             showScreen('chats-screen');
             const container = document.getElementById('chats-list');
             container.innerHTML = '<p class="text-[11px] opacity-40 text-center py-8">Loading conversations...</p>';
             
             try {
-                // Find all chats where current user is a participant
+                // Query chats where current user is a participant
                 const chatsRef = collection(db, "chats");
-                const allChats = await getDocs(chatsRef);
+                const chatsQuery = query(chatsRef, where("participants", "array-contains", currentUserId));
+                const chatsSnap = await getDocs(chatsQuery);
+                
+                if (chatsSnap.empty) {
+                    container.innerHTML = '<p class="text-[11px] opacity-40 text-center py-12 italic">No messages yet.<br>Message a seller to start a conversation.</p>';
+                    return;
+                }
                 
                 const myChats = [];
                 
-                for (const chatDoc of allChats.docs) {
+                for (const chatDoc of chatsSnap.docs) {
+                    const chatData = chatDoc.data();
                     const chatId = chatDoc.id;
                     
-                    // Check if this chat involves current user
-                    if (chatId.includes(currentUserId)) {
-                        // Extract other user ID
-                        const parts = chatId.split('_');
-                        const otherId = parts.find(id => id !== currentUserId);
-                        
-                        if (!otherId) continue;
-                        
-                        // Get last message
-                        const messagesRef = collection(db, "chats", chatId, "messages");
-                        const lastMsgSnap = await getDocs(
-                            query(messagesRef, orderBy("timestamp", "desc"), limit(1))
-                        );
-                        
-                        const lastMsg = lastMsgSnap.docs[0]?.data();
-                        
-                        // Get other user info
-                        const userSnap = await getDoc(doc(db, "Users", otherId));
-                        const userData = userSnap.exists() ? userSnap.data() : { name: 'Campus User' };
-                        
-                        myChats.push({
-                            chatId,
-                            otherId,
-                            otherName: userData.name || 'Campus User',
-                            otherPhoto: userData.photo,
-                            lastMsg,
-                            lastMsgTime: lastMsg?.timestamp
-                        });
-                    }
+                    // Find the other participant
+                    const otherId = chatData.participants.find(id => id !== currentUserId);
+                    if (!otherId) continue;
+                    
+                    // Get last message
+                    const messagesRef = collection(db, "chats", chatId, "messages");
+                    const lastMsgSnap = await getDocs(
+                        query(messagesRef, orderBy("timestamp", "desc"), limit(1))
+                    );
+                    
+                    const lastMsg = lastMsgSnap.docs[0]?.data();
+                    
+                    // Get other user info
+                    const userSnap = await getDoc(doc(db, "Users", otherId));
+                    const userData = userSnap.exists() ? userSnap.data() : { name: 'Campus User' };
+                    
+                    myChats.push({
+                        chatId,
+                        otherId,
+                        otherName: userData.name || 'Campus User',
+                        otherPhoto: userData.photo,
+                        lastMsg,
+                        lastMsgTime: lastMsg?.timestamp || chatData.lastMessageAt
+                    });
                 }
                 
                 // Sort by most recent message
@@ -738,11 +788,6 @@
                     const bTime = b.lastMsgTime?.seconds || 0;
                     return bTime - aTime;
                 });
-                
-                if (myChats.length === 0) {
-                    container.innerHTML = '<p class="text-[11px] opacity-40 text-center py-12 italic">No messages yet.<br>Message a seller to start a conversation.</p>';
-                    return;
-                }
                 
                 container.innerHTML = '';
                 
@@ -771,7 +816,13 @@
                 
             } catch (e) {
                 console.error("Error loading chats:", e);
-                container.innerHTML = '<p class="text-[11px] text-red-400 text-center py-10">Error loading inbox</p>';
+                container.innerHTML = `
+                    <div class="text-center py-8">
+                        <p class="text-red-500 text-sm mb-2">❌ Error loading inbox</p>
+                        <p class="text-[11px] opacity-70 mb-4">${e.message}</p>
+                        <button onclick="openChats()" class="bg-blue-600 text-white px-4 py-2 rounded-full text-xs font-bold">Retry</button>
+                    </div>
+                `;
             }
         };
 
