@@ -161,26 +161,6 @@
 
         .active-nav { color: var(--primary) !important; font-weight: 800; }
 
-        /* Notification badge on Inbox */
-        .notification-dot { 
-            position: absolute; 
-            top: -4px; 
-            right: 6px; 
-            background: #ef4444; 
-            color: white;
-            font-size: 8px;
-            font-weight: 900;
-            min-width: 16px;
-            height: 16px;
-            border-radius: 8px;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 0 3px;
-            border: 2px solid var(--card);
-            z-index: 100;
-        }
-
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -224,34 +204,6 @@
         }
         .star-rating i.active { color: #f59e0b; }
         .star-rating i:hover { transform: scale(1.2); }
-
-        /* Toast notification for incoming messages */
-        .toast {
-            position: fixed;
-            bottom: 100px;
-            right: 16px;
-            background: var(--card);
-            border-left: 4px solid #2563eb;
-            border: 1px solid var(--border);
-            border-left: 4px solid #2563eb;
-            border-radius: 16px;
-            padding: 14px 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            z-index: 10000;
-            max-width: 280px;
-            animation: toastIn 0.3s ease;
-            cursor: pointer;
-        }
-        @keyframes toastIn {
-            from { transform: translateX(120%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        .toast-out {
-            animation: toastOut 0.3s ease forwards;
-        }
-        @keyframes toastOut {
-            to { transform: translateX(120%); opacity: 0; }
-        }
 
         /* Review reply styles */
         .review-reply {
@@ -517,6 +469,10 @@
                     <div id="admin-user-list" class="space-y-3 max-h-80 overflow-y-auto no-scrollbar"></div>
                 </div>
                 <div class="bg-card p-6 border border-base rounded-[2rem] shadow-sm">
+                    <h3 class="text-xs font-extrabold uppercase mb-4 text-blue-600">Verification Requests</h3>
+                    <div id="admin-verification-list" class="space-y-3 max-h-80 overflow-y-auto no-scrollbar"></div>
+                </div>
+                <div class="bg-card p-6 border border-base rounded-[2rem] shadow-sm">
                     <h3 class="text-xs font-extrabold uppercase mb-4 text-red-600">Reports & Flagged</h3>
                     <div id="admin-reports-list" class="space-y-3"></div>
                 </div>
@@ -545,7 +501,7 @@
             <i class="fas fa-grid-2 text-lg mb-1" style="color: var(--text-muted);"></i>
             <span class="text-[9px] font-bold text-muted">Manager</span>
         </button>
-        <button onclick="window.open('https://wa.me/2348053103234?text=Hello%20Admin%2C%20I%20need%20help%20with%20SLIT-HUB.%20My%20ID%3A%20' + currentUserId, '_blank')" class="nav-item flex flex-col items-center relative">
+        <button onclick="window.open('https://wa.me/2348053103234?text=Hello%20Admin%2C%20I%20need%20help%20with%20SLIT-HUB.%20My%20ID%3A%20' + (typeof currentUserId !== 'undefined' ? currentUserId : ''), '_blank')" class="nav-item flex flex-col items-center relative">
             <i class="fas fa-comment-dots text-lg mb-1 text-green-500"></i>
             <span class="text-[9px] font-bold text-muted">Admin</span>
         </button>
@@ -1272,7 +1228,11 @@
                 isAdminMode = !isAdminMode;
                 document.getElementById('admin-panel').classList.toggle('hidden', !isAdminMode);
                 document.getElementById('admin-toggle-btn').innerText = `Admin Mode: ${isAdminMode ? 'ON' : 'OFF'}`;
-                if (isAdminMode) { loadReports(); loadAdminUserList(); }
+                if (isAdminMode) { 
+                    loadReports(); 
+                    loadAdminUserList();
+                    loadVerificationRequests();
+                }
                 loadMyItems();
             }
         };
@@ -1285,6 +1245,61 @@
             }
             await setDoc(doc(db, "AppData", "Announcement"), { message: msg, active: true });
             alert("Announcement Updated!");
+        };
+
+        // New function to load verification requests
+        async function loadVerificationRequests() {
+            const container = document.getElementById('admin-verification-list');
+            if (!container) return;
+            
+            onSnapshot(collection(db, "VerificationRequests"), async (snap) => {
+                if (snap.empty) {
+                    container.innerHTML = '<p class="text-[10px] opacity-50 text-muted">No verification requests.</p>';
+                    return;
+                }
+                
+                container.innerHTML = '';
+                
+                for (const doc of snap.docs) {
+                    const request = doc.data();
+                    const userId = doc.id;
+                    const date = request.timestamp ? new Date(request.timestamp.seconds * 1000).toLocaleDateString() : 'Unknown';
+                    
+                    // Get user info
+                    const userSnap = await getDoc(doc(db, "Users", userId));
+                    const userName = userSnap.exists() ? userSnap.data().name : 'Unknown';
+                    
+                    container.innerHTML += `
+                        <div class="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-xl border border-yellow-200 dark:border-yellow-800">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="font-bold text-xs text-default">${userName}</p>
+                                    <p class="text-[9px] text-muted">ID: ${userId}</p>
+                                    <p class="text-[8px] text-muted">Requested: ${date}</p>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button onclick="viewIdImage('${request.idImage}')" class="bg-blue-600 text-white px-2 py-1 rounded text-[8px] font-bold">VIEW ID</button>
+                                    <button onclick="verifyUser('${userId}')" class="bg-green-600 text-white px-2 py-1 rounded text-[8px] font-bold">VERIFY</button>
+                                    <button onclick="deleteRequest('${doc.id}')" class="bg-red-600 text-white px-2 py-1 rounded text-[8px] font-bold">DELETE</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        // Helper function to view ID image
+        window.viewIdImage = (imageUrl) => {
+            window.open(imageUrl, '_blank');
+        };
+
+        // Helper function to delete verification request
+        window.deleteRequest = async (requestId) => {
+            if (confirm("Delete this verification request?")) {
+                await deleteDoc(doc(db, "VerificationRequests", requestId));
+                alert("Request deleted.");
+            }
         };
 
         function loadReports() {
@@ -1372,6 +1387,12 @@
         window.verifyUser = async uid => {
             if (confirm("Verify this user?")) {
                 await setDoc(doc(db, "VerifiedUsers", uid), { verifiedAt: serverTimestamp(), verifiedBy: currentUserId });
+                // Delete verification request if exists
+                try {
+                    await deleteDoc(doc(db, "VerificationRequests", uid));
+                } catch (e) {
+                    // Ignore if doesn't exist
+                }
                 alert("User verified! ✅");
                 loadAdminUserList();
             }
