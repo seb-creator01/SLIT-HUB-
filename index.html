@@ -12,6 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 
     <style>
+        /* Cross-browser CSS variables */
         :root { 
             --primary: #2563eb; 
             --primary-glow: rgba(37, 99, 235, 0.2);
@@ -22,8 +23,11 @@
             --text-muted: #64748b;
             --border: #e2e8f0; 
             --input-bg: #f1f5f9;
+            --nav-text: #64748b;
         }
-        .dark { 
+        
+        /* Dark mode - using attribute for cross-browser compatibility */
+        html.dark { 
             --bg: #0f172a; 
             --card: #1e293b; 
             --text: #f8fafc; 
@@ -31,41 +35,48 @@
             --text-muted: #94a3b8;
             --border: #334155; 
             --input-bg: #1e293b;
+            --nav-text: #94a3b8;
         }
 
+        /* Apply variables with fallbacks for older browsers */
         body { 
             padding-bottom: 90px;
-            background-color: var(--bg); 
-            color: var(--text); 
-            transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+            background-color: var(--bg, #f8fafc); 
+            color: var(--text, #1e293b); 
+            transition: background 0.4s ease, color 0.4s ease; 
             font-family: 'Plus Jakarta Sans', sans-serif;
             overflow-x: hidden;
         }
 
-        /* Text color classes for both modes */
-        .text-default { color: var(--text) !important; }
-        .text-light { color: var(--text-light) !important; }
-        .text-muted { color: var(--text-muted) !important; }
-        .bg-card { background-color: var(--card) !important; }
-        .border-base { border-color: var(--border) !important; }
-        .bg-input { background-color: var(--input-bg) !important; }
+        /* Text color classes with !important to override everything */
+        .text-default { color: var(--text, #1e293b) !important; }
+        .text-light { color: var(--text-light, #334155) !important; }
+        .text-muted { color: var(--text-muted, #64748b) !important; }
+        .bg-card { background-color: var(--card, #ffffff) !important; }
+        .border-base { border-color: var(--border, #e2e8f0) !important; }
+        .bg-input { background-color: var(--input-bg, #f1f5f9) !important; }
 
-        /* Input styles */
+        /* Input styles - cross-browser */
         input, textarea, select {
-            background-color: var(--input-bg) !important;
-            color: var(--text) !important;
-            border-color: var(--border) !important;
+            background-color: var(--input-bg, #f1f5f9) !important;
+            color: var(--text, #1e293b) !important;
+            border-color: var(--border, #e2e8f0) !important;
         }
         input::placeholder, textarea::placeholder {
-            color: var(--text-muted) !important;
+            color: var(--text-muted, #64748b) !important;
             opacity: 0.7;
         }
+        /* For older browsers */
+        input::-webkit-input-placeholder { color: var(--text-muted, #64748b) !important; opacity: 0.7; }
+        input::-moz-placeholder { color: var(--text-muted, #64748b) !important; opacity: 0.7; }
+        input:-ms-input-placeholder { color: var(--text-muted, #64748b) !important; opacity: 0.7; }
 
         .brand-logo {
             font-weight: 800;
             letter-spacing: -1.5px;
             background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
             filter: drop-shadow(0 2px 4px rgba(37, 99, 235, 0.1));
             cursor: pointer;
@@ -80,46 +91,9 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: .5; }
-        }
-        .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-        .skeleton-card { background: var(--border); border-radius: 20px; height: 220px; width: 100%; }
-
-        button, .nav-item, a, .chip {
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-            cursor: pointer;
-            outline: none;
-        }
-        button:active, .nav-item:active, .chip:active {
-            transform: scale(0.92) !important;
-            opacity: 0.8;
-        }
-
-        .glass-header {
-            background: rgba(248, 250, 252, 0.9);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border);
-        }
-        .dark .glass-header {
-            background: rgba(15, 23, 42, 0.9);
-        }
-
-        .glass-nav {
-            background: rgba(255,255,255,0.92);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border-top: 1px solid var(--border);
-            border-radius: 2rem 2rem 0 0;
-            box-shadow: 0 -10px 30px rgba(0,0,0,0.05);
-        }
-        .dark .glass-nav { background: rgba(15, 23, 42, 0.92); }
-
         .product-card {
-            background: var(--card);
-            border: 1px solid var(--border);
+            background: var(--card, #ffffff);
+            border: 1px solid var(--border, #e2e8f0);
             border-radius: 20px;
             overflow: hidden;
             transition: all 0.3s ease;
@@ -138,7 +112,7 @@
         }
 
         .view-toggle { 
-            background: var(--border); 
+            background: var(--border, #e2e8f0); 
             border-radius: 20px; 
             padding: 5px; 
             display: flex; 
@@ -151,11 +125,11 @@
             border-radius: 16px; 
             font-size: 0.85rem; 
             font-weight: 700; 
-            color: var(--text-muted); 
+            color: var(--text-muted, #64748b); 
         }
         .view-toggle .active { 
-            background: var(--card); 
-            color: var(--primary); 
+            background: var(--card, #ffffff); 
+            color: var(--primary) !important; 
             box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
         }
 
@@ -164,54 +138,10 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        .modal-content { 
-            background: var(--card); 
-            border-radius: 2.5rem; 
-            animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        @keyframes modalPop {
-            from { transform: scale(0.8); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-
         .btn-premium {
             background: linear-gradient(135deg, #2563eb, #7c3aed);
-            color: white;
+            color: white !important;
             box-shadow: 0 4px 15px var(--primary-glow);
-        }
-
-        #profile-loader {
-            position: absolute; inset: 0;
-            background: rgba(255,255,255,0.7);
-            display: none; align-items: center; justify-content: center;
-            border-radius: 50%; z-index: 10;
-        }
-        .dark #profile-loader { background: rgba(15, 23, 42, 0.7); }
-
-        .spinner {
-            width: 20px; height: 20px;
-            border: 3px solid var(--primary);
-            border-top-color: transparent;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        .star-rating i {
-            cursor: pointer;
-            transition: transform 0.2s, color 0.2s;
-            color: #e2e8f0;
-        }
-        .star-rating i.active { color: #f59e0b; }
-        .star-rating i:hover { transform: scale(1.2); }
-
-        /* Review reply styles */
-        .review-reply {
-            margin-left: 30px;
-            padding: 10px;
-            background: rgba(37, 99, 235, 0.05);
-            border-radius: 12px;
-            border-left: 3px solid var(--primary);
         }
 
         /* Safety warning banner */
@@ -228,17 +158,22 @@
             gap: 12px;
             box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
         }
-        .safety-warning i {
-            font-size: 20px;
-        }
+        .safety-warning i { font-size: 20px; }
         .safety-warning .close-btn {
             margin-left: auto;
             cursor: pointer;
             opacity: 0.8;
             transition: opacity 0.2s;
         }
-        .safety-warning .close-btn:hover {
-            opacity: 1;
+        .safety-warning .close-btn:hover { opacity: 1; }
+
+        /* Review reply styles */
+        .review-reply {
+            margin-left: 30px;
+            padding: 10px;
+            background: rgba(37, 99, 235, 0.05);
+            border-radius: 12px;
+            border-left: 3px solid var(--primary);
         }
     </style>
 </head>
@@ -246,18 +181,18 @@
 
     <!-- Terms Modal -->
     <div id="terms-modal" class="hidden fixed inset-0 z-[10000] bg-black/60 backdrop-blur-sm flex items-center justify-center p-6">
-        <div class="modal-content p-8 max-w-sm w-full shadow-2xl border border-base">
+        <div class="modal-content p-8 max-w-sm w-full shadow-2xl border border-base" style="background: var(--card, #ffffff); border-color: var(--border, #e2e8f0);">
             <div class="text-center mb-6">
                 <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i class="fas fa-shield-halved text-2xl"></i>
                 </div>
-                <h2 class="text-2xl font-extrabold text-default">Campus Rules</h2>
-                <p class="text-xs opacity-60 mt-2 text-light">To keep our campus safe, please agree to these terms.</p>
+                <h2 class="text-2xl font-extrabold" style="color: var(--text, #1e293b);">Campus Rules</h2>
+                <p class="text-xs opacity-60 mt-2" style="color: var(--text-light, #334155);">To keep our campus safe, please agree to these terms.</p>
             </div>
             <div class="space-y-4 text-sm mb-8">
-                <div class="flex gap-3 items-start"><i class="fas fa-check-circle text-blue-500 mt-1"></i><p class="text-default"><b>Be Real:</b> Authentic posts only.</p></div>
-                <div class="flex gap-3 items-start"><i class="fas fa-check-circle text-blue-500 mt-1"></i><p class="text-default"><b>Safety:</b> Meet in public areas.</p></div>
-                <div class="flex gap-3 items-start"><i class="fas fa-check-circle text-blue-500 mt-1"></i><p class="text-default"><b>No Scams:</b> Immediate permanent ban.</p></div>
+                <div class="flex gap-3 items-start"><i class="fas fa-check-circle text-blue-500 mt-1"></i><p style="color: var(--text, #1e293b);"><b>Be Real:</b> Authentic posts only.</p></div>
+                <div class="flex gap-3 items-start"><i class="fas fa-check-circle text-blue-500 mt-1"></i><p style="color: var(--text, #1e293b);"><b>Safety:</b> Meet in public areas.</p></div>
+                <div class="flex gap-3 items-start"><i class="fas fa-check-circle text-blue-500 mt-1"></i><p style="color: var(--text, #1e293b);"><b>No Scams:</b> Immediate permanent ban.</p></div>
             </div>
             <button onclick="acceptTerms()" class="w-full btn-premium font-bold py-4 rounded-2xl shadow-lg transition-all">I AGREE & CONTINUE</button>
         </div>
@@ -268,21 +203,21 @@
         <div class="text-red-500 mb-6 bg-red-50 dark:bg-red-950/30 p-6 rounded-full">
             <i class="fas fa-user-lock text-5xl"></i>
         </div>
-        <h1 class="text-3xl font-extrabold text-default">Account Suspended</h1>
-        <p class="opacity-60 mt-4 max-w-xs text-light">You have been flagged for community violations. Please contact admin to appeal.</p>
+        <h1 class="text-3xl font-extrabold" style="color: var(--text, #1e293b);">Account Suspended</h1>
+        <p class="opacity-60 mt-4 max-w-xs" style="color: var(--text-light, #334155);">You have been flagged for community violations. Please contact admin to appeal.</p>
         <button onclick="contactDeveloper()" class="mt-8 bg-blue-600 text-white px-8 py-3 rounded-full font-bold shadow-lg">Appeal Access</button>
     </div>
 
     <!-- Header -->
-    <header class="glass-header sticky top-0 z-50 p-4">
+    <header class="glass-header sticky top-0 z-50 p-4" style="background: rgba(248, 250, 252, 0.9); border-bottom: 1px solid var(--border, #e2e8f0);">
         <div class="max-w-5xl mx-auto flex justify-between items-center gap-4">
             <h1 class="brand-logo text-2xl" onclick="showScreen('browse-screen')">SLIT-HUB</h1>
             <div class="flex-1 max-w-md relative">
-                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-muted text-xs"></i>
-                <input type="text" id="global-search" placeholder="Search campus..." class="w-full bg-input border-none rounded-2xl pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all text-default placeholder:text-muted">
+                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2" style="color: var(--text-muted, #64748b);"></i>
+                <input type="text" id="global-search" placeholder="Search campus..." class="w-full bg-input border-none rounded-2xl pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" style="background: var(--input-bg, #f1f5f9); color: var(--text, #1e293b);">
             </div>
-            <button onclick="toggleDarkMode()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-input transition-colors">
-                <i class="fas fa-moon" id="dark-icon" style="color: var(--text);"></i>
+            <button onclick="toggleDarkMode()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-input transition-colors" style="background: var(--input-bg, #f1f5f9);">
+                <i class="fas fa-moon" id="dark-icon" style="color: var(--text, #1e293b);"></i>
             </button>
         </div>
     </header>
@@ -296,7 +231,7 @@
         <button onclick="this.parentElement.classList.add('hidden')" class="opacity-70 hover:opacity-100"><i class="fas fa-times"></i></button>
     </div>
 
-    <!-- Safety Warning Banner (Can be closed) -->
+    <!-- Safety Warning Banner -->
     <div id="safety-banner" class="max-w-5xl mx-auto px-4 mt-4">
         <div class="safety-warning">
             <i class="fas fa-shield-alt"></i>
@@ -324,7 +259,7 @@
 
         <!-- Settings/Profile Screen -->
         <section id="settings-screen" class="screen hidden max-w-lg mx-auto">
-            <div class="bg-card p-8 rounded-[2.5rem] shadow-xl border border-base">
+            <div class="bg-card p-8 rounded-[2.5rem] shadow-xl border border-base" style="background: var(--card, #ffffff); border-color: var(--border, #e2e8f0);">
                 <div class="text-center mb-8">
                     <div class="relative inline-block">
                         <div id="profile-loader"><div class="spinner"></div></div>
@@ -335,19 +270,19 @@
                         </div>
                         <input type="file" id="profile-upload" class="hidden" accept="image/*">
                     </div>
-                    <h2 id="my-profile-name-display" class="font-extrabold text-xl text-default mt-4">My Profile</h2>
-                    <p class="text-[10px] opacity-40 font-mono mt-1 text-light">ID: <span id="display-user-id" class="text-blue-600"></span></p>
+                    <h2 id="my-profile-name-display" class="font-extrabold text-xl mt-4" style="color: var(--text, #1e293b);">My Profile</h2>
+                    <p class="text-[10px] opacity-40 font-mono mt-1" style="color: var(--text-light, #334155);">ID: <span id="display-user-id" class="text-blue-600"></span></p>
                 </div>
                 <div class="space-y-5">
-                    <input type="text" id="set-profile-name" placeholder="👤 Full Name" class="w-full bg-input border border-base p-3.5 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500 text-default placeholder:text-muted">
-                    <input type="text" id="set-profile-dept" placeholder="🎓 Dept" class="w-full bg-input border border-base p-3.5 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500 text-default placeholder:text-muted">
-                    <textarea id="set-profile-bio" placeholder="📝 About you..." class="w-full bg-input border border-base p-3.5 rounded-2xl text-sm h-24 outline-none focus:ring-2 focus:ring-blue-500 text-default placeholder:text-muted"></textarea>
+                    <input type="text" id="set-profile-name" placeholder="👤 Full Name" class="w-full bg-input border border-base p-3.5 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500" style="background: var(--input-bg, #f1f5f9); color: var(--text, #1e293b); border-color: var(--border, #e2e8f0);">
+                    <input type="text" id="set-profile-dept" placeholder="🎓 Dept" class="w-full bg-input border border-base p-3.5 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500" style="background: var(--input-bg, #f1f5f9); color: var(--text, #1e293b); border-color: var(--border, #e2e8f0);">
+                    <textarea id="set-profile-bio" placeholder="📝 About you..." class="w-full bg-input border border-base p-3.5 rounded-2xl text-sm h-24 outline-none focus:ring-2 focus:ring-blue-500" style="background: var(--input-bg, #f1f5f9); color: var(--text, #1e293b); border-color: var(--border, #e2e8f0);"></textarea>
                     <button onclick="saveUserProfile()" class="w-full btn-premium font-bold py-4 rounded-2xl shadow-lg">SAVE PROFILE</button>
                     
-                    <!-- Safety Tips in Profile -->
+                    <!-- Safety Tips -->
                     <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-2xl">
                         <p class="text-[11px] font-extrabold text-yellow-800 dark:text-yellow-200 mb-2">🛡️ SAFETY TIPS</p>
-                        <ul class="text-[10px] space-y-1 text-light">
+                        <ul class="text-[10px] space-y-1" style="color: var(--text-light, #334155);">
                             <li>• NEVER pay before seeing the item</li>
                             <li>• Meet in public places (library, cafeteria)</li>
                             <li>• Bring a friend if possible</li>
@@ -356,28 +291,31 @@
                         </ul>
                     </div>
                     
+                    <!-- Verification Section with FIXED Admin Button -->
                     <div class="p-5 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-3xl">
                         <p class="text-[11px] font-extrabold text-blue-800 dark:text-blue-200 mb-3 tracking-wider">🛡️ CAMPUS VERIFICATION</p>
                         <div class="flex gap-3">
                             <button onclick="requestVerification()" class="flex-1 bg-white dark:bg-slate-800 border border-blue-600 text-blue-600 text-[10px] font-bold py-3 rounded-xl shadow-sm">UPLOAD ID</button>
-                            <button onclick="window.open('https://wa.me/2348053103234?text=Hello%20Admin%2C%20I%20want%20to%20verify%20my%20account.%20My%20ID%3A%20' + currentUserId, '_blank')" class="flex-1 bg-green-500 text-white text-[10px] font-bold py-3 rounded-xl shadow-sm hover:bg-green-600 transition-colors">
+                            <!-- FIXED: Admin button with your WhatsApp link -->
+                            <a href="https://wa.me/message/O2QERB7C5VE6E1?text=Hello%20Admin%2C%20I%20want%20to%20verify%20my%20account.%20My%20ID%3A%20" target="_blank" class="flex-1 bg-green-500 text-white text-[10px] font-bold py-3 rounded-xl shadow-sm hover:bg-green-600 transition-colors text-center block">
                                 <i class="fab fa-whatsapp mr-1"></i>CHAT ADMIN
-                            </button>
+                            </a>
                         </div>
                     </div>
-                    <button onclick="contactDeveloper()" class="w-full flex items-center justify-between p-5 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-base hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
-                        <div class="flex items-center gap-3"><i class="fab fa-whatsapp text-2xl text-green-500"></i><p class="text-sm font-bold text-default">Contact Developer</p></div>
-                        <i class="fas fa-chevron-right text-xs text-muted"></i>
-                    </button>
+                    
+                    <!-- Contact Developer with your WhatsApp link -->
+                    <a href="https://wa.me/message/O2QERB7C5VE6E1?text=Hi%20Developer!%20I%20need%20help%20with%20SLIT-HUB.%20My%20ID%3A%20" target="_blank" class="w-full flex items-center justify-between p-5 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-base hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors no-underline">
+                        <div class="flex items-center gap-3"><i class="fab fa-whatsapp text-2xl text-green-500"></i><p class="text-sm font-bold" style="color: var(--text, #1e293b);">Contact Developer</p></div>
+                        <i class="fas fa-chevron-right text-xs" style="color: var(--text-muted, #64748b);"></i>
+                    </a>
                 </div>
             </div>
         </section>
 
         <!-- Post Screen -->
-        <section id="post-screen" class="screen hidden max-w-xl mx-auto bg-card p-8 rounded-[2.5rem] shadow-xl border border-base">
-            <h2 class="text-2xl font-extrabold text-default mb-6">Create New Listing</h2>
+        <section id="post-screen" class="screen hidden max-w-xl mx-auto bg-card p-8 rounded-[2.5rem] shadow-xl border border-base" style="background: var(--card, #ffffff); border-color: var(--border, #e2e8f0);">
+            <h2 class="text-2xl font-extrabold mb-6" style="color: var(--text, #1e293b);">Create New Listing</h2>
             
-            <!-- Safety Reminder for Sellers -->
             <div class="mb-6 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl">
                 <p class="text-[10px] font-bold text-yellow-800 dark:text-yellow-200">
                     <i class="fas fa-shield-alt mr-1"></i> 
@@ -385,65 +323,66 @@
                 </p>
             </div>
             
-            <div class="flex gap-2 mb-8 bg-input p-1.5 rounded-2xl">
-                <label class="flex-1 py-3 rounded-xl text-center text-[11px] font-extrabold uppercase cursor-pointer transition-all"><input type="radio" name="post-type" value="Product" checked class="hidden" onclick="togglePostForm('Product')"><span class="text-default">🛍️ Product</span></label>
-                <label class="flex-1 py-3 rounded-xl text-center text-[11px] font-extrabold uppercase cursor-pointer transition-all"><input type="radio" name="post-type" value="Service" class="hidden" onclick="togglePostForm('Service')"><span class="text-default">🛠️ Service</span></label>
-                <label class="flex-1 py-3 rounded-xl text-center text-[11px] font-extrabold uppercase cursor-pointer transition-all"><input type="radio" name="post-type" value="Request" class="hidden" onclick="togglePostForm('Request')"><span class="text-default">🙋‍♂️ Ask</span></label>
+            <div class="flex gap-2 mb-8 bg-input p-1.5 rounded-2xl" style="background: var(--input-bg, #f1f5f9);">
+                <label class="flex-1 py-3 rounded-xl text-center text-[11px] font-extrabold uppercase cursor-pointer transition-all"><input type="radio" name="post-type" value="Product" checked class="hidden" onclick="togglePostForm('Product')"><span style="color: var(--text, #1e293b);">🛍️ Product</span></label>
+                <label class="flex-1 py-3 rounded-xl text-center text-[11px] font-extrabold uppercase cursor-pointer transition-all"><input type="radio" name="post-type" value="Service" class="hidden" onclick="togglePostForm('Service')"><span style="color: var(--text, #1e293b);">🛠️ Service</span></label>
+                <label class="flex-1 py-3 rounded-xl text-center text-[11px] font-extrabold uppercase cursor-pointer transition-all"><input type="radio" name="post-type" value="Request" class="hidden" onclick="togglePostForm('Request')"><span style="color: var(--text, #1e293b);">🙋‍♂️ Ask</span></label>
             </div>
+            
             <div class="space-y-5">
-                <div id="image-preview-container" class="w-full h-48 border-2 border-dashed border-base rounded-3xl flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:bg-input transition-all">
+                <div id="image-preview-container" class="w-full h-48 border-2 border-dashed border-base rounded-3xl flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:bg-input transition-all" style="border-color: var(--border, #e2e8f0);">
                     <img id="image-preview" class="hidden w-full h-full object-cover">
                     <div id="preview-placeholder" class="text-center">
                         <i class="fas fa-cloud-arrow-up text-3xl text-blue-500 mb-2"></i>
-                        <p class="text-[11px] font-bold text-muted">Tap to upload photo</p>
+                        <p class="text-[11px] font-bold" style="color: var(--text-muted, #64748b);">Tap to upload photo</p>
                     </div>
                 </div>
                 <input type="file" id="file-input" class="hidden">
-                <input type="text" id="post-title" placeholder="What are you listing?" class="w-full bg-input border border-base p-4 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500 text-default placeholder:text-muted">
-                <textarea id="post-desc" placeholder="Details (Condition, size, etc.)..." class="w-full bg-input border border-base p-4 rounded-2xl text-sm h-32 outline-none focus:ring-2 focus:ring-blue-500 text-default placeholder:text-muted"></textarea>
+                <input type="text" id="post-title" placeholder="What are you listing?" class="w-full bg-input border border-base p-4 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500" style="background: var(--input-bg, #f1f5f9); color: var(--text, #1e293b); border-color: var(--border, #e2e8f0);">
+                <textarea id="post-desc" placeholder="Details (Condition, size, etc.)..." class="w-full bg-input border border-base p-4 rounded-2xl text-sm h-32 outline-none focus:ring-2 focus:ring-blue-500" style="background: var(--input-bg, #f1f5f9); color: var(--text, #1e293b); border-color: var(--border, #e2e8f0);"></textarea>
                 <div class="grid grid-cols-2 gap-4">
                     <div class="relative">
-                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-muted">₦</span>
-                        <input type="number" id="post-price" placeholder="Price" class="w-full bg-input border border-base pl-10 pr-4 py-4 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500 text-default placeholder:text-muted">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold" style="color: var(--text-muted, #64748b);">₦</span>
+                        <input type="number" id="post-price" placeholder="Price" class="w-full bg-input border border-base pl-10 pr-4 py-4 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500" style="background: var(--input-bg, #f1f5f9); color: var(--text, #1e293b); border-color: var(--border, #e2e8f0);">
                     </div>
-                    <select id="post-negotiable" class="w-full bg-input border border-base px-4 py-4 rounded-2xl text-sm outline-none text-default">
+                    <select id="post-negotiable" class="w-full bg-input border border-base px-4 py-4 rounded-2xl text-sm outline-none" style="background: var(--input-bg, #f1f5f9); color: var(--text, #1e293b); border-color: var(--border, #e2e8f0);">
                         <option value="Fixed">Fixed Price</option>
                         <option value="Negotiable">Negotiable</option>
                     </select>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
-                    <select id="post-category" class="w-full bg-input border border-base px-4 py-4 rounded-2xl text-sm outline-none text-default"></select>
-                    <select id="post-condition" class="w-full bg-input border border-base px-4 py-4 rounded-2xl text-sm outline-none text-default"></select>
+                    <select id="post-category" class="w-full bg-input border border-base px-4 py-4 rounded-2xl text-sm outline-none" style="background: var(--input-bg, #f1f5f9); color: var(--text, #1e293b); border-color: var(--border, #e2e8f0);"></select>
+                    <select id="post-condition" class="w-full bg-input border border-base px-4 py-4 rounded-2xl text-sm outline-none" style="background: var(--input-bg, #f1f5f9); color: var(--text, #1e293b); border-color: var(--border, #e2e8f0);"></select>
                 </div>
                 <div class="relative">
                     <span class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-blue-600">+234</span>
-                    <input type="tel" id="post-phone" placeholder="Phone number (e.g. 8051234567)" class="w-full bg-input border border-base pl-16 pr-4 py-4 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500 text-default placeholder:text-muted">
+                    <input type="tel" id="post-phone" placeholder="Phone number (e.g. 8051234567)" class="w-full bg-input border border-base pl-16 pr-4 py-4 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500" style="background: var(--input-bg, #f1f5f9); color: var(--text, #1e293b); border-color: var(--border, #e2e8f0);">
                 </div>
-                <input type="text" id="post-location" placeholder="📍 Campus Location" class="w-full bg-input border border-base p-4 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500 text-default placeholder:text-muted">
+                <input type="text" id="post-location" placeholder="📍 Campus Location" class="w-full bg-input border border-base p-4 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500" style="background: var(--input-bg, #f1f5f9); color: var(--text, #1e293b); border-color: var(--border, #e2e8f0);">
                 <button id="btn-post" class="w-full btn-premium font-extrabold py-4 rounded-2xl shadow-xl mt-4">PUBLISH NOW</button>
             </div>
         </section>
 
         <!-- Edit Screen -->
-        <section id="edit-screen" class="screen hidden max-w-xl mx-auto bg-card p-8 rounded-[2.5rem] shadow-xl border border-base">
+        <section id="edit-screen" class="screen hidden max-w-xl mx-auto bg-card p-8 rounded-[2.5rem] shadow-xl border border-base" style="background: var(--card, #ffffff); border-color: var(--border, #e2e8f0);">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-extrabold text-default">Edit Listing</h2>
-                <button onclick="showScreen('my-items-screen')" class="text-xs opacity-50 font-bold text-muted hover:opacity-100">CANCEL</button>
+                <h2 class="text-2xl font-extrabold" style="color: var(--text, #1e293b);">Edit Listing</h2>
+                <button onclick="showScreen('my-items-screen')" class="text-xs opacity-50 font-bold hover:opacity-100" style="color: var(--text-muted, #64748b);">CANCEL</button>
             </div>
             <div class="space-y-5">
                 <input type="hidden" id="edit-product-id">
-                <div id="edit-image-preview-container" class="w-full h-48 border-2 border-dashed border-base rounded-3xl overflow-hidden cursor-pointer">
+                <div id="edit-image-preview-container" class="w-full h-48 border-2 border-dashed border-base rounded-3xl overflow-hidden cursor-pointer" style="border-color: var(--border, #e2e8f0);">
                     <img id="edit-image-preview" class="w-full h-full object-cover">
                 </div>
                 <input type="file" id="edit-file-input" class="hidden">
-                <input type="text" id="edit-title" placeholder="Title" class="w-full bg-input border border-base p-4 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500 text-default placeholder:text-muted">
-                <textarea id="edit-desc" placeholder="Details..." class="w-full bg-input border border-base p-4 rounded-2xl text-sm h-32 outline-none focus:ring-2 focus:ring-blue-500 text-default placeholder:text-muted"></textarea>
+                <input type="text" id="edit-title" placeholder="Title" class="w-full bg-input border border-base p-4 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500" style="background: var(--input-bg, #f1f5f9); color: var(--text, #1e293b); border-color: var(--border, #e2e8f0);">
+                <textarea id="edit-desc" placeholder="Details..." class="w-full bg-input border border-base p-4 rounded-2xl text-sm h-32 outline-none focus:ring-2 focus:ring-blue-500" style="background: var(--input-bg, #f1f5f9); color: var(--text, #1e293b); border-color: var(--border, #e2e8f0);"></textarea>
                 <div class="grid grid-cols-2 gap-4">
                     <div class="relative">
-                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-muted">₦</span>
-                        <input type="number" id="edit-price" class="w-full bg-input border border-base pl-10 pr-4 py-4 rounded-2xl text-sm outline-none text-default">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold" style="color: var(--text-muted, #64748b);">₦</span>
+                        <input type="number" id="edit-price" class="w-full bg-input border border-base pl-10 pr-4 py-4 rounded-2xl text-sm outline-none" style="background: var(--input-bg, #f1f5f9); color: var(--text, #1e293b); border-color: var(--border, #e2e8f0);">
                     </div>
-                    <select id="edit-sold-status" class="w-full bg-input border border-base px-4 py-4 rounded-2xl text-sm outline-none text-default">
+                    <select id="edit-sold-status" class="w-full bg-input border border-base px-4 py-4 rounded-2xl text-sm outline-none" style="background: var(--input-bg, #f1f5f9); color: var(--text, #1e293b); border-color: var(--border, #e2e8f0);">
                         <option value="false">Available</option>
                         <option value="true">Mark as Sold</option>
                     </select>
@@ -455,8 +394,8 @@
         <!-- Manager Screen -->
         <section id="my-items-screen" class="screen hidden">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-extrabold text-default">Manager</h2>
-                <button onclick="toggleAdminMode()" id="admin-toggle-btn" class="text-[9px] bg-input px-3 py-1.5 rounded-full font-bold uppercase tracking-widest text-default">Admin: OFF</button>
+                <h2 class="text-2xl font-extrabold" style="color: var(--text, #1e293b);">Manager</h2>
+                <button onclick="toggleAdminMode()" id="admin-toggle-btn" class="text-[9px] bg-input px-3 py-1.5 rounded-full font-bold uppercase tracking-widest" style="background: var(--input-bg, #f1f5f9); color: var(--text, #1e293b);">Admin: OFF</button>
             </div>
             <div id="admin-panel" class="hidden mb-10 space-y-6">
                 <div class="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 rounded-[2rem] text-white shadow-xl">
@@ -464,15 +403,16 @@
                     <textarea id="admin-announcement-input" class="w-full p-4 rounded-2xl text-slate-900 text-sm h-20 mb-3 outline-none" placeholder="Broadcast message..."></textarea>
                     <button onclick="updateAnnouncement()" class="bg-white text-blue-600 px-8 py-2.5 rounded-xl text-[10px] font-bold shadow-lg hover:bg-gray-100 transition-colors">PUSH NOTIFICATION</button>
                 </div>
-                <div class="bg-card p-6 border border-base rounded-[2rem] shadow-sm">
+                <div class="bg-card p-6 border border-base rounded-[2rem] shadow-sm" style="background: var(--card, #ffffff); border-color: var(--border, #e2e8f0);">
                     <h3 class="text-xs font-extrabold uppercase mb-4 text-blue-600">Member Directory</h3>
                     <div id="admin-user-list" class="space-y-3 max-h-80 overflow-y-auto no-scrollbar"></div>
                 </div>
-                <div class="bg-card p-6 border border-base rounded-[2rem] shadow-sm">
-                    <h3 class="text-xs font-extrabold uppercase mb-4 text-blue-600">Verification Requests</h3>
+                <!-- FIXED: Verification Requests Section -->
+                <div class="bg-card p-6 border border-base rounded-[2rem] shadow-sm" style="background: var(--card, #ffffff); border-color: var(--border, #e2e8f0);">
+                    <h3 class="text-xs font-extrabold uppercase mb-4 text-blue-600">📋 VERIFICATION REQUESTS</h3>
                     <div id="admin-verification-list" class="space-y-3 max-h-80 overflow-y-auto no-scrollbar"></div>
                 </div>
-                <div class="bg-card p-6 border border-base rounded-[2rem] shadow-sm">
+                <div class="bg-card p-6 border border-base rounded-[2rem] shadow-sm" style="background: var(--card, #ffffff); border-color: var(--border, #e2e8f0);">
                     <h3 class="text-xs font-extrabold uppercase mb-4 text-red-600">Reports & Flagged</h3>
                     <div id="admin-reports-list" class="space-y-3"></div>
                 </div>
@@ -481,33 +421,34 @@
         </section>
 
         <!-- Product Details Screen -->
-        <section id="details-screen" class="screen hidden bg-card rounded-[2.5rem] shadow-2xl overflow-hidden pb-12 border border-base">
+        <section id="details-screen" class="screen hidden bg-card rounded-[2.5rem] shadow-2xl overflow-hidden pb-12 border border-base" style="background: var(--card, #ffffff); border-color: var(--border, #e2e8f0);">
             <div id="details-content"></div>
         </section>
 
     </main>
 
-    <!-- Bottom Nav -->
-    <nav class="fixed bottom-0 left-0 right-0 glass-nav flex justify-around py-4 z-50">
+    <!-- Bottom Nav with FIXED Admin Button -->
+    <nav class="fixed bottom-0 left-0 right-0 glass-nav flex justify-around py-4 z-50" style="background: rgba(255,255,255,0.92); border-top: 1px solid var(--border, #e2e8f0);">
         <button onclick="showScreen('browse-screen')" class="nav-item flex flex-col items-center relative">
-            <i class="fas fa-house-chimney text-lg mb-1" style="color: var(--text-muted);"></i>
-            <span class="text-[9px] font-bold text-muted">Home</span>
+            <i class="fas fa-house-chimney text-lg mb-1" style="color: var(--nav-text, #64748b);"></i>
+            <span class="text-[9px] font-bold" style="color: var(--nav-text, #64748b);">Home</span>
         </button>
         <button onclick="startNewPost()" class="nav-item flex flex-col items-center relative">
             <i class="fas fa-plus-circle text-2xl text-blue-600 mb-1"></i>
-            <span class="text-[9px] font-bold text-muted">Post</span>
+            <span class="text-[9px] font-bold" style="color: var(--nav-text, #64748b);">Post</span>
         </button>
         <button onclick="loadMyItems()" class="nav-item flex flex-col items-center relative">
-            <i class="fas fa-grid-2 text-lg mb-1" style="color: var(--text-muted);"></i>
-            <span class="text-[9px] font-bold text-muted">Manager</span>
+            <i class="fas fa-grid-2 text-lg mb-1" style="color: var(--nav-text, #64748b);"></i>
+            <span class="text-[9px] font-bold" style="color: var(--nav-text, #64748b);">Manager</span>
         </button>
-        <button onclick="window.open('https://wa.me/2348053103234?text=Hello%20Admin%2C%20I%20need%20help%20with%20SLIT-HUB.%20My%20ID%3A%20' + (typeof currentUserId !== 'undefined' ? currentUserId : ''), '_blank')" class="nav-item flex flex-col items-center relative">
+        <!-- FIXED: Admin button with your WhatsApp link -->
+        <a href="https://wa.me/message/O2QERB7C5VE6E1?text=Hello%20Admin%2C%20I%20need%20help%20with%20SLIT-HUB.%20My%20ID%3A%20" target="_blank" class="nav-item flex flex-col items-center relative no-underline">
             <i class="fas fa-comment-dots text-lg mb-1 text-green-500"></i>
-            <span class="text-[9px] font-bold text-muted">Admin</span>
-        </button>
+            <span class="text-[9px] font-bold" style="color: var(--nav-text, #64748b);">Admin</span>
+        </a>
         <button onclick="showScreen('settings-screen')" class="nav-item flex flex-col items-center relative">
-            <i class="fas fa-circle-user text-lg mb-1" style="color: var(--text-muted);"></i>
-            <span class="text-[9px] font-bold text-muted">Me</span>
+            <i class="fas fa-circle-user text-lg mb-1" style="color: var(--nav-text, #64748b);"></i>
+            <span class="text-[9px] font-bold" style="color: var(--nav-text, #64748b);">Me</span>
         </button>
     </nav>
 
@@ -515,7 +456,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, updateDoc, query, orderBy, onSnapshot, where, serverTimestamp, doc, getDoc, deleteDoc, setDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // ── Firebase init ──────────────────────────────────────────
+        // Firebase config
         const firebaseConfig = {
             apiKey: "AIzaSyCpsDTN-NTkTFmbwg3T6vv9H4eE_YXQdZA",
             authDomain: "slit-hub.firebaseapp.com",
@@ -527,7 +468,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // ── State ──────────────────────────────────────────────────
+        // User ID
         let currentUserId = localStorage.getItem('slit_user_id');
         if (!currentUserId || currentUserId.length < 8 || !currentUserId.startsWith('user_')) {
             currentUserId = "user_" + Date.now() + "_" + Math.floor(Math.random() * 9999);
@@ -544,7 +485,20 @@
 
         document.getElementById('display-user-id').innerText = currentUserId;
 
-        // ── Terms ──────────────────────────────────────────────────
+        // Dark mode toggle
+        window.toggleDarkMode = () => {
+            const html = document.documentElement;
+            const isDark = html.classList.toggle('dark');
+            localStorage.setItem('dark-mode', isDark);
+            const icon = document.getElementById('dark-icon');
+            icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+        };
+        if (localStorage.getItem('dark-mode') === 'true') {
+            document.documentElement.classList.add('dark');
+            document.getElementById('dark-icon').className = 'fas fa-sun';
+        }
+
+        // Terms
         window.onload = () => {
             if (!localStorage.getItem('slit_terms_accepted')) {
                 document.getElementById('terms-modal').classList.remove('hidden');
@@ -555,23 +509,14 @@
             document.getElementById('terms-modal').classList.add('hidden');
         };
 
-        // ── Dark Mode ──────────────────────────────────────────────
-        window.toggleDarkMode = () => {
-            const isDark = document.body.classList.toggle('dark');
-            localStorage.setItem('dark-mode', isDark);
-            const icon = document.getElementById('dark-icon');
-            icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
-        };
-        if (localStorage.getItem('dark-mode') === 'true') toggleDarkMode();
-
-        // ── Categories ─────────────────────────────────────────────
+        // Categories
         const categories = {
             Product: ["All","💻 Tech & Gadgets","📚 Textbooks","👕 Thrift & Fashion","🏠 Hostel Gear","🛋️ Furniture","🍳 Cooking & Kitchen","⚽ Sports/Hobby","✨ Cosmetics","➕ Others"],
             Service: ["All","✂️ Barbing & Hair","🧼 Laundry","👨‍🏫 Tutoring","🎨 Graphics/Tech","🧹 Cleaning","🚚 Delivery","📸 Photography","➕ Others"],
             Request: ["All","💰 Buy Request","🛠️ Service Needed","🚑 Urgent Help","👫 Study Partner","➕ Others"]
         };
 
-        // ── Real-time listeners on app start ───────────────────────
+        // Listeners
         onSnapshot(doc(db, "BannedUsers", currentUserId), snap => {
             document.getElementById('ban-screen').classList.toggle('hidden', !snap.exists());
             isUserBanned = snap.exists();
@@ -603,37 +548,28 @@
             }
         });
 
-        // ── WHATSAPP CHAT FUNCTION ─────────────────────────────
+        // WhatsApp Chat
         window.startChat = (phone, sellerName, productTitle, productPrice) => {
             if (!phone) {
                 alert("This seller hasn't provided a phone number.");
                 return;
             }
-            
-            // Clean the phone number
             let cleanPhone = phone.replace(/[^0-9]/g, '');
-            
-            // If it starts with 0, remove the 0 and add 234
             if (cleanPhone.startsWith('0')) {
                 cleanPhone = '234' + cleanPhone.substring(1);
             } else if (!cleanPhone.startsWith('234')) {
                 cleanPhone = '234' + cleanPhone;
             }
-            
-            // Create the message with safety reminder
             const message = encodeURIComponent(
                 `Hello ${sellerName || 'Seller'}, I'm interested in your product: *${productTitle}* for ₦${productPrice}. Is it still available? I will ONLY pay after seeing the product in person.`
             );
-            
-            // Open WhatsApp
             window.open(`https://wa.me/${cleanPhone}?text=${message}`, '_blank');
         };
 
-        // ── REPLY TO REVIEW FUNCTION ─────────────────────────────
+        // Reply to Review
         window.replyToReview = async (productId, reviewId, reviewerName) => {
             const replyText = prompt(`Reply to ${reviewerName}:`);
             if (!replyText) return;
-            
             try {
                 const replyRef = collection(db, "Products", productId, "Reviews", reviewId, "Replies");
                 await addDoc(replyRef, {
@@ -644,16 +580,15 @@
                 });
                 alert("Reply posted successfully!");
             } catch (e) {
-                console.error("Error posting reply:", e);
                 alert("Failed to post reply.");
             }
         };
 
-        // ── Screen navigation ──────────────────────────────────────
+        // Screen navigation
         window.showScreen = screenId => {
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
             document.getElementById(screenId).classList.remove('hidden');
-            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active-nav'));
+            document.querySelectorAll('nav button, nav a').forEach(b => b.classList.remove('active-nav'));
             const map = { 'browse-screen': 0, 'post-screen': 1, 'my-items-screen': 2, 'settings-screen': 4 };
             if (map[screenId] !== undefined) {
                 document.querySelectorAll('nav button')[map[screenId]].classList.add('active-nav');
@@ -661,7 +596,7 @@
             window.scrollTo(0, 0);
         };
 
-        // ── Profile ────────────────────────────────────────────────
+        // Profile
         document.getElementById('profile-upload').onchange = async e => {
             const file = e.target.files[0];
             if (!file) return;
@@ -672,7 +607,7 @@
                 await setDoc(doc(db, "Users", currentUserId), { photo: url }, { merge: true });
                 document.getElementById('my-profile-pic').src = url;
             } catch (err) {
-                alert("Upload failed. Check Cloudinary settings.");
+                alert("Upload failed.");
             }
             loader.style.display = 'none';
         };
@@ -694,7 +629,7 @@
             alert("Profile Updated! ✨");
         };
 
-        // FIXED: Improved verification request with better error handling
+        // FIXED: Upload ID function
         window.requestVerification = async () => {
             const input = document.createElement('input');
             input.type = 'file';
@@ -703,83 +638,53 @@
                 const file = e.target.files[0];
                 if (!file) return;
                 
-                // Show loading state
-                const btn = e.target?.activeElement;
-                const originalText = btn?.innerText;
-                if (btn) btn.innerText = "Uploading...";
+                if (file.size > 5 * 1024 * 1024) {
+                    alert("File too large! Max 5MB.");
+                    return;
+                }
                 
                 try {
-                    // Check file size (max 5MB)
-                    if (file.size > 5 * 1024 * 1024) {
-                        alert("File too large! Please upload an image under 5MB.");
-                        if (btn) btn.innerText = originalText;
-                        return;
-                    }
-                    
-                    // Check file type
-                    if (!file.type.startsWith('image/')) {
-                        alert("Please upload an image file (JPEG, PNG, etc.)");
-                        if (btn) btn.innerText = originalText;
-                        return;
-                    }
-                    
-                    // Upload to Cloudinary
                     const url = await uploadToCloudinary(file);
+                    
+                    // Get user name
+                    const userSnap = await getDoc(doc(db, "Users", currentUserId));
+                    const userName = userSnap.exists() ? userSnap.data().name : 'Unknown';
                     
                     // Save to Firestore
                     await setDoc(doc(db, "VerificationRequests", currentUserId), {
-                        userId: currentUserId, 
-                        idImage: url, 
+                        userId: currentUserId,
+                        userName: userName,
+                        idImage: url,
                         timestamp: serverTimestamp(),
-                        status: 'pending',
-                        userName: document.getElementById('set-profile-name').value || 'Unknown'
+                        status: 'pending'
                     });
                     
-                    alert("✅ ID Uploaded! Admin will verify soon. 🚀");
+                    alert("✅ ID Uploaded! Admin will verify soon.");
                 } catch (err) {
-                    console.error("Upload error:", err);
-                    
-                    // Check for specific Cloudinary errors
-                    if (err.message.includes("upload_preset")) {
-                        alert("❌ Cloudinary configuration error. Please check your upload preset is set to 'Unsigned' in Cloudinary settings.");
-                    } else if (err.message.includes("Failed to fetch")) {
-                        alert("❌ Network error. Please check your internet connection and try again.");
-                    } else {
-                        alert("❌ Upload failed: " + err.message);
-                    }
-                } finally {
-                    if (btn) btn.innerText = originalText;
+                    console.error(err);
+                    alert("❌ Upload failed. Make sure your Cloudinary preset is 'unsigned'.");
                 }
             };
             input.click();
         };
 
-        // ── Cloudinary upload with better error handling ───────────
+        // Cloudinary upload
         async function uploadToCloudinary(file) {
             const formData = new FormData();
             formData.append('file', file);
             formData.append('upload_preset', 'SLIT-HUB');
             
-            try {
-                const res = await fetch('https://api.cloudinary.com/v1_1/ddm87a9p2/image/upload', { 
-                    method: 'POST', 
-                    body: formData 
-                });
-                
-                if (!res.ok) {
-                    const errorData = await res.json();
-                    throw new Error(errorData.error?.message || "Cloudinary upload failed");
-                }
-                
-                const data = await res.json();
-                return data.secure_url;
-            } catch (error) {
-                console.error("Cloudinary error:", error);
-                throw error;
-            }
+            const res = await fetch('https://api.cloudinary.com/v1_1/ddm87a9p2/image/upload', { 
+                method: 'POST', 
+                body: formData 
+            });
+            
+            if (!res.ok) throw new Error("Upload failed");
+            const data = await res.json();
+            return data.secure_url;
         }
 
-        // ── Post a listing ─────────────────────────────────────────
+        // Post listing
         const fileInput = document.getElementById('file-input');
         const imagePreview = document.getElementById('image-preview');
         document.getElementById('image-preview-container').onclick = () => fileInput.click();
@@ -801,32 +706,29 @@
 
         window.togglePostForm = type => {
             const catSelect = document.getElementById('post-category');
-            catSelect.innerHTML = categories[type].filter(c => c !== "All").map(c => `<option value="${c}" class="text-default">${c}</option>`).join('');
+            catSelect.innerHTML = categories[type].filter(c => c !== "All").map(c => `<option value="${c}">${c}</option>`).join('');
             document.getElementById('post-condition').innerHTML = type === 'Product'
-                ? '<option value="New" class="text-default">New</option><option value="Used" class="text-default">Used</option>'
-                : '<option value="Standard" class="text-default">Standard</option>';
-            document.querySelectorAll('input[name="post-type"]').forEach(input => {
-                input.parentElement.classList.toggle('bg-white', input.checked);
-                input.parentElement.classList.toggle('shadow-sm', input.checked);
-            });
+                ? '<option value="New">New</option><option value="Used">Used</option>'
+                : '<option value="Standard">Standard</option>';
         };
 
         document.getElementById('btn-post').onclick = async () => {
             if (isUserBanned) return;
             
-            // Validate phone number
             const phone = document.getElementById('post-phone').value.trim();
             if (!phone) {
-                alert("Please enter your phone number for buyers to contact you!");
+                alert("Please enter your phone number!");
                 return;
             }
             
             const btn = document.getElementById('btn-post');
             btn.innerText = "Publishing..."; btn.disabled = true;
+            
             try {
                 let imageUrl = "https://placehold.co/600x400?text=Post";
                 if (fileInput.files[0]) imageUrl = await uploadToCloudinary(fileInput.files[0]);
                 const postType = document.querySelector('input[name="post-type"]:checked').value;
+                
                 await addDoc(collection(db, "Products"), {
                     Title: document.getElementById('post-title').value,
                     Description: document.getElementById('post-desc').value,
@@ -853,16 +755,15 @@
                 imagePreview.classList.add('hidden');
                 document.getElementById('preview-placeholder').classList.remove('hidden');
                 
-                alert("Listing published successfully! 📢");
+                alert("Listing published!");
                 showScreen('browse-screen');
             } catch (e) {
-                alert("Error publishing. Please try again.");
-                console.error(e);
+                alert("Error publishing.");
             }
             btn.innerText = "PUBLISH NOW"; btn.disabled = false;
         };
 
-        // ── Load products ──────────────────────────────────────────
+        // Load products
         window.switchView = view => {
             currentView = view;
             selectedCategory = 'All';
@@ -874,7 +775,7 @@
 
         function renderCategoryChips() {
             document.getElementById('category-filter-chips').innerHTML = categories[currentView].map(c => `
-                <button onclick="setCategoryFilter('${c}')" class="chip px-5 py-2.5 rounded-full text-[11px] font-bold border border-base whitespace-nowrap ${selectedCategory === c ? 'bg-blue-600 text-white shadow-lg' : 'bg-card text-default'}">${c}</button>
+                <button onclick="setCategoryFilter('${c}')" class="chip px-5 py-2.5 rounded-full text-[11px] font-bold border border-base whitespace-nowrap ${selectedCategory === c ? 'bg-blue-600 text-white shadow-lg' : 'bg-card'}" style="border-color: var(--border, #e2e8f0); background: ${selectedCategory === c ? '#2563eb' : 'var(--card, #ffffff)'}; color: ${selectedCategory === c ? 'white' : 'var(--text, #1e293b)'};">${c}</button>
             `).join('');
         }
 
@@ -896,26 +797,26 @@
 
                     container.innerHTML = '';
                     if (docs.length === 0) {
-                        container.innerHTML = `<div class="col-span-full py-20 text-center opacity-40"><i class="fas fa-box-open text-4xl text-muted"></i><p class="font-bold text-default">No items found.</p></div>`;
+                        container.innerHTML = `<div class="col-span-full py-20 text-center opacity-40"><i class="fas fa-box-open text-4xl" style="color: var(--text-muted, #64748b);"></i><p class="font-bold" style="color: var(--text, #1e293b);">No items found.</p></div>`;
                         return;
                     }
                     docs.forEach(product => {
                         const isVer = verifiedSellers.includes(product.SellerId);
                         const avgRating = product.ReviewCount > 0 ? (product.Rating / product.ReviewCount).toFixed(1) : "0";
                         const card = document.createElement("div");
-                        card.className = "product-card relative";
+                        card.className = "product-card";
                         card.innerHTML = `
                             ${product.IsSold ? '<div class="sold-overlay">SOLD</div>' : ''}
                             <div class="relative h-40 overflow-hidden">
                                 <img src="${product.ImageURL}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110" onclick="viewProduct('${product.id}')">
                             </div>
                             <div class="p-3">
-                                <h3 class="font-bold text-[11px] truncate mb-1 text-default">${product.Title}${isVer ? ' <i class="fas fa-check-circle text-blue-500"></i>' : ''}</h3>
+                                <h3 class="font-bold text-[11px] truncate mb-1" style="color: var(--text, #1e293b);">${product.Title}${isVer ? ' <i class="fas fa-check-circle text-blue-500"></i>' : ''}</h3>
                                 <div class="flex items-center gap-2 mb-2">
                                     <span class="text-blue-600 font-extrabold text-sm">₦${product.Price}</span>
                                     <div class="flex items-center text-[8px] text-yellow-500 font-bold bg-yellow-50 dark:bg-yellow-950/20 px-1.5 py-0.5 rounded"><i class="fas fa-star mr-1"></i>${avgRating}</div>
                                 </div>
-                                <div class="flex items-center text-[9px] opacity-40 uppercase font-bold text-muted">
+                                <div class="flex items-center text-[9px] opacity-40 uppercase font-bold" style="color: var(--text-muted, #64748b);">
                                     <i class="fas fa-location-dot mr-1 text-[7px]"></i>${product.Location || 'Campus'}
                                 </div>
                             </div>
@@ -926,7 +827,7 @@
             );
         }
 
-        // ── View product details with review replies ───────────────
+        // View product details
         window.viewProduct = async id => {
             const snap = await getDoc(doc(db, "Products", id));
             if (!snap.exists()) return;
@@ -944,7 +845,6 @@
                     <button onclick="showScreen('browse-screen')" class="absolute top-5 left-5 w-10 h-10 bg-white/30 backdrop-blur-md rounded-full text-white flex items-center justify-center"><i class="fas fa-chevron-left"></i></button>
                 </div>
                 <div class="p-6">
-                    <!-- Safety warning in product details -->
                     <div class="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
                         <p class="text-[11px] font-bold text-red-600 dark:text-red-400">
                             <i class="fas fa-exclamation-triangle mr-1"></i>
@@ -954,29 +854,29 @@
                     
                     <div class="flex justify-between items-start mb-6">
                         <div>
-                            <h2 class="text-2xl font-extrabold text-default">${p.Title}${isVer ? ' <i class="fas fa-check-circle text-blue-500"></i>' : ''}</h2>
-                            <p class="text-[10px] opacity-50 font-bold uppercase tracking-widest mt-1 text-muted">${p.Category}</p>
+                            <h2 class="text-2xl font-extrabold" style="color: var(--text, #1e293b);">${p.Title}${isVer ? ' <i class="fas fa-check-circle text-blue-500"></i>' : ''}</h2>
+                            <p class="text-[10px] opacity-50 font-bold uppercase tracking-widest mt-1" style="color: var(--text-muted, #64748b);">${p.Category}</p>
                         </div>
                         <p class="text-blue-600 text-2xl font-black">₦${p.Price}</p>
                     </div>
-                    <div class="flex items-center gap-4 p-4 bg-input rounded-2xl mb-8 border border-base">
+                    <div class="flex items-center gap-4 p-4 bg-input rounded-2xl mb-8 border border-base" style="background: var(--input-bg, #f1f5f9); border-color: var(--border, #e2e8f0);">
                         <img src="${u.photo || 'https://ui-avatars.com/api/?name=User'}" class="w-12 h-12 rounded-full border-2 border-white">
                         <div class="flex-1">
-                            <p class="text-xs font-extrabold text-default">${u.name || 'Campus Student'}</p>
+                            <p class="text-xs font-extrabold" style="color: var(--text, #1e293b);">${u.name || 'Campus Student'}</p>
                             <p class="text-[9px] text-yellow-500 font-bold"><i class="fas fa-star mr-1"></i>${avgRating} (${p.ReviewCount || 0} reviews)</p>
                         </div>
                         ${!isMyProduct ? `<button onclick="reportUser('${p.SellerId}')" class="text-[9px] font-bold text-red-500 bg-red-50 dark:bg-red-950/20 px-3 py-1.5 rounded-lg border border-red-100 dark:border-red-900/40">REPORT</button>` : ''}
                     </div>
                     <div class="mb-10">
-                        <h4 class="text-[10px] font-extrabold uppercase opacity-40 mb-2 text-muted">Description</h4>
-                        <p class="text-sm leading-relaxed text-default">${p.Description}</p>
+                        <h4 class="text-[10px] font-extrabold uppercase opacity-40 mb-2" style="color: var(--text-muted, #64748b);">Description</h4>
+                        <p class="text-sm leading-relaxed" style="color: var(--text, #1e293b);">${p.Description}</p>
                     </div>
                     <div class="mt-8 mb-8">
-                        <h3 class="text-sm font-extrabold mb-4 uppercase tracking-wider opacity-60 text-muted">Other listings from this seller</h3>
+                        <h3 class="text-sm font-extrabold mb-4 uppercase tracking-wider opacity-60" style="color: var(--text-muted, #64748b);">Other listings from this seller</h3>
                         <div id="more-from-seller-grid" class="grid grid-cols-2 gap-4"></div>
                     </div>
-                    <div class="mt-10 border-t border-base pt-6 mb-12">
-                        <h3 class="font-extrabold text-sm mb-6 uppercase tracking-widest opacity-60 text-muted">Student Reviews</h3>
+                    <div class="mt-10 border-t border-base pt-6 mb-12" style="border-color: var(--border, #e2e8f0);">
+                        <h3 class="font-extrabold text-sm mb-6 uppercase tracking-widest opacity-60" style="color: var(--text-muted, #64748b);">Student Reviews</h3>
                         <div id="reviews-placeholder" class="space-y-4"></div>
                     </div>
                     ${isMyProduct ? `
@@ -990,12 +890,12 @@
                             </button>
                             ${p.Phone ? `<a href="tel:${p.Phone}" class="bg-green-600 text-white font-extrabold py-4 rounded-2xl text-center shadow-lg flex items-center justify-center"><i class="fas fa-phone mr-2"></i>CALL SELLER</a>` : ''}
                         </div>
-                        <div class="bg-card p-6 rounded-[2rem] border border-base shadow-sm" id="rating-container">
-                            <h3 class="font-extrabold text-sm mb-4 text-default">Rate & Review</h3>
+                        <div class="bg-card p-6 rounded-[2rem] border border-base shadow-sm" id="rating-container" style="background: var(--card, #ffffff); border-color: var(--border, #e2e8f0);">
+                            <h3 class="font-extrabold text-sm mb-4" style="color: var(--text, #1e293b);">Rate & Review</h3>
                             <div class="star-rating mb-4 flex gap-2" id="rating-input">
                                 ${[1,2,3,4,5].map(v => `<i class="fas fa-star text-2xl active" data-val="${v}"></i>`).join('')}
                             </div>
-                            <textarea id="review-text" placeholder="Share your experience..." class="w-full bg-input border border-base p-4 text-sm h-24 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 text-default placeholder:text-muted"></textarea>
+                            <textarea id="review-text" placeholder="Share your experience..." class="w-full bg-input border border-base p-4 text-sm h-24 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500" style="background: var(--input-bg, #f1f5f9); color: var(--text, #1e293b); border-color: var(--border, #e2e8f0);"></textarea>
                             <button id="btn-submit-review" onclick="submitReview('${id}')" class="w-full bg-slate-900 dark:bg-slate-700 text-white py-3.5 rounded-2xl mt-4 font-bold">SUBMIT REVIEW</button>
                         </div>
                     `}
@@ -1023,14 +923,14 @@
             const container = document.getElementById('more-from-seller-grid');
             if (!container) return;
             const others = snap.docs.filter(d => d.id !== currentProductId);
-            container.innerHTML = others.length === 0 ? '<p class="text-[10px] opacity-40 col-span-2 text-muted">No other listings.</p>' : '';
+            container.innerHTML = others.length === 0 ? '<p class="text-[10px] opacity-40 col-span-2" style="color: var(--text-muted, #64748b);">No other listings.</p>' : '';
             others.forEach(d => {
                 const item = d.data();
                 container.innerHTML += `
-                    <div class="bg-input rounded-2xl overflow-hidden border border-base cursor-pointer" onclick="viewProduct('${d.id}')">
+                    <div class="bg-input rounded-2xl overflow-hidden border border-base cursor-pointer" onclick="viewProduct('${d.id}')" style="background: var(--input-bg, #f1f5f9); border-color: var(--border, #e2e8f0);">
                         <img src="${item.ImageURL}" class="w-full h-24 object-cover">
                         <div class="p-2">
-                            <p class="text-[10px] font-bold truncate text-default">${item.Title}</p>
+                            <p class="text-[10px] font-bold truncate" style="color: var(--text, #1e293b);">${item.Title}</p>
                             <p class="text-blue-600 text-[10px] font-black">₦${item.Price}</p>
                         </div>
                     </div>
@@ -1042,11 +942,10 @@
             const container = document.getElementById('reviews-placeholder');
             if (!container) return;
             
-            // Load reviews
             onSnapshot(query(collection(db, "Products", productId, "Reviews"), orderBy("timestamp", "desc")), async (snap) => {
                 if (!container) return;
                 if (snap.empty) {
-                    container.innerHTML = '<p class="text-[11px] opacity-30 text-center py-4 italic text-muted">No reviews yet.</p>';
+                    container.innerHTML = '<p class="text-[11px] opacity-30 text-center py-4 italic" style="color: var(--text-muted, #64748b);">No reviews yet.</p>';
                     return;
                 }
                 
@@ -1057,11 +956,9 @@
                     const reviewId = reviewDoc.id;
                     const date = r.timestamp?.seconds ? new Date(r.timestamp.seconds * 1000).toLocaleDateString() : 'Recent';
                     
-                    // Check if current user is the seller
                     const productSnap = await getDoc(doc(db, "Products", productId));
                     const isSeller = productSnap.exists() && productSnap.data().SellerId === currentUserId;
                     
-                    // Load replies for this review
                     let repliesHtml = '';
                     const repliesSnap = await getDocs(collection(db, "Products", productId, "Reviews", reviewId, "Replies"));
                     
@@ -1070,25 +967,25 @@
                         repliesHtml += `
                             <div class="review-reply mt-2">
                                 <p class="text-[10px] font-bold text-blue-600">${reply.sellerName || 'Seller'} replied:</p>
-                                <p class="text-[11px] mt-1 text-default">${reply.text}</p>
-                                <p class="text-[8px] opacity-40 mt-1 text-muted">${reply.timestamp ? new Date(reply.timestamp.seconds * 1000).toLocaleDateString() : ''}</p>
+                                <p class="text-[11px] mt-1" style="color: var(--text, #1e293b);">${reply.text}</p>
+                                <p class="text-[8px] opacity-40 mt-1" style="color: var(--text-muted, #64748b);">${reply.timestamp ? new Date(reply.timestamp.seconds * 1000).toLocaleDateString() : ''}</p>
                             </div>
                         `;
                     });
                     
                     container.innerHTML += `
-                        <div class="bg-input p-4 rounded-2xl border border-base" id="review-${reviewId}">
+                        <div class="bg-input p-4 rounded-2xl border border-base" id="review-${reviewId}" style="background: var(--input-bg, #f1f5f9); border-color: var(--border, #e2e8f0);">
                             <div class="flex justify-between items-center mb-3">
                                 <div class="flex items-center gap-2">
                                     <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-[9px] font-bold text-blue-600">${r.userId.substring(5,7).toUpperCase()}</div>
-                                    <p class="text-[10px] font-bold opacity-60 text-default">${r.userName || 'User'}</p>
+                                    <p class="text-[10px] font-bold opacity-60" style="color: var(--text, #1e293b);">${r.userName || 'User'}</p>
                                 </div>
-                                <span class="text-[8px] opacity-30 font-bold uppercase text-muted">${date}</span>
+                                <span class="text-[8px] opacity-30 font-bold uppercase" style="color: var(--text-muted, #64748b);">${date}</span>
                             </div>
                             <div class="flex text-yellow-500 text-[10px] mb-2">
                                 ${'<i class="fas fa-star"></i>'.repeat(r.stars)}${'<i class="far fa-star"></i>'.repeat(5 - r.stars)}
                             </div>
-                            <p class="text-xs leading-relaxed text-default">${r.text}</p>
+                            <p class="text-xs leading-relaxed" style="color: var(--text, #1e293b);">${r.text}</p>
                             ${repliesHtml}
                             ${isSeller ? `
                                 <button onclick="replyToReview('${productId}', '${reviewId}', '${r.userName || 'User'}')" 
@@ -1130,7 +1027,6 @@
             btn.innerText = "Posting...";
             
             try {
-                // Get user name
                 const userSnap = await getDoc(doc(db, "Users", currentUserId));
                 const userName = userSnap.exists() ? userSnap.data().name : 'User';
                 
@@ -1162,8 +1058,7 @@
                 alert("Review published! ✨");
                 viewProduct(productId);
             } catch (e) { 
-                alert("Submit failed. Please try again."); 
-                console.error(e);
+                alert("Submit failed."); 
             }
             
             btn.disabled = false; 
@@ -1171,10 +1066,8 @@
         };
 
         window.reportUser = async targetUserId => {
-            const reason = prompt("Why are you reporting this user? Please be specific:");
+            const reason = prompt("Why are you reporting this user?");
             if (!reason) return;
-            
-            // Add safety warning
             if (confirm("⚠️ False reports may get you banned. Continue?")) {
                 try {
                     await addDoc(collection(db, "Reports"), { 
@@ -1183,14 +1076,14 @@
                         reason, 
                         timestamp: serverTimestamp() 
                     });
-                    alert("Report sent. Admin will review it.");
+                    alert("Report sent.");
                 } catch (e) { 
-                    alert("Error reporting. Please try again."); 
+                    alert("Error reporting."); 
                 }
             }
         };
 
-        // ── My Items / Manager ─────────────────────────────────────
+        // My Items
         window.loadMyItems = () => {
             showScreen('my-items-screen');
             if (activeMyItemsListener) { activeMyItemsListener(); activeMyItemsListener = null; }
@@ -1201,21 +1094,21 @@
                 const grid = document.getElementById('my-items-grid');
                 grid.innerHTML = '';
                 if (snap.empty) {
-                    grid.innerHTML = '<p class="text-center opacity-40 py-10 text-muted">No listings yet.</p>';
+                    grid.innerHTML = '<p class="text-center opacity-40 py-10" style="color: var(--text-muted, #64748b);">No listings yet.</p>';
                     return;
                 }
                 snap.docs.forEach(d => {
                     const p = d.data();
                     grid.innerHTML += `
-                        <div class="bg-card p-4 rounded-2xl border border-base flex gap-4 items-center shadow-sm">
+                        <div class="bg-card p-4 rounded-2xl border border-base flex gap-4 items-center shadow-sm" style="background: var(--card, #ffffff); border-color: var(--border, #e2e8f0);">
                             <img src="${p.ImageURL}" class="w-16 h-16 rounded-xl object-cover flex-shrink-0">
                             <div class="flex-1 min-w-0">
-                                <h3 class="font-bold text-sm truncate text-default">${p.Title}</h3>
+                                <h3 class="font-bold text-sm truncate" style="color: var(--text, #1e293b);">${p.Title}</h3>
                                 <p class="text-blue-600 font-bold text-xs">₦${p.Price}</p>
                             </div>
                             <div class="flex gap-2 flex-shrink-0">
-                                <button onclick="openEditScreen('${d.id}')" class="bg-blue-50 dark:bg-blue-900/30 text-blue-600 p-2.5 rounded-xl text-xs hover:bg-blue-100 dark:hover:bg-blue-800 transition-colors"><i class="fas fa-pen-to-square"></i></button>
-                                <button onclick="deleteProduct('${d.id}')" class="bg-red-50 dark:bg-red-900/30 text-red-600 p-2.5 rounded-xl text-xs hover:bg-red-100 dark:hover:bg-red-800 transition-colors"><i class="fas fa-trash"></i></button>
+                                <button onclick="openEditScreen('${d.id}')" class="bg-blue-50 dark:bg-blue-900/30 text-blue-600 p-2.5 rounded-xl text-xs"><i class="fas fa-pen-to-square"></i></button>
+                                <button onclick="deleteProduct('${d.id}')" class="bg-red-50 dark:bg-red-900/30 text-red-600 p-2.5 rounded-xl text-xs"><i class="fas fa-trash"></i></button>
                             </div>
                         </div>
                     `;
@@ -1261,20 +1154,19 @@
                 alert("Product updated! ✅");
                 showScreen('my-items-screen');
             } catch (e) { 
-                alert("Failed to update. Please try again."); 
-                console.error(e);
+                alert("Failed to update."); 
             }
             btn.innerText = "SAVE CHANGES"; btn.disabled = false;
         };
 
         window.deleteProduct = async id => {
-            if (confirm("Delete this listing? This cannot be undone.")) {
+            if (confirm("Delete this listing?")) {
                 await deleteDoc(doc(db, "Products", id));
                 alert("Listing deleted.");
             }
         };
 
-        // ── Admin ──────────────────────────────────────────────────
+        // Admin functions
         window.toggleAdminMode = () => {
             if (prompt("Enter admin passphrase:") === "junior123") {
                 isAdminMode = !isAdminMode;
@@ -1299,40 +1191,45 @@
             alert("Announcement Updated!");
         };
 
-        // Function to load verification requests
+        // FIXED: Load verification requests function
         async function loadVerificationRequests() {
             const container = document.getElementById('admin-verification-list');
             if (!container) return;
             
             onSnapshot(collection(db, "VerificationRequests"), async (snap) => {
                 if (snap.empty) {
-                    container.innerHTML = '<p class="text-[10px] opacity-50 text-muted">No verification requests.</p>';
+                    container.innerHTML = '<p class="text-[10px] opacity-50 text-center py-4" style="color: var(--text-muted, #64748b);">No verification requests.</p>';
                     return;
                 }
                 
                 container.innerHTML = '';
                 
-                for (const doc of snap.docs) {
-                    const request = doc.data();
-                    const userId = doc.id;
-                    const date = request.timestamp ? new Date(request.timestamp.seconds * 1000).toLocaleDateString() : 'Unknown';
-                    
-                    // Get user info
-                    const userSnap = await getDoc(doc(db, "Users", userId));
-                    const userName = userSnap.exists() ? userSnap.data().name : 'Unknown';
+                for (const docSnap of snap.docs) {
+                    const request = docSnap.data();
+                    const userId = docSnap.id;
+                    const date = request.timestamp ? new Date(request.timestamp.seconds * 1000).toLocaleString() : 'Unknown';
                     
                     container.innerHTML += `
-                        <div class="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-xl border border-yellow-200 dark:border-yellow-800">
+                        <div class="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-xl border border-yellow-200 dark:border-yellow-800">
                             <div class="flex justify-between items-start">
-                                <div>
-                                    <p class="font-bold text-xs text-default">${userName}</p>
-                                    <p class="text-[9px] text-muted">ID: ${userId}</p>
-                                    <p class="text-[8px] text-muted">Requested: ${date}</p>
+                                <div class="flex-1">
+                                    <p class="font-bold text-sm" style="color: var(--text, #1e293b);">${request.userName || 'Unknown'}</p>
+                                    <p class="text-[10px] mt-1" style="color: var(--text-muted, #64748b);">ID: ${userId}</p>
+                                    <p class="text-[9px] mt-1" style="color: var(--text-muted, #64748b);">Requested: ${date}</p>
+                                    ${request.idImage ? `<img src="${request.idImage}" class="w-20 h-20 object-cover rounded-lg mt-2 border border-base" style="border-color: var(--border, #e2e8f0);">` : ''}
                                 </div>
-                                <div class="flex gap-2">
-                                    <button onclick="viewIdImage('${request.idImage}')" class="bg-blue-600 text-white px-2 py-1 rounded text-[8px] font-bold">VIEW ID</button>
-                                    <button onclick="verifyUser('${userId}')" class="bg-green-600 text-white px-2 py-1 rounded text-[8px] font-bold">VERIFY</button>
-                                    <button onclick="deleteRequest('${doc.id}')" class="bg-red-600 text-white px-2 py-1 rounded text-[8px] font-bold">DELETE</button>
+                                <div class="flex flex-col gap-2 ml-2">
+                                    ${request.idImage ? `
+                                        <a href="${request.idImage}" target="_blank" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold text-center whitespace-nowrap">
+                                            VIEW ID
+                                        </a>
+                                    ` : ''}
+                                    <button onclick="verifyUser('${userId}')" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold whitespace-nowrap">
+                                        VERIFY
+                                    </button>
+                                    <button onclick="deleteRequest('${docSnap.id}')" class="bg-red-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold whitespace-nowrap">
+                                        DELETE
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -1341,12 +1238,11 @@
             });
         }
 
-        // Helper function to view ID image
+        // Helper functions
         window.viewIdImage = (imageUrl) => {
             window.open(imageUrl, '_blank');
         };
 
-        // Helper function to delete verification request
         window.deleteRequest = async (requestId) => {
             if (confirm("Delete this verification request?")) {
                 await deleteDoc(doc(db, "VerificationRequests", requestId));
@@ -1357,21 +1253,21 @@
         function loadReports() {
             onSnapshot(collection(db, "Reports"), snap => {
                 const list = document.getElementById('admin-reports-list');
-                list.innerHTML = snap.empty ? '<p class="text-[10px] opacity-50 text-muted">No reports.</p>' : '';
+                list.innerHTML = snap.empty ? '<p class="text-[10px] opacity-50 text-center py-4" style="color: var(--text-muted, #64748b);">No reports.</p>' : '';
                 snap.forEach(d => {
                     const r = d.data();
-                    const date = r.timestamp ? new Date(r.timestamp.seconds * 1000).toLocaleDateString() : 'Unknown';
+                    const date = r.timestamp ? new Date(r.timestamp.seconds * 1000).toLocaleString() : 'Unknown';
                     list.innerHTML += `
                         <div class="p-3 border-l-4 border-red-500 bg-red-50 dark:bg-red-950/20 rounded-xl text-[10px] mb-2">
                             <div class="flex justify-between">
                                 <b class="text-red-600">Report</b>
-                                <span class="text-muted">${date}</span>
+                                <span style="color: var(--text-muted, #64748b);">${date}</span>
                             </div>
-                            <p class="text-default mt-1"><b>Target:</b> ${r.reportedUser}</p>
-                            <p class="text-default"><b>Reason:</b> ${r.reason}</p>
+                            <p class="mt-1" style="color: var(--text, #1e293b);"><b>Target:</b> ${r.reportedUser}</p>
+                            <p style="color: var(--text, #1e293b);"><b>Reason:</b> ${r.reason}</p>
                             <div class="flex gap-2 mt-2">
-                                <button onclick="banUser('${r.reportedUser}')" class="bg-red-600 text-white px-3 py-1 rounded-lg text-[9px] font-bold hover:bg-red-700 transition-colors">BAN</button>
-                                <button onclick="window.open('https://wa.me/2348053103234?text=Regarding%20report%20on%20user%20${r.reportedUser}', '_blank')" class="bg-green-600 text-white px-3 py-1 rounded-lg text-[9px] font-bold hover:bg-green-700 transition-colors">CONTACT</button>
+                                <button onclick="banUser('${r.reportedUser}')" class="bg-red-600 text-white px-3 py-1 rounded-lg text-[9px] font-bold">BAN</button>
+                                <a href="https://wa.me/message/O2QERB7C5VE6E1?text=Regarding%20report%20on%20user%20${r.reportedUser}" target="_blank" class="bg-green-600 text-white px-3 py-1 rounded-lg text-[9px] font-bold no-underline">CONTACT</a>
                             </div>
                         </div>
                     `;
@@ -1381,7 +1277,7 @@
 
         async function loadAdminUserList() {
             const container = document.getElementById('admin-user-list');
-            container.innerHTML = '<p class="text-[10px] opacity-40 text-muted">Loading...</p>';
+            container.innerHTML = '<p class="text-[10px] opacity-40 text-center py-4" style="color: var(--text-muted, #64748b);">Loading...</p>';
             const usersSnap = await getDocs(collection(db, "Users"));
             const bannedSnap = await getDocs(collection(db, "BannedUsers"));
             const bannedIds = bannedSnap.docs.map(d => d.id);
@@ -1397,9 +1293,6 @@
                 const pSnap = await getDocs(query(collection(db, "Products"), where("SellerId", "==", uid)));
                 if (!pSnap.empty) phone = pSnap.docs[0].data().Phone || "N/A";
                 
-                const safeName = (u.name || 'Admin Support').replace(/'/g, "\\'");
-                
-                // Format phone for WhatsApp
                 let whatsappPhone = phone.replace(/[^0-9]/g, '');
                 if (whatsappPhone.startsWith('0')) {
                     whatsappPhone = '234' + whatsappPhone.substring(1);
@@ -1408,26 +1301,26 @@
                 }
                 
                 container.innerHTML += `
-                    <div class="bg-input p-4 rounded-2xl border border-base">
+                    <div class="bg-input p-4 rounded-2xl border border-base" style="background: var(--input-bg, #f1f5f9); border-color: var(--border, #e2e8f0);">
                         <div class="flex justify-between items-start">
                             <div class="text-[11px] min-w-0 flex-1 mr-2">
-                                <p class="font-extrabold text-blue-600 truncate text-default">${u.name || 'Anonymous'} ${isVerified ? '✅' : ''}</p>
-                                <p class="opacity-50 truncate text-muted">ID: ${uid}</p>
-                                <p class="font-bold text-default"><i class="fas fa-phone mr-1"></i>${phone}</p>
+                                <p class="font-extrabold text-blue-600 truncate" style="color: var(--text, #1e293b);">${u.name || 'Anonymous'} ${isVerified ? '✅' : ''}</p>
+                                <p class="opacity-50 truncate" style="color: var(--text-muted, #64748b);">ID: ${uid}</p>
+                                <p class="font-bold" style="color: var(--text, #1e293b);"><i class="fas fa-phone mr-1"></i>${phone}</p>
                             </div>
                             <div class="flex flex-col gap-2 flex-shrink-0">
                                 ${whatsappPhone !== 'N/A' ? `
-                                    <button onclick="window.open('https://wa.me/${whatsappPhone}', '_blank')" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-[9px] font-bold hover:bg-green-700 transition-colors">
+                                    <a href="https://wa.me/${whatsappPhone}" target="_blank" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-[9px] font-bold text-center no-underline">
                                         <i class="fab fa-whatsapp mr-1"></i>WHATSAPP
-                                    </button>
+                                    </a>
                                 ` : ''}
                                 ${isVerified
-                                    ? `<button onclick="removeVerification('${uid}')" class="bg-orange-500 text-white px-3 py-1.5 rounded-lg text-[9px] font-bold hover:bg-orange-600 transition-colors">REMOVE TICK</button>`
-                                    : `<button onclick="verifyUser('${uid}')" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-[9px] font-bold hover:bg-green-700 transition-colors">VERIFY</button>`
+                                    ? `<button onclick="removeVerification('${uid}')" class="bg-orange-500 text-white px-3 py-1.5 rounded-lg text-[9px] font-bold">REMOVE TICK</button>`
+                                    : `<button onclick="verifyUser('${uid}')" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-[9px] font-bold">VERIFY</button>`
                                 }
                                 ${isBanned
-                                    ? `<button onclick="unbanUser('${uid}')" class="bg-blue-100 text-blue-600 px-3 py-1.5 rounded-lg text-[9px] font-bold hover:bg-blue-200 transition-colors">UNBAN</button>`
-                                    : `<button onclick="banUser('${uid}')" class="bg-red-600 text-white px-3 py-1.5 rounded-lg text-[9px] font-bold hover:bg-red-700 transition-colors">BAN</button>`
+                                    ? `<button onclick="unbanUser('${uid}')" class="bg-blue-100 text-blue-600 px-3 py-1.5 rounded-lg text-[9px] font-bold">UNBAN</button>`
+                                    : `<button onclick="banUser('${uid}')" class="bg-red-600 text-white px-3 py-1.5 rounded-lg text-[9px] font-bold">BAN</button>`
                                 }
                             </div>
                         </div>
@@ -1439,12 +1332,9 @@
         window.verifyUser = async uid => {
             if (confirm("Verify this user?")) {
                 await setDoc(doc(db, "VerifiedUsers", uid), { verifiedAt: serverTimestamp(), verifiedBy: currentUserId });
-                // Delete verification request if exists
                 try {
                     await deleteDoc(doc(db, "VerificationRequests", uid));
-                } catch (e) {
-                    // Ignore if doesn't exist
-                }
+                } catch (e) {}
                 alert("User verified! ✅");
                 loadAdminUserList();
             }
@@ -1459,7 +1349,7 @@
         };
         
         window.banUser = async uid => {
-            if (confirm("⚠️ Ban this user? They won't be able to use the app.")) {
+            if (confirm("⚠️ Ban this user?")) {
                 await setDoc(doc(db, "BannedUsers", uid), { 
                     bannedAt: serverTimestamp(), 
                     bannedBy: currentUserId 
@@ -1470,14 +1360,14 @@
         };
         
         window.unbanUser = async uid => {
-            if (confirm("Restore this account?")) {
+            if (confirm("Unban this user?")) {
                 await deleteDoc(doc(db, "BannedUsers", uid));
                 alert("User unbanned!");
                 if (isAdminMode) loadAdminUserList();
             }
         };
 
-        // ── Search ─────────────────────────────────────────────────
+        // Search
         document.getElementById('global-search').oninput = e => {
             const term = e.target.value.toLowerCase();
             document.querySelectorAll('#product-grid > div').forEach(card => {
@@ -1486,13 +1376,12 @@
             });
         };
 
-        // FIXED: Contact developer with working WhatsApp link
+        // Contact developer
         window.contactDeveloper = () => {
-            const url = 'https://wa.me/2348053103234?text=Hi%20Developer!%20I%20need%20help%20with%20SLIT-HUB.%20My%20ID%3A%20' + currentUserId;
-            window.open(url, '_blank');
+            window.open('https://wa.me/message/O2QERB7C5VE6E1?text=Hi%20Developer!%20I%20need%20help%20with%20SLIT-HUB.%20My%20ID%3A%20' + currentUserId, '_blank');
         };
 
-        // ── Init ───────────────────────────────────────────────────
+        // Init
         togglePostForm('Product');
         switchView('Product');
         showScreen('browse-screen');
