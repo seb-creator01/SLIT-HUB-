@@ -12,7 +12,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        /* Cross-browser CSS variables */
         :root { 
             --primary: #2563eb; 
             --primary-glow: rgba(37, 99, 235, 0.2);
@@ -38,7 +37,6 @@
             --nav-text: #94a3b8;
         }
 
-        /* Apply variables with fallbacks for older browsers */
         body { 
             padding-bottom: 90px;
             background-color: var(--bg, #f8fafc); 
@@ -48,7 +46,6 @@
             overflow-x: hidden;
         }
 
-        /* Text color classes with !important to override everything */
         .text-default { color: var(--text, #1e293b) !important; }
         .text-light { color: var(--text-light, #334155) !important; }
         .text-muted { color: var(--text-muted, #64748b) !important; }
@@ -56,7 +53,6 @@
         .border-base { border-color: var(--border, #e2e8f0) !important; }
         .bg-input { background-color: var(--input-bg, #f1f5f9) !important; }
 
-        /* Input styles - cross-browser */
         input, textarea, select {
             background-color: var(--input-bg, #f1f5f9) !important;
             color: var(--text, #1e293b) !important;
@@ -66,7 +62,6 @@
             color: var(--text-muted, #64748b) !important;
             opacity: 0.7;
         }
-        /* For older browsers */
         input::-webkit-input-placeholder { color: var(--text-muted, #64748b) !important; opacity: 0.7; }
         input::-moz-placeholder { color: var(--text-muted, #64748b) !important; opacity: 0.7; }
         input:-ms-input-placeholder { color: var(--text-muted, #64748b) !important; opacity: 0.7; }
@@ -144,7 +139,6 @@
             box-shadow: 0 4px 15px var(--primary-glow);
         }
 
-        /* Safety warning banner */
         .safety-warning {
             background: linear-gradient(135deg, #ef4444, #dc2626);
             color: white;
@@ -167,13 +161,43 @@
         }
         .safety-warning .close-btn:hover { opacity: 1; }
 
-        /* Review reply styles */
         .review-reply {
             margin-left: 30px;
             padding: 10px;
             background: rgba(37, 99, 235, 0.05);
             border-radius: 12px;
             border-left: 3px solid var(--primary);
+        }
+
+        /* Install button styles */
+        #install-btn {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            z-index: 9999;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #ff4500, #ff6a00);
+            color: white;
+            border-radius: 50px;
+            border: none;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 4px 15px rgba(255, 69, 0, 0.3);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+        #install-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 69, 0, 0.4);
+        }
+        #install-btn:active {
+            transform: translateY(0);
+        }
+        #install-btn i {
+            font-size: 16px;
         }
     </style>
 </head>
@@ -291,19 +315,18 @@
                         </ul>
                     </div>
                     
-                    <!-- Verification Section with FIXED Admin Button -->
+                    <!-- Verification Section -->
                     <div class="p-5 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-3xl">
                         <p class="text-[11px] font-extrabold text-blue-800 dark:text-blue-200 mb-3 tracking-wider">🛡️ CAMPUS VERIFICATION</p>
                         <div class="flex gap-3">
                             <button onclick="requestVerification()" class="flex-1 bg-white dark:bg-slate-800 border border-blue-600 text-blue-600 text-[10px] font-bold py-3 rounded-xl shadow-sm">UPLOAD ID</button>
-                            <!-- FIXED: Admin button with your WhatsApp link -->
                             <a href="https://wa.me/message/O2QERB7C5VE6E1?text=Hello%20Admin%2C%20I%20want%20to%20verify%20my%20account.%20My%20ID%3A%20" target="_blank" class="flex-1 bg-green-500 text-white text-[10px] font-bold py-3 rounded-xl shadow-sm hover:bg-green-600 transition-colors text-center block">
                                 <i class="fab fa-whatsapp mr-1"></i>CHAT ADMIN
                             </a>
                         </div>
                     </div>
                     
-                    <!-- Contact Developer with your WhatsApp link -->
+                    <!-- Contact Developer -->
                     <a href="https://wa.me/message/O2QERB7C5VE6E1?text=Hi%20Developer!%20I%20need%20help%20with%20SLIT-HUB.%20My%20ID%3A%20" target="_blank" class="w-full flex items-center justify-between p-5 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-base hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors no-underline">
                         <div class="flex items-center gap-3"><i class="fab fa-whatsapp text-2xl text-green-500"></i><p class="text-sm font-bold" style="color: var(--text, #1e293b);">Contact Developer</p></div>
                         <i class="fas fa-chevron-right text-xs" style="color: var(--text-muted, #64748b);"></i>
@@ -407,7 +430,7 @@
                     <h3 class="text-xs font-extrabold uppercase mb-4 text-blue-600">Member Directory</h3>
                     <div id="admin-user-list" class="space-y-3 max-h-80 overflow-y-auto no-scrollbar"></div>
                 </div>
-                <!-- FIXED: Verification Requests Section -->
+                <!-- Verification Requests Section -->
                 <div class="bg-card p-6 border border-base rounded-[2rem] shadow-sm" style="background: var(--card, #ffffff); border-color: var(--border, #e2e8f0);">
                     <h3 class="text-xs font-extrabold uppercase mb-4 text-blue-600">📋 VERIFICATION REQUESTS</h3>
                     <div id="admin-verification-list" class="space-y-3 max-h-80 overflow-y-auto no-scrollbar"></div>
@@ -427,7 +450,7 @@
 
     </main>
 
-    <!-- Bottom Nav with FIXED Admin Button -->
+    <!-- Bottom Nav -->
     <nav class="fixed bottom-0 left-0 right-0 glass-nav flex justify-around py-4 z-50" style="background: rgba(255,255,255,0.92); border-top: 1px solid var(--border, #e2e8f0);">
         <button onclick="showScreen('browse-screen')" class="nav-item flex flex-col items-center relative">
             <i class="fas fa-house-chimney text-lg mb-1" style="color: var(--nav-text, #64748b);"></i>
@@ -441,7 +464,7 @@
             <i class="fas fa-grid-2 text-lg mb-1" style="color: var(--nav-text, #64748b);"></i>
             <span class="text-[9px] font-bold" style="color: var(--nav-text, #64748b);">Manager</span>
         </button>
-        <!-- FIXED: Admin button with your WhatsApp link -->
+        <!-- Admin button with WhatsApp link -->
         <a href="https://wa.me/message/O2QERB7C5VE6E1?text=Hello%20Admin%2C%20I%20need%20help%20with%20SLIT-HUB.%20My%20ID%3A%20" target="_blank" class="nav-item flex flex-col items-center relative no-underline">
             <i class="fas fa-comment-dots text-lg mb-1 text-green-500"></i>
             <span class="text-[9px] font-bold" style="color: var(--nav-text, #64748b);">Admin</span>
@@ -451,6 +474,11 @@
             <span class="text-[9px] font-bold" style="color: var(--nav-text, #64748b);">Me</span>
         </button>
     </nav>
+
+    <!-- Install App Button - PWA Installation -->
+    <button id="install-btn">
+        <i class="fas fa-download"></i> Install Slit-Hub App
+    </button>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -629,7 +657,7 @@
             alert("Profile Updated! ✨");
         };
 
-        // FIXED: Upload ID function
+        // Upload ID function
         window.requestVerification = async () => {
             const input = document.createElement('input');
             input.type = 'file';
@@ -1191,7 +1219,7 @@
             alert("Announcement Updated!");
         };
 
-        // FIXED: Load verification requests function
+        // Load verification requests function
         async function loadVerificationRequests() {
             const container = document.getElementById('admin-verification-list');
             if (!container) return;
@@ -1380,6 +1408,41 @@
         window.contactDeveloper = () => {
             window.open('https://wa.me/message/O2QERB7C5VE6E1?text=Hi%20Developer!%20I%20need%20help%20with%20SLIT-HUB.%20My%20ID%3A%20' + currentUserId, '_blank');
         };
+
+        // PWA Installation Code
+        let deferredPrompt;
+        const installBtn = document.getElementById('install-btn');
+
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(() => console.log("Service Worker Registered"))
+                .catch(err => console.log("Service Worker registration failed:", err));
+        }
+
+        // Listen for beforeinstallprompt event
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.style.display = 'flex';
+        });
+
+        // Handle install button click
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`User response to install: ${outcome}`);
+                deferredPrompt = null;
+                installBtn.style.display = 'none';
+            }
+        });
+
+        // Hide button if already installed
+        window.addEventListener('appinstalled', () => {
+            console.log('Slit-Hub was installed!');
+            installBtn.style.display = 'none';
+        });
 
         // Init
         togglePostForm('Product');
