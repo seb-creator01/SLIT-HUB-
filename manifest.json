@@ -4,18 +4,18 @@
   "description": "Campus marketplace for students to buy and sell items",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f8fafc",
-  "theme_color": "#2563eb",
+  "background_color": "#10b981",  /* Changed to green */
+  "theme_color": "#10b981",       /* Changed to green */
   "orientation": "portrait",
   "icons": [
     {
-      "src": "https://ui-avatars.com/api/?name=SH&background=2563eb&color=fff&size=192",
+      "src": "https://ui-avatars.com/api/?name=SH&background=10b981&color=fff&size=192",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "https://ui-avatars.com/api/?name=SH&background=2563eb&color=fff&size=512",
+      "src": "https://ui-avatars.com/api/?name=SH&background=10b981&color=fff&size=512",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
