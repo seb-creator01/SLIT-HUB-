@@ -7,6 +7,12 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2563eb">
     
+    <!-- PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="SLIT-HUB">
+    <link rel="apple-touch-icon" href="https://ui-avatars.com/api/?name=SH&background=2563eb&color=fff&size=192">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -25,7 +31,6 @@
             --nav-text: #64748b;
         }
         
-        /* Dark mode - using attribute for cross-browser compatibility */
         html.dark { 
             --bg: #0f172a; 
             --card: #1e293b; 
@@ -62,9 +67,6 @@
             color: var(--text-muted, #64748b) !important;
             opacity: 0.7;
         }
-        input::-webkit-input-placeholder { color: var(--text-muted, #64748b) !important; opacity: 0.7; }
-        input::-moz-placeholder { color: var(--text-muted, #64748b) !important; opacity: 0.7; }
-        input:-ms-input-placeholder { color: var(--text-muted, #64748b) !important; opacity: 0.7; }
 
         .brand-logo {
             font-weight: 800;
@@ -169,7 +171,6 @@
             border-left: 3px solid var(--primary);
         }
 
-        /* Install button styles */
         #install-btn {
             position: fixed;
             bottom: 100px;
@@ -199,9 +200,48 @@
         #install-btn i {
             font-size: 16px;
         }
+
+        /* Offline fallback styles */
+        #offline-fallback {
+            display: none;
+            text-align: center;
+            padding: 50px 20px;
+        }
+        #offline-fallback i {
+            font-size: 48px;
+            color: var(--text-muted, #64748b);
+            margin-bottom: 20px;
+        }
+        #offline-fallback h2 {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--text, #1e293b);
+        }
+        #offline-fallback p {
+            color: var(--text-light, #334155);
+            margin-bottom: 20px;
+        }
+        #offline-fallback button {
+            background: var(--primary, #2563eb);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
+
+    <!-- Offline Fallback (hidden by default) -->
+    <div id="offline-fallback">
+        <i class="fas fa-wifi-slash"></i>
+        <h2>You're Offline</h2>
+        <p>Please check your internet connection and try again.</p>
+        <button onclick="window.location.reload()">Retry</button>
+    </div>
 
     <!-- Terms Modal -->
     <div id="terms-modal" class="hidden fixed inset-0 z-[10000] bg-black/60 backdrop-blur-sm flex items-center justify-center p-6">
@@ -303,7 +343,6 @@
                     <textarea id="set-profile-bio" placeholder="📝 About you..." class="w-full bg-input border border-base p-3.5 rounded-2xl text-sm h-24 outline-none focus:ring-2 focus:ring-blue-500" style="background: var(--input-bg, #f1f5f9); color: var(--text, #1e293b); border-color: var(--border, #e2e8f0);"></textarea>
                     <button onclick="saveUserProfile()" class="w-full btn-premium font-bold py-4 rounded-2xl shadow-lg">SAVE PROFILE</button>
                     
-                    <!-- Safety Tips -->
                     <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-2xl">
                         <p class="text-[11px] font-extrabold text-yellow-800 dark:text-yellow-200 mb-2">🛡️ SAFETY TIPS</p>
                         <ul class="text-[10px] space-y-1" style="color: var(--text-light, #334155);">
@@ -315,7 +354,6 @@
                         </ul>
                     </div>
                     
-                    <!-- Verification Section -->
                     <div class="p-5 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-3xl">
                         <p class="text-[11px] font-extrabold text-blue-800 dark:text-blue-200 mb-3 tracking-wider">🛡️ CAMPUS VERIFICATION</p>
                         <div class="flex gap-3">
@@ -326,7 +364,6 @@
                         </div>
                     </div>
                     
-                    <!-- Contact Developer -->
                     <a href="https://wa.me/message/O2QERB7C5VE6E1?text=Hi%20Developer!%20I%20need%20help%20with%20SLIT-HUB.%20My%20ID%3A%20" target="_blank" class="w-full flex items-center justify-between p-5 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-base hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors no-underline">
                         <div class="flex items-center gap-3"><i class="fab fa-whatsapp text-2xl text-green-500"></i><p class="text-sm font-bold" style="color: var(--text, #1e293b);">Contact Developer</p></div>
                         <i class="fas fa-chevron-right text-xs" style="color: var(--text-muted, #64748b);"></i>
@@ -430,7 +467,6 @@
                     <h3 class="text-xs font-extrabold uppercase mb-4 text-blue-600">Member Directory</h3>
                     <div id="admin-user-list" class="space-y-3 max-h-80 overflow-y-auto no-scrollbar"></div>
                 </div>
-                <!-- Verification Requests Section -->
                 <div class="bg-card p-6 border border-base rounded-[2rem] shadow-sm" style="background: var(--card, #ffffff); border-color: var(--border, #e2e8f0);">
                     <h3 class="text-xs font-extrabold uppercase mb-4 text-blue-600">📋 VERIFICATION REQUESTS</h3>
                     <div id="admin-verification-list" class="space-y-3 max-h-80 overflow-y-auto no-scrollbar"></div>
@@ -464,7 +500,6 @@
             <i class="fas fa-grid-2 text-lg mb-1" style="color: var(--nav-text, #64748b);"></i>
             <span class="text-[9px] font-bold" style="color: var(--nav-text, #64748b);">Manager</span>
         </button>
-        <!-- Admin button with WhatsApp link -->
         <a href="https://wa.me/message/O2QERB7C5VE6E1?text=Hello%20Admin%2C%20I%20need%20help%20with%20SLIT-HUB.%20My%20ID%3A%20" target="_blank" class="nav-item flex flex-col items-center relative no-underline">
             <i class="fas fa-comment-dots text-lg mb-1 text-green-500"></i>
             <span class="text-[9px] font-bold" style="color: var(--nav-text, #64748b);">Admin</span>
@@ -475,7 +510,7 @@
         </button>
     </nav>
 
-    <!-- Install App Button - PWA Installation -->
+    <!-- Install App Button -->
     <button id="install-btn">
         <i class="fas fa-download"></i> Install Slit-Hub App
     </button>
@@ -495,6 +530,24 @@
         };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+
+        // Check if online
+        function checkOnlineStatus() {
+            const offlineFallback = document.getElementById('offline-fallback');
+            const mainContent = document.querySelector('main');
+            
+            if (!navigator.onLine) {
+                offlineFallback.style.display = 'block';
+                if (mainContent) mainContent.style.display = 'none';
+            } else {
+                offlineFallback.style.display = 'none';
+                if (mainContent) mainContent.style.display = 'block';
+            }
+        }
+
+        window.addEventListener('online', checkOnlineStatus);
+        window.addEventListener('offline', checkOnlineStatus);
+        checkOnlineStatus();
 
         // User ID
         let currentUserId = localStorage.getItem('slit_user_id');
@@ -674,11 +727,9 @@
                 try {
                     const url = await uploadToCloudinary(file);
                     
-                    // Get user name
                     const userSnap = await getDoc(doc(db, "Users", currentUserId));
                     const userName = userSnap.exists() ? userSnap.data().name : 'Unknown';
                     
-                    // Save to Firestore
                     await setDoc(doc(db, "VerificationRequests", currentUserId), {
                         userId: currentUserId,
                         userName: userName,
@@ -774,7 +825,6 @@
                     IsSold: false
                 });
                 
-                // Clear form
                 document.getElementById('post-title').value = '';
                 document.getElementById('post-desc').value = '';
                 document.getElementById('post-price').value = '';
@@ -1219,7 +1269,6 @@
             alert("Announcement Updated!");
         };
 
-        // Load verification requests function
         async function loadVerificationRequests() {
             const container = document.getElementById('admin-verification-list');
             if (!container) return;
@@ -1266,7 +1315,6 @@
             });
         }
 
-        // Helper functions
         window.viewIdImage = (imageUrl) => {
             window.open(imageUrl, '_blank');
         };
@@ -1413,21 +1461,18 @@
         let deferredPrompt;
         const installBtn = document.getElementById('install-btn');
 
-        // Register Service Worker
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js')
                 .then(() => console.log("Service Worker Registered"))
                 .catch(err => console.log("Service Worker registration failed:", err));
         }
 
-        // Listen for beforeinstallprompt event
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
             installBtn.style.display = 'flex';
         });
 
-        // Handle install button click
         installBtn.addEventListener('click', async () => {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
@@ -1438,7 +1483,6 @@
             }
         });
 
-        // Hide button if already installed
         window.addEventListener('appinstalled', () => {
             console.log('Slit-Hub was installed!');
             installBtn.style.display = 'none';
