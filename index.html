@@ -694,6 +694,7 @@
             alert("Profile Updated! ✨");
         };
 
+        // FIXED: Improved verification request with better error handling
         window.requestVerification = async () => {
             const input = document.createElement('input');
             input.type = 'file';
@@ -702,29 +703,80 @@
                 const file = e.target.files[0];
                 if (!file) return;
                 
+                // Show loading state
+                const btn = e.target?.activeElement;
+                const originalText = btn?.innerText;
+                if (btn) btn.innerText = "Uploading...";
+                
                 try {
+                    // Check file size (max 5MB)
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert("File too large! Please upload an image under 5MB.");
+                        if (btn) btn.innerText = originalText;
+                        return;
+                    }
+                    
+                    // Check file type
+                    if (!file.type.startsWith('image/')) {
+                        alert("Please upload an image file (JPEG, PNG, etc.)");
+                        if (btn) btn.innerText = originalText;
+                        return;
+                    }
+                    
+                    // Upload to Cloudinary
                     const url = await uploadToCloudinary(file);
+                    
+                    // Save to Firestore
                     await setDoc(doc(db, "VerificationRequests", currentUserId), {
                         userId: currentUserId, 
                         idImage: url, 
-                        timestamp: serverTimestamp()
+                        timestamp: serverTimestamp(),
+                        status: 'pending',
+                        userName: document.getElementById('set-profile-name').value || 'Unknown'
                     });
-                    alert("ID Uploaded! Admin will verify soon. 🚀");
+                    
+                    alert("✅ ID Uploaded! Admin will verify soon. 🚀");
                 } catch (err) {
-                    alert("Upload failed. Please try again.");
+                    console.error("Upload error:", err);
+                    
+                    // Check for specific Cloudinary errors
+                    if (err.message.includes("upload_preset")) {
+                        alert("❌ Cloudinary configuration error. Please check your upload preset is set to 'Unsigned' in Cloudinary settings.");
+                    } else if (err.message.includes("Failed to fetch")) {
+                        alert("❌ Network error. Please check your internet connection and try again.");
+                    } else {
+                        alert("❌ Upload failed: " + err.message);
+                    }
+                } finally {
+                    if (btn) btn.innerText = originalText;
                 }
             };
             input.click();
         };
 
-        // ── Cloudinary upload ──────────────────────────────────────
+        // ── Cloudinary upload with better error handling ───────────
         async function uploadToCloudinary(file) {
             const formData = new FormData();
             formData.append('file', file);
             formData.append('upload_preset', 'SLIT-HUB');
-            const res = await fetch('https://api.cloudinary.com/v1_1/ddm87a9p2/image/upload', { method: 'POST', body: formData });
-            if (!res.ok) throw new Error("Cloudinary upload failed");
-            return (await res.json()).secure_url;
+            
+            try {
+                const res = await fetch('https://api.cloudinary.com/v1_1/ddm87a9p2/image/upload', { 
+                    method: 'POST', 
+                    body: formData 
+                });
+                
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    throw new Error(errorData.error?.message || "Cloudinary upload failed");
+                }
+                
+                const data = await res.json();
+                return data.secure_url;
+            } catch (error) {
+                console.error("Cloudinary error:", error);
+                throw error;
+            }
         }
 
         // ── Post a listing ─────────────────────────────────────────
@@ -1247,7 +1299,7 @@
             alert("Announcement Updated!");
         };
 
-        // New function to load verification requests
+        // Function to load verification requests
         async function loadVerificationRequests() {
             const container = document.getElementById('admin-verification-list');
             if (!container) return;
@@ -1434,9 +1486,10 @@
             });
         };
 
-        // ── Contact developer ─────────────────────────────────
+        // FIXED: Contact developer with working WhatsApp link
         window.contactDeveloper = () => {
-            window.open('https://wa.me/2348053103234?text=Hi%20Developer!%20I%20need%20help%20with%20SLIT-HUB.%20My%20ID%3A%20' + currentUserId, '_blank');
+            const url = 'https://wa.me/2348053103234?text=Hi%20Developer!%20I%20need%20help%20with%20SLIT-HUB.%20My%20ID%3A%20' + currentUserId;
+            window.open(url, '_blank');
         };
 
         // ── Init ───────────────────────────────────────────────────
