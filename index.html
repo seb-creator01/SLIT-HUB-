@@ -1082,6 +1082,12 @@
 
         document.getElementById('display-user-id').innerText = currentUserId;
 
+        // Detect standalone mode (installed app)
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            console.log('App is running in standalone mode');
+            document.body.classList.add('installed-app');
+        }
+
         // Tab switching
         window.switchTab = (tabId) => {
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
@@ -1334,7 +1340,43 @@
             }
         };
 
-        // Save user profile (FIXED - triggers executive check)
+        // Link executive to user
+        window.linkExecutiveToUser = async () => {
+            const email = document.getElementById('set-profile-email')?.value;
+            if (!email) return false;
+            
+            try {
+                const execSnap = await getDocs(query(
+                    collection(db, "executives"), 
+                    where("email", "==", email)
+                ));
+                
+                if (!execSnap.empty) {
+                    const execDoc = execSnap.docs[0];
+                    const execData = execDoc.data();
+                    
+                    await updateDoc(doc(db, "executives", execDoc.id), {
+                        userId: currentUserId,
+                        lastActive: serverTimestamp()
+                    });
+                    
+                    console.log("✅ Executive linked successfully:", execData.name);
+                    
+                    await updateDoc(doc(db, "Users", currentUserId), {
+                        executiveId: execDoc.id,
+                        executivePosition: execData.position,
+                        isExecutive: true
+                    });
+                    
+                    return true;
+                }
+            } catch (error) {
+                console.error("Error linking executive:", error);
+            }
+            return false;
+        };
+
+        // Save user profile
         window.saveUserProfile = async () => {
             if (isUserBanned) return;
             
@@ -1354,24 +1396,43 @@
             
             alert("Profile Updated! ✨");
             
-            // Force check executive status and show post card
+            // Link executive and check status
+            await linkExecutiveToUser();
             await checkExecutiveStatus();
             
-            // Also reload announcements to update any executive badges
+            // Reload announcements to update any executive badges
             loadAnnouncements();
         };
 
-        // Check if current user is an executive (FIXED - shows post card)
+        // Check if current user is an executive
         window.checkExecutiveStatus = async () => {
             const email = document.getElementById('set-profile-email')?.value;
             if (!email) return;
             
             console.log("Checking executive status for email:", email);
             
-            const execSnap = await getDocs(query(
+            // First check by userId
+            let execSnap = await getDocs(query(
                 collection(db, "executives"), 
-                where("email", "==", email)
+                where("userId", "==", currentUserId)
             ));
+            
+            // If not found by userId, check by email
+            if (execSnap.empty) {
+                execSnap = await getDocs(query(
+                    collection(db, "executives"), 
+                    where("email", "==", email)
+                ));
+                
+                // If found by email, link it!
+                if (!execSnap.empty) {
+                    const execDoc = execSnap.docs[0];
+                    await updateDoc(doc(db, "executives", execDoc.id), {
+                        userId: currentUserId
+                    });
+                    console.log("✅ Executive linked via email check");
+                }
+            }
             
             const badge = document.getElementById('executive-status-badge');
             const positionDisplay = document.getElementById('executive-position-display');
@@ -2076,7 +2137,7 @@
             }
         };
 
-        // Post announcement
+        // Post announcement (FIXED with better authorization)
         window.postAnnouncement = async () => {
             const title = document.getElementById('announce-title').value.trim();
             const content = document.getElementById('announce-content').value.trim();
@@ -2086,20 +2147,45 @@
                 return;
             }
             
-            const checkboxes = document.querySelectorAll('.level-checkbox:checked');
-            const targetLevels = Array.from(checkboxes).map(cb => cb.value);
-            
-            const execSnap = await getDocs(query(
+            // First try to find executive by userId
+            let execSnap = await getDocs(query(
                 collection(db, "executives"), 
                 where("userId", "==", currentUserId)
             ));
             
+            // If not found by userId, try by email
             if (execSnap.empty) {
-                alert("You are not authorized to post announcements");
+                const email = document.getElementById('set-profile-email')?.value;
+                if (email) {
+                    execSnap = await getDocs(query(
+                        collection(db, "executives"), 
+                        where("email", "==", email)
+                    ));
+                    
+                    // If found by email, link it!
+                    if (!execSnap.empty) {
+                        const execDoc = execSnap.docs[0];
+                        await updateDoc(doc(db, "executives", execDoc.id), {
+                            userId: currentUserId
+                        });
+                        console.log("✅ Executive linked via email");
+                    }
+                }
+            }
+            
+            if (execSnap.empty) {
+                alert("You are not authorized to post announcements. Please make sure your email matches an executive record.");
                 return;
             }
             
             const exec = execSnap.docs[0].data();
+            const execId = execSnap.docs[0].id;
+            
+            // Get selected levels
+            const checkboxes = document.querySelectorAll('.level-checkbox:checked');
+            const targetLevels = Array.from(checkboxes).map(cb => cb.value);
+            
+            // Get department info
             const deptSnap = await getDoc(doc(db, "departments", exec.departmentId));
             
             await addDoc(collection(db, "announcements"), {
@@ -2117,17 +2203,22 @@
                 pinned: false
             });
             
+            // Clear form
             document.getElementById('announce-title').value = '';
             document.getElementById('announce-content').value = '';
             document.getElementById('announce-link').value = '';
             document.getElementById('announce-date').value = '';
             
+            // Reset level checkboxes
             document.querySelectorAll('.level-checkbox').forEach(cb => {
                 cb.checked = false;
             });
             document.getElementById('select-all-levels').checked = true;
             
-            alert("✅ Announcement posted!");
+            alert("✅ Announcement posted successfully!");
+            
+            // Reload announcements to show the new one
+            loadAnnouncements();
         };
 
         // Select all levels
