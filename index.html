@@ -348,6 +348,7 @@
             margin-bottom: 1.5rem;
             overflow-x: auto;
             white-space: nowrap;
+            position: relative;
         }
         .tab {
             padding: 0.5rem 1rem;
@@ -358,6 +359,7 @@
             transition: all 0.2s;
             background: none;
             border: none;
+            position: relative;
         }
         .tab:hover {
             background: var(--input-bg);
@@ -366,6 +368,66 @@
         .tab.active {
             background: var(--primary);
             color: white;
+        }
+
+        /* Notification Badge */
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ef4444;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+            border: 2px solid var(--card);
+            animation: pulse 2s infinite;
+            z-index: 10;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* Toast Notification */
+        .announcement-toast {
+            position: fixed;
+            bottom: 100px;
+            left: 20px;
+            right: 20px;
+            background: var(--card);
+            border-left: 4px solid #10b981;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 10000;
+            animation: slideUp 0.3s ease;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(0); opacity: 1; }
+            to { transform: translateY(100px); opacity: 0; }
+        }
+
+        .new-announcement {
+            border-left: 4px solid #10b981;
+            transition: border-left-color 0.3s ease;
         }
 
         .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
@@ -386,11 +448,6 @@
 
         .hidden {
             display: none !important;
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(100px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
         }
 
         .delete-btn {
@@ -543,7 +600,7 @@
                 </div>
             </div>
             
-            <!-- Executive Post Card -->
+            <!-- Executive Post Card (Only visible to executives) -->
             <div id="executive-post-card" class="card mb-6 hidden p-6" style="background: var(--card); border-color: var(--border);">
                 <div id="executive-post-header"></div>
                 <div class="space-y-4">
@@ -1018,6 +1075,10 @@
         let currentView = 'Product';
         let selectedCategory = 'All';
         let isUserBanned = false;
+        
+        // Notification tracking
+        let lastSeenAnnouncementTime = parseInt(localStorage.getItem('lastSeenAnnouncement')) || 0;
+        let unreadAnnouncementCount = 0;
 
         document.getElementById('display-user-id').innerText = currentUserId;
 
@@ -1026,15 +1087,100 @@
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
             
             if (tabId === 'browse') document.getElementById('browse-screen').classList.remove('hidden');
-            if (tabId === 'feed') document.getElementById('feed-screen').classList.remove('hidden');
+            if (tabId === 'feed') {
+                document.getElementById('feed-screen').classList.remove('hidden');
+                // Mark announcements as read when viewing feed
+                setTimeout(() => {
+                    markAnnouncementsAsRead();
+                    updateAnnouncementBadge(0);
+                }, 1000);
+            }
             if (tabId === 'departments') document.getElementById('departments-screen').classList.remove('hidden');
             if (tabId === 'executives') document.getElementById('executives-screen').classList.remove('hidden');
-            if (tabId === 'settings') document.getElementById('settings-screen').classList.remove('hidden');
+            if (tabId === 'settings') {
+                document.getElementById('settings-screen').classList.remove('hidden');
+                // Check executive status when viewing settings
+                setTimeout(() => {
+                    checkExecutiveStatus();
+                }, 500);
+            }
             if (tabId === 'manager') document.getElementById('my-items-screen').classList.remove('hidden');
             
             document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
             event.target.classList.add('active');
         };
+
+        // Update announcement badge
+        function updateAnnouncementBadge(count) {
+            const announcementTab = document.querySelector('.tab[onclick="switchTab(\'feed\')"]');
+            if (!announcementTab) return;
+            
+            const existingBadge = announcementTab.querySelector('.notification-badge');
+            if (existingBadge) existingBadge.remove();
+            
+            if (count > 0) {
+                const badge = document.createElement('span');
+                badge.className = 'notification-badge';
+                badge.textContent = count > 99 ? '99+' : count;
+                announcementTab.style.position = 'relative';
+                announcementTab.appendChild(badge);
+            }
+        }
+
+        // Show toast notification
+        function showAnnouncementToast(announcement) {
+            const toast = document.createElement('div');
+            toast.className = 'announcement-toast';
+            
+            const time = announcement.createdAt ? 
+                new Date(announcement.createdAt.seconds * 1000).toLocaleTimeString() : 'Just now';
+            
+            toast.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-green-600 to-emerald-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                        <i class="fas fa-bullhorn"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-xs font-bold text-green-600">${announcement.departmentName || 'New'}</span>
+                            <span class="text-[8px] text-muted">${time}</span>
+                        </div>
+                        <p class="font-bold text-sm truncate" style="color: var(--text);">${announcement.title}</p>
+                        <p class="text-xs text-muted truncate">${announcement.content.substring(0, 50)}...</p>
+                    </div>
+                    <button class="toast-close text-muted hover:text-text">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            toast.querySelector('.toast-close').addEventListener('click', (e) => {
+                e.stopPropagation();
+                toast.remove();
+            });
+            
+            toast.addEventListener('click', () => {
+                switchTab('feed');
+                toast.remove();
+            });
+            
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.style.animation = 'slideDown 0.3s ease forwards';
+                    setTimeout(() => toast.remove(), 300);
+                }
+            }, 5000);
+        }
+
+        // Mark announcements as read
+        function markAnnouncementsAsRead() {
+            lastSeenAnnouncementTime = Date.now();
+            localStorage.setItem('lastSeenAnnouncement', lastSeenAnnouncementTime);
+            unreadAnnouncementCount = 0;
+            updateAnnouncementBadge(0);
+        }
 
         // Dark mode toggle
         window.toggleDarkMode = () => {
@@ -1060,6 +1206,11 @@
             loadDepartments();
             loadExecutives();
             loadStats();
+            
+            // Check executive status on load
+            setTimeout(() => {
+                checkExecutiveStatus();
+            }, 2000);
         };
         
         window.acceptTerms = () => {
@@ -1183,7 +1334,7 @@
             }
         };
 
-        // Save user profile
+        // Save user profile (FIXED - triggers executive check)
         window.saveUserProfile = async () => {
             if (isUserBanned) return;
             
@@ -1203,13 +1354,19 @@
             
             alert("Profile Updated! ✨");
             
+            // Force check executive status and show post card
             await checkExecutiveStatus();
+            
+            // Also reload announcements to update any executive badges
+            loadAnnouncements();
         };
 
-        // Check if current user is an executive
+        // Check if current user is an executive (FIXED - shows post card)
         window.checkExecutiveStatus = async () => {
             const email = document.getElementById('set-profile-email')?.value;
             if (!email) return;
+            
+            console.log("Checking executive status for email:", email);
             
             const execSnap = await getDocs(query(
                 collection(db, "executives"), 
@@ -1218,18 +1375,44 @@
             
             const badge = document.getElementById('executive-status-badge');
             const positionDisplay = document.getElementById('executive-position-display');
+            const execPostCard = document.getElementById('executive-post-card');
+            const execHeader = document.getElementById('executive-post-header');
             
             if (!execSnap.empty) {
                 const exec = execSnap.docs[0].data();
+                console.log("Executive found:", exec);
+                
                 badge.classList.remove('hidden');
                 positionDisplay.textContent = `${exec.position} • ${exec.name}`;
+                
+                // SHOW THE EXECUTIVE POST CARD!
+                if (execPostCard) {
+                    execPostCard.classList.remove('hidden');
+                    if (execHeader) {
+                        execHeader.innerHTML = `
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-bold text-green-600 flex items-center gap-2">
+                                    <i class="fas fa-pen"></i> POST ANNOUNCEMENT
+                                </h3>
+                                <span class="badge-gold flex items-center gap-1">
+                                    <i class="fas fa-check"></i> 
+                                    ${exec.position} • ${exec.name}
+                                </span>
+                            </div>
+                        `;
+                    }
+                }
                 
                 await updateDoc(doc(db, "Users", currentUserId), {
                     executiveId: execSnap.docs[0].id,
                     executivePosition: exec.position
                 });
             } else {
+                console.log("No executive found for this email");
                 badge.classList.add('hidden');
+                if (execPostCard) {
+                    execPostCard.classList.add('hidden');
+                }
             }
         };
 
@@ -1702,10 +1885,12 @@
             }
         };
 
-        // ============ ANNOUNCEMENTS WITH LEVEL SUPPORT ============
-        window.loadAnnouncements = () => {
+        // ============ ANNOUNCEMENTS WITH NOTIFICATIONS ============
+        window.loadAnnouncements = async () => {
             const container = document.getElementById('announcements-feed');
             if (!container) return;
+            
+            const isFeedTab = !document.getElementById('feed-screen').classList.contains('hidden');
             
             onSnapshot(query(collection(db, "announcements"), orderBy("createdAt", "desc")), async (snapshot) => {
                 if (snapshot.empty) {
@@ -1725,33 +1910,69 @@
                 ));
                 const isExecutive = !execSnap.empty;
                 
-                // Get current user's level for filtering
                 const userSnap = await getDoc(doc(db, "Users", currentUserId));
                 const userLevel = userSnap.exists() ? userSnap.data().level : null;
                 
+                // Count unread announcements
+                let newUnreadCount = 0;
+                const docs = [];
+                
+                snapshot.forEach(doc => {
+                    docs.push({ id: doc.id, ...doc.data() });
+                });
+                
+                const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
+                
+                docs.forEach(ann => {
+                    const annTime = ann.createdAt ? ann.createdAt.seconds * 1000 : 0;
+                    if (annTime > lastSeenAnnouncementTime && annTime > oneDayAgo) {
+                        newUnreadCount++;
+                    }
+                });
+                
+                unreadAnnouncementCount = newUnreadCount;
+                
+                if (!isFeedTab) {
+                    updateAnnouncementBadge(unreadAnnouncementCount);
+                } else {
+                    updateAnnouncementBadge(0);
+                }
+                
+                // Check for newly added announcements
+                snapshot.docChanges().forEach(change => {
+                    if (change.type === 'added') {
+                        const newAnn = change.doc.data();
+                        const annTime = newAnn.createdAt ? newAnn.createdAt.seconds * 1000 : 0;
+                        
+                        if (snapshot.docs.length > 1 && 
+                            (Date.now() - annTime) < 10000 && 
+                            !isFeedTab) {
+                            showAnnouncementToast(newAnn);
+                        }
+                    }
+                });
+                
+                // Display announcements
                 container.innerHTML = '';
                 
-                for (const docSnap of snapshot.docs) {
-                    const ann = docSnap.data();
-                    const annId = docSnap.id;
+                for (const ann of docs) {
+                    const annId = ann.id;
                     const date = ann.createdAt ? 
                         new Date(ann.createdAt.seconds * 1000).toLocaleDateString('en-US', { 
                             month: 'short', day: 'numeric', year: 'numeric' 
                         }) : 'Just now';
                     
-                    // Check level filter
+                    const annTime = ann.createdAt ? ann.createdAt.seconds * 1000 : 0;
+                    const isNew = annTime > lastSeenAnnouncementTime && (Date.now() - annTime) < 86400000;
+                    
                     const selectedLevel = document.getElementById('filter-level')?.value;
                     const departmentFilter = document.getElementById('filter-department')?.value;
                     
                     if (departmentFilter !== 'all' && ann.departmentId !== departmentFilter) continue;
-                    
-                    if (selectedLevel !== 'all') {
-                        if (!ann.targetLevels || !ann.targetLevels.includes(selectedLevel)) continue;
-                    }
+                    if (selectedLevel !== 'all' && (!ann.targetLevels || !ann.targetLevels.includes(selectedLevel))) continue;
                     
                     const canDelete = isAdmin || (isExecutive && ann.executiveId === currentUserId);
                     
-                    // Get level badges HTML
                     let levelBadges = '';
                     if (ann.targetLevels && ann.targetLevels.length > 0) {
                         if (ann.targetLevels.includes('all')) {
@@ -1764,7 +1985,7 @@
                     }
                     
                     container.innerHTML += `
-                        <div class="card p-6 relative" style="background: var(--card); border-color: var(--border);">
+                        <div class="card p-6 relative ${isNew ? 'new-announcement' : ''}" style="background: var(--card); border-color: var(--border);">
                             ${canDelete ? `
                                 <button onclick="deleteAnnouncement('${annId}')" class="delete-btn absolute top-4 right-4" title="Delete announcement">
                                     <i class="fas fa-trash"></i>
@@ -1777,6 +1998,7 @@
                                     ${ann.departmentName || 'General'}
                                 </span>
                                 ${levelBadges}
+                                ${isNew ? '<span class="bg-green-500 text-white text-[8px] px-2 py-0.5 rounded-full ml-2 animate-pulse">NEW</span>' : ''}
                                 <span class="text-xs text-muted ml-auto">${date}</span>
                                 ${ann.pinned ? '<i class="fas fa-thumbtack text-yellow-500"></i>' : ''}
                             </div>
@@ -1813,6 +2035,10 @@
                         </div>
                     `;
                 }
+                
+                if (isFeedTab) {
+                    markAnnouncementsAsRead();
+                }
             });
         };
 
@@ -1820,7 +2046,6 @@
             loadAnnouncements();
         };
 
-        // Delete announcement function
         window.deleteAnnouncement = async (announcementId) => {
             if (confirm("Are you sure you want to delete this announcement?")) {
                 try {
@@ -1833,7 +2058,6 @@
             }
         };
 
-        // Delete global broadcast
         window.deleteGlobalBroadcast = async () => {
             if (confirm("Are you sure you want to delete the global broadcast?")) {
                 try {
@@ -1852,35 +2076,7 @@
             }
         };
 
-        // Check if user is executive
-        window.checkExecutiveStatus = async () => {
-            const execPostCard = document.getElementById('executive-post-card');
-            const execHeader = document.getElementById('executive-post-header');
-            if (!execPostCard || !execHeader) return;
-            
-            const execSnap = await getDocs(query(
-                collection(db, "executives"), 
-                where("userId", "==", currentUserId)
-            ));
-            
-            if (!execSnap.empty) {
-                const execData = execSnap.docs[0].data();
-                execPostCard.classList.remove('hidden');
-                execHeader.innerHTML = `
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-bold text-green-600 flex items-center gap-2">
-                            <i class="fas fa-pen"></i> POST ANNOUNCEMENT
-                        </h3>
-                        <span class="badge-gold flex items-center gap-1">
-                            <i class="fas fa-check"></i> 
-                            ${execData.position} • ${execData.name}
-                        </span>
-                    </div>
-                `;
-            }
-        };
-
-        // Post announcement with level support
+        // Post announcement
         window.postAnnouncement = async () => {
             const title = document.getElementById('announce-title').value.trim();
             const content = document.getElementById('announce-content').value.trim();
@@ -1890,7 +2086,6 @@
                 return;
             }
             
-            // Get selected levels
             const checkboxes = document.querySelectorAll('.level-checkbox:checked');
             const targetLevels = Array.from(checkboxes).map(cb => cb.value);
             
@@ -1941,6 +2136,14 @@
                 cb.checked = e.target.checked;
             });
         });
+
+        // Periodic check for new announcements
+        setInterval(() => {
+            const isFeedTab = !document.getElementById('feed-screen').classList.contains('hidden');
+            if (!isFeedTab) {
+                loadAnnouncements();
+            }
+        }, 30000);
 
         // ============ DEPARTMENTS ============
         window.addDepartment = async () => {
