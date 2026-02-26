@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SLIT-HUB | Campus Marketplace & Services</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#10b981"><!-- Changed to green -->
+    <meta name="theme-color" content="#10b981">
     
     <!-- PWA Meta Tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="SLIT-HUB">
-    <link rel="apple-touch-icon" href="https://ui-avatars.com/api/?name=SH&background=10b981&color=fff&size=192"><!-- Changed to green -->
+    <link rel="apple-touch-icon" href="https://ui-avatars.com/api/?name=SH&background=10b981&color=fff&size=192">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -19,8 +19,8 @@
 
     <style>
         :root { 
-            --primary: #10b981; /* Changed from blue to green */
-            --primary-glow: rgba(16, 185, 129, 0.2); /* Green glow */
+            --primary: #10b981;
+            --primary-glow: rgba(16, 185, 129, 0.2);
             --bg: #f8fafc; 
             --card: #ffffff; 
             --text: #1e293b; 
@@ -44,38 +44,40 @@
 
         body { 
             padding-bottom: 90px;
-            background-color: var(--bg, #f8fafc); 
-            color: var(--text, #1e293b); 
+            background-color: var(--bg); 
+            color: var(--text); 
             transition: background 0.4s ease, color 0.4s ease; 
             font-family: 'Plus Jakarta Sans', sans-serif;
             overflow-x: hidden;
         }
 
-        .text-default { color: var(--text, #1e293b) !important; }
-        .text-light { color: var(--text-light, #334155) !important; }
-        .text-muted { color: var(--text-muted, #64748b) !important; }
-        .bg-card { background-color: var(--card, #ffffff) !important; }
-        .border-base { border-color: var(--border, #e2e8f0) !important; }
-        .bg-input { background-color: var(--input-bg, #f1f5f9) !important; }
+        /* Text color classes */
+        .text-default { color: var(--text) !important; }
+        .text-light { color: var(--text-light) !important; }
+        .text-muted { color: var(--text-muted) !important; }
+        .bg-card { background-color: var(--card) !important; }
+        .border-base { border-color: var(--border) !important; }
+        .bg-input { background-color: var(--input-bg) !important; }
 
+        /* Input styles */
         input, textarea, select {
-            background-color: var(--input-bg, #f1f5f9) !important;
-            color: var(--text, #1e293b) !important;
-            border-color: var(--border, #e2e8f0) !important;
+            background-color: var(--input-bg) !important;
+            color: var(--text) !important;
+            border-color: var(--border) !important;
         }
         input::placeholder, textarea::placeholder {
-            color: var(--text-muted, #64748b) !important;
+            color: var(--text-muted) !important;
             opacity: 0.7;
         }
 
         .brand-logo {
             font-weight: 800;
             letter-spacing: -1.5px;
-            background: linear-gradient(135deg, #10b981 0%, #34d399 100%); /* Changed to green gradient */
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 2px 4px rgba(16, 185, 129, 0.1)); /* Green shadow */
+            filter: drop-shadow(0 2px 4px rgba(16, 185, 129, 0.1));
             cursor: pointer;
             transition: transform 0.2s;
         }
@@ -89,8 +91,8 @@
         }
 
         .product-card {
-            background: var(--card, #ffffff);
-            border: 1px solid var(--border, #e2e8f0);
+            background: var(--card);
+            border: 1px solid var(--border);
             border-radius: 20px;
             overflow: hidden;
             transition: all 0.3s ease;
@@ -109,7 +111,7 @@
         }
 
         .view-toggle { 
-            background: var(--border, #e2e8f0); 
+            background: var(--border); 
             border-radius: 20px; 
             padding: 5px; 
             display: flex; 
@@ -122,10 +124,10 @@
             border-radius: 16px; 
             font-size: 0.85rem; 
             font-weight: 700; 
-            color: var(--text-muted, #64748b); 
+            color: var(--text-muted); 
         }
         .view-toggle .active { 
-            background: var(--card, #ffffff); 
+            background: var(--card); 
             color: var(--primary) !important; 
             box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
         }
@@ -136,7 +138,7 @@
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
         .btn-premium {
-            background: linear-gradient(135deg, #10b981, #34d399); /* Changed to green gradient */
+            background: linear-gradient(135deg, #10b981, #34d399);
             color: white !important;
             box-shadow: 0 4px 15px var(--primary-glow);
         }
@@ -166,7 +168,7 @@
         .review-reply {
             margin-left: 30px;
             padding: 10px;
-            background: rgba(16, 185, 129, 0.05); /* Changed to green tint */
+            background: rgba(16, 185, 129, 0.05);
             border-radius: 12px;
             border-left: 3px solid var(--primary);
         }
@@ -177,13 +179,13 @@
             right: 20px;
             z-index: 9999;
             padding: 12px 24px;
-            background: linear-gradient(135deg, #10b981, #34d399); /* Changed to green */
+            background: linear-gradient(135deg, #10b981, #34d399);
             color: white;
             border-radius: 50px;
             border: none;
             font-weight: bold;
             font-size: 14px;
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); /* Green shadow */
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
             display: none;
@@ -208,27 +210,99 @@
         }
         #offline-fallback i {
             font-size: 48px;
-            color: var(--text-muted, #64748b);
+            color: var(--text-muted);
             margin-bottom: 20px;
         }
         #offline-fallback h2 {
             font-size: 24px;
             font-weight: bold;
             margin-bottom: 10px;
-            color: var(--text, #1e293b);
+            color: var(--text);
         }
         #offline-fallback p {
-            color: var(--text-light, #334155);
+            color: var(--text-light);
             margin-bottom: 20px;
         }
         #offline-fallback button {
-            background: var(--primary, #10b981); /* Changed to green */
+            background: var(--primary);
             color: white;
             border: none;
             padding: 12px 30px;
             border-radius: 25px;
             font-weight: bold;
             cursor: pointer;
+        }
+
+        /* Gold Tick */
+        .gold-tick {
+            color: #ffd700;
+            font-size: 1.1em;
+            font-weight: bold;
+            display: inline-block;
+            margin-left: 2px;
+            text-shadow: 0 0 2px rgba(0,0,0,0.2);
+        }
+        .dark .gold-tick {
+            text-shadow: 0 0 4px rgba(255, 215, 0, 0.5);
+        }
+        .badge-executive {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #78350f;
+            border: none;
+        }
+        .badge-executive i {
+            color: #ffd700;
+            text-shadow: 0 0 2px rgba(0,0,0,0.2);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        .tab {
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+            background: none;
+            border: none;
+        }
+        .tab:hover {
+            background: var(--input-bg);
+            color: var(--text);
+        }
+        .tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Grid */
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+
+        @media (max-width: 768px) {
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hidden {
+            display: none !important;
         }
     </style>
 </head>
@@ -244,18 +318,18 @@
 
     <!-- Terms Modal -->
     <div id="terms-modal" class="hidden fixed inset-0 z-[10000] bg-black/60 backdrop-blur-sm flex items-center justify-center p-6">
-        <div class="modal-content p-8 max-w-sm w-full shadow-2xl border border-base" style="background: var(--card, #ffffff); border-color: var(--border, #e2e8f0);">
+        <div class="modal-content p-8 max-w-sm w-full shadow-2xl border border-base" style="background: var(--card); border-color: var(--border);">
             <div class="text-center mb-6">
-                <div class="w-16 h-16 bg-green-100 dark:bg-green-900/30 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4"> <!-- Changed to green -->
+                <div class="w-16 h-16 bg-green-100 dark:bg-green-900/30 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i class="fas fa-shield-halved text-2xl"></i>
                 </div>
-                <h2 class="text-2xl font-extrabold" style="color: var(--text, #1e293b);">Campus Rules</h2>
-                <p class="text-xs opacity-60 mt-2" style="color: var(--text-light, #334155);">To keep our campus safe, please agree to these terms.</p>
+                <h2 class="text-2xl font-extrabold" style="color: var(--text);">Campus Rules</h2>
+                <p class="text-xs opacity-60 mt-2" style="color: var(--text-light);">To keep our campus safe, please agree to these terms.</p>
             </div>
             <div class="space-y-4 text-sm mb-8">
-                <div class="flex gap-3 items-start"><i class="fas fa-check-circle text-green-500 mt-1"></i><p style="color: var(--text, #1e293b);"><b>Be Real:</b> Authentic posts only.</p></div>
-                <div class="flex gap-3 items-start"><i class="fas fa-check-circle text-green-500 mt-1"></i><p style="color: var(--text, #1e293b);"><b>Safety:</b> Meet in public areas.</p></div>
-                <div class="flex gap-3 items-start"><i class="fas fa-check-circle text-green-500 mt-1"></i><p style="color: var(--text, #1e293b);"><b>No Scams:</b> Immediate permanent ban.</p></div>
+                <div class="flex gap-3 items-start"><i class="fas fa-check-circle text-green-500 mt-1"></i><p style="color: var(--text);"><b>Be Real:</b> Authentic posts only.</p></div>
+                <div class="flex gap-3 items-start"><i class="fas fa-check-circle text-green-500 mt-1"></i><p style="color: var(--text);"><b>Safety:</b> Meet in public areas.</p></div>
+                <div class="flex gap-3 items-start"><i class="fas fa-check-circle text-green-500 mt-1"></i><p style="color: var(--text);"><b>No Scams:</b> Immediate permanent ban.</p></div>
             </div>
             <button onclick="acceptTerms()" class="w-full btn-premium font-bold py-4 rounded-2xl shadow-lg transition-all">I AGREE & CONTINUE</button>
         </div>
@@ -266,27 +340,27 @@
         <div class="text-red-500 mb-6 bg-red-50 dark:bg-red-950/30 p-6 rounded-full">
             <i class="fas fa-user-lock text-5xl"></i>
         </div>
-        <h1 class="text-3xl font-extrabold" style="color: var(--text, #1e293b);">Account Suspended</h1>
-        <p class="opacity-60 mt-4 max-w-xs" style="color: var(--text-light, #334155);">You have been flagged for community violations. Please contact admin to appeal.</p>
-        <button onclick="contactDeveloper()" class="mt-8 bg-green-600 text-white px-8 py-3 rounded-full font-bold shadow-lg">Appeal Access</button> <!-- Changed to green -->
+        <h1 class="text-3xl font-extrabold" style="color: var(--text);">Account Suspended</h1>
+        <p class="opacity-60 mt-4 max-w-xs" style="color: var(--text-light);">You have been flagged for community violations. Please contact admin to appeal.</p>
+        <button onclick="contactDeveloper()" class="mt-8 bg-green-600 text-white px-8 py-3 rounded-full font-bold shadow-lg">Appeal Access</button>
     </div>
 
     <!-- Header -->
-    <header class="glass-header sticky top-0 z-50 p-4" style="background: rgba(248, 250, 252, 0.9); border-bottom: 1px solid var(--border, #e2e8f0);">
+    <header class="glass-header sticky top-0 z-50 p-4" style="background: rgba(248, 250, 252, 0.9); border-bottom: 1px solid var(--border);">
         <div class="max-w-5xl mx-auto flex justify-between items-center gap-4">
             <h1 class="brand-logo text-2xl" onclick="showScreen('browse-screen')">SLIT-HUB</h1>
             <div class="flex-1 max-w-md relative">
-                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2" style="color: var(--text-muted, #64748b);"></i>
-                <input type="text" id="global-search" placeholder="Search campus..." class="w-full bg-input border-none rounded-2xl pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-green-500 outline-none transition-all" style="background: var(--input-bg, #f1f5f9); color: var(--text, #1e293b);">
+                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2" style="color: var(--text-muted);"></i>
+                <input type="text" id="global-search" placeholder="Search campus..." class="w-full bg-input border-none rounded-2xl pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-green-500 outline-none transition-all" style="background: var(--input-bg); color: var(--text);">
             </div>
-            <button onclick="toggleDarkMode()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-input transition-colors" style="background: var(--input-bg, #f1f5f9);">
-                <i class="fas fa-moon" id="dark-icon" style="color: var(--text, #1e293b);"></i>
+            <button onclick="toggleDarkMode()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-input transition-colors" style="background: var(--input-bg);">
+                <i class="fas fa-moon" id="dark-icon" style="color: var(--text);"></i>
             </button>
         </div>
     </header>
 
     <!-- Announcement Bar -->
-    <div id="announcement-bar" class="hidden text-white py-3 px-4 flex justify-between items-center text-[11px] font-bold shadow-md sticky top-[73px] z-40" style="background: linear-gradient(90deg, #10b981, #34d399);"> <!-- Changed to green gradient -->
+    <div id="announcement-bar" class="hidden text-white py-3 px-4 flex justify-between items-center text-[11px] font-bold shadow-md sticky top-[73px] z-40" style="background: linear-gradient(90deg, #10b981, #34d399);">
         <div class="flex-1 text-center flex items-center justify-center gap-2">
             <i class="fas fa-sparkles"></i>
             <span id="announcement-text">Welcome!</span>
@@ -309,7 +383,17 @@
 
     <main class="max-w-5xl mx-auto p-4 md:p-6">
 
-        <!-- Browse Screen -->
+        <!-- Tabs Navigation -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('browse')">🛍️ Marketplace</button>
+            <button class="tab" onclick="switchTab('feed')">📢 Announcements</button>
+            <button class="tab" onclick="switchTab('departments')">🏛️ Departments</button>
+            <button class="tab" onclick="switchTab('executives')">👥 Executives</button>
+            <button class="tab" onclick="switchTab('settings')">⚙️ Profile</button>
+            <button class="tab" onclick="switchTab('manager')">📋 Manager</button>
+        </div>
+
+        <!-- Browse/Marketplace Screen -->
         <section id="browse-screen" class="screen">
             <div class="view-toggle">
                 <button id="toggle-products" class="active" onclick="switchView('Product')">🛍️ Shop</button>
@@ -320,31 +404,78 @@
             <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5"></div>
         </section>
 
+        <!-- Feed/Announcements Screen -->
+        <section id="feed-screen" class="screen hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-extrabold" style="color: var(--text);">Announcements</h2>
+                <select id="filter-department" class="input-field w-auto" onchange="filterAnnouncements(this.value)">
+                    <option value="all">All Departments</option>
+                </select>
+            </div>
+            
+            <!-- Executive Post Card (Only visible to executives) -->
+            <div id="executive-post-card" class="card mb-6 hidden p-6" style="background: var(--card); border-color: var(--border);">
+                <div id="executive-post-header"></div>
+                <div class="space-y-4">
+                    <input type="text" id="announce-title" placeholder="Announcement title" class="input-field">
+                    <textarea id="announce-content" placeholder="Write your announcement..." rows="3" class="input-field"></textarea>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <input type="text" id="announce-link" placeholder="Link (optional)" class="input-field">
+                        <input type="date" id="announce-date" class="input-field">
+                    </div>
+                    <button onclick="postAnnouncement()" class="btn-premium w-full py-3 rounded-xl font-bold">
+                        <i class="fas fa-paper-plane mr-2"></i>Publish Announcement
+                    </button>
+                </div>
+            </div>
+
+            <!-- Announcements Feed -->
+            <div id="announcements-feed" class="space-y-4">
+                <!-- Announcements will load here -->
+            </div>
+        </section>
+
+        <!-- Departments Screen -->
+        <section id="departments-screen" class="screen hidden">
+            <h2 class="text-2xl font-extrabold mb-6" style="color: var(--text);">Academic Departments</h2>
+            <div id="departments-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Departments load here -->
+            </div>
+        </section>
+
+        <!-- Executives Screen -->
+        <section id="executives-screen" class="screen hidden">
+            <h2 class="text-2xl font-extrabold mb-6" style="color: var(--text);">Student Executives</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="executives-grid">
+                <!-- Executives load here -->
+            </div>
+        </section>
+
         <!-- Settings/Profile Screen -->
         <section id="settings-screen" class="screen hidden max-w-lg mx-auto">
-            <div class="bg-card p-8 rounded-[2.5rem] shadow-xl border border-base" style="background: var(--card, #ffffff); border-color: var(--border, #e2e8f0);">
+            <div class="bg-card p-8 rounded-[2.5rem] shadow-xl border border-base" style="background: var(--card); border-color: var(--border);">
                 <div class="text-center mb-8">
                     <div class="relative inline-block">
                         <div id="profile-loader"><div class="spinner"></div></div>
                         <img id="my-profile-pic" src="https://ui-avatars.com/api/?name=User&background=random" class="mx-auto mb-2 border-4 border-white shadow-lg w-24 h-24 rounded-full object-cover">
                         <div class="flex gap-2 justify-center absolute -bottom-2 w-full">
-                            <button onclick="document.getElementById('profile-upload').click()" class="bg-green-600 text-white p-2.5 rounded-full text-xs border-2 border-white shadow-md"><i class="fas fa-camera"></i></button> <!-- Changed to green -->
+                            <button onclick="document.getElementById('profile-upload').click()" class="bg-green-600 text-white p-2.5 rounded-full text-xs border-2 border-white shadow-md"><i class="fas fa-camera"></i></button>
                             <button id="btn-remove-photo" onclick="removeProfilePic()" class="hidden bg-red-500 text-white p-2.5 rounded-full text-xs border-2 border-white shadow-md"><i class="fas fa-trash"></i></button>
                         </div>
                         <input type="file" id="profile-upload" class="hidden" accept="image/*">
                     </div>
-                    <h2 id="my-profile-name-display" class="font-extrabold text-xl mt-4" style="color: var(--text, #1e293b);">My Profile</h2>
-                    <p class="text-[10px] opacity-40 font-mono mt-1" style="color: var(--text-light, #334155);">ID: <span id="display-user-id" class="text-green-600"></span></p> <!-- Changed to green -->
+                    <h2 id="my-profile-name-display" class="font-extrabold text-xl mt-4" style="color: var(--text);">My Profile</h2>
+                    <p class="text-[10px] opacity-40 font-mono mt-1" style="color: var(--text-light);">ID: <span id="display-user-id" class="text-green-600"></span></p>
                 </div>
                 <div class="space-y-5">
-                    <input type="text" id="set-profile-name" placeholder="👤 Full Name" class="w-full bg-input border border-base p-3.5 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-green-500" style="background: var(--input-bg, #f1f5f9); color: var(--text, #1e293b); border-color: var(--border, #e2e8f0);">
-                    <input type="text" id="set-profile-dept" placeholder="🎓 Dept" class="w-full bg-input border border-base p-3.5 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-green-500" style="background: var(--input-bg, #f1f5f9); color: var(--text, #1e293b); border-color: var(--border, #e2e8f0);">
-                    <textarea id="set-profile-bio" placeholder="📝 About you..." class="w-full bg-input border border-base p-3.5 rounded-2xl text-sm h-24 outline-none focus:ring-2 focus:ring-green-500" style="background: var(--input-bg, #f1f5f9); color: var(--text, #1e293b); border-color: var(--border, #e2e8f0);"></textarea>
+                    <input type="text" id="set-profile-name" placeholder="👤 Full Name" class="w-full bg-input border border-base p-3.5 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-green-500" style="background: var(--input-bg); color: var(--text); border-color: var(--border);">
+                    <input type="text" id="set-profile-dept" placeholder="🎓 Dept" class="w-full bg-input border border-base p-3.5 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-green-500" style="background: var(--input-bg); color: var(--text); border-color: var(--border);">
+                    <textarea id="set-profile-bio" placeholder="📝 About you..." class="w-full bg-input border border-base p-3.5 rounded-2xl text-sm h-24 outline-none focus:ring-2 focus:ring-green-500" style="background: var(--input-bg); color: var(--text); border-color: var(--border);"></textarea>
                     <button onclick="saveUserProfile()" class="w-full btn-premium font-bold py-4 rounded-2xl shadow-lg">SAVE PROFILE</button>
                     
                     <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-2xl">
                         <p class="text-[11px] font-extrabold text-yellow-800 dark:text-yellow-200 mb-2">🛡️ SAFETY TIPS</p>
-                        <ul class="text-[10px] space-y-1" style="color: var(--text-light, #334155);">
+                        <ul class="text-[10px] space-y-1" style="color: var(--text-light);">
                             <li>• NEVER pay before seeing the item</li>
                             <li>• Meet in public places (library, cafeteria)</li>
                             <li>• Bring a friend if possible</li>
@@ -353,10 +484,10 @@
                         </ul>
                     </div>
                     
-                    <div class="p-5 bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800 rounded-3xl"> <!-- Changed to green -->
+                    <div class="p-5 bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800 rounded-3xl">
                         <p class="text-[11px] font-extrabold text-green-800 dark:text-green-200 mb-3 tracking-wider">🛡️ CAMPUS VERIFICATION</p>
                         <div class="flex gap-3">
-                            <button onclick="requestVerification()" class="flex-1 bg-white dark:bg-slate-800 border border-green-600 text-green-600 text-[10px] font-bold py-3 rounded-xl shadow-sm">UPLOAD ID</button> <!-- Changed to green -->
+                            <button onclick="requestVerification()" class="flex-1 bg-white dark:bg-slate-800 border border-green-600 text-green-600 text-[10px] font-bold py-3 rounded-xl shadow-sm">UPLOAD ID</button>
                             <a href="https://wa.me/message/O2QERB7C5VE6E1?text=Hello%20Admin%2C%20I%20want%20to%20verify%20my%20account.%20My%20ID%3A%20" target="_blank" class="flex-1 bg-green-500 text-white text-[10px] font-bold py-3 rounded-xl shadow-sm hover:bg-green-600 transition-colors text-center block">
                                 <i class="fab fa-whatsapp mr-1"></i>CHAT ADMIN
                             </a>
@@ -364,16 +495,16 @@
                     </div>
                     
                     <a href="https://wa.me/message/O2QERB7C5VE6E1?text=Hi%20Developer!%20I%20need%20help%20with%20SLIT-HUB.%20My%20ID%3A%20" target="_blank" class="w-full flex items-center justify-between p-5 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-base hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors no-underline">
-                        <div class="flex items-center gap-3"><i class="fab fa-whatsapp text-2xl text-green-500"></i><p class="text-sm font-bold" style="color: var(--text, #1e293b);">Contact Developer</p></div>
-                        <i class="fas fa-chevron-right text-xs" style="color: var(--text-muted, #64748b);"></i>
+                        <div class="flex items-center gap-3"><i class="fab fa-whatsapp text-2xl text-green-500"></i><p class="text-sm font-bold" style="color: var(--text);">Contact Developer</p></div>
+                        <i class="fas fa-chevron-right text-xs" style="color: var(--text-muted);"></i>
                     </a>
                 </div>
             </div>
         </section>
 
         <!-- Post Screen -->
-        <section id="post-screen" class="screen hidden max-w-xl mx-auto bg-card p-8 rounded-[2.5rem] shadow-xl border border-base" style="background: var(--card, #ffffff); border-color: var(--border, #e2e8f0);">
-            <h2 class="text-2xl font-extrabold mb-6" style="color: var(--text, #1e293b);">Create New Listing</h2>
+        <section id="post-screen" class="screen hidden max-w-xl mx-auto bg-card p-8 rounded-[2.5rem] shadow-xl border border-base" style="background: var(--card); border-color: var(--border);">
+            <h2 class="text-2xl font-extrabold mb-6" style="color: var(--text);">Create New Listing</h2>
             
             <div class="mb-6 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl">
                 <p class="text-[10px] font-bold text-yellow-800 dark:text-yellow-200">
@@ -382,66 +513,66 @@
                 </p>
             </div>
             
-            <div class="flex gap-2 mb-8 bg-input p-1.5 rounded-2xl" style="background: var(--input-bg, #f1f5f9);">
-                <label class="flex-1 py-3 rounded-xl text-center text-[11px] font-extrabold uppercase cursor-pointer transition-all"><input type="radio" name="post-type" value="Product" checked class="hidden" onclick="togglePostForm('Product')"><span style="color: var(--text, #1e293b);">🛍️ Product</span></label>
-                <label class="flex-1 py-3 rounded-xl text-center text-[11px] font-extrabold uppercase cursor-pointer transition-all"><input type="radio" name="post-type" value="Service" class="hidden" onclick="togglePostForm('Service')"><span style="color: var(--text, #1e293b);">🛠️ Service</span></label>
-                <label class="flex-1 py-3 rounded-xl text-center text-[11px] font-extrabold uppercase cursor-pointer transition-all"><input type="radio" name="post-type" value="Request" class="hidden" onclick="togglePostForm('Request')"><span style="color: var(--text, #1e293b);">🙋‍♂️ Ask</span></label>
+            <div class="flex gap-2 mb-8 bg-input p-1.5 rounded-2xl" style="background: var(--input-bg);">
+                <label class="flex-1 py-3 rounded-xl text-center text-[11px] font-extrabold uppercase cursor-pointer transition-all"><input type="radio" name="post-type" value="Product" checked class="hidden" onclick="togglePostForm('Product')"><span style="color: var(--text);">🛍️ Product</span></label>
+                <label class="flex-1 py-3 rounded-xl text-center text-[11px] font-extrabold uppercase cursor-pointer transition-all"><input type="radio" name="post-type" value="Service" class="hidden" onclick="togglePostForm('Service')"><span style="color: var(--text);">🛠️ Service</span></label>
+                <label class="flex-1 py-3 rounded-xl text-center text-[11px] font-extrabold uppercase cursor-pointer transition-all"><input type="radio" name="post-type" value="Request" class="hidden" onclick="togglePostForm('Request')"><span style="color: var(--text);">🙋‍♂️ Ask</span></label>
             </div>
             
             <div class="space-y-5">
-                <div id="image-preview-container" class="w-full h-48 border-2 border-dashed border-base rounded-3xl flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:bg-input transition-all" style="border-color: var(--border, #e2e8f0);">
+                <div id="image-preview-container" class="w-full h-48 border-2 border-dashed border-base rounded-3xl flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:bg-input transition-all" style="border-color: var(--border);">
                     <img id="image-preview" class="hidden w-full h-full object-cover">
                     <div id="preview-placeholder" class="text-center">
-                        <i class="fas fa-cloud-arrow-up text-3xl text-green-500 mb-2"></i> <!-- Changed to green -->
-                        <p class="text-[11px] font-bold" style="color: var(--text-muted, #64748b);">Tap to upload photo</p>
+                        <i class="fas fa-cloud-arrow-up text-3xl text-green-500 mb-2"></i>
+                        <p class="text-[11px] font-bold" style="color: var(--text-muted);">Tap to upload photo</p>
                     </div>
                 </div>
                 <input type="file" id="file-input" class="hidden">
-                <input type="text" id="post-title" placeholder="What are you listing?" class="w-full bg-input border border-base p-4 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-green-500" style="background: var(--input-bg, #f1f5f9); color: var(--text, #1e293b); border-color: var(--border, #e2e8f0);">
-                <textarea id="post-desc" placeholder="Details (Condition, size, etc.)..." class="w-full bg-input border border-base p-4 rounded-2xl text-sm h-32 outline-none focus:ring-2 focus:ring-green-500" style="background: var(--input-bg, #f1f5f9); color: var(--text, #1e293b); border-color: var(--border, #e2e8f0);"></textarea>
+                <input type="text" id="post-title" placeholder="What are you listing?" class="w-full bg-input border border-base p-4 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-green-500" style="background: var(--input-bg); color: var(--text); border-color: var(--border);">
+                <textarea id="post-desc" placeholder="Details (Condition, size, etc.)..." class="w-full bg-input border border-base p-4 rounded-2xl text-sm h-32 outline-none focus:ring-2 focus:ring-green-500" style="background: var(--input-bg); color: var(--text); border-color: var(--border);"></textarea>
                 <div class="grid grid-cols-2 gap-4">
                     <div class="relative">
-                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold" style="color: var(--text-muted, #64748b);">₦</span>
-                        <input type="number" id="post-price" placeholder="Price" class="w-full bg-input border border-base pl-10 pr-4 py-4 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-green-500" style="background: var(--input-bg, #f1f5f9); color: var(--text, #1e293b); border-color: var(--border, #e2e8f0);">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold" style="color: var(--text-muted);">₦</span>
+                        <input type="number" id="post-price" placeholder="Price" class="w-full bg-input border border-base pl-10 pr-4 py-4 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-green-500" style="background: var(--input-bg); color: var(--text); border-color: var(--border);">
                     </div>
-                    <select id="post-negotiable" class="w-full bg-input border border-base px-4 py-4 rounded-2xl text-sm outline-none" style="background: var(--input-bg, #f1f5f9); color: var(--text, #1e293b); border-color: var(--border, #e2e8f0);">
+                    <select id="post-negotiable" class="w-full bg-input border border-base px-4 py-4 rounded-2xl text-sm outline-none" style="background: var(--input-bg); color: var(--text); border-color: var(--border);">
                         <option value="Fixed">Fixed Price</option>
                         <option value="Negotiable">Negotiable</option>
                     </select>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
-                    <select id="post-category" class="w-full bg-input border border-base px-4 py-4 rounded-2xl text-sm outline-none" style="background: var(--input-bg, #f1f5f9); color: var(--text, #1e293b); border-color: var(--border, #e2e8f0);"></select>
-                    <select id="post-condition" class="w-full bg-input border border-base px-4 py-4 rounded-2xl text-sm outline-none" style="background: var(--input-bg, #f1f5f9); color: var(--text, #1e293b); border-color: var(--border, #e2e8f0);"></select>
+                    <select id="post-category" class="w-full bg-input border border-base px-4 py-4 rounded-2xl text-sm outline-none" style="background: var(--input-bg); color: var(--text); border-color: var(--border);"></select>
+                    <select id="post-condition" class="w-full bg-input border border-base px-4 py-4 rounded-2xl text-sm outline-none" style="background: var(--input-bg); color: var(--text); border-color: var(--border);"></select>
                 </div>
                 <div class="relative">
-                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-green-600">+234</span> <!-- Changed to green -->
-                    <input type="tel" id="post-phone" placeholder="Phone number (e.g. 8051234567)" class="w-full bg-input border border-base pl-16 pr-4 py-4 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-green-500" style="background: var(--input-bg, #f1f5f9); color: var(--text, #1e293b); border-color: var(--border, #e2e8f0);">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-green-600">+234</span>
+                    <input type="tel" id="post-phone" placeholder="Phone number (e.g. 8051234567)" class="w-full bg-input border border-base pl-16 pr-4 py-4 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-green-500" style="background: var(--input-bg); color: var(--text); border-color: var(--border);">
                 </div>
-                <input type="text" id="post-location" placeholder="📍 Campus Location" class="w-full bg-input border border-base p-4 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-green-500" style="background: var(--input-bg, #f1f5f9); color: var(--text, #1e293b); border-color: var(--border, #e2e8f0);">
+                <input type="text" id="post-location" placeholder="📍 Campus Location" class="w-full bg-input border border-base p-4 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-green-500" style="background: var(--input-bg); color: var(--text); border-color: var(--border);">
                 <button id="btn-post" class="w-full btn-premium font-extrabold py-4 rounded-2xl shadow-xl mt-4">PUBLISH NOW</button>
             </div>
         </section>
 
         <!-- Edit Screen -->
-        <section id="edit-screen" class="screen hidden max-w-xl mx-auto bg-card p-8 rounded-[2.5rem] shadow-xl border border-base" style="background: var(--card, #ffffff); border-color: var(--border, #e2e8f0);">
+        <section id="edit-screen" class="screen hidden max-w-xl mx-auto bg-card p-8 rounded-[2.5rem] shadow-xl border border-base" style="background: var(--card); border-color: var(--border);">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-extrabold" style="color: var(--text, #1e293b);">Edit Listing</h2>
-                <button onclick="showScreen('my-items-screen')" class="text-xs opacity-50 font-bold hover:opacity-100" style="color: var(--text-muted, #64748b);">CANCEL</button>
+                <h2 class="text-2xl font-extrabold" style="color: var(--text);">Edit Listing</h2>
+                <button onclick="showScreen('my-items-screen')" class="text-xs opacity-50 font-bold hover:opacity-100" style="color: var(--text-muted);">CANCEL</button>
             </div>
             <div class="space-y-5">
                 <input type="hidden" id="edit-product-id">
-                <div id="edit-image-preview-container" class="w-full h-48 border-2 border-dashed border-base rounded-3xl overflow-hidden cursor-pointer" style="border-color: var(--border, #e2e8f0);">
+                <div id="edit-image-preview-container" class="w-full h-48 border-2 border-dashed border-base rounded-3xl overflow-hidden cursor-pointer" style="border-color: var(--border);">
                     <img id="edit-image-preview" class="w-full h-full object-cover">
                 </div>
                 <input type="file" id="edit-file-input" class="hidden">
-                <input type="text" id="edit-title" placeholder="Title" class="w-full bg-input border border-base p-4 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-green-500" style="background: var(--input-bg, #f1f5f9); color: var(--text, #1e293b); border-color: var(--border, #e2e8f0);">
-                <textarea id="edit-desc" placeholder="Details..." class="w-full bg-input border border-base p-4 rounded-2xl text-sm h-32 outline-none focus:ring-2 focus:ring-green-500" style="background: var(--input-bg, #f1f5f9); color: var(--text, #1e293b); border-color: var(--border, #e2e8f0);"></textarea>
+                <input type="text" id="edit-title" placeholder="Title" class="w-full bg-input border border-base p-4 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-green-500" style="background: var(--input-bg); color: var(--text); border-color: var(--border);">
+                <textarea id="edit-desc" placeholder="Details..." class="w-full bg-input border border-base p-4 rounded-2xl text-sm h-32 outline-none focus:ring-2 focus:ring-green-500" style="background: var(--input-bg); color: var(--text); border-color: var(--border);"></textarea>
                 <div class="grid grid-cols-2 gap-4">
                     <div class="relative">
-                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold" style="color: var(--text-muted, #64748b);">₦</span>
-                        <input type="number" id="edit-price" class="w-full bg-input border border-base pl-10 pr-4 py-4 rounded-2xl text-sm outline-none" style="background: var(--input-bg, #f1f5f9); color: var(--text, #1e293b); border-color: var(--border, #e2e8f0);">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold" style="color: var(--text-muted);">₦</span>
+                        <input type="number" id="edit-price" class="w-full bg-input border border-base pl-10 pr-4 py-4 rounded-2xl text-sm outline-none" style="background: var(--input-bg); color: var(--text); border-color: var(--border);">
                     </div>
-                    <select id="edit-sold-status" class="w-full bg-input border border-base px-4 py-4 rounded-2xl text-sm outline-none" style="background: var(--input-bg, #f1f5f9); color: var(--text, #1e293b); border-color: var(--border, #e2e8f0);">
+                    <select id="edit-sold-status" class="w-full bg-input border border-base px-4 py-4 rounded-2xl text-sm outline-none" style="background: var(--input-bg); color: var(--text); border-color: var(--border);">
                         <option value="false">Available</option>
                         <option value="true">Mark as Sold</option>
                     </select>
@@ -450,62 +581,142 @@
             </div>
         </section>
 
-        <!-- Manager Screen -->
+        <!-- Manager Screen (with Full Admin Panel) -->
         <section id="my-items-screen" class="screen hidden">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-extrabold" style="color: var(--text, #1e293b);">Manager</h2>
-                <button onclick="toggleAdminMode()" id="admin-toggle-btn" class="text-[9px] bg-input px-3 py-1.5 rounded-full font-bold uppercase tracking-widest" style="background: var(--input-bg, #f1f5f9); color: var(--text, #1e293b);">Admin: OFF</button>
+                <h2 class="text-2xl font-extrabold" style="color: var(--text);">Manager</h2>
+                <button onclick="toggleAdminMode()" id="admin-toggle-btn" class="text-[9px] bg-input px-3 py-1.5 rounded-full font-bold uppercase tracking-widest" style="background: var(--input-bg); color: var(--text);">Admin: OFF</button>
             </div>
+
+            <!-- Quick Stats Card (Visible in Admin Mode) -->
+            <div id="admin-quick-stats" class="hidden mb-6">
+                <div class="bg-gradient-to-r from-green-600 to-emerald-600 p-6 rounded-2xl text-white">
+                    <h3 class="text-sm font-bold mb-4">Quick Stats</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div>
+                            <p class="text-3xl font-bold" id="stat-departments">0</p>
+                            <p class="text-sm opacity-90">Departments</p>
+                        </div>
+                        <div>
+                            <p class="text-3xl font-bold" id="stat-executives">0</p>
+                            <p class="text-sm opacity-90">Executives</p>
+                        </div>
+                        <div>
+                            <p class="text-3xl font-bold" id="stat-announcements">0</p>
+                            <p class="text-sm opacity-90">Announcements</p>
+                        </div>
+                        <div>
+                            <p class="text-3xl font-bold" id="stat-products">0</p>
+                            <p class="text-sm opacity-90">Products</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Full Admin Panel (Requires Password) -->
             <div id="admin-panel" class="hidden mb-10 space-y-6">
-                <div class="bg-gradient-to-r from-green-600 to-emerald-600 p-6 rounded-[2rem] text-white shadow-xl"> <!-- Changed to green gradient -->
+                
+                <!-- Global Broadcast (Original) -->
+                <div class="bg-gradient-to-r from-green-600 to-emerald-600 p-6 rounded-2xl text-white shadow-xl">
                     <h3 class="text-xs font-extrabold uppercase mb-4">📢 Global Broadcast</h3>
                     <textarea id="admin-announcement-input" class="w-full p-4 rounded-2xl text-slate-900 text-sm h-20 mb-3 outline-none" placeholder="Broadcast message..."></textarea>
-                    <button onclick="updateAnnouncement()" class="bg-white text-green-600 px-8 py-2.5 rounded-xl text-[10px] font-bold shadow-lg hover:bg-gray-100 transition-colors">PUSH NOTIFICATION</button> <!-- Changed to green -->
+                    <button onclick="updateAnnouncement()" class="bg-white text-green-600 px-8 py-2.5 rounded-xl text-[10px] font-bold shadow-lg hover:bg-gray-100 transition-colors">PUSH NOTIFICATION</button>
                 </div>
-                <div class="bg-card p-6 border border-base rounded-[2rem] shadow-sm" style="background: var(--card, #ffffff); border-color: var(--border, #e2e8f0);">
-                    <h3 class="text-xs font-extrabold uppercase mb-4 text-green-600">Member Directory</h3> <!-- Changed to green -->
+
+                <!-- Department Management (New) -->
+                <div class="bg-card p-6 border border-base rounded-2xl shadow-sm" style="background: var(--card); border-color: var(--border);">
+                    <h3 class="text-sm font-bold mb-4 text-green-600 flex items-center gap-2">
+                        <i class="fas fa-building"></i> Department Management
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+                        <input type="text" id="dept-name" placeholder="Department Name" class="input-field">
+                        <input type="text" id="dept-code" placeholder="Department Code" class="input-field">
+                        <button onclick="addDepartment()" class="bg-green-600 text-white px-4 py-2 rounded-xl text-sm font-bold">
+                            <i class="fas fa-plus mr-2"></i>Add Department
+                        </button>
+                    </div>
+                    
+                    <div id="departments-list" class="space-y-2 max-h-60 overflow-y-auto">
+                        <!-- Departments list loads here -->
+                    </div>
+                </div>
+
+                <!-- Executive Management (New) -->
+                <div class="bg-card p-6 border border-base rounded-2xl shadow-sm" style="background: var(--card); border-color: var(--border);">
+                    <h3 class="text-sm font-bold mb-4 text-green-600 flex items-center gap-2">
+                        <i class="fas fa-user-tie"></i> Executive Management <span class="gold-tick text-lg ml-1">✓</span>
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
+                        <select id="exec-dept" class="input-field">
+                            <option value="">Select Department</option>
+                        </select>
+                        <input type="text" id="exec-name" placeholder="Full Name" class="input-field">
+                        <input type="text" id="exec-position" placeholder="Position" class="input-field">
+                        <input type="email" id="exec-email" placeholder="Email" class="input-field">
+                        <input type="tel" id="exec-phone" placeholder="Phone" class="input-field">
+                        <button onclick="addExecutive()" class="bg-green-600 text-white px-4 py-2 rounded-xl text-sm font-bold">
+                            <i class="fas fa-plus mr-2"></i>Add Executive
+                        </button>
+                    </div>
+                    
+                    <div id="executives-list" class="space-y-2 max-h-60 overflow-y-auto">
+                        <!-- Executives list loads here -->
+                    </div>
+                </div>
+
+                <!-- Member Directory (Original) -->
+                <div class="bg-card p-6 border border-base rounded-2xl shadow-sm" style="background: var(--card); border-color: var(--border);">
+                    <h3 class="text-xs font-extrabold uppercase mb-4 text-green-600">Member Directory</h3>
                     <div id="admin-user-list" class="space-y-3 max-h-80 overflow-y-auto no-scrollbar"></div>
                 </div>
-                <div class="bg-card p-6 border border-base rounded-[2rem] shadow-sm" style="background: var(--card, #ffffff); border-color: var(--border, #e2e8f0);">
-                    <h3 class="text-xs font-extrabold uppercase mb-4 text-green-600">📋 VERIFICATION REQUESTS</h3> <!-- Changed to green -->
+
+                <!-- Verification Requests (Original) -->
+                <div class="bg-card p-6 border border-base rounded-2xl shadow-sm" style="background: var(--card); border-color: var(--border);">
+                    <h3 class="text-xs font-extrabold uppercase mb-4 text-green-600">📋 VERIFICATION REQUESTS</h3>
                     <div id="admin-verification-list" class="space-y-3 max-h-80 overflow-y-auto no-scrollbar"></div>
                 </div>
-                <div class="bg-card p-6 border border-base rounded-[2rem] shadow-sm" style="background: var(--card, #ffffff); border-color: var(--border, #e2e8f0);">
+
+                <!-- Reports & Flagged (Original) -->
+                <div class="bg-card p-6 border border-base rounded-2xl shadow-sm" style="background: var(--card); border-color: var(--border);">
                     <h3 class="text-xs font-extrabold uppercase mb-4 text-red-600">Reports & Flagged</h3>
                     <div id="admin-reports-list" class="space-y-3"></div>
                 </div>
             </div>
+
+            <!-- My Items Grid -->
             <div id="my-items-grid" class="grid grid-cols-1 gap-4"></div>
         </section>
 
         <!-- Product Details Screen -->
-        <section id="details-screen" class="screen hidden bg-card rounded-[2.5rem] shadow-2xl overflow-hidden pb-12 border border-base" style="background: var(--card, #ffffff); border-color: var(--border, #e2e8f0);">
+        <section id="details-screen" class="screen hidden bg-card rounded-[2.5rem] shadow-2xl overflow-hidden pb-12 border border-base" style="background: var(--card); border-color: var(--border);">
             <div id="details-content"></div>
         </section>
 
     </main>
 
     <!-- Bottom Nav -->
-    <nav class="fixed bottom-0 left-0 right-0 glass-nav flex justify-around py-4 z-50" style="background: rgba(255,255,255,0.92); border-top: 1px solid var(--border, #e2e8f0);">
+    <nav class="fixed bottom-0 left-0 right-0 glass-nav flex justify-around py-4 z-50" style="background: rgba(255,255,255,0.92); border-top: 1px solid var(--border);">
         <button onclick="showScreen('browse-screen')" class="nav-item flex flex-col items-center relative">
-            <i class="fas fa-house-chimney text-lg mb-1" style="color: var(--nav-text, #64748b);"></i>
-            <span class="text-[9px] font-bold" style="color: var(--nav-text, #64748b);">Home</span>
+            <i class="fas fa-home text-lg mb-1" style="color: var(--nav-text);"></i>
+            <span class="text-[9px] font-bold" style="color: var(--nav-text);">Home</span>
         </button>
         <button onclick="startNewPost()" class="nav-item flex flex-col items-center relative">
-            <i class="fas fa-plus-circle text-2xl text-green-600 mb-1"></i> <!-- Changed to green -->
-            <span class="text-[9px] font-bold" style="color: var(--nav-text, #64748b);">Post</span>
+            <i class="fas fa-plus-circle text-2xl text-green-600 mb-1"></i>
+            <span class="text-[9px] font-bold" style="color: var(--nav-text);">Post</span>
         </button>
         <button onclick="loadMyItems()" class="nav-item flex flex-col items-center relative">
-            <i class="fas fa-grid-2 text-lg mb-1" style="color: var(--nav-text, #64748b);"></i>
-            <span class="text-[9px] font-bold" style="color: var(--nav-text, #64748b);">Manager</span>
+            <i class="fas fa-grid-2 text-lg mb-1" style="color: var(--nav-text);"></i>
+            <span class="text-[9px] font-bold" style="color: var(--nav-text);">Manager</span>
         </button>
         <a href="https://wa.me/message/O2QERB7C5VE6E1?text=Hello%20Admin%2C%20I%20need%20help%20with%20SLIT-HUB.%20My%20ID%3A%20" target="_blank" class="nav-item flex flex-col items-center relative no-underline">
             <i class="fas fa-comment-dots text-lg mb-1 text-green-500"></i>
-            <span class="text-[9px] font-bold" style="color: var(--nav-text, #64748b);">Admin</span>
+            <span class="text-[9px] font-bold" style="color: var(--nav-text);">Admin</span>
         </a>
         <button onclick="showScreen('settings-screen')" class="nav-item flex flex-col items-center relative">
-            <i class="fas fa-circle-user text-lg mb-1" style="color: var(--nav-text, #64748b);"></i>
-            <span class="text-[9px] font-bold" style="color: var(--nav-text, #64748b);">Me</span>
+            <i class="fas fa-user-circle text-lg mb-1" style="color: var(--nav-text);"></i>
+            <span class="text-[9px] font-bold" style="color: var(--nav-text);">Me</span>
         </button>
     </nav>
 
@@ -565,6 +776,24 @@
 
         document.getElementById('display-user-id').innerText = currentUserId;
 
+        // Tab switching
+        window.switchTab = (tabId) => {
+            // Hide all main screens
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            
+            // Show selected screen
+            if (tabId === 'browse') document.getElementById('browse-screen').classList.remove('hidden');
+            if (tabId === 'feed') document.getElementById('feed-screen').classList.remove('hidden');
+            if (tabId === 'departments') document.getElementById('departments-screen').classList.remove('hidden');
+            if (tabId === 'executives') document.getElementById('executives-screen').classList.remove('hidden');
+            if (tabId === 'settings') document.getElementById('settings-screen').classList.remove('hidden');
+            if (tabId === 'manager') document.getElementById('my-items-screen').classList.remove('hidden');
+            
+            // Update tab active states
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+        };
+
         // Dark mode toggle
         window.toggleDarkMode = () => {
             const html = document.documentElement;
@@ -583,7 +812,16 @@
             if (!localStorage.getItem('slit_terms_accepted')) {
                 document.getElementById('terms-modal').classList.remove('hidden');
             }
+            
+            // Load all data
+            loadProducts();
+            loadAnnouncements();
+            loadDepartments();
+            loadExecutives();
+            checkExecutiveStatus();
+            loadStats();
         };
+        
         window.acceptTerms = () => {
             localStorage.setItem('slit_terms_accepted', 'true');
             document.getElementById('terms-modal').classList.add('hidden');
@@ -668,6 +906,8 @@
         window.showScreen = screenId => {
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
             document.getElementById(screenId).classList.remove('hidden');
+            
+            // Update nav active states
             document.querySelectorAll('nav button, nav a').forEach(b => b.classList.remove('active-nav'));
             const map = { 'browse-screen': 0, 'post-screen': 1, 'my-items-screen': 2, 'settings-screen': 4 };
             if (map[screenId] !== undefined) {
@@ -852,7 +1092,7 @@
 
         function renderCategoryChips() {
             document.getElementById('category-filter-chips').innerHTML = categories[currentView].map(c => `
-                <button onclick="setCategoryFilter('${c}')" class="chip px-5 py-2.5 rounded-full text-[11px] font-bold border border-base whitespace-nowrap ${selectedCategory === c ? 'bg-green-600 text-white shadow-lg' : 'bg-card'}" style="border-color: var(--border, #e2e8f0); background: ${selectedCategory === c ? '#10b981' : 'var(--card, #ffffff)'}; color: ${selectedCategory === c ? 'white' : 'var(--text, #1e293b)'};">${c}</button>
+                <button onclick="setCategoryFilter('${c}')" class="chip px-5 py-2.5 rounded-full text-[11px] font-bold border border-base whitespace-nowrap ${selectedCategory === c ? 'bg-green-600 text-white shadow-lg' : 'bg-card'}" style="border-color: var(--border); background: ${selectedCategory === c ? '#10b981' : 'var(--card)'}; color: ${selectedCategory === c ? 'white' : 'var(--text)'};">${c}</button>
             `).join('');
         }
 
@@ -874,7 +1114,7 @@
 
                     container.innerHTML = '';
                     if (docs.length === 0) {
-                        container.innerHTML = `<div class="col-span-full py-20 text-center opacity-40"><i class="fas fa-box-open text-4xl" style="color: var(--text-muted, #64748b);"></i><p class="font-bold" style="color: var(--text, #1e293b);">No items found.</p></div>`;
+                        container.innerHTML = `<div class="col-span-full py-20 text-center opacity-40"><i class="fas fa-box-open text-4xl" style="color: var(--text-muted);"></i><p class="font-bold" style="color: var(--text);">No items found.</p></div>`;
                         return;
                     }
                     docs.forEach(product => {
@@ -888,12 +1128,12 @@
                                 <img src="${product.ImageURL}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110" onclick="viewProduct('${product.id}')">
                             </div>
                             <div class="p-3">
-                                <h3 class="font-bold text-[11px] truncate mb-1" style="color: var(--text, #1e293b);">${product.Title}${isVer ? ' <i class="fas fa-check-circle text-green-500"></i>' : ''}</h3> <!-- Changed to green -->
+                                <h3 class="font-bold text-[11px] truncate mb-1" style="color: var(--text);">${product.Title}${isVer ? ' <i class="fas fa-check-circle text-green-500"></i>' : ''}</h3>
                                 <div class="flex items-center gap-2 mb-2">
-                                    <span class="text-green-600 font-extrabold text-sm">₦${product.Price}</span> <!-- Changed to green -->
+                                    <span class="text-green-600 font-extrabold text-sm">₦${product.Price}</span>
                                     <div class="flex items-center text-[8px] text-yellow-500 font-bold bg-yellow-50 dark:bg-yellow-950/20 px-1.5 py-0.5 rounded"><i class="fas fa-star mr-1"></i>${avgRating}</div>
                                 </div>
-                                <div class="flex items-center text-[9px] opacity-40 uppercase font-bold" style="color: var(--text-muted, #64748b);">
+                                <div class="flex items-center text-[9px] opacity-40 uppercase font-bold" style="color: var(--text-muted);">
                                     <i class="fas fa-location-dot mr-1 text-[7px]"></i>${product.Location || 'Campus'}
                                 </div>
                             </div>
@@ -931,49 +1171,49 @@
                     
                     <div class="flex justify-between items-start mb-6">
                         <div>
-                            <h2 class="text-2xl font-extrabold" style="color: var(--text, #1e293b);">${p.Title}${isVer ? ' <i class="fas fa-check-circle text-green-500"></i>' : ''}</h2> <!-- Changed to green -->
-                            <p class="text-[10px] opacity-50 font-bold uppercase tracking-widest mt-1" style="color: var(--text-muted, #64748b);">${p.Category}</p>
+                            <h2 class="text-2xl font-extrabold" style="color: var(--text);">${p.Title}${isVer ? ' <i class="fas fa-check-circle text-green-500"></i>' : ''}</h2>
+                            <p class="text-[10px] opacity-50 font-bold uppercase tracking-widest mt-1" style="color: var(--text-muted);">${p.Category}</p>
                         </div>
-                        <p class="text-green-600 text-2xl font-black">₦${p.Price}</p> <!-- Changed to green -->
+                        <p class="text-green-600 text-2xl font-black">₦${p.Price}</p>
                     </div>
-                    <div class="flex items-center gap-4 p-4 bg-input rounded-2xl mb-8 border border-base" style="background: var(--input-bg, #f1f5f9); border-color: var(--border, #e2e8f0);">
+                    <div class="flex items-center gap-4 p-4 bg-input rounded-2xl mb-8 border border-base" style="background: var(--input-bg); border-color: var(--border);">
                         <img src="${u.photo || 'https://ui-avatars.com/api/?name=User'}" class="w-12 h-12 rounded-full border-2 border-white">
                         <div class="flex-1">
-                            <p class="text-xs font-extrabold" style="color: var(--text, #1e293b);">${u.name || 'Campus Student'}</p>
+                            <p class="text-xs font-extrabold" style="color: var(--text);">${u.name || 'Campus Student'}</p>
                             <p class="text-[9px] text-yellow-500 font-bold"><i class="fas fa-star mr-1"></i>${avgRating} (${p.ReviewCount || 0} reviews)</p>
                         </div>
                         ${!isMyProduct ? `<button onclick="reportUser('${p.SellerId}')" class="text-[9px] font-bold text-red-500 bg-red-50 dark:bg-red-950/20 px-3 py-1.5 rounded-lg border border-red-100 dark:border-red-900/40">REPORT</button>` : ''}
                     </div>
                     <div class="mb-10">
-                        <h4 class="text-[10px] font-extrabold uppercase opacity-40 mb-2" style="color: var(--text-muted, #64748b);">Description</h4>
-                        <p class="text-sm leading-relaxed" style="color: var(--text, #1e293b);">${p.Description}</p>
+                        <h4 class="text-[10px] font-extrabold uppercase opacity-40 mb-2" style="color: var(--text-muted);">Description</h4>
+                        <p class="text-sm leading-relaxed" style="color: var(--text);">${p.Description}</p>
                     </div>
                     <div class="mt-8 mb-8">
-                        <h3 class="text-sm font-extrabold mb-4 uppercase tracking-wider opacity-60" style="color: var(--text-muted, #64748b);">Other listings from this seller</h3>
+                        <h3 class="text-sm font-extrabold mb-4 uppercase tracking-wider opacity-60" style="color: var(--text-muted);">Other listings from this seller</h3>
                         <div id="more-from-seller-grid" class="grid grid-cols-2 gap-4"></div>
                     </div>
-                    <div class="mt-10 border-t border-base pt-6 mb-12" style="border-color: var(--border, #e2e8f0);">
-                        <h3 class="font-extrabold text-sm mb-6 uppercase tracking-widest opacity-60" style="color: var(--text-muted, #64748b);">Student Reviews</h3>
+                    <div class="mt-10 border-t border-base pt-6 mb-12" style="border-color: var(--border);">
+                        <h3 class="font-extrabold text-sm mb-6 uppercase tracking-widest opacity-60" style="color: var(--text-muted);">Student Reviews</h3>
                         <div id="reviews-placeholder" class="space-y-4"></div>
                     </div>
                     ${isMyProduct ? `
-                        <div class="p-5 bg-green-50 dark:bg-green-900/20 rounded-2xl text-center border border-green-100 dark:border-green-800"> <!-- Changed to green -->
-                            <p class="text-xs font-bold text-green-700 dark:text-green-300">You posted this listing.</p> <!-- Changed to green -->
+                        <div class="p-5 bg-green-50 dark:bg-green-900/20 rounded-2xl text-center border border-green-100 dark:border-green-800">
+                            <p class="text-xs font-bold text-green-700 dark:text-green-300">You posted this listing.</p>
                         </div>
                     ` : `
                         <div class="grid grid-cols-2 gap-4 mb-8">
                             <button onclick="startChat('${p.Phone}', '${sellerName}', '${p.Title.replace(/'/g, "\\'")}', '${p.Price}')" class="btn-premium font-extrabold py-4 rounded-2xl shadow-lg">
                                 <i class="fab fa-whatsapp mr-2"></i>MESSAGE SELLER
                             </button>
-                            ${p.Phone ? `<a href="tel:${p.Phone}" class="bg-green-600 text-white font-extrabold py-4 rounded-2xl text-center shadow-lg flex items-center justify-center"><i class="fas fa-phone mr-2"></i>CALL SELLER</a>` : ''} <!-- Changed to green -->
+                            ${p.Phone ? `<a href="tel:${p.Phone}" class="bg-green-600 text-white font-extrabold py-4 rounded-2xl text-center shadow-lg flex items-center justify-center"><i class="fas fa-phone mr-2"></i>CALL SELLER</a>` : ''}
                         </div>
-                        <div class="bg-card p-6 rounded-[2rem] border border-base shadow-sm" id="rating-container" style="background: var(--card, #ffffff); border-color: var(--border, #e2e8f0);">
-                            <h3 class="font-extrabold text-sm mb-4" style="color: var(--text, #1e293b);">Rate & Review</h3>
+                        <div class="bg-card p-6 rounded-[2rem] border border-base shadow-sm" id="rating-container" style="background: var(--card); border-color: var(--border);">
+                            <h3 class="font-extrabold text-sm mb-4" style="color: var(--text);">Rate & Review</h3>
                             <div class="star-rating mb-4 flex gap-2" id="rating-input">
                                 ${[1,2,3,4,5].map(v => `<i class="fas fa-star text-2xl active" data-val="${v}"></i>`).join('')}
                             </div>
-                            <textarea id="review-text" placeholder="Share your experience..." class="w-full bg-input border border-base p-4 text-sm h-24 rounded-2xl outline-none focus:ring-2 focus:ring-green-500" style="background: var(--input-bg, #f1f5f9); color: var(--text, #1e293b); border-color: var(--border, #e2e8f0);"></textarea>
-                            <button id="btn-submit-review" onclick="submitReview('${id}')" class="w-full bg-green-600 text-white py-3.5 rounded-2xl mt-4 font-bold">SUBMIT REVIEW</button> <!-- Changed to green -->
+                            <textarea id="review-text" placeholder="Share your experience..." class="w-full bg-input border border-base p-4 text-sm h-24 rounded-2xl outline-none focus:ring-2 focus:ring-green-500" style="background: var(--input-bg); color: var(--text); border-color: var(--border);"></textarea>
+                            <button id="btn-submit-review" onclick="submitReview('${id}')" class="w-full bg-green-600 text-white py-3.5 rounded-2xl mt-4 font-bold">SUBMIT REVIEW</button>
                         </div>
                     `}
                 </div>
@@ -984,9 +1224,9 @@
                 const existing = await getDocs(query(collection(db, "Products", id, "Reviews"), where("userId", "==", currentUserId)));
                 if (!existing.empty) {
                     document.getElementById('rating-container').innerHTML = `
-                        <div class="p-6 bg-green-50 dark:bg-green-900/20 rounded-3xl text-center border border-green-100 dark:border-green-800/40"> <!-- Changed to green -->
-                            <i class="fas fa-circle-check text-green-600 mb-2 text-xl"></i> <!-- Changed to green -->
-                            <p class="text-[11px] font-bold text-green-800 dark:text-green-300 uppercase">You've already reviewed this item!</p> <!-- Changed to green -->
+                        <div class="p-6 bg-green-50 dark:bg-green-900/20 rounded-3xl text-center border border-green-100 dark:border-green-800/40">
+                            <i class="fas fa-circle-check text-green-600 mb-2 text-xl"></i>
+                            <p class="text-[11px] font-bold text-green-800 dark:text-green-300 uppercase">You've already reviewed this item!</p>
                         </div>
                     `;
                 }
@@ -1000,15 +1240,15 @@
             const container = document.getElementById('more-from-seller-grid');
             if (!container) return;
             const others = snap.docs.filter(d => d.id !== currentProductId);
-            container.innerHTML = others.length === 0 ? '<p class="text-[10px] opacity-40 col-span-2" style="color: var(--text-muted, #64748b);">No other listings.</p>' : '';
+            container.innerHTML = others.length === 0 ? '<p class="text-[10px] opacity-40 col-span-2" style="color: var(--text-muted);">No other listings.</p>' : '';
             others.forEach(d => {
                 const item = d.data();
                 container.innerHTML += `
-                    <div class="bg-input rounded-2xl overflow-hidden border border-base cursor-pointer" onclick="viewProduct('${d.id}')" style="background: var(--input-bg, #f1f5f9); border-color: var(--border, #e2e8f0);">
+                    <div class="bg-input rounded-2xl overflow-hidden border border-base cursor-pointer" onclick="viewProduct('${d.id}')" style="background: var(--input-bg); border-color: var(--border);">
                         <img src="${item.ImageURL}" class="w-full h-24 object-cover">
                         <div class="p-2">
-                            <p class="text-[10px] font-bold truncate" style="color: var(--text, #1e293b);">${item.Title}</p>
-                            <p class="text-green-600 text-[10px] font-black">₦${item.Price}</p> <!-- Changed to green -->
+                            <p class="text-[10px] font-bold truncate" style="color: var(--text);">${item.Title}</p>
+                            <p class="text-green-600 text-[10px] font-black">₦${item.Price}</p>
                         </div>
                     </div>
                 `;
@@ -1022,7 +1262,7 @@
             onSnapshot(query(collection(db, "Products", productId, "Reviews"), orderBy("timestamp", "desc")), async (snap) => {
                 if (!container) return;
                 if (snap.empty) {
-                    container.innerHTML = '<p class="text-[11px] opacity-30 text-center py-4 italic" style="color: var(--text-muted, #64748b);">No reviews yet.</p>';
+                    container.innerHTML = '<p class="text-[11px] opacity-30 text-center py-4 italic" style="color: var(--text-muted);">No reviews yet.</p>';
                     return;
                 }
                 
@@ -1043,30 +1283,30 @@
                         const reply = replyDoc.data();
                         repliesHtml += `
                             <div class="review-reply mt-2">
-                                <p class="text-[10px] font-bold text-green-600">${reply.sellerName || 'Seller'} replied:</p> <!-- Changed to green -->
-                                <p class="text-[11px] mt-1" style="color: var(--text, #1e293b);">${reply.text}</p>
-                                <p class="text-[8px] opacity-40 mt-1" style="color: var(--text-muted, #64748b);">${reply.timestamp ? new Date(reply.timestamp.seconds * 1000).toLocaleDateString() : ''}</p>
+                                <p class="text-[10px] font-bold text-green-600">${reply.sellerName || 'Seller'} replied:</p>
+                                <p class="text-[11px] mt-1" style="color: var(--text);">${reply.text}</p>
+                                <p class="text-[8px] opacity-40 mt-1" style="color: var(--text-muted);">${reply.timestamp ? new Date(reply.timestamp.seconds * 1000).toLocaleDateString() : ''}</p>
                             </div>
                         `;
                     });
                     
                     container.innerHTML += `
-                        <div class="bg-input p-4 rounded-2xl border border-base" id="review-${reviewId}" style="background: var(--input-bg, #f1f5f9); border-color: var(--border, #e2e8f0);">
+                        <div class="bg-input p-4 rounded-2xl border border-base" id="review-${reviewId}" style="background: var(--input-bg); border-color: var(--border);">
                             <div class="flex justify-between items-center mb-3">
                                 <div class="flex items-center gap-2">
-                                    <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center text-[9px] font-bold text-green-600">${r.userId.substring(5,7).toUpperCase()}</div> <!-- Changed to green -->
-                                    <p class="text-[10px] font-bold opacity-60" style="color: var(--text, #1e293b);">${r.userName || 'User'}</p>
+                                    <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center text-[9px] font-bold text-green-600">${r.userId.substring(5,7).toUpperCase()}</div>
+                                    <p class="text-[10px] font-bold opacity-60" style="color: var(--text);">${r.userName || 'User'}</p>
                                 </div>
-                                <span class="text-[8px] opacity-30 font-bold uppercase" style="color: var(--text-muted, #64748b);">${date}</span>
+                                <span class="text-[8px] opacity-30 font-bold uppercase" style="color: var(--text-muted);">${date}</span>
                             </div>
                             <div class="flex text-yellow-500 text-[10px] mb-2">
                                 ${'<i class="fas fa-star"></i>'.repeat(r.stars)}${'<i class="far fa-star"></i>'.repeat(5 - r.stars)}
                             </div>
-                            <p class="text-xs leading-relaxed" style="color: var(--text, #1e293b);">${r.text}</p>
+                            <p class="text-xs leading-relaxed" style="color: var(--text);">${r.text}</p>
                             ${repliesHtml}
                             ${isSeller ? `
                                 <button onclick="replyToReview('${productId}', '${reviewId}', '${r.userName || 'User'}')" 
-                                    class="mt-2 text-[9px] bg-green-100 dark:bg-green-900/30 text-green-600 px-3 py-1 rounded-full font-bold hover:bg-green-200 dark:hover:bg-green-800 transition-colors"> <!-- Changed to green -->
+                                    class="mt-2 text-[9px] bg-green-100 dark:bg-green-900/30 text-green-600 px-3 py-1 rounded-full font-bold hover:bg-green-200 dark:hover:bg-green-800 transition-colors">
                                     REPLY
                                 </button>
                             ` : ''}
@@ -1160,6 +1400,398 @@
             }
         };
 
+        // ============ ANNOUNCEMENTS ============
+        window.loadAnnouncements = () => {
+            const container = document.getElementById('announcements-feed');
+            if (!container) return;
+            
+            onSnapshot(query(collection(db, "announcements"), orderBy("createdAt", "desc")), (snapshot) => {
+                if (snapshot.empty) {
+                    container.innerHTML = `
+                        <div class="card text-center py-12" style="background: var(--card); border-color: var(--border);">
+                            <i class="fas fa-bullhorn text-4xl text-muted mb-3"></i>
+                            <p class="text-muted">No announcements yet</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const ann = doc.data();
+                    const date = ann.createdAt ? 
+                        new Date(ann.createdAt.seconds * 1000).toLocaleDateString('en-US', { 
+                            month: 'short', day: 'numeric', year: 'numeric' 
+                        }) : 'Just now';
+                    
+                    container.innerHTML += `
+                        <div class="card p-6" style="background: var(--card); border-color: var(--border);">
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="badge badge-department px-3 py-1 bg-input rounded-full text-xs" style="color: var(--text);">
+                                    <i class="fas fa-building mr-1"></i>
+                                    ${ann.departmentName || 'General'}
+                                </span>
+                                <span class="text-xs text-muted">${date}</span>
+                                ${ann.pinned ? '<i class="fas fa-thumbtack text-yellow-500 ml-auto"></i>' : ''}
+                            </div>
+                            
+                            <h3 class="font-bold text-lg mb-2" style="color: var(--text);">${ann.title}</h3>
+                            <p class="text-muted mb-4">${ann.content}</p>
+                            
+                            ${ann.eventDate ? `
+                                <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg mb-3 flex items-center gap-2">
+                                    <i class="far fa-calendar text-blue-500"></i>
+                                    <span class="text-sm">Event: ${new Date(ann.eventDate).toLocaleDateString()}</span>
+                                </div>
+                            ` : ''}
+                            
+                            ${ann.link ? `
+                                <a href="${ann.link}" target="_blank" class="flex items-center gap-2 text-green-600 mb-3">
+                                    <i class="fas fa-link"></i>
+                                    <span class="text-sm">View details</span>
+                                </a>
+                            ` : ''}
+                            
+                            <div class="flex items-center gap-3 pt-3 border-t border-base" style="border-color: var(--border);">
+                                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-green-600 to-emerald-600 flex items-center justify-center text-white text-xs font-bold">
+                                    ${ann.executiveName ? ann.executiveName.charAt(0) : 'EX'}
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-1">
+                                        <span class="font-medium" style="color: var(--text);">${ann.executiveName || 'Executive'}</span>
+                                        <span class="gold-tick text-sm" title="Verified Executive">✓</span>
+                                    </div>
+                                    <p class="text-xs text-muted">${ann.executivePosition || 'Executive'} • ${ann.departmentName}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+        };
+
+        // Check if user is executive
+        window.checkExecutiveStatus = async () => {
+            const execPostCard = document.getElementById('executive-post-card');
+            const execHeader = document.getElementById('executive-post-header');
+            if (!execPostCard || !execHeader) return;
+            
+            const execSnap = await getDocs(query(
+                collection(db, "executives"), 
+                where("userId", "==", currentUserId)
+            ));
+            
+            if (!execSnap.empty) {
+                const execData = execSnap.docs[0].data();
+                execPostCard.classList.remove('hidden');
+                execHeader.innerHTML = `
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-green-600 flex items-center gap-2">
+                            <i class="fas fa-pen"></i> POST ANNOUNCEMENT
+                        </h3>
+                        <span class="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                            <i class="fas fa-check-circle gold-tick"></i> 
+                            ${execData.position} • ${execData.name}
+                        </span>
+                    </div>
+                `;
+            }
+        };
+
+        // Post announcement
+        window.postAnnouncement = async () => {
+            const title = document.getElementById('announce-title').value.trim();
+            const content = document.getElementById('announce-content').value.trim();
+            
+            if (!title || !content) {
+                alert("Please enter title and content");
+                return;
+            }
+            
+            const execSnap = await getDocs(query(
+                collection(db, "executives"), 
+                where("userId", "==", currentUserId)
+            ));
+            
+            if (execSnap.empty) {
+                alert("You are not authorized to post announcements");
+                return;
+            }
+            
+            const exec = execSnap.docs[0].data();
+            const deptSnap = await getDoc(doc(db, "departments", exec.departmentId));
+            
+            await addDoc(collection(db, "announcements"), {
+                departmentId: exec.departmentId,
+                departmentName: deptSnap.exists() ? deptSnap.data().name : 'Department',
+                executiveId: currentUserId,
+                executiveName: exec.name,
+                executivePosition: exec.position,
+                title: title,
+                content: content,
+                link: document.getElementById('announce-link').value || null,
+                eventDate: document.getElementById('announce-date').value || null,
+                createdAt: serverTimestamp(),
+                pinned: false
+            });
+            
+            document.getElementById('announce-title').value = '';
+            document.getElementById('announce-content').value = '';
+            document.getElementById('announce-link').value = '';
+            document.getElementById('announce-date').value = '';
+            
+            alert("✅ Announcement posted!");
+        };
+
+        // Filter announcements
+        window.filterAnnouncements = (deptId) => {
+            // Will be implemented
+        };
+
+        // ============ DEPARTMENTS ============
+        window.addDepartment = async () => {
+            const name = document.getElementById('dept-name').value.trim();
+            const code = document.getElementById('dept-code').value.trim();
+            
+            if (!name || !code) {
+                alert("Please fill all fields");
+                return;
+            }
+            
+            await addDoc(collection(db, "departments"), {
+                name: name,
+                code: code.toUpperCase(),
+                createdAt: serverTimestamp()
+            });
+            
+            document.getElementById('dept-name').value = '';
+            document.getElementById('dept-code').value = '';
+            loadStats();
+        };
+
+        window.loadDepartments = () => {
+            const container = document.getElementById('departments-list');
+            const grid = document.getElementById('departments-grid');
+            const filterSelect = document.getElementById('filter-department');
+            
+            onSnapshot(collection(db, "departments"), (snapshot) => {
+                // Admin list
+                if (container) {
+                    if (snapshot.empty) {
+                        container.innerHTML = '<p class="text-center text-muted py-4">No departments yet. Add your first department!</p>';
+                    } else {
+                        container.innerHTML = '';
+                        snapshot.forEach(doc => {
+                            const dept = doc.data();
+                            container.innerHTML += `
+                                <div class="flex items-center justify-between p-3 bg-input rounded-lg">
+                                    <div>
+                                        <p class="font-medium" style="color: var(--text);">${dept.name}</p>
+                                        <p class="text-xs text-muted">${dept.code}</p>
+                                    </div>
+                                    <button onclick="deleteDepartment('${doc.id}')" class="text-red-500 hover:text-red-700">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            `;
+                        });
+                    }
+                }
+                
+                // Public grid
+                if (grid) {
+                    if (snapshot.empty) {
+                        grid.innerHTML = '<p class="text-center text-muted py-8">No departments available</p>';
+                    } else {
+                        grid.innerHTML = '';
+                        snapshot.forEach(doc => {
+                            const dept = doc.data();
+                            grid.innerHTML += `
+                                <div class="card text-center p-6 cursor-pointer" style="background: var(--card); border-color: var(--border);" onclick="filterByDepartment('${doc.id}')">
+                                    <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-green-600 to-emerald-600 flex items-center justify-center text-white font-bold text-xl">
+                                        ${dept.code}
+                                    </div>
+                                    <h3 class="font-bold" style="color: var(--text);">${dept.name}</h3>
+                                    <p class="text-xs text-muted mt-1">${dept.code}</p>
+                                    <button class="btn btn-outline w-full mt-4 text-sm" style="border-color: var(--border); color: var(--text);">
+                                        View Announcements
+                                    </button>
+                                </div>
+                            `;
+                        });
+                    }
+                }
+                
+                // Filter dropdown
+                if (filterSelect) {
+                    filterSelect.innerHTML = '<option value="all">All Departments</option>';
+                    snapshot.forEach(doc => {
+                        const dept = doc.data();
+                        filterSelect.innerHTML += `<option value="${doc.id}">${dept.name}</option>`;
+                    });
+                }
+                
+                loadStats();
+            });
+        };
+
+        window.deleteDepartment = async (id) => {
+            if (confirm("Delete this department? This will NOT delete associated executives.")) {
+                await deleteDoc(doc(db, "departments", id));
+            }
+        };
+
+        window.filterByDepartment = (deptId) => {
+            switchTab('feed');
+            // Filter implementation will go here
+        };
+
+        // ============ EXECUTIVES ============
+        window.loadDepartmentDropdown = async () => {
+            const select = document.getElementById('exec-dept');
+            if (!select) return;
+            
+            const snapshot = await getDocs(collection(db, "departments"));
+            
+            select.innerHTML = '<option value="">Select Department</option>';
+            snapshot.forEach(doc => {
+                const dept = doc.data();
+                select.innerHTML += `<option value="${doc.id}">${dept.name} (${dept.code})</option>`;
+            });
+        };
+
+        window.addExecutive = async () => {
+            const deptId = document.getElementById('exec-dept').value;
+            const name = document.getElementById('exec-name').value.trim();
+            const position = document.getElementById('exec-position').value.trim();
+            const email = document.getElementById('exec-email').value.trim();
+            const phone = document.getElementById('exec-phone').value.trim();
+            
+            if (!deptId || !name || !position) {
+                alert("Please select department, enter name and position");
+                return;
+            }
+            
+            await addDoc(collection(db, "executives"), {
+                departmentId: deptId,
+                name: name,
+                position: position,
+                email: email || null,
+                phone: phone || null,
+                userId: null,
+                createdAt: serverTimestamp(),
+                isActive: true
+            });
+            
+            document.getElementById('exec-name').value = '';
+            document.getElementById('exec-position').value = '';
+            document.getElementById('exec-email').value = '';
+            document.getElementById('exec-phone').value = '';
+            loadStats();
+        };
+
+        window.loadExecutives = () => {
+            const container = document.getElementById('executives-list');
+            const grid = document.getElementById('executives-grid');
+            
+            onSnapshot(query(collection(db, "executives"), orderBy("createdAt", "desc")), async (snapshot) => {
+                // Admin list
+                if (container) {
+                    if (snapshot.empty) {
+                        container.innerHTML = '<p class="text-center text-muted py-4">No executives yet. Add your first executive!</p>';
+                    } else {
+                        container.innerHTML = '';
+                        for (const docSnap of snapshot.docs) {
+                            const exec = docSnap.data();
+                            const deptDoc = await getDoc(doc(db, "departments", exec.departmentId));
+                            
+                            container.innerHTML += `
+                                <div class="flex items-center justify-between p-3 bg-input rounded-lg">
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <p class="font-medium" style="color: var(--text);">${exec.name}</p>
+                                            <span class="badge badge-executive text-xs px-2 py-1 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200">
+                                                <i class="fas fa-check-circle gold-tick"></i> EXECUTIVE
+                                            </span>
+                                        </div>
+                                        <p class="text-xs text-muted">${exec.position} • ${deptDoc.exists() ? deptDoc.data().name : 'Unknown'}</p>
+                                        ${exec.email ? `<p class="text-xs text-muted mt-1"><i class="far fa-envelope"></i> ${exec.email}</p>` : ''}
+                                        ${exec.phone ? `<p class="text-xs text-muted"><i class="fas fa-phone"></i> ${exec.phone}</p>` : ''}
+                                    </div>
+                                    <button onclick="deleteExecutive('${docSnap.id}')" class="text-red-500 hover:text-red-700">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            `;
+                        }
+                    }
+                }
+                
+                // Public grid
+                if (grid) {
+                    if (snapshot.empty) {
+                        grid.innerHTML = '<p class="text-center text-muted py-8">No executives listed yet</p>';
+                    } else {
+                        grid.innerHTML = '';
+                        for (const docSnap of snapshot.docs) {
+                            const exec = docSnap.data();
+                            const deptDoc = await getDoc(doc(db, "departments", exec.departmentId));
+                            
+                            grid.innerHTML += `
+                                <div class="card text-center p-6" style="background: var(--card); border-color: var(--border);">
+                                    <div class="relative inline-block">
+                                        <div class="w-20 h-20 mx-auto mb-3 rounded-full bg-gradient-to-br from-green-600 to-emerald-600 flex items-center justify-center text-white font-bold text-2xl">
+                                            ${exec.name.charAt(0)}
+                                        </div>
+                                        <span class="absolute -bottom-1 -right-1 bg-yellow-400 rounded-full w-6 h-6 flex items-center justify-center text-white text-xs border-2 border-white shadow-lg">
+                                            <i class="fas fa-check-circle gold-tick text-sm"></i>
+                                        </span>
+                                    </div>
+                                    <h3 class="font-bold flex items-center justify-center gap-1" style="color: var(--text);">
+                                        ${exec.name}
+                                        <span class="gold-tick text-lg" title="Verified Executive">✓</span>
+                                    </h3>
+                                    <p class="text-sm text-green-600">${exec.position}</p>
+                                    <p class="text-xs text-muted mt-1">${deptDoc.exists() ? deptDoc.data().name : ''}</p>
+                                    <div class="flex justify-center gap-3 mt-3">
+                                        ${exec.phone ? `
+                                            <a href="tel:${exec.phone}" class="text-green-600 hover:text-green-700">
+                                                <i class="fas fa-phone"></i>
+                                            </a>
+                                        ` : ''}
+                                        ${exec.email ? `
+                                            <a href="mailto:${exec.email}" class="text-blue-600 hover:text-blue-700">
+                                                <i class="far fa-envelope"></i>
+                                            </a>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    }
+                }
+            });
+        };
+
+        window.deleteExecutive = async (id) => {
+            if (confirm("Remove this executive?")) {
+                await deleteDoc(doc(db, "executives", id));
+            }
+        };
+
+        // ============ STATS ============
+        window.loadStats = async () => {
+            const deptSnap = await getDocs(collection(db, "departments"));
+            const execSnap = await getDocs(collection(db, "executives"));
+            const annSnap = await getDocs(collection(db, "announcements"));
+            const prodSnap = await getDocs(collection(db, "Products"));
+            
+            document.getElementById('stat-departments').textContent = deptSnap.size;
+            document.getElementById('stat-executives').textContent = execSnap.size;
+            document.getElementById('stat-announcements').textContent = annSnap.size;
+            document.getElementById('stat-products').textContent = prodSnap.size;
+        };
+
         // My Items
         window.loadMyItems = () => {
             showScreen('my-items-screen');
@@ -1171,20 +1803,20 @@
                 const grid = document.getElementById('my-items-grid');
                 grid.innerHTML = '';
                 if (snap.empty) {
-                    grid.innerHTML = '<p class="text-center opacity-40 py-10" style="color: var(--text-muted, #64748b);">No listings yet.</p>';
+                    grid.innerHTML = '<p class="text-center opacity-40 py-10" style="color: var(--text-muted);">No listings yet.</p>';
                     return;
                 }
                 snap.docs.forEach(d => {
                     const p = d.data();
                     grid.innerHTML += `
-                        <div class="bg-card p-4 rounded-2xl border border-base flex gap-4 items-center shadow-sm" style="background: var(--card, #ffffff); border-color: var(--border, #e2e8f0);">
+                        <div class="bg-card p-4 rounded-2xl border border-base flex gap-4 items-center shadow-sm" style="background: var(--card); border-color: var(--border);">
                             <img src="${p.ImageURL}" class="w-16 h-16 rounded-xl object-cover flex-shrink-0">
                             <div class="flex-1 min-w-0">
-                                <h3 class="font-bold text-sm truncate" style="color: var(--text, #1e293b);">${p.Title}</h3>
-                                <p class="text-green-600 font-bold text-xs">₦${p.Price}</p> <!-- Changed to green -->
+                                <h3 class="font-bold text-sm truncate" style="color: var(--text);">${p.Title}</h3>
+                                <p class="text-green-600 font-bold text-xs">₦${p.Price}</p>
                             </div>
                             <div class="flex gap-2 flex-shrink-0">
-                                <button onclick="openEditScreen('${d.id}')" class="bg-green-50 dark:bg-green-900/30 text-green-600 p-2.5 rounded-xl text-xs"><i class="fas fa-pen-to-square"></i></button> <!-- Changed to green -->
+                                <button onclick="openEditScreen('${d.id}')" class="bg-green-50 dark:bg-green-900/30 text-green-600 p-2.5 rounded-xl text-xs"><i class="fas fa-pen-to-square"></i></button>
                                 <button onclick="deleteProduct('${d.id}')" class="bg-red-50 dark:bg-red-900/30 text-red-600 p-2.5 rounded-xl text-xs"><i class="fas fa-trash"></i></button>
                             </div>
                         </div>
@@ -1243,16 +1875,19 @@
             }
         };
 
-        // Admin functions
+        // Admin functions (Original)
         window.toggleAdminMode = () => {
             if (prompt("Enter admin passphrase:") === "junior123") {
                 isAdminMode = !isAdminMode;
                 document.getElementById('admin-panel').classList.toggle('hidden', !isAdminMode);
-                document.getElementById('admin-toggle-btn').innerText = `Admin Mode: ${isAdminMode ? 'ON' : 'OFF'}`;
+                document.getElementById('admin-quick-stats').classList.toggle('hidden', !isAdminMode);
+                document.getElementById('admin-toggle-btn').innerText = `Admin: ${isAdminMode ? 'ON' : 'OFF'}`;
                 if (isAdminMode) { 
                     loadReports(); 
                     loadAdminUserList();
                     loadVerificationRequests();
+                    loadDepartmentDropdown();
+                    loadStats();
                 }
                 loadMyItems();
             }
@@ -1268,13 +1903,14 @@
             alert("Announcement Updated!");
         };
 
+        // Verification Requests (Original)
         async function loadVerificationRequests() {
             const container = document.getElementById('admin-verification-list');
             if (!container) return;
             
             onSnapshot(collection(db, "VerificationRequests"), async (snap) => {
                 if (snap.empty) {
-                    container.innerHTML = '<p class="text-[10px] opacity-50 text-center py-4" style="color: var(--text-muted, #64748b);">No verification requests.</p>';
+                    container.innerHTML = '<p class="text-[10px] opacity-50 text-center py-4" style="color: var(--text-muted);">No verification requests.</p>';
                     return;
                 }
                 
@@ -1286,21 +1922,21 @@
                     const date = request.timestamp ? new Date(request.timestamp.seconds * 1000).toLocaleString() : 'Unknown';
                     
                     container.innerHTML += `
-                        <div class="bg-green-50 dark:bg-green-900/20 p-4 rounded-xl border border-green-200 dark:border-green-800"> <!-- Changed to green -->
+                        <div class="bg-green-50 dark:bg-green-900/20 p-4 rounded-xl border border-green-200 dark:border-green-800">
                             <div class="flex justify-between items-start">
                                 <div class="flex-1">
-                                    <p class="font-bold text-sm" style="color: var(--text, #1e293b);">${request.userName || 'Unknown'}</p>
-                                    <p class="text-[10px] mt-1" style="color: var(--text-muted, #64748b);">ID: ${userId}</p>
-                                    <p class="text-[9px] mt-1" style="color: var(--text-muted, #64748b);">Requested: ${date}</p>
-                                    ${request.idImage ? `<img src="${request.idImage}" class="w-20 h-20 object-cover rounded-lg mt-2 border border-base" style="border-color: var(--border, #e2e8f0);">` : ''}
+                                    <p class="font-bold text-sm" style="color: var(--text);">${request.userName || 'Unknown'}</p>
+                                    <p class="text-[10px] mt-1" style="color: var(--text-muted);">ID: ${userId}</p>
+                                    <p class="text-[9px] mt-1" style="color: var(--text-muted);">Requested: ${date}</p>
+                                    ${request.idImage ? `<img src="${request.idImage}" class="w-20 h-20 object-cover rounded-lg mt-2 border border-base" style="border-color: var(--border);">` : ''}
                                 </div>
                                 <div class="flex flex-col gap-2 ml-2">
                                     ${request.idImage ? `
-                                        <a href="${request.idImage}" target="_blank" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold text-center whitespace-nowrap"> <!-- Changed to green -->
+                                        <a href="${request.idImage}" target="_blank" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold text-center whitespace-nowrap">
                                             VIEW ID
                                         </a>
                                     ` : ''}
-                                    <button onclick="verifyUser('${userId}')" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold whitespace-nowrap"> <!-- Changed to green -->
+                                    <button onclick="verifyUser('${userId}')" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold whitespace-nowrap">
                                         VERIFY
                                     </button>
                                     <button onclick="deleteRequest('${docSnap.id}')" class="bg-red-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold whitespace-nowrap">
@@ -1325,10 +1961,11 @@
             }
         };
 
+        // Reports (Original)
         function loadReports() {
             onSnapshot(collection(db, "Reports"), snap => {
                 const list = document.getElementById('admin-reports-list');
-                list.innerHTML = snap.empty ? '<p class="text-[10px] opacity-50 text-center py-4" style="color: var(--text-muted, #64748b);">No reports.</p>' : '';
+                list.innerHTML = snap.empty ? '<p class="text-[10px] opacity-50 text-center py-4" style="color: var(--text-muted);">No reports.</p>' : '';
                 snap.forEach(d => {
                     const r = d.data();
                     const date = r.timestamp ? new Date(r.timestamp.seconds * 1000).toLocaleString() : 'Unknown';
@@ -1336,10 +1973,10 @@
                         <div class="p-3 border-l-4 border-red-500 bg-red-50 dark:bg-red-950/20 rounded-xl text-[10px] mb-2">
                             <div class="flex justify-between">
                                 <b class="text-red-600">Report</b>
-                                <span style="color: var(--text-muted, #64748b);">${date}</span>
+                                <span style="color: var(--text-muted);">${date}</span>
                             </div>
-                            <p class="mt-1" style="color: var(--text, #1e293b);"><b>Target:</b> ${r.reportedUser}</p>
-                            <p style="color: var(--text, #1e293b);"><b>Reason:</b> ${r.reason}</p>
+                            <p class="mt-1" style="color: var(--text);"><b>Target:</b> ${r.reportedUser}</p>
+                            <p style="color: var(--text);"><b>Reason:</b> ${r.reason}</p>
                             <div class="flex gap-2 mt-2">
                                 <button onclick="banUser('${r.reportedUser}')" class="bg-red-600 text-white px-3 py-1 rounded-lg text-[9px] font-bold">BAN</button>
                                 <a href="https://wa.me/message/O2QERB7C5VE6E1?text=Regarding%20report%20on%20user%20${r.reportedUser}" target="_blank" class="bg-green-600 text-white px-3 py-1 rounded-lg text-[9px] font-bold no-underline">CONTACT</a>
@@ -1350,9 +1987,10 @@
             });
         }
 
+        // Admin User List (Original)
         async function loadAdminUserList() {
             const container = document.getElementById('admin-user-list');
-            container.innerHTML = '<p class="text-[10px] opacity-40 text-center py-4" style="color: var(--text-muted, #64748b);">Loading...</p>';
+            container.innerHTML = '<p class="text-[10px] opacity-40 text-center py-4" style="color: var(--text-muted);">Loading...</p>';
             const usersSnap = await getDocs(collection(db, "Users"));
             const bannedSnap = await getDocs(collection(db, "BannedUsers"));
             const bannedIds = bannedSnap.docs.map(d => d.id);
@@ -1376,16 +2014,16 @@
                 }
                 
                 container.innerHTML += `
-                    <div class="bg-input p-4 rounded-2xl border border-base" style="background: var(--input-bg, #f1f5f9); border-color: var(--border, #e2e8f0);">
+                    <div class="bg-input p-4 rounded-2xl border border-base" style="background: var(--input-bg); border-color: var(--border);">
                         <div class="flex justify-between items-start">
                             <div class="text-[11px] min-w-0 flex-1 mr-2">
-                                <p class="font-extrabold text-green-600 truncate" style="color: var(--text, #1e293b);">${u.name || 'Anonymous'} ${isVerified ? '✅' : ''}</p> <!-- Changed to green -->
-                                <p class="opacity-50 truncate" style="color: var(--text-muted, #64748b);">ID: ${uid}</p>
-                                <p class="font-bold" style="color: var(--text, #1e293b);"><i class="fas fa-phone mr-1"></i>${phone}</p>
+                                <p class="font-extrabold text-green-600 truncate" style="color: var(--text);">${u.name || 'Anonymous'} ${isVerified ? '✅' : ''}</p>
+                                <p class="opacity-50 truncate" style="color: var(--text-muted);">ID: ${uid}</p>
+                                <p class="font-bold" style="color: var(--text);"><i class="fas fa-phone mr-1"></i>${phone}</p>
                             </div>
                             <div class="flex flex-col gap-2 flex-shrink-0">
                                 ${whatsappPhone !== 'N/A' ? `
-                                    <a href="https://wa.me/${whatsappPhone}" target="_blank" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-[9px] font-bold text-center no-underline"> <!-- Changed to green -->
+                                    <a href="https://wa.me/${whatsappPhone}" target="_blank" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-[9px] font-bold text-center no-underline">
                                         <i class="fab fa-whatsapp mr-1"></i>WHATSAPP
                                     </a>
                                 ` : ''}
@@ -1404,6 +2042,7 @@
             }
         }
 
+        // User verification functions (Original)
         window.verifyUser = async uid => {
             if (confirm("Verify this user?")) {
                 await setDoc(doc(db, "VerifiedUsers", uid), { verifiedAt: serverTimestamp(), verifiedBy: currentUserId });
