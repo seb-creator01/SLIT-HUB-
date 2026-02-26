@@ -1,11 +1,11 @@
 {
   "name": "SLIT-HUB Campus Marketplace",
   "short_name": "SLIT-HUB",
-  "description": "Campus marketplace for students to buy and sell items",
+  "description": "Campus marketplace for students to buy and sell items, view announcements, and connect with executives",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#10b981",  /* Changed to green */
-  "theme_color": "#10b981",       /* Changed to green */
+  "background_color": "#10b981",
+  "theme_color": "#10b981",
   "orientation": "portrait",
   "icons": [
     {
