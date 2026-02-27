@@ -15,12 +15,17 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
+        /* ========== PROFESSIONAL DESIGN SYSTEM ========== */
         :root { 
             --primary: #10b981;
-            --primary-glow: rgba(16, 185, 129, 0.2);
+            --primary-dark: #059669;
+            --primary-light: #34d399;
+            --primary-glow: rgba(16, 185, 129, 0.3);
+            --secondary: #6366f1;
+            --accent: #8b5cf6;
             --bg: #f8fafc; 
             --card: #ffffff; 
             --text: #1e293b; 
@@ -30,9 +35,16 @@
             --input-bg: #f1f5f9;
             --nav-text: #64748b;
             --danger: #ef4444;
+            --danger-light: #fee2e2;
             --warning: #f59e0b;
             --success: #10b981;
             --info: #3b82f6;
+            --gold: #fbbf24;
+            --gold-dark: #f59e0b;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
         
         html.dark { 
@@ -54,14 +66,21 @@
 
         body { 
             padding-bottom: 90px;
-            background-color: var(--bg); 
+            background: var(--bg);
             color: var(--text); 
-            transition: background 0.4s ease, color 0.4s ease; 
+            transition: background 0.3s ease, color 0.3s ease; 
             font-family: 'Plus Jakarta Sans', sans-serif;
             overflow-x: hidden;
+            min-height: 100vh;
         }
 
-        /* Text color classes */
+        /* ========== TYPOGRAPHY ========== */
+        h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; }
+        h2 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.01em; }
+        h3 { font-size: 1.25rem; font-weight: 600; }
+        p { font-size: 0.95rem; color: var(--text-light); line-height: 1.5; }
+
+        /* ========== TEXT COLORS ========== */
         .text-default { color: var(--text) !important; }
         .text-light { color: var(--text-light) !important; }
         .text-muted { color: var(--text-muted) !important; }
@@ -69,105 +88,175 @@
         .border-base { border-color: var(--border) !important; }
         .bg-input { background-color: var(--input-bg) !important; }
 
+        /* ========== INPUT STYLES ========== */
         input, textarea, select {
             background-color: var(--input-bg) !important;
             color: var(--text) !important;
-            border-color: var(--border) !important;
+            border: 1px solid var(--border) !important;
+            border-radius: 12px !important;
+            padding: 12px 16px !important;
+            font-size: 0.95rem !important;
+            transition: all 0.2s ease !important;
+            width: 100%;
+        }
+        input:focus, textarea:focus, select:focus {
+            outline: none !important;
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 3px var(--primary-glow) !important;
         }
         input::placeholder, textarea::placeholder {
             color: var(--text-muted) !important;
             opacity: 0.7;
         }
+        .input-error {
+            border-color: var(--danger) !important;
+        }
+        .error-message {
+            color: var(--danger);
+            font-size: 0.75rem;
+            margin-top: 4px;
+            display: none;
+        }
 
-        /* Brand Logo */
+        /* ========== BRANDING ========== */
         .brand-logo {
             font-weight: 800;
             letter-spacing: -1.5px;
-            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 2px 4px rgba(16, 185, 129, 0.1));
+            filter: drop-shadow(0 2px 4px rgba(16, 185, 129, 0.2));
             cursor: pointer;
+            transition: transform 0.2s;
         }
+        .brand-logo:active { transform: scale(0.95); }
 
         .tagline {
             font-size: 0.75rem;
             color: var(--text-muted);
             letter-spacing: 0.5px;
+            font-weight: 500;
         }
 
-        /* Buttons */
-        .btn-primary {
-            background: linear-gradient(135deg, #10b981, #34d399);
-            color: white !important;
+        /* ========== BUTTONS ========== */
+        .btn {
             padding: 12px 24px;
             border-radius: 12px;
-            font-weight: bold;
-            border: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
-            transition: all 0.2s;
+            border: none;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+        }
+        .btn:active::after {
+            width: 200px;
+            height: 200px;
+        }
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            box-shadow: 0 4px 15px var(--primary-glow);
         }
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px -5px rgba(16,185,129,0.4);
-        }
-        .btn-primary:active {
-            transform: translateY(0);
+            box-shadow: 0 8px 25px var(--primary-glow);
         }
 
         .btn-outline {
             background: transparent;
             border: 1px solid var(--border);
             color: var(--text);
-            padding: 10px 20px;
-            border-radius: 10px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
         }
         .btn-outline:hover {
             background: var(--input-bg);
         }
 
         .btn-danger {
-            background: #ef4444;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
             color: white;
-            padding: 10px 20px;
-            border-radius: 10px;
-            font-weight: 500;
-            border: none;
-            cursor: pointer;
+        }
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
         }
 
-        /* Badges */
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+
+        .btn-loading {
+            position: relative;
+            color: transparent !important;
+        }
+        .btn-loading::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid white;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ========== BADGES ========== */
         .gold-badge {
             display: inline-flex;
             align-items: center;
-            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
             color: white;
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 700;
             gap: 6px;
+            box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
         }
 
         .gold-check {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
             color: white;
             border-radius: 50%;
             width: 20px;
             height: 20px;
             font-size: 11px;
             margin-left: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .blue-badge {
@@ -180,6 +269,7 @@
             font-size: 12px;
             font-weight: 700;
             gap: 6px;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
         }
 
         .blue-check {
@@ -195,11 +285,125 @@
             margin-left: 4px;
         }
 
-        /* Notification Badge */
+        /* ========== CARDS ========== */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .product-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+        }
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* ========== NAVIGATION ========== */
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card);
+            border-top: 1px solid var(--border);
+            padding: 8px 16px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 50;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: var(--nav-text);
+            transition: all 0.2s;
+            font-size: 0.7rem;
+            font-weight: 500;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 12px;
+        }
+        .nav-item i {
+            font-size: 1.3rem;
+            transition: transform 0.2s;
+        }
+        .nav-item:hover {
+            color: var(--primary);
+            background: var(--input-bg);
+        }
+        .nav-item:hover i {
+            transform: translateY(-2px);
+        }
+        .nav-item.active-nav {
+            color: var(--primary);
+            background: var(--primary-glow);
+        }
+        .nav-item.active-nav i {
+            transform: scale(1.1);
+        }
+
+        /* ========== TABS ========== */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+            white-space: nowrap;
+            scrollbar-width: none;
+        }
+        .tabs::-webkit-scrollbar {
+            display: none;
+        }
+        .tab {
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 30px;
+            transition: all 0.2s;
+            background: none;
+            border: none;
+            font-size: 0.9rem;
+        }
+        .tab:hover {
+            background: var(--input-bg);
+            color: var(--text);
+        }
+        .tab.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px var(--primary-glow);
+        }
+
+        /* ========== NOTIFICATIONS ========== */
         .notification-badge {
             position: absolute;
-            top: -5px;
-            right: -5px;
+            top: -4px;
+            right: -4px;
             background: #ef4444;
             color: white;
             font-size: 10px;
@@ -212,19 +416,24 @@
             justify-content: center;
             padding: 0 4px;
             border: 2px solid var(--card);
+            animation: pulse 2s infinite;
         }
 
-        /* Toast Notification */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
         .toast {
             position: fixed;
             bottom: 100px;
             left: 20px;
             right: 20px;
             background: var(--card);
-            border-left: 4px solid #10b981;
-            border-radius: 12px;
+            border-left: 4px solid var(--primary);
+            border-radius: 16px;
             padding: 16px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: var(--shadow-xl);
             z-index: 10000;
             animation: slideUp 0.3s ease;
             cursor: pointer;
@@ -237,7 +446,7 @@
             to { transform: translateY(0); opacity: 1; }
         }
 
-        /* Level Badges */
+        /* ========== LEVEL BADGES ========== */
         .level-badge {
             display: inline-flex;
             padding: 2px 10px;
@@ -253,39 +462,10 @@
         .level-400 { background: #ef4444; }
         .level-500 { background: #8b5cf6; }
 
-        /* Tabs */
-        .tabs {
-            display: flex;
-            gap: 0.5rem;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 0.5rem;
-            margin-bottom: 1.5rem;
-            overflow-x: auto;
-            white-space: nowrap;
-        }
-        .tab {
-            padding: 0.5rem 1rem;
-            font-weight: 500;
-            color: var(--text-muted);
-            cursor: pointer;
-            border-radius: 0.5rem;
-            transition: all 0.2s;
-            background: none;
-            border: none;
-        }
-        .tab:hover {
-            background: var(--input-bg);
-            color: var(--text);
-        }
-        .tab.active {
-            background: var(--primary);
-            color: white;
-        }
-
-        /* Grid */
+        /* ========== GRID ========== */
         .grid-2, .grid-3, .grid-4 {
             display: grid;
-            gap: 1rem;
+            gap: 1.5rem;
         }
         .grid-2 { grid-template-columns: repeat(2, 1fr); }
         .grid-3 { grid-template-columns: repeat(3, 1fr); }
@@ -299,49 +479,7 @@
             display: none !important;
         }
 
-        /* Cards */
-        .card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 1rem;
-            padding: 1.5rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        /* Product Card */
-        .product-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 1rem;
-            overflow: hidden;
-            transition: all 0.2s;
-            cursor: pointer;
-        }
-        .product-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
-        }
-
-        /* Install Button */
-        #install-btn {
-            position: fixed;
-            bottom: 80px;
-            right: 16px;
-            background: linear-gradient(135deg, #10b981, #34d399);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            padding: 12px 24px;
-            font-weight: bold;
-            box-shadow: 0 4px 15px rgba(16,185,129,0.3);
-            cursor: pointer;
-            z-index: 9999;
-            display: none;
-            align-items: center;
-            gap: 8px;
-        }
-
-        /* Modal */
+        /* ========== MODAL ========== */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -349,11 +487,13 @@
             right: 0;
             bottom: 0;
             background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
             z-index: 100000;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 16px;
+            animation: fadeIn 0.2s ease;
         }
         .modal-content {
             background: var(--card);
@@ -363,6 +503,87 @@
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
+            animation: scaleIn 0.3s ease;
+            box-shadow: var(--shadow-xl);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes scaleIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        /* ========== INSTALL BUTTON ========== */
+        #install-btn {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 14px 28px;
+            font-weight: bold;
+            box-shadow: 0 4px 20px var(--primary-glow);
+            cursor: pointer;
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+        #install-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px var(--primary-glow);
+        }
+
+        /* ========== RATING STARS ========== */
+        .star-rating {
+            display: flex;
+            gap: 4px;
+        }
+        .star-rating i {
+            color: #fbbf24;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .star-rating i:hover {
+            transform: scale(1.2);
+        }
+        .star-rating i.inactive {
+            color: var(--border);
+        }
+
+        /* ========== PRICE FORMATTING ========== */
+        .price-input {
+            position: relative;
+        }
+        .price-input input {
+            padding-left: 30px !important;
+        }
+        .price-input::before {
+            content: '₦';
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-weight: 600;
+            z-index: 1;
+        }
+
+        /* ========== LOADING SKELETON ========== */
+        .skeleton {
+            background: linear-gradient(90deg, var(--border) 25%, var(--input-bg) 50%, var(--border) 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 8px;
+        }
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
     </style>
 </head>
@@ -376,7 +597,7 @@
                 <p class="tagline hidden md:block">Learn. Connect. Trade. — Everything SLIT, One Place</p>
             </div>
             <div class="flex items-center gap-3">
-                <button onclick="toggleDarkMode()" class="w-10 h-10 rounded-xl bg-input flex items-center justify-center">
+                <button onclick="toggleDarkMode()" class="w-10 h-10 rounded-xl bg-input flex items-center justify-center hover:bg-opacity-80 transition">
                     <i class="fas fa-moon" id="dark-icon"></i>
                 </button>
             </div>
@@ -391,6 +612,7 @@
             <button class="tab" onclick="switchTab('community')">👥 Connect</button>
             <button class="tab" onclick="switchTab('marketplace')">🛍️ Trade</button>
             <button class="tab" onclick="switchTab('profile')">👤 Profile</button>
+            <button class="tab" onclick="switchTab('manager')">📋 Manager</button>
             <button class="tab" onclick="switchTab('admin')">⚙️ Admin</button>
         </div>
     </div>
@@ -399,56 +621,55 @@
         
         <!-- HOME TAB -->
         <section id="home-tab" class="tab-content">
-            <div class="mb-6">
+            <div class="mb-8">
                 <h2 class="text-2xl font-bold">Welcome back, <span id="home-user-name">Student</span>!</h2>
                 <p class="text-muted" id="home-user-details">SLIT • Set your department in profile</p>
             </div>
 
             <!-- Quick Stats -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <div class="bg-card p-4 rounded-xl border border-base text-center">
-                    <div class="text-3xl mb-2">📚</div>
+                <div class="card text-center">
+                    <div class="text-4xl mb-2 text-primary">📚</div>
                     <div class="text-2xl font-bold" id="stat-courses">0</div>
                     <div class="text-xs text-muted">Courses</div>
                 </div>
-                <div class="bg-card p-4 rounded-xl border border-base text-center">
-                    <div class="text-3xl mb-2">📢</div>
+                <div class="card text-center">
+                    <div class="text-4xl mb-2 text-warning">📢</div>
                     <div class="text-2xl font-bold" id="stat-announcements">0</div>
                     <div class="text-xs text-muted">Announcements</div>
                 </div>
-                <div class="bg-card p-4 rounded-xl border border-base text-center">
-                    <div class="text-3xl mb-2">🛍️</div>
+                <div class="card text-center">
+                    <div class="text-4xl mb-2 text-success">🛍️</div>
                     <div class="text-2xl font-bold" id="stat-items">0</div>
                     <div class="text-xs text-muted">Items for Sale</div>
                 </div>
-                <div class="bg-card p-4 rounded-xl border border-base text-center">
-                    <div class="text-3xl mb-2">👥</div>
+                <div class="card text-center">
+                    <div class="text-4xl mb-2 text-info">👥</div>
                     <div class="text-2xl font-bold" id="stat-execs">0</div>
                     <div class="text-xs text-muted">Executives</div>
                 </div>
             </div>
 
             <!-- Today's Schedule -->
-            <div class="bg-card p-6 rounded-2xl border border-base mb-8">
+            <div class="card mb-8">
                 <h3 class="font-bold mb-4 flex items-center gap-2">
                     <i class="fas fa-calendar-day text-primary"></i> Today's Schedule
                 </h3>
                 <div id="today-schedule" class="space-y-3">
-                    <p class="text-muted text-sm">Complete your profile to see your timetable</p>
+                    <div class="skeleton h-12 w-full"></div>
+                    <div class="skeleton h-12 w-full"></div>
                 </div>
             </div>
 
             <!-- Latest Announcements -->
-            <div class="bg-card p-6 rounded-2xl border border-base">
+            <div class="card">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-bold flex items-center gap-2">
                         <i class="fas fa-bullhorn text-primary"></i> Latest Announcements
                     </h3>
-                    <button class="text-sm text-primary" onclick="switchTab('community')">View All →</button>
+                    <button class="text-primary hover:underline" onclick="switchTab('community')">View All →</button>
                 </div>
-                <div id="home-announcements" class="space-y-3">
-                    <p class="text-muted text-sm">Loading announcements...</p>
-                </div>
+                <div id="home-announcements" class="space-y-3"></div>
             </div>
         </section>
 
@@ -460,48 +681,48 @@
             </div>
 
             <!-- Department Selector -->
-            <div class="bg-card p-4 rounded-xl border border-base mb-6">
+            <div class="card mb-6">
                 <label class="block text-sm font-bold mb-2">Your Department</label>
-                <select id="academics-dept" class="input-field w-full md:w-64" onchange="loadDepartmentData()">
+                <select id="academics-dept" class="input-field w-full md:w-96" onchange="loadDepartmentData()">
                     <option value="">Select Department</option>
                 </select>
             </div>
 
             <!-- Quick Access Cards -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <div class="bg-card p-4 rounded-xl border border-base text-center cursor-pointer hover:shadow-lg transition" onclick="showTimetable('lecture')">
-                    <div class="text-3xl mb-2">📖</div>
+                <div class="card text-center cursor-pointer hover:shadow-lg transition" onclick="showTimetable('lecture')">
+                    <div class="text-4xl mb-2">📖</div>
                     <div class="font-bold">Lectures</div>
                     <div class="text-xs text-muted">Weekly schedule</div>
                 </div>
-                <div class="bg-card p-4 rounded-xl border border-base text-center cursor-pointer hover:shadow-lg transition" onclick="showTimetable('test')">
-                    <div class="text-3xl mb-2">📝</div>
+                <div class="card text-center cursor-pointer hover:shadow-lg transition" onclick="showTimetable('test')">
+                    <div class="text-4xl mb-2">📝</div>
                     <div class="font-bold">Tests</div>
                     <div class="text-xs text-muted">Upcoming tests</div>
                 </div>
-                <div class="bg-card p-4 rounded-xl border border-base text-center cursor-pointer hover:shadow-lg transition" onclick="showTimetable('exam')">
-                    <div class="text-3xl mb-2">📋</div>
+                <div class="card text-center cursor-pointer hover:shadow-lg transition" onclick="showTimetable('exam')">
+                    <div class="text-4xl mb-2">📋</div>
                     <div class="font-bold">Exams</div>
                     <div class="text-xs text-muted">Exam schedule</div>
                 </div>
-                <div class="bg-card p-4 rounded-xl border border-base text-center cursor-pointer hover:shadow-lg transition" onclick="showMaterials()">
-                    <div class="text-3xl mb-2">📚</div>
+                <div class="card text-center cursor-pointer hover:shadow-lg transition" onclick="showMaterials()">
+                    <div class="text-4xl mb-2">📚</div>
                     <div class="font-bold">Materials</div>
                     <div class="text-xs text-muted">Past questions</div>
                 </div>
             </div>
 
             <!-- Timetable Display -->
-            <div id="timetable-container" class="bg-card p-6 rounded-2xl border border-base mb-8 hidden">
+            <div id="timetable-container" class="card mb-8 hidden">
                 <div class="flex justify-between items-center mb-4">
                     <h3 id="timetable-title" class="font-bold">Lecture Timetable</h3>
-                    <button onclick="hideTimetable()" class="text-muted"><i class="fas fa-times"></i></button>
+                    <button onclick="hideTimetable()" class="text-muted hover:text-danger"><i class="fas fa-times"></i></button>
                 </div>
                 <div id="timetable-content" class="space-y-3"></div>
             </div>
 
             <!-- Study Groups -->
-            <div class="bg-card p-6 rounded-2xl border border-base mb-8">
+            <div class="card mb-8">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-bold flex items-center gap-2">
                         <i class="fas fa-users text-primary"></i> Study Groups
@@ -512,7 +733,7 @@
             </div>
 
             <!-- Course Materials -->
-            <div class="bg-card p-6 rounded-2xl border border-base">
+            <div class="card">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-bold flex items-center gap-2">
                         <i class="fas fa-folder-open text-primary"></i> Course Materials
@@ -531,16 +752,16 @@
             </div>
 
             <!-- Announcement Categories -->
-            <div class="flex gap-2 overflow-x-auto pb-4 mb-6">
-                <button class="px-4 py-2 bg-primary text-white rounded-full text-sm font-bold" onclick="filterAnnouncements('all')">All</button>
-                <button class="px-4 py-2 bg-card border border-base rounded-full text-sm" onclick="filterAnnouncements('sports')">⚽ Sports</button>
-                <button class="px-4 py-2 bg-card border border-base rounded-full text-sm" onclick="filterAnnouncements('social')">🎉 Social</button>
-                <button class="px-4 py-2 bg-card border border-base rounded-full text-sm" onclick="filterAnnouncements('academic')">📚 Academic</button>
-                <button class="px-4 py-2 bg-card border border-base rounded-full text-sm" onclick="filterAnnouncements('media')">📸 Media</button>
+            <div class="flex gap-2 overflow-x-auto pb-4 mb-6 scrollbar-hide">
+                <button class="category-btn px-4 py-2 bg-primary text-white rounded-full text-sm font-bold" onclick="filterAnnouncements('all')">All</button>
+                <button class="category-btn px-4 py-2 bg-card border border-base rounded-full text-sm" onclick="filterAnnouncements('sports')">⚽ Sports</button>
+                <button class="category-btn px-4 py-2 bg-card border border-base rounded-full text-sm" onclick="filterAnnouncements('social')">🎉 Social</button>
+                <button class="category-btn px-4 py-2 bg-card border border-base rounded-full text-sm" onclick="filterAnnouncements('academic')">📚 Academic</button>
+                <button class="category-btn px-4 py-2 bg-card border border-base rounded-full text-sm" onclick="filterAnnouncements('media')">📸 Media</button>
             </div>
 
             <!-- Executive Post Card -->
-            <div id="executive-post-card" class="bg-card p-6 rounded-2xl border border-base mb-6 hidden">
+            <div id="executive-post-card" class="card mb-6 hidden">
                 <div class="flex items-center gap-2 mb-4">
                     <i class="fas fa-pen-fancy text-primary text-xl"></i>
                     <span class="font-bold">Post Announcement</span>
@@ -567,13 +788,13 @@
             <div id="announcements-feed" class="space-y-4 mb-8"></div>
 
             <!-- Executives Directory -->
-            <div class="bg-card p-6 rounded-2xl border border-base mb-8">
+            <div class="card mb-8">
                 <h3 class="font-bold mb-4">Department Executives</h3>
                 <div id="executives-directory" class="space-y-3"></div>
             </div>
 
             <!-- Media Gallery -->
-            <div class="bg-card p-6 rounded-2xl border border-base">
+            <div class="card">
                 <h3 class="font-bold mb-4">📸 Media Gallery</h3>
                 <div id="media-gallery" class="grid grid-cols-3 gap-2"></div>
             </div>
@@ -588,9 +809,9 @@
 
             <!-- Marketplace Sub-tabs -->
             <div class="flex gap-2 border-b border-base mb-6">
-                <button class="px-4 py-2 font-bold text-primary border-b-2 border-primary" onclick="switchMarketplaceTab('shop')">🛒 Shop</button>
-                <button class="px-4 py-2 text-muted" onclick="switchMarketplaceTab('services')">🛠️ Services</button>
-                <button class="px-4 py-2 text-muted" onclick="switchMarketplaceTab('requests')">🙋 Requests</button>
+                <button class="sub-tab px-4 py-2 font-bold text-primary border-b-2 border-primary" onclick="switchMarketplaceTab('shop')">🛒 Shop</button>
+                <button class="sub-tab px-4 py-2 text-muted" onclick="switchMarketplaceTab('services')">🛠️ Services</button>
+                <button class="sub-tab px-4 py-2 text-muted" onclick="switchMarketplaceTab('requests')">🙋 Requests</button>
             </div>
 
             <!-- Shop Section -->
@@ -611,20 +832,20 @@
 
                 <!-- Service Categories -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-                    <div class="bg-card p-3 rounded-xl border border-base text-center cursor-pointer hover:shadow" onclick="filterServices('hair')">
-                        <div class="text-2xl mb-1">✂️</div>
+                    <div class="card text-center cursor-pointer hover:shadow-lg" onclick="filterServices('hair')">
+                        <div class="text-3xl mb-1">✂️</div>
                         <div class="text-xs font-bold">Hair & Beauty</div>
                     </div>
-                    <div class="bg-card p-3 rounded-xl border border-base text-center cursor-pointer hover:shadow" onclick="filterServices('repair')">
-                        <div class="text-2xl mb-1">📱</div>
+                    <div class="card text-center cursor-pointer hover:shadow-lg" onclick="filterServices('repair')">
+                        <div class="text-3xl mb-1">📱</div>
                         <div class="text-xs font-bold">Gadget Repair</div>
                     </div>
-                    <div class="bg-card p-3 rounded-xl border border-base text-center cursor-pointer hover:shadow" onclick="filterServices('photo')">
-                        <div class="text-2xl mb-1">📸</div>
+                    <div class="card text-center cursor-pointer hover:shadow-lg" onclick="filterServices('photo')">
+                        <div class="text-3xl mb-1">📸</div>
                         <div class="text-xs font-bold">Photography</div>
                     </div>
-                    <div class="bg-card p-3 rounded-xl border border-base text-center cursor-pointer hover:shadow" onclick="filterServices('tutor')">
-                        <div class="text-2xl mb-1">👨‍🏫</div>
+                    <div class="card text-center cursor-pointer hover:shadow-lg" onclick="filterServices('tutor')">
+                        <div class="text-3xl mb-1">👨‍🏫</div>
                         <div class="text-xs font-bold">Tutoring</div>
                     </div>
                 </div>
@@ -641,11 +862,11 @@
 
                 <!-- Request Categories -->
                 <div class="flex gap-2 overflow-x-auto pb-4 mb-4">
-                    <button class="px-3 py-1 bg-primary text-white rounded-full text-xs" onclick="filterRequests('all')">All</button>
-                    <button class="px-3 py-1 bg-card border border-base rounded-full text-xs" onclick="filterRequests('roommate')">🏠 Roommate</button>
-                    <button class="px-3 py-1 bg-card border border-base rounded-full text-xs" onclick="filterRequests('study')">👫 Study Partner</button>
-                    <button class="px-3 py-1 bg-card border border-base rounded-full text-xs" onclick="filterRequests('textbook')">📚 Textbook</button>
-                    <button class="px-3 py-1 bg-card border border-base rounded-full text-xs" onclick="filterRequests('urgent')">🚑 Urgent</button>
+                    <button class="category-btn px-3 py-1 bg-primary text-white rounded-full text-xs" onclick="filterRequests('all')">All</button>
+                    <button class="category-btn px-3 py-1 bg-card border border-base rounded-full text-xs" onclick="filterRequests('roommate')">🏠 Roommate</button>
+                    <button class="category-btn px-3 py-1 bg-card border border-base rounded-full text-xs" onclick="filterRequests('study')">👫 Study Partner</button>
+                    <button class="category-btn px-3 py-1 bg-card border border-base rounded-full text-xs" onclick="filterRequests('textbook')">📚 Textbook</button>
+                    <button class="category-btn px-3 py-1 bg-card border border-base rounded-full text-xs" onclick="filterRequests('urgent')">🚑 Urgent</button>
                 </div>
 
                 <div id="requests-grid" class="space-y-4"></div>
@@ -654,11 +875,11 @@
 
         <!-- PROFILE TAB -->
         <section id="profile-tab" class="tab-content hidden max-w-2xl mx-auto">
-            <div class="bg-card p-8 rounded-2xl shadow-xl border border-base">
+            <div class="card">
                 <div class="text-center mb-8">
                     <div class="relative inline-block">
-                        <img id="profile-pic" src="https://ui-avatars.com/api/?name=User&background=10b981&color=fff&size=128" class="w-24 h-24 rounded-full mx-auto border-4 border-white shadow-lg">
-                        <button onclick="document.getElementById('profile-upload').click()" class="absolute bottom-0 right-0 bg-primary text-white p-2 rounded-full text-xs border-2 border-white">
+                        <img id="profile-pic" src="https://ui-avatars.com/api/?name=User&background=10b981&color=fff&size=128" class="w-28 h-28 rounded-full mx-auto border-4 border-white shadow-lg">
+                        <button onclick="document.getElementById('profile-upload').click()" class="absolute bottom-0 right-0 bg-primary text-white p-2.5 rounded-full text-xs border-2 border-white hover:bg-primary-dark transition">
                             <i class="fas fa-camera"></i>
                         </button>
                     </div>
@@ -668,18 +889,19 @@
                     <p class="text-sm text-muted">ID: <span id="profile-id"></span></p>
                     
                     <!-- Badges -->
-                    <div id="profile-badges" class="flex justify-center gap-2 mt-2"></div>
+                    <div id="profile-badges" class="flex justify-center gap-2 mt-2 flex-wrap"></div>
                 </div>
 
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-bold mb-1">Full Name</label>
-                        <input type="text" id="profile-name-input" class="input-field">
+                        <label class="block text-sm font-bold mb-1">Full Name <span class="text-danger">*</span></label>
+                        <input type="text" id="profile-name-input" class="input-field" placeholder="Enter your full name">
+                        <div class="error-message" id="name-error">Name is required</div>
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-bold mb-1">Email</label>
-                        <input type="email" id="profile-email" class="input-field">
+                        <label class="block text-sm font-bold mb-1">Email <span class="text-danger">*</span></label>
+                        <input type="email" id="profile-email" class="input-field" placeholder="your.email@university.edu.ng">
                         <p class="text-xs text-muted mt-1">Use same email as executive registration to get badges</p>
                     </div>
                     
@@ -705,14 +927,18 @@
                         <textarea id="profile-bio" rows="3" class="input-field" placeholder="Tell us about yourself..."></textarea>
                     </div>
 
+                    <button onclick="saveProfile()" class="btn-primary w-full" id="save-profile-btn">
+                        <i class="fas fa-save"></i> Save Profile
+                    </button>
+
                     <!-- Contact Developer/Admin -->
                     <div class="border-t border-base pt-4 mt-4">
                         <h3 class="font-bold mb-3">Need Help?</h3>
                         <div class="flex gap-3">
-                            <a href="https://wa.me/2348053103234" target="_blank" class="flex-1 bg-green-600 text-white py-3 rounded-xl text-center font-bold flex items-center justify-center gap-2">
+                            <a href="https://wa.me/2348053103234" target="_blank" class="flex-1 bg-green-600 text-white py-3 rounded-xl text-center font-bold flex items-center justify-center gap-2 hover:bg-green-700 transition">
                                 <i class="fab fa-whatsapp"></i> Contact Developer
                             </a>
-                            <button onclick="showContactAdminModal()" class="flex-1 bg-primary text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2">
+                            <button onclick="showContactAdminModal()" class="flex-1 bg-primary text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-primary-dark transition">
                                 <i class="fas fa-envelope"></i> Message Admin
                             </button>
                         </div>
@@ -721,7 +947,7 @@
                     <!-- Upload ID for Verification -->
                     <div class="border-t border-base pt-4 mt-4">
                         <h3 class="font-bold mb-3 text-green-600">✅ Get Verified</h3>
-                        <button onclick="requestVerification()" class="w-full bg-green-600 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2">
+                        <button onclick="requestVerification()" class="w-full bg-green-600 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-green-700 transition">
                             <i class="fas fa-id-card"></i> Upload Student ID for Verification
                         </button>
                     </div>
@@ -729,14 +955,14 @@
                     <!-- Upload Course Materials (for Course Reps) -->
                     <div id="course-rep-upload" class="border-t border-base pt-4 mt-4 hidden">
                         <h3 class="font-bold mb-3 text-blue-600">📘 Course Rep Tools</h3>
-                        <button onclick="showUploadMaterialModal()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2">
+                        <button onclick="showUploadMaterialModal()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-blue-700 transition">
                             <i class="fas fa-upload"></i> Upload Course Materials
                         </button>
                     </div>
 
                     <!-- Delete Profile -->
                     <div class="border-t border-base pt-4 mt-4">
-                        <button onclick="confirmDeleteProfile()" class="w-full bg-red-500 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2">
+                        <button onclick="confirmDeleteProfile()" class="w-full btn-danger py-3 rounded-xl font-bold flex items-center justify-center gap-2">
                             <i class="fas fa-trash"></i> Delete Profile
                         </button>
                         <p class="text-xs text-muted text-center mt-2">This action cannot be undone</p>
@@ -745,11 +971,20 @@
             </div>
         </section>
 
+        <!-- MANAGER TAB (My Items) -->
+        <section id="manager-tab" class="tab-content hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">📋 My Items</h2>
+                <button class="btn-primary text-sm py-2" onclick="switchTab('marketplace')">+ Add New</button>
+            </div>
+            <div id="my-items-grid" class="grid grid-cols-1 gap-4"></div>
+        </section>
+
         <!-- ADMIN TAB -->
         <section id="admin-tab" class="tab-content hidden">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-bold">⚙️ Admin Dashboard</h2>
-                <button onclick="toggleAdminMode()" id="admin-toggle" class="px-4 py-2 bg-card border border-base rounded-xl text-sm">
+                <button onclick="toggleAdminMode()" id="admin-toggle" class="px-4 py-2 bg-card border border-base rounded-xl text-sm hover:bg-input transition">
                     <i class="fas fa-lock"></i> Admin: OFF
                 </button>
             </div>
@@ -759,43 +994,49 @@
                 
                 <!-- Quick Stats -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="bg-gradient-to-r from-green-600 to-emerald-600 p-4 rounded-xl text-white">
+                    <div class="bg-gradient-to-r from-green-600 to-emerald-600 p-4 rounded-xl text-white shadow-lg">
                         <div class="text-3xl font-bold" id="admin-stat-depts">0</div>
                         <div class="text-sm opacity-90">Departments</div>
                     </div>
-                    <div class="bg-gradient-to-r from-yellow-500 to-yellow-600 p-4 rounded-xl text-white">
+                    <div class="bg-gradient-to-r from-yellow-500 to-yellow-600 p-4 rounded-xl text-white shadow-lg">
                         <div class="text-3xl font-bold" id="admin-stat-execs">0</div>
                         <div class="text-sm opacity-90">Executives</div>
                     </div>
-                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-4 rounded-xl text-white">
+                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-4 rounded-xl text-white shadow-lg">
                         <div class="text-3xl font-bold" id="admin-stat-users">0</div>
                         <div class="text-sm opacity-90">Users</div>
                     </div>
-                    <div class="bg-gradient-to-r from-purple-500 to-purple-600 p-4 rounded-xl text-white">
+                    <div class="bg-gradient-to-r from-purple-500 to-purple-600 p-4 rounded-xl text-white shadow-lg">
                         <div class="text-3xl font-bold" id="admin-stat-products">0</div>
                         <div class="text-sm opacity-90">Products</div>
                     </div>
                 </div>
 
                 <!-- Global Broadcast -->
-                <div class="bg-gradient-to-r from-primary to-emerald-600 p-6 rounded-2xl text-white">
+                <div class="bg-gradient-to-r from-primary to-emerald-600 p-6 rounded-2xl text-white shadow-lg">
                     <h3 class="font-bold mb-4 flex items-center gap-2">
                         <i class="fas fa-bullhorn"></i> Global Broadcast
                     </h3>
                     <textarea id="global-broadcast-input" class="w-full p-3 rounded-xl text-gray-900 mb-3" rows="2" placeholder="Type broadcast message..."></textarea>
-                    <button onclick="sendGlobalBroadcast()" class="bg-white text-primary px-6 py-2 rounded-xl font-bold">Send to All Users</button>
-                    <button onclick="deleteGlobalBroadcast()" class="ml-2 bg-red-500 text-white px-6 py-2 rounded-xl font-bold">Delete Broadcast</button>
+                    <div class="flex gap-3">
+                        <button onclick="sendGlobalBroadcast()" class="bg-white text-primary px-6 py-2 rounded-xl font-bold hover:shadow-lg transition">
+                            <i class="fas fa-paper-plane"></i> Send
+                        </button>
+                        <button onclick="deleteGlobalBroadcast()" class="bg-red-500 text-white px-6 py-2 rounded-xl font-bold hover:bg-red-600 transition">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Department Management -->
-                <div class="bg-card p-6 rounded-2xl border border-base">
+                <div class="card">
                     <h3 class="font-bold mb-4 text-primary">🏛️ Department Management</h3>
                     
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-                        <input type="text" id="dept-name" placeholder="Department Name" class="input-field">
+                        <input type="text" id="dept-name" placeholder="Department Name (e.g., PMT)" class="input-field">
                         <input type="text" id="dept-code" placeholder="Code (e.g., PMT)" class="input-field">
-                        <button onclick="addDepartment()" class="bg-primary text-white px-4 py-2 rounded-xl font-bold">
-                            <i class="fas fa-plus mr-2"></i>Add Department
+                        <button onclick="addDepartment()" class="btn-primary" id="add-dept-btn">
+                            <i class="fas fa-plus"></i> Add Department
                         </button>
                     </div>
                     
@@ -803,7 +1044,7 @@
                 </div>
 
                 <!-- Executive Management -->
-                <div class="bg-card p-6 rounded-2xl border border-base">
+                <div class="card">
                     <h3 class="font-bold mb-4 text-yellow-600">⭐ Executive Management</h3>
                     
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
@@ -819,8 +1060,8 @@
                             <option value="course">📘 Course Representative</option>
                         </select>
                         <input type="text" id="exec-course" placeholder="Course Code (if rep)" class="input-field">
-                        <button onclick="addExecutive()" class="bg-yellow-500 text-white px-4 py-2 rounded-xl font-bold col-span-3">
-                            <i class="fas fa-plus mr-2"></i>Add Executive
+                        <button onclick="addExecutive()" class="btn-warning col-span-3" id="add-exec-btn">
+                            <i class="fas fa-plus"></i> Add Executive
                         </button>
                     </div>
                     
@@ -828,28 +1069,28 @@
                 </div>
 
                 <!-- Member Directory -->
-                <div class="bg-card p-6 rounded-2xl border border-base">
+                <div class="card">
                     <h3 class="font-bold mb-4 text-blue-600">👥 Member Directory</h3>
                     <div id="member-directory" class="space-y-3 max-h-96 overflow-y-auto"></div>
                 </div>
 
                 <!-- Verification Requests -->
-                <div class="bg-card p-6 rounded-2xl border border-base">
+                <div class="card">
                     <h3 class="font-bold mb-4 text-green-600">✅ Verification Requests</h3>
                     <div id="verification-list" class="space-y-3"></div>
                 </div>
 
                 <!-- Reports -->
-                <div class="bg-card p-6 rounded-2xl border border-base">
+                <div class="card">
                     <h3 class="font-bold mb-4 text-red-600">⚠️ Reports</h3>
                     <div id="reports-list" class="space-y-3"></div>
                 </div>
 
                 <!-- Danger Zone -->
-                <div class="bg-card p-6 rounded-2xl border border-red-300">
-                    <h3 class="font-bold mb-4 text-red-600">⚠️ Danger Zone</h3>
-                    <button onclick="showDeleteAllDataModal()" class="bg-red-600 text-white px-6 py-3 rounded-xl font-bold">
-                        Delete All Data (Requires Super Admin)
+                <div class="card border-2 border-danger">
+                    <h3 class="font-bold mb-4 text-danger">⚠️ Danger Zone</h3>
+                    <button onclick="showDeleteAllDataModal()" class="btn-danger w-full">
+                        <i class="fas fa-exclamation-triangle"></i> Delete All Data (Requires Super Admin)
                     </button>
                 </div>
             </div>
@@ -857,26 +1098,30 @@
     </main>
 
     <!-- Bottom Navigation -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-card border-t border-base py-2 px-4 flex justify-around z-50">
-        <button class="nav-item flex flex-col items-center" onclick="switchTab('home')">
-            <i class="fas fa-home text-xl"></i>
-            <span class="text-xs">Home</span>
+    <nav class="nav-bar">
+        <button class="nav-item" onclick="switchTab('home')">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
         </button>
-        <button class="nav-item flex flex-col items-center" onclick="switchTab('academics')">
-            <i class="fas fa-book-open text-xl"></i>
-            <span class="text-xs">Learn</span>
+        <button class="nav-item" onclick="switchTab('academics')">
+            <i class="fas fa-book-open"></i>
+            <span>Learn</span>
         </button>
-        <button class="nav-item flex flex-col items-center" onclick="switchTab('community')">
-            <i class="fas fa-users text-xl"></i>
-            <span class="text-xs">Connect</span>
+        <button class="nav-item" onclick="switchTab('community')">
+            <i class="fas fa-users"></i>
+            <span>Connect</span>
         </button>
-        <button class="nav-item flex flex-col items-center" onclick="switchTab('marketplace')">
-            <i class="fas fa-store text-xl"></i>
-            <span class="text-xs">Trade</span>
+        <button class="nav-item" onclick="switchTab('marketplace')">
+            <i class="fas fa-store"></i>
+            <span>Trade</span>
         </button>
-        <button class="nav-item flex flex-col items-center" onclick="switchTab('profile')">
-            <i class="fas fa-user-circle text-xl"></i>
-            <span class="text-xs">Profile</span>
+        <button class="nav-item" onclick="switchTab('profile')">
+            <i class="fas fa-user-circle"></i>
+            <span>Profile</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('manager')">
+            <i class="fas fa-clipboard-list"></i>
+            <span>Manager</span>
         </button>
     </nav>
 
@@ -887,8 +1132,6 @@
 
     <!-- Toast Container -->
     <div id="toast-container"></div>
-
-    <!-- Modals will be inserted here dynamically -->
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -933,13 +1176,29 @@
                     <div class="flex-1">
                         <p class="font-bold">${message}</p>
                     </div>
-                    <button onclick="this.parentElement.parentElement.remove()" class="text-muted">
+                    <button onclick="this.parentElement.parentElement.remove()" class="text-muted hover:text-text">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
             `;
             document.getElementById('toast-container').appendChild(toast);
             setTimeout(() => toast.remove(), duration);
+        }
+
+        function showLoading(buttonId) {
+            const btn = document.getElementById(buttonId);
+            if (btn) {
+                btn.classList.add('btn-loading');
+                btn.disabled = true;
+            }
+        }
+
+        function hideLoading(buttonId) {
+            const btn = document.getElementById(buttonId);
+            if (btn) {
+                btn.classList.remove('btn-loading');
+                btn.disabled = false;
+            }
         }
 
         // ============ TAB SWITCHING ============
@@ -955,7 +1214,7 @@
             
             const tabIndex = {
                 'home': 0, 'academics': 1, 'community': 2, 
-                'marketplace': 3, 'profile': 4, 'admin': 5
+                'marketplace': 3, 'profile': 4, 'manager': 5, 'admin': 6
             }[tabId];
             
             if (tabs[tabIndex]) tabs[tabIndex].classList.add('active');
@@ -967,11 +1226,18 @@
             if (tabId === 'community') loadCommunityData();
             if (tabId === 'marketplace') loadMarketplaceData();
             if (tabId === 'profile') loadProfileData();
+            if (tabId === 'manager') loadMyItems();
         };
 
         window.switchMarketplaceTab = (tab) => {
             document.querySelectorAll('.marketplace-section').forEach(s => s.classList.add('hidden'));
             document.getElementById(`${tab}-section`).classList.remove('hidden');
+            
+            document.querySelectorAll('.sub-tab').forEach(t => {
+                t.classList.remove('text-primary', 'border-b-2', 'border-primary');
+                t.classList.add('text-muted');
+            });
+            event.target.classList.add('text-primary', 'border-b-2', 'border-primary');
             
             if (tab === 'shop') loadProducts();
             if (tab === 'services') loadServices();
@@ -1011,7 +1277,7 @@
                 recentAnn.forEach(doc => {
                     const ann = doc.data();
                     annHtml += `
-                        <div class="p-3 bg-input rounded-lg cursor-pointer" onclick="viewAnnouncement('${doc.id}')">
+                        <div class="p-3 bg-input rounded-lg cursor-pointer hover:bg-opacity-80 transition" onclick="viewAnnouncement('${doc.id}')">
                             <div class="flex items-center gap-2 mb-1">
                                 <span class="text-xs font-bold text-primary">${ann.category}</span>
                                 <span class="text-xs text-muted">${ann.createdAt ? new Date(ann.createdAt.seconds*1000).toLocaleDateString() : ''}</span>
@@ -1080,9 +1346,25 @@
         };
 
         window.saveProfile = async () => {
+            const name = document.getElementById('profile-name-input').value.trim();
+            const email = document.getElementById('profile-email').value.trim();
+            
+            // Validation
+            let isValid = true;
+            if (!name) {
+                document.getElementById('name-error').style.display = 'block';
+                document.getElementById('profile-name-input').classList.add('input-error');
+                isValid = false;
+            } else {
+                document.getElementById('name-error').style.display = 'none';
+                document.getElementById('profile-name-input').classList.remove('input-error');
+            }
+            
+            if (!isValid) return;
+            
+            showLoading('save-profile-btn');
+            
             try {
-                const name = document.getElementById('profile-name-input').value;
-                const email = document.getElementById('profile-email').value;
                 const dept = document.getElementById('profile-dept').value;
                 const level = document.getElementById('profile-level').value;
                 const bio = document.getElementById('profile-bio').value;
@@ -1095,6 +1377,8 @@
                 loadProfileData();
             } catch (e) {
                 showToast('Error saving profile', 'error');
+            } finally {
+                hideLoading('save-profile-btn');
             }
         };
 
@@ -1102,6 +1386,8 @@
         document.getElementById('profile-upload').onchange = async (e) => {
             const file = e.target.files[0];
             if (!file) return;
+            
+            showLoading('profile-upload');
             
             try {
                 const formData = new FormData();
@@ -1123,6 +1409,8 @@
                 }
             } catch (e) {
                 showToast('Upload failed', 'error');
+            } finally {
+                hideLoading('profile-upload');
             }
         };
 
@@ -1139,6 +1427,8 @@
                     showToast('File too large! Max 5MB', 'error');
                     return;
                 }
+                
+                showLoading('verify-btn');
                 
                 try {
                     const formData = new FormData();
@@ -1167,6 +1457,8 @@
                     }
                 } catch (e) {
                     showToast('Upload failed', 'error');
+                } finally {
+                    hideLoading('verify-btn');
                 }
             };
             input.click();
@@ -1174,7 +1466,7 @@
 
         // Delete Profile
         window.confirmDeleteProfile = () => {
-            if (confirm('Are you sure you want to delete your profile? This cannot be undone!')) {
+            if (confirm('⚠️ Are you sure you want to delete your profile? This cannot be undone!')) {
                 deleteProfile();
             }
         };
@@ -1192,35 +1484,66 @@
 
         // ============ MARKETPLACE FUNCTIONS ============
         window.showPostProductModal = () => {
-            // Create modal HTML
             const modal = document.createElement('div');
             modal.className = 'modal-overlay';
             modal.innerHTML = `
                 <div class="modal-content">
                     <h2 class="text-2xl font-bold mb-4">Sell an Item</h2>
-                    <div class="space-y-3">
-                        <input type="text" id="product-title" placeholder="Title" class="input-field">
-                        <textarea id="product-desc" placeholder="Description" rows="3" class="input-field"></textarea>
-                        <input type="number" id="product-price" placeholder="Price (₦)" class="input-field">
-                        <select id="product-category" class="input-field">
-                            <option value="Tech">💻 Tech & Gadgets</option>
-                            <option value="Books">📚 Textbooks</option>
-                            <option value="Fashion">👕 Fashion</option>
-                            <option value="Other">➕ Other</option>
-                        </select>
-                        <select id="product-condition" class="input-field">
-                            <option value="New">New</option>
-                            <option value="Used">Used</option>
-                        </select>
-                        <div class="flex gap-2">
-                            <input type="checkbox" id="product-negotiable" class="w-4"> 
-                            <label>Negotiable</label>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-bold mb-1">Title <span class="text-danger">*</span></label>
+                            <input type="text" id="product-title" class="input-field" placeholder="e.g., MacBook Pro">
+                            <div class="error-message" id="product-title-error">Title is required</div>
                         </div>
-                        <input type="text" id="product-location" placeholder="Location" class="input-field">
-                        <input type="tel" id="product-phone" placeholder="Phone Number" class="input-field">
-                        <input type="file" id="product-image" accept="image/*" class="input-field">
-                        <div class="flex gap-3">
-                            <button onclick="postProduct()" class="btn-primary flex-1">Post Item</button>
+                        <div>
+                            <label class="block text-sm font-bold mb-1">Description <span class="text-danger">*</span></label>
+                            <textarea id="product-desc" class="input-field" rows="3" placeholder="Describe your item..."></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold mb-1">Price (₦) <span class="text-danger">*</span></label>
+                            <div class="price-input">
+                                <input type="text" id="product-price" class="input-field" placeholder="e.g., 45000" oninput="formatPriceInput(this)">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-sm font-bold mb-1">Category</label>
+                                <select id="product-category" class="input-field">
+                                    <option value="Tech">💻 Tech & Gadgets</option>
+                                    <option value="Books">📚 Textbooks</option>
+                                    <option value="Fashion">👕 Fashion</option>
+                                    <option value="Other">➕ Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold mb-1">Condition</label>
+                                <select id="product-condition" class="input-field">
+                                    <option value="New">New</option>
+                                    <option value="Used">Used</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" id="product-negotiable" class="w-4 h-4"> 
+                            <label class="text-sm">Price is negotiable</label>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold mb-1">Location</label>
+                            <input type="text" id="product-location" class="input-field" placeholder="e.g., Hostel B">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold mb-1">Phone Number <span class="text-danger">*</span></label>
+                            <input type="tel" id="product-phone" class="input-field" placeholder="08012345678">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold mb-1">Photos</label>
+                            <input type="file" id="product-image" accept="image/*" class="input-field">
+                            <p class="text-xs text-muted mt-1">Max 5MB</p>
+                        </div>
+                        <div class="flex gap-3 mt-4">
+                            <button onclick="postProduct(this)" class="btn-primary flex-1" id="post-product-btn">
+                                <i class="fas fa-cloud-upload-alt"></i> Post Item
+                            </button>
                             <button onclick="this.closest('.modal-overlay').remove()" class="btn-outline">Cancel</button>
                         </div>
                     </div>
@@ -1229,21 +1552,43 @@
             document.body.appendChild(modal);
         };
 
-        window.postProduct = async () => {
-            const title = document.getElementById('product-title')?.value;
-            const desc = document.getElementById('product-desc')?.value;
-            const price = document.getElementById('product-price')?.value;
+        window.formatPriceInput = (input) => {
+            let value = input.value.replace(/,/g, '');
+            if (!isNaN(value) && value !== '') {
+                input.value = new Intl.NumberFormat('en-NG').format(value);
+            }
+        };
+
+        window.postProduct = async (btn) => {
+            const title = document.getElementById('product-title')?.value.trim();
+            const desc = document.getElementById('product-desc')?.value.trim();
+            const priceInput = document.getElementById('product-price')?.value.replace(/,/g, '');
+            const price = parseInt(priceInput);
             const category = document.getElementById('product-category')?.value;
             const condition = document.getElementById('product-condition')?.value;
             const negotiable = document.getElementById('product-negotiable')?.checked;
-            const location = document.getElementById('product-location')?.value;
-            const phone = document.getElementById('product-phone')?.value;
+            const location = document.getElementById('product-location')?.value.trim();
+            const phone = document.getElementById('product-phone')?.value.trim();
             const file = document.getElementById('product-image')?.files[0];
             
-            if (!title || !desc || !price || !phone) {
-                showToast('Please fill all required fields', 'error');
+            // Validation
+            if (!title) {
+                document.getElementById('product-title-error').style.display = 'block';
                 return;
             }
+            
+            if (!price || isNaN(price)) {
+                showToast('Please enter a valid price', 'error');
+                return;
+            }
+            
+            if (!phone) {
+                showToast('Phone number is required', 'error');
+                return;
+            }
+            
+            btn.classList.add('btn-loading');
+            btn.disabled = true;
             
             try {
                 let imageUrl = "https://placehold.co/600x400?text=Product";
@@ -1264,7 +1609,7 @@
                 await addDoc(collection(db, "Products"), {
                     Title: title,
                     Description: desc,
-                    Price: parseInt(price),
+                    Price: price,
                     Category: category,
                     Condition: condition,
                     Negotiable: negotiable,
@@ -1273,7 +1618,9 @@
                     ImageURL: imageUrl,
                     SellerId: currentUserId,
                     CreatedAt: serverTimestamp(),
-                    IsSold: false
+                    IsSold: false,
+                    Rating: 0,
+                    ReviewCount: 0
                 });
                 
                 document.querySelector('.modal-overlay')?.remove();
@@ -1281,12 +1628,17 @@
                 loadProducts();
             } catch (e) {
                 showToast('Error posting product', 'error');
+            } finally {
+                btn.classList.remove('btn-loading');
+                btn.disabled = false;
             }
         };
 
         async function loadProducts() {
             const container = document.getElementById('product-grid');
             if (!container) return;
+            
+            container.innerHTML = '<div class="skeleton h-40 w-full"></div>'.repeat(4);
             
             try {
                 const snapshot = await getDocs(query(collection(db, "Products"), orderBy("CreatedAt", "desc")));
@@ -1299,13 +1651,18 @@
                 let html = '';
                 snapshot.forEach(doc => {
                     const p = doc.data();
+                    const avgRating = p.ReviewCount > 0 ? (p.Rating / p.ReviewCount).toFixed(1) : "0";
                     html += `
                         <div class="product-card" onclick="viewProduct('${doc.id}')">
                             <img src="${p.ImageURL}" class="w-full h-40 object-cover">
                             <div class="p-3">
                                 <h3 class="font-bold truncate">${p.Title}</h3>
                                 <p class="text-primary font-bold">₦${formatPrice(p.Price)}</p>
-                                <p class="text-xs text-muted">${p.Location || 'Campus'}</p>
+                                <div class="flex items-center gap-1 mt-1">
+                                    <i class="fas fa-star text-yellow-500 text-xs"></i>
+                                    <span class="text-xs">${avgRating} (${p.ReviewCount || 0})</span>
+                                </div>
+                                <p class="text-xs text-muted mt-1">${p.Location || 'Campus'}</p>
                             </div>
                         </div>
                     `;
@@ -1313,6 +1670,281 @@
                 container.innerHTML = html;
             } catch (e) {
                 console.error("Error loading products:", e);
+                container.innerHTML = '<p class="text-danger text-center py-8">Error loading products</p>';
+            }
+        }
+
+        // View Product Details
+        window.viewProduct = async (productId) => {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            
+            const snap = await getDoc(doc(db, "Products", productId));
+            const p = snap.data();
+            const userSnap = await getDoc(doc(db, "Users", p.SellerId));
+            const seller = userSnap.exists() ? userSnap.data() : {};
+            const avgRating = p.ReviewCount > 0 ? (p.Rating / p.ReviewCount).toFixed(1) : "0";
+            const isMyProduct = p.SellerId === currentUserId;
+            
+            // Load reviews
+            const reviewsSnap = await getDocs(query(
+                collection(db, "Products", productId, "Reviews"),
+                orderBy("timestamp", "desc")
+            ));
+            
+            let reviewsHtml = '';
+            reviewsSnap.forEach(doc => {
+                const r = doc.data();
+                reviewsHtml += `
+                    <div class="bg-input p-3 rounded-lg">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-bold text-sm">${r.userName || 'Anonymous'}</span>
+                            <span class="text-xs text-muted">${r.timestamp ? new Date(r.timestamp.seconds*1000).toLocaleDateString() : ''}</span>
+                        </div>
+                        <div class="flex text-yellow-500 text-xs mb-1">
+                            ${'<i class="fas fa-star"></i>'.repeat(r.stars)}${'<i class="far fa-star"></i>'.repeat(5 - r.stars)}
+                        </div>
+                        <p class="text-sm">${r.text}</p>
+                    </div>
+                `;
+            });
+            
+            modal.innerHTML = `
+                <div class="modal-content max-w-2xl">
+                    <img src="${p.ImageURL}" class="w-full h-64 object-cover rounded-lg mb-4">
+                    
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h2 class="text-2xl font-bold">${p.Title}</h2>
+                            <p class="text-muted">${p.Category} • ${p.Condition}</p>
+                        </div>
+                        <p class="text-primary text-2xl font-bold">₦${formatPrice(p.Price)}</p>
+                    </div>
+                    
+                    <div class="bg-input p-4 rounded-lg mb-4">
+                        <p class="text-sm">${p.Description}</p>
+                        ${p.Negotiable ? '<p class="text-xs text-green-600 mt-2">💰 Price is negotiable</p>' : ''}
+                    </div>
+                    
+                    <div class="flex items-center gap-4 p-4 bg-input rounded-lg mb-4">
+                        <img src="${seller.photo || 'https://ui-avatars.com/api/?name=' + (seller.name || 'User')}" class="w-12 h-12 rounded-full">
+                        <div class="flex-1">
+                            <p class="font-bold">${seller.name || 'Campus Student'}</p>
+                            <div class="flex items-center gap-1">
+                                <i class="fas fa-star text-yellow-500 text-xs"></i>
+                                <span class="text-xs">${avgRating} (${p.ReviewCount || 0} reviews)</span>
+                            </div>
+                        </div>
+                        ${!isMyProduct ? `
+                            <button onclick="reportUser('${p.SellerId}')" class="text-red-500 text-sm">
+                                <i class="fas fa-flag"></i> Report
+                            </button>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="mb-6">
+                        <h3 class="font-bold mb-3">Location & Contact</h3>
+                        <p class="text-sm mb-2"><i class="fas fa-map-marker-alt text-muted mr-2"></i>${p.Location || 'Campus'}</p>
+                        <p class="text-sm"><i class="fas fa-phone text-muted mr-2"></i>${p.Phone}</p>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <h3 class="font-bold mb-3">Reviews (${p.ReviewCount || 0})</h3>
+                        <div class="space-y-3 max-h-60 overflow-y-auto">
+                            ${reviewsHtml || '<p class="text-muted text-sm">No reviews yet</p>'}
+                        </div>
+                    </div>
+                    
+                    ${!isMyProduct ? `
+                        <div class="border-t border-base pt-4">
+                            <h3 class="font-bold mb-3">Leave a Review</h3>
+                            <div class="star-rating mb-3" id="review-stars">
+                                ${[1,2,3,4,5].map(i => `<i class="far fa-star text-2xl" data-rating="${i}"></i>`).join('')}
+                            </div>
+                            <textarea id="review-text" class="input-field mb-3" rows="2" placeholder="Share your experience..."></textarea>
+                            <button onclick="submitReview('${productId}')" class="btn-primary w-full">Submit Review</button>
+                        </div>
+                    ` : `
+                        <div class="flex gap-3">
+                            <button onclick="editProduct('${productId}')" class="btn-outline flex-1">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button onclick="deleteProduct('${productId}')" class="btn-danger flex-1">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    `}
+                    
+                    <button onclick="this.closest('.modal-overlay').remove()" class="btn-outline w-full mt-4">Close</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            // Setup star rating
+            const stars = document.querySelectorAll('#review-stars i');
+            let currentRating = 0;
+            stars.forEach(star => {
+                star.addEventListener('mouseover', () => {
+                    const rating = parseInt(star.dataset.rating);
+                    stars.forEach((s, i) => {
+                        if (i < rating) {
+                            s.classList.remove('far');
+                            s.classList.add('fas');
+                        } else {
+                            s.classList.remove('fas');
+                            s.classList.add('far');
+                        }
+                    });
+                });
+                star.addEventListener('click', () => {
+                    currentRating = parseInt(star.dataset.rating);
+                });
+            });
+            window.getCurrentRating = () => currentRating || 5;
+        };
+
+        window.submitReview = async (productId) => {
+            const text = document.getElementById('review-text')?.value.trim();
+            const stars = window.getCurrentRating ? window.getCurrentRating() : 5;
+            
+            if (!text || text.length < 10) {
+                showToast('Please write at least 10 characters', 'error');
+                return;
+            }
+            
+            try {
+                const userSnap = await getDoc(doc(db, "Users", currentUserId));
+                const userName = userSnap.exists() ? userSnap.data().name : 'User';
+                
+                await addDoc(collection(db, "Products", productId, "Reviews"), {
+                    userId: currentUserId,
+                    userName: userName,
+                    stars: stars,
+                    text: text,
+                    timestamp: serverTimestamp()
+                });
+                
+                const pRef = doc(db, "Products", productId);
+                const pSnap = await getDoc(pRef);
+                const pData = pSnap.data();
+                
+                await updateDoc(pRef, {
+                    Rating: (pData.Rating || 0) + stars,
+                    ReviewCount: (pData.ReviewCount || 0) + 1
+                });
+                
+                showToast('Review submitted!');
+                document.querySelector('.modal-overlay')?.remove();
+            } catch (e) {
+                showToast('Error submitting review', 'error');
+            }
+        };
+
+        window.editProduct = async (productId) => {
+            const snap = await getDoc(doc(db, "Products", productId));
+            const p = snap.data();
+            
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h2 class="text-2xl font-bold mb-4">Edit Product</h2>
+                    <div class="space-y-4">
+                        <input type="text" id="edit-title" class="input-field" value="${p.Title}">
+                        <textarea id="edit-desc" class="input-field" rows="3">${p.Description}</textarea>
+                        <input type="number" id="edit-price" class="input-field" value="${p.Price}">
+                        <select id="edit-sold" class="input-field">
+                            <option value="false" ${!p.IsSold ? 'selected' : ''}>Available</option>
+                            <option value="true" ${p.IsSold ? 'selected' : ''}>Sold</option>
+                        </select>
+                        <div class="flex gap-3">
+                            <button onclick="updateProduct('${productId}')" class="btn-primary flex-1">Update</button>
+                            <button onclick="this.closest('.modal-overlay').remove()" class="btn-outline">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        };
+
+        window.updateProduct = async (productId) => {
+            const title = document.getElementById('edit-title').value;
+            const desc = document.getElementById('edit-desc').value;
+            const price = parseInt(document.getElementById('edit-price').value);
+            const isSold = document.getElementById('edit-sold').value === 'true';
+            
+            try {
+                await updateDoc(doc(db, "Products", productId), {
+                    Title: title,
+                    Description: desc,
+                    Price: price,
+                    IsSold: isSold
+                });
+                showToast('Product updated!');
+                document.querySelector('.modal-overlay')?.remove();
+                loadProducts();
+            } catch (e) {
+                showToast('Error updating product', 'error');
+            }
+        };
+
+        window.deleteProduct = async (productId) => {
+            if (confirm('Delete this product?')) {
+                try {
+                    await deleteDoc(doc(db, "Products", productId));
+                    showToast('Product deleted');
+                    document.querySelector('.modal-overlay')?.remove();
+                    loadProducts();
+                } catch (e) {
+                    showToast('Error deleting product', 'error');
+                }
+            }
+        };
+
+        // ============ MY ITEMS (MANAGER) ============
+        async function loadMyItems() {
+            const container = document.getElementById('my-items-grid');
+            if (!container) return;
+            
+            container.innerHTML = '<div class="skeleton h-20 w-full"></div>'.repeat(3);
+            
+            try {
+                const snapshot = await getDocs(query(
+                    collection(db, "Products"),
+                    where("SellerId", "==", currentUserId),
+                    orderBy("CreatedAt", "desc")
+                ));
+                
+                if (snapshot.empty) {
+                    container.innerHTML = '<p class="text-muted text-center py-8">You have no listings yet</p>';
+                    return;
+                }
+                
+                let html = '';
+                snapshot.forEach(doc => {
+                    const p = doc.data();
+                    html += `
+                        <div class="card flex items-center gap-4">
+                            <img src="${p.ImageURL}" class="w-16 h-16 rounded-lg object-cover">
+                            <div class="flex-1">
+                                <h3 class="font-bold">${p.Title}</h3>
+                                <p class="text-primary font-bold">₦${formatPrice(p.Price)}</p>
+                                ${p.IsSold ? '<span class="text-xs bg-danger text-white px-2 py-1 rounded">SOLD</span>' : ''}
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="editProduct('${doc.id}')" class="btn-outline p-2">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="deleteProduct('${doc.id}')" class="btn-danger p-2">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            } catch (e) {
+                console.error("Error loading my items:", e);
             }
         }
 
@@ -1358,9 +1990,12 @@
                 deptsSnap.forEach(doc => {
                     const dept = doc.data();
                     deptList += `
-                        <div class="flex justify-between items-center p-2 bg-input rounded-lg">
-                            <span>${dept.name} (${dept.code})</span>
-                            <button onclick="deleteDepartment('${doc.id}')" class="text-red-500">
+                        <div class="flex justify-between items-center p-3 bg-input rounded-lg">
+                            <div>
+                                <span class="font-bold">${dept.name}</span>
+                                <span class="text-xs text-muted ml-2">${dept.code}</span>
+                            </div>
+                            <button onclick="deleteDepartment('${doc.id}')" class="text-danger hover:text-red-700">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
@@ -1375,12 +2010,13 @@
                     const exec = doc.data();
                     const badge = exec.level === 'faculty' ? '👑' : exec.level === 'department' ? '⭐' : '📘';
                     execList += `
-                        <div class="flex justify-between items-center p-2 bg-input rounded-lg">
+                        <div class="flex justify-between items-center p-3 bg-input rounded-lg">
                             <div>
                                 <span class="font-bold">${exec.name}</span>
                                 <span class="text-xs ml-2">${badge} ${exec.position}</span>
+                                <p class="text-xs text-muted">${exec.email}</p>
                             </div>
-                            <button onclick="deleteExecutive('${doc.id}')" class="text-red-500">
+                            <button onclick="deleteExecutive('${doc.id}')" class="text-danger hover:text-red-700">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
@@ -1399,11 +2035,14 @@
                                 <p class="text-xs text-muted">ID: ${doc.id}</p>
                             </div>
                             <div class="flex gap-2">
-                                <button onclick="window.open('https://wa.me/${user.phone || ''}')" class="text-green-600">
+                                <button onclick="window.open('https://wa.me/${user.phone || ''}')" class="text-green-600 hover:text-green-700">
                                     <i class="fab fa-whatsapp"></i>
                                 </button>
-                                <button onclick="banUser('${doc.id}')" class="text-red-500">
+                                <button onclick="banUser('${doc.id}')" class="text-danger hover:text-red-700">
                                     <i class="fas fa-ban"></i>
+                                </button>
+                                <button onclick="unbanUser('${doc.id}')" class="text-success hover:text-green-700">
+                                    <i class="fas fa-check-circle"></i>
                                 </button>
                             </div>
                         </div>
@@ -1411,19 +2050,64 @@
                 });
                 document.getElementById('member-directory').innerHTML = memberHtml;
                 
+                // Load verification requests
+                const verifSnap = await getDocs(collection(db, "VerificationRequests"));
+                let verifHtml = '';
+                verifSnap.forEach(doc => {
+                    const req = doc.data();
+                    verifHtml += `
+                        <div class="flex justify-between items-center p-3 bg-input rounded-lg">
+                            <div>
+                                <p class="font-bold">${req.userName || 'Unknown'}</p>
+                                <p class="text-xs text-muted">ID: ${doc.id}</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <a href="${req.idImage}" target="_blank" class="btn-outline text-xs py-1 px-2">View ID</a>
+                                <button onclick="verifyUser('${doc.id}')" class="text-success">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                <button onclick="rejectVerification('${doc.id}')" class="text-danger">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                document.getElementById('verification-list').innerHTML = verifHtml || '<p class="text-muted">No verification requests</p>';
+                
+                // Load reports
+                const reportsSnap = await getDocs(collection(db, "Reports"));
+                let reportsHtml = '';
+                reportsSnap.forEach(doc => {
+                    const r = doc.data();
+                    reportsHtml += `
+                        <div class="p-3 bg-input rounded-lg">
+                            <p class="font-bold">Report against: ${r.reportedUser}</p>
+                            <p class="text-sm mt-1">${r.reason}</p>
+                            <div class="flex gap-2 mt-2">
+                                <button onclick="banUser('${r.reportedUser}')" class="btn-danger text-xs py-1 px-3">Ban</button>
+                                <button onclick="window.open('https://wa.me/2348053103234')" class="btn-primary text-xs py-1 px-3">Contact Admin</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                document.getElementById('reports-list').innerHTML = reportsHtml || '<p class="text-muted">No reports</p>';
+                
             } catch (e) {
                 console.error("Error loading admin data:", e);
             }
         }
 
         window.addDepartment = async () => {
-            const name = document.getElementById('dept-name').value;
-            const code = document.getElementById('dept-code').value;
+            const name = document.getElementById('dept-name').value.trim();
+            const code = document.getElementById('dept-code').value.trim();
             
             if (!name || !code) {
                 showToast('Please fill all fields', 'error');
                 return;
             }
+            
+            showLoading('add-dept-btn');
             
             try {
                 await addDoc(collection(db, "departments"), {
@@ -1437,6 +2121,8 @@
                 loadAdminData();
             } catch (e) {
                 showToast('Error adding department', 'error');
+            } finally {
+                hideLoading('add-dept-btn');
             }
         };
 
@@ -1454,16 +2140,18 @@
 
         window.addExecutive = async () => {
             const deptId = document.getElementById('exec-dept').value;
-            const name = document.getElementById('exec-name').value;
-            const position = document.getElementById('exec-position').value;
-            const email = document.getElementById('exec-email').value;
+            const name = document.getElementById('exec-name').value.trim();
+            const position = document.getElementById('exec-position').value.trim();
+            const email = document.getElementById('exec-email').value.trim();
             const level = document.getElementById('exec-level').value;
-            const course = document.getElementById('exec-course').value;
+            const course = document.getElementById('exec-course').value.trim();
             
             if (!deptId || !name || !position || !email) {
                 showToast('Please fill required fields', 'error');
                 return;
             }
+            
+            showLoading('add-exec-btn');
             
             try {
                 await addDoc(collection(db, "executives"), {
@@ -1481,6 +2169,8 @@
                 loadAdminData();
             } catch (e) {
                 showToast('Error adding executive', 'error');
+            } finally {
+                hideLoading('add-exec-btn');
             }
         };
 
@@ -1511,8 +2201,46 @@
             }
         };
 
+        window.unbanUser = async (userId) => {
+            if (confirm('Unban this user?')) {
+                try {
+                    await deleteDoc(doc(db, "BannedUsers", userId));
+                    showToast('User unbanned');
+                    loadAdminData();
+                } catch (e) {
+                    showToast('Error unbanning user', 'error');
+                }
+            }
+        };
+
+        window.verifyUser = async (userId) => {
+            try {
+                await setDoc(doc(db, "VerifiedUsers", userId), {
+                    verifiedAt: serverTimestamp(),
+                    verifiedBy: currentUserId
+                });
+                await deleteDoc(doc(db, "VerificationRequests", userId));
+                showToast('User verified');
+                loadAdminData();
+            } catch (e) {
+                showToast('Error verifying user', 'error');
+            }
+        };
+
+        window.rejectVerification = async (requestId) => {
+            if (confirm('Reject this verification request?')) {
+                try {
+                    await deleteDoc(doc(db, "VerificationRequests", requestId));
+                    showToast('Request rejected');
+                    loadAdminData();
+                } catch (e) {
+                    showToast('Error rejecting request', 'error');
+                }
+            }
+        };
+
         window.sendGlobalBroadcast = async () => {
-            const msg = document.getElementById('global-broadcast-input').value;
+            const msg = document.getElementById('global-broadcast-input').value.trim();
             if (!msg) {
                 showToast('Enter a message', 'error');
                 return;
@@ -1564,7 +2292,7 @@
         };
 
         window.sendAdminMessage = async () => {
-            const message = document.getElementById('admin-message')?.value;
+            const message = document.getElementById('admin-message')?.value.trim();
             if (!message) {
                 showToast('Please enter a message', 'error');
                 return;
@@ -1581,6 +2309,18 @@
                 showToast('Message sent to admin!');
             } catch (e) {
                 showToast('Error sending message', 'error');
+            }
+        };
+
+        window.reportUser = (userId) => {
+            const reason = prompt('Why are you reporting this user?');
+            if (reason) {
+                addDoc(collection(db, "Reports"), {
+                    reportedUser: userId,
+                    reporterUser: currentUserId,
+                    reason: reason,
+                    timestamp: serverTimestamp()
+                }).then(() => showToast('Report sent')).catch(() => showToast('Error sending report', 'error'));
             }
         };
 
@@ -1615,6 +2355,17 @@
             }
         });
 
+        // ============ HELPER FUNCTIONS ============
+        async function getDeptName(deptId) {
+            if (!deptId) return 'SLIT';
+            try {
+                const deptSnap = await getDoc(doc(db, "departments", deptId));
+                return deptSnap.exists() ? deptSnap.data().name : 'SLIT';
+            } catch {
+                return 'SLIT';
+            }
+        }
+
         // ============ INITIAL LOAD ============
         window.onload = () => {
             switchTab('home');
@@ -1625,7 +2376,7 @@
             }
         };
 
-        // Placeholder functions to prevent errors
+        // Placeholder functions
         window.loadAcademicsData = () => {};
         window.loadCommunityData = () => {};
         window.loadMarketplaceData = () => {};
@@ -1636,15 +2387,26 @@
         window.showTimetable = () => {};
         window.hideTimetable = () => {};
         window.showMaterials = () => {};
-        window.showCreateStudyGroupModal = () => {};
-        window.showUploadMaterialModal = () => {};
-        window.postAnnouncement = () => {};
+        window.showCreateStudyGroupModal = () => {
+            showToast('Study Group feature coming soon!');
+        };
+        window.showUploadMaterialModal = () => {
+            showToast('Upload Material feature coming soon!');
+        };
+        window.postAnnouncement = () => {
+            showToast('Announcement feature coming soon!');
+        };
         window.filterAnnouncements = () => {};
         window.viewAnnouncement = () => {};
-        window.showPostServiceModal = () => {};
-        window.showPostRequestModal = () => {};
-        window.showDeleteAllDataModal = () => {};
-        window.getDeptName = async (id) => 'Department';
+        window.showPostServiceModal = () => {
+            showToast('Service posting coming soon!');
+        };
+        window.showPostRequestModal = () => {
+            showToast('Request posting coming soon!');
+        };
+        window.showDeleteAllDataModal = () => {
+            showToast('This feature requires super admin access');
+        };
 
     </script>
 </body>
