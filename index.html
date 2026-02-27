@@ -29,12 +29,10 @@
             --border: #e2e8f0; 
             --input-bg: #f1f5f9;
             --nav-text: #64748b;
-            
-            --level-100: #3b82f6;
-            --level-200: #10b981;
-            --level-300: #f59e0b;
-            --level-400: #ef4444;
-            --level-500: #8b5cf6;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+            --info: #3b82f6;
         }
         
         html.dark { 
@@ -81,6 +79,7 @@
             opacity: 0.7;
         }
 
+        /* Brand Logo */
         .brand-logo {
             font-weight: 800;
             letter-spacing: -1.5px;
@@ -92,39 +91,57 @@
             cursor: pointer;
         }
 
-        /* Welcome Tour */
-        .tour-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.8);
-            z-index: 100000;
-            display: flex;
+        .tagline {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981, #34d399);
+            color: white !important;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            animation: fadeIn 0.3s ease;
+            gap: 8px;
         }
-        
-        .tour-card {
-            background: var(--card);
-            border-radius: 2rem;
-            padding: 2rem;
-            max-width: 90%;
-            width: 400px;
-            text-align: center;
-            animation: slideUp 0.3s ease;
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(16,185,129,0.4);
+        }
+        .btn-primary:active {
+            transform: translateY(0);
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-outline:hover {
+            background: var(--input-bg);
         }
 
-        @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
         }
 
         /* Badges */
@@ -133,11 +150,11 @@
             align-items: center;
             background: linear-gradient(135deg, #fbbf24, #f59e0b);
             color: white;
-            padding: 2px 8px;
+            padding: 4px 12px;
             border-radius: 20px;
-            font-size: 10px;
+            font-size: 12px;
             font-weight: 700;
-            gap: 4px;
+            gap: 6px;
         }
 
         .gold-check {
@@ -147,9 +164,9 @@
             background: linear-gradient(135deg, #fbbf24, #f59e0b);
             color: white;
             border-radius: 50%;
-            width: 18px;
-            height: 18px;
-            font-size: 10px;
+            width: 20px;
+            height: 20px;
+            font-size: 11px;
             margin-left: 4px;
         }
 
@@ -158,15 +175,28 @@
             align-items: center;
             background: linear-gradient(135deg, #3b82f6, #2563eb);
             color: white;
-            padding: 2px 8px;
+            padding: 4px 12px;
             border-radius: 20px;
-            font-size: 10px;
+            font-size: 12px;
             font-weight: 700;
-            gap: 4px;
+            gap: 6px;
+        }
+
+        .blue-check {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 11px;
+            margin-left: 4px;
         }
 
         /* Notification Badge */
-        .app-badge {
+        .notification-badge {
             position: absolute;
             top: -5px;
             right: -5px;
@@ -182,12 +212,6 @@
             justify-content: center;
             padding: 0 4px;
             border: 2px solid var(--card);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
         }
 
         /* Toast Notification */
@@ -206,6 +230,11 @@
             cursor: pointer;
             border: 1px solid var(--border);
             backdrop-filter: blur(10px);
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
         /* Level Badges */
@@ -253,6 +282,7 @@
             color: white;
         }
 
+        /* Grid */
         .grid-2, .grid-3, .grid-4 {
             display: grid;
             gap: 1rem;
@@ -269,86 +299,81 @@
             display: none !important;
         }
 
-        .btn-premium {
-            background: linear-gradient(135deg, #10b981, #34d399);
-            color: white !important;
-            padding: 12px 24px;
-            border-radius: 12px;
-            font-weight: bold;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s;
+        /* Cards */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-        .btn-premium:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px -5px rgba(16,185,129,0.4);
+
+        /* Product Card */
+        .product-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            overflow: hidden;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+        }
+
+        /* Install Button */
+        #install-btn {
+            position: fixed;
+            bottom: 80px;
+            right: 16px;
+            background: linear-gradient(135deg, #10b981, #34d399);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 24px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(16,185,129,0.3);
+            cursor: pointer;
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 100000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .modal-content {
+            background: var(--card);
+            border-radius: 24px;
+            padding: 24px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
         }
     </style>
 </head>
 <body>
 
-    <!-- Welcome Tour (Shown to new users) -->
-    <div id="welcome-tour" class="tour-overlay hidden">
-        <div class="tour-card">
-            <div class="text-6xl mb-4">👋</div>
-            <h2 class="text-2xl font-bold mb-2">Welcome to SLIT-HUB!</h2>
-            <p class="text-muted mb-6">Your all-in-one platform for academics, community, and campus trade.</p>
-            
-            <div id="tour-step-1" class="tour-step">
-                <div class="text-4xl mb-3">📚</div>
-                <h3 class="font-bold mb-2">Learn</h3>
-                <p class="text-sm text-muted mb-4">Access timetables, past questions, and study groups for your department.</p>
-            </div>
-            
-            <div id="tour-step-2" class="tour-step hidden">
-                <div class="text-4xl mb-3">👥</div>
-                <h3 class="font-bold mb-2">Connect</h3>
-                <p class="text-sm text-muted mb-4">Follow executives, join your department community, and get important announcements.</p>
-            </div>
-            
-            <div id="tour-step-3" class="tour-step hidden">
-                <div class="text-4xl mb-3">🛍️</div>
-                <h3 class="font-bold mb-2">Trade</h3>
-                <p class="text-sm text-muted mb-4">Buy, sell, request services, and find study partners - all on campus.</p>
-            </div>
-            
-            <div id="tour-step-4" class="tour-step hidden">
-                <div class="text-4xl mb-3">⚙️</div>
-                <h3 class="font-bold mb-2">Get Started</h3>
-                <p class="text-sm text-muted mb-4">Complete your profile to unlock all features!</p>
-            </div>
-            
-            <div class="flex justify-between mt-4">
-                <button id="tour-prev" class="btn-outline hidden" onclick="prevTourStep()">Previous</button>
-                <button id="tour-next" class="btn-premium" onclick="nextTourStep()">Next</button>
-                <button id="tour-skip" class="text-muted text-sm" onclick="hideWelcomeTour()">Skip</button>
-            </div>
-            
-            <div class="flex justify-center gap-1 mt-4">
-                <span id="dot-1" class="w-2 h-2 bg-primary rounded-full"></span>
-                <span id="dot-2" class="w-2 h-2 bg-muted rounded-full"></span>
-                <span id="dot-3" class="w-2 h-2 bg-muted rounded-full"></span>
-                <span id="dot-4" class="w-2 h-2 bg-muted rounded-full"></span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Update Banner -->
-    <div id="update-banner" class="hidden fixed bottom-24 left-4 right-4 bg-primary text-white p-4 rounded-xl shadow-lg z-[10000] animate-slideUp">
-        <div class="flex items-center gap-3">
-            <i class="fas fa-rocket"></i>
-            <span class="font-bold flex-1">New features available!</span>
-            <button onclick="updateApp()" class="bg-white text-primary px-4 py-2 rounded-lg text-sm font-bold">Update</button>
-            <button onclick="hideUpdateBanner()" class="text-white/80"><i class="fas fa-times"></i></button>
-        </div>
-    </div>
-
     <!-- Header -->
     <header class="sticky top-0 z-50 bg-card border-b border-base p-4 backdrop-blur-md">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div>
-                <h1 class="brand-logo text-2xl" onclick="showHome()">SLIT-HUB</h1>
-                <p class="text-xs text-muted hidden md:block">Learn. Connect. Trade. — Everything SLIT, One Place</p>
+                <h1 class="brand-logo text-2xl" onclick="switchTab('home')">SLIT-HUB</h1>
+                <p class="tagline hidden md:block">Learn. Connect. Trade. — Everything SLIT, One Place</p>
             </div>
             <div class="flex items-center gap-3">
                 <button onclick="toggleDarkMode()" class="w-10 h-10 rounded-xl bg-input flex items-center justify-center">
@@ -372,7 +397,7 @@
 
     <main class="max-w-7xl mx-auto p-4">
         
-        <!-- HOME TAB (Dashboard) -->
+        <!-- HOME TAB -->
         <section id="home-tab" class="tab-content">
             <div class="mb-6">
                 <h2 class="text-2xl font-bold">Welcome back, <span id="home-user-name">Student</span>!</h2>
@@ -427,10 +452,10 @@
             </div>
         </section>
 
-        <!-- ACADEMICS TAB (Learn) -->
+        <!-- ACADEMICS TAB -->
         <section id="academics-tab" class="tab-content hidden">
             <div class="mb-6">
-                <h2 class="text-2xl font-bold">📚 Academics</h2>
+                <h2 class="text-2xl font-bold">📚 Learn</h2>
                 <p class="text-muted">School of Logistics and Innovation Technology</p>
             </div>
 
@@ -472,9 +497,7 @@
                     <h3 id="timetable-title" class="font-bold">Lecture Timetable</h3>
                     <button onclick="hideTimetable()" class="text-muted"><i class="fas fa-times"></i></button>
                 </div>
-                <div id="timetable-content" class="space-y-3">
-                    <!-- Timetable loads here -->
-                </div>
+                <div id="timetable-content" class="space-y-3"></div>
             </div>
 
             <!-- Study Groups -->
@@ -483,11 +506,9 @@
                     <h3 class="font-bold flex items-center gap-2">
                         <i class="fas fa-users text-primary"></i> Study Groups
                     </h3>
-                    <button class="text-sm text-primary" onclick="createStudyGroup()">+ Create Group</button>
+                    <button class="btn-primary text-sm py-2" onclick="showCreateStudyGroupModal()">+ Create Group</button>
                 </div>
-                <div id="study-groups" class="space-y-3">
-                    <p class="text-muted text-sm">Select your department to see study groups</p>
-                </div>
+                <div id="study-groups" class="space-y-3"></div>
             </div>
 
             <!-- Course Materials -->
@@ -496,15 +517,13 @@
                     <h3 class="font-bold flex items-center gap-2">
                         <i class="fas fa-folder-open text-primary"></i> Course Materials
                     </h3>
-                    <button class="text-sm text-primary" onclick="uploadMaterial()">+ Upload</button>
+                    <button class="btn-primary text-sm py-2" onclick="showUploadMaterialModal()">+ Upload</button>
                 </div>
-                <div id="materials-list" class="space-y-3">
-                    <p class="text-muted text-sm">Select your department to see materials</p>
-                </div>
+                <div id="materials-list" class="space-y-3"></div>
             </div>
         </section>
 
-        <!-- COMMUNITY TAB (Connect) -->
+        <!-- COMMUNITY TAB -->
         <section id="community-tab" class="tab-content hidden">
             <div class="mb-6">
                 <h2 class="text-2xl font-bold">👥 Connect</h2>
@@ -520,7 +539,7 @@
                 <button class="px-4 py-2 bg-card border border-base rounded-full text-sm" onclick="filterAnnouncements('media')">📸 Media</button>
             </div>
 
-            <!-- Executive Post Card (for executives) -->
+            <!-- Executive Post Card -->
             <div id="executive-post-card" class="bg-card p-6 rounded-2xl border border-base mb-6 hidden">
                 <div class="flex items-center gap-2 mb-4">
                     <i class="fas fa-pen-fancy text-primary text-xl"></i>
@@ -540,33 +559,27 @@
                         <input type="text" id="announce-link" placeholder="Link (optional)" class="input-field">
                         <input type="date" id="announce-date" class="input-field">
                     </div>
-                    <button onclick="postAnnouncement()" class="btn-premium w-full">Publish Announcement</button>
+                    <button onclick="postAnnouncement()" class="btn-primary w-full">Publish Announcement</button>
                 </div>
             </div>
 
             <!-- Announcements Feed -->
-            <div id="announcements-feed" class="space-y-4 mb-8">
-                <!-- Announcements load here -->
-            </div>
+            <div id="announcements-feed" class="space-y-4 mb-8"></div>
 
             <!-- Executives Directory -->
             <div class="bg-card p-6 rounded-2xl border border-base mb-8">
                 <h3 class="font-bold mb-4">Department Executives</h3>
-                <div id="executives-directory" class="space-y-3">
-                    <p class="text-muted text-sm">Select your department to see executives</p>
-                </div>
+                <div id="executives-directory" class="space-y-3"></div>
             </div>
 
             <!-- Media Gallery -->
             <div class="bg-card p-6 rounded-2xl border border-base">
                 <h3 class="font-bold mb-4">📸 Media Gallery</h3>
-                <div id="media-gallery" class="grid grid-cols-3 gap-2">
-                    <!-- Media items load here -->
-                </div>
+                <div id="media-gallery" class="grid grid-cols-3 gap-2"></div>
             </div>
         </section>
 
-        <!-- MARKETPLACE TAB (Trade) -->
+        <!-- MARKETPLACE TAB -->
         <section id="marketplace-tab" class="tab-content hidden">
             <div class="mb-6">
                 <h2 class="text-2xl font-bold">🛍️ Trade</h2>
@@ -584,18 +597,16 @@
             <div id="shop-section" class="marketplace-section">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-bold">Recent Items</h3>
-                    <button class="btn-premium text-sm py-2" onclick="showPostScreen()">+ Sell Item</button>
+                    <button class="btn-primary text-sm py-2" onclick="showPostProductModal()">+ Sell Item</button>
                 </div>
-                <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    <!-- Products load here -->
-                </div>
+                <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
             </div>
 
             <!-- Services Section -->
             <div id="services-section" class="marketplace-section hidden">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-bold">Campus Services</h3>
-                    <button class="btn-premium text-sm py-2" onclick="showServiceForm()">+ List Service</button>
+                    <button class="btn-primary text-sm py-2" onclick="showPostServiceModal()">+ List Service</button>
                 </div>
 
                 <!-- Service Categories -->
@@ -618,16 +629,14 @@
                     </div>
                 </div>
 
-                <div id="services-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Services load here -->
-                </div>
+                <div id="services-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
 
             <!-- Requests Section -->
             <div id="requests-section" class="marketplace-section hidden">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-bold">Community Requests</h3>
-                    <button class="btn-premium text-sm py-2" onclick="showRequestForm()">+ New Request</button>
+                    <button class="btn-primary text-sm py-2" onclick="showPostRequestModal()">+ New Request</button>
                 </div>
 
                 <!-- Request Categories -->
@@ -639,9 +648,7 @@
                     <button class="px-3 py-1 bg-card border border-base rounded-full text-xs" onclick="filterRequests('urgent')">🚑 Urgent</button>
                 </div>
 
-                <div id="requests-grid" class="space-y-4">
-                    <!-- Requests load here -->
-                </div>
+                <div id="requests-grid" class="space-y-4"></div>
             </div>
         </section>
 
@@ -660,10 +667,8 @@
                     <h2 id="profile-name" class="text-2xl font-bold mt-4">Your Name</h2>
                     <p class="text-sm text-muted">ID: <span id="profile-id"></span></p>
                     
-                    <!-- Executive/Course Rep Badges -->
-                    <div id="profile-badges" class="flex justify-center gap-2 mt-2">
-                        <!-- Badges appear here -->
-                    </div>
+                    <!-- Badges -->
+                    <div id="profile-badges" class="flex justify-center gap-2 mt-2"></div>
                 </div>
 
                 <div class="space-y-4">
@@ -680,9 +685,7 @@
                     
                     <div>
                         <label class="block text-sm font-bold mb-1">Department</label>
-                        <select id="profile-dept" class="input-field">
-                            <option value="">Select Department</option>
-                        </select>
+                        <select id="profile-dept" class="input-field"></select>
                     </div>
                     
                     <div>
@@ -701,8 +704,43 @@
                         <label class="block text-sm font-bold mb-1">Bio</label>
                         <textarea id="profile-bio" rows="3" class="input-field" placeholder="Tell us about yourself..."></textarea>
                     </div>
-                    
-                    <button onclick="saveProfile()" class="btn-premium w-full">Save Profile</button>
+
+                    <!-- Contact Developer/Admin -->
+                    <div class="border-t border-base pt-4 mt-4">
+                        <h3 class="font-bold mb-3">Need Help?</h3>
+                        <div class="flex gap-3">
+                            <a href="https://wa.me/2348053103234" target="_blank" class="flex-1 bg-green-600 text-white py-3 rounded-xl text-center font-bold flex items-center justify-center gap-2">
+                                <i class="fab fa-whatsapp"></i> Contact Developer
+                            </a>
+                            <button onclick="showContactAdminModal()" class="flex-1 bg-primary text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2">
+                                <i class="fas fa-envelope"></i> Message Admin
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Upload ID for Verification -->
+                    <div class="border-t border-base pt-4 mt-4">
+                        <h3 class="font-bold mb-3 text-green-600">✅ Get Verified</h3>
+                        <button onclick="requestVerification()" class="w-full bg-green-600 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2">
+                            <i class="fas fa-id-card"></i> Upload Student ID for Verification
+                        </button>
+                    </div>
+
+                    <!-- Upload Course Materials (for Course Reps) -->
+                    <div id="course-rep-upload" class="border-t border-base pt-4 mt-4 hidden">
+                        <h3 class="font-bold mb-3 text-blue-600">📘 Course Rep Tools</h3>
+                        <button onclick="showUploadMaterialModal()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2">
+                            <i class="fas fa-upload"></i> Upload Course Materials
+                        </button>
+                    </div>
+
+                    <!-- Delete Profile -->
+                    <div class="border-t border-base pt-4 mt-4">
+                        <button onclick="confirmDeleteProfile()" class="w-full bg-red-500 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2">
+                            <i class="fas fa-trash"></i> Delete Profile
+                        </button>
+                        <p class="text-xs text-muted text-center mt-2">This action cannot be undone</p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -716,7 +754,7 @@
                 </button>
             </div>
 
-            <!-- Admin Panel (Requires Password) -->
+            <!-- Admin Panel -->
             <div id="admin-panel" class="hidden space-y-6">
                 
                 <!-- Quick Stats -->
@@ -739,21 +777,29 @@
                     </div>
                 </div>
 
+                <!-- Global Broadcast -->
+                <div class="bg-gradient-to-r from-primary to-emerald-600 p-6 rounded-2xl text-white">
+                    <h3 class="font-bold mb-4 flex items-center gap-2">
+                        <i class="fas fa-bullhorn"></i> Global Broadcast
+                    </h3>
+                    <textarea id="global-broadcast-input" class="w-full p-3 rounded-xl text-gray-900 mb-3" rows="2" placeholder="Type broadcast message..."></textarea>
+                    <button onclick="sendGlobalBroadcast()" class="bg-white text-primary px-6 py-2 rounded-xl font-bold">Send to All Users</button>
+                    <button onclick="deleteGlobalBroadcast()" class="ml-2 bg-red-500 text-white px-6 py-2 rounded-xl font-bold">Delete Broadcast</button>
+                </div>
+
                 <!-- Department Management -->
                 <div class="bg-card p-6 rounded-2xl border border-base">
                     <h3 class="font-bold mb-4 text-primary">🏛️ Department Management</h3>
                     
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-                        <input type="text" id="dept-name" placeholder="Department Name (e.g., PMT)" class="input-field">
+                        <input type="text" id="dept-name" placeholder="Department Name" class="input-field">
                         <input type="text" id="dept-code" placeholder="Code (e.g., PMT)" class="input-field">
                         <button onclick="addDepartment()" class="bg-primary text-white px-4 py-2 rounded-xl font-bold">
                             <i class="fas fa-plus mr-2"></i>Add Department
                         </button>
                     </div>
                     
-                    <div id="depts-list" class="space-y-2 max-h-60 overflow-y-auto">
-                        <!-- Departments list -->
-                    </div>
+                    <div id="depts-list" class="space-y-2 max-h-60 overflow-y-auto"></div>
                 </div>
 
                 <!-- Executive Management -->
@@ -765,7 +811,7 @@
                             <option value="">Select Department</option>
                         </select>
                         <input type="text" id="exec-name" placeholder="Full Name" class="input-field">
-                        <input type="text" id="exec-position" placeholder="Position (e.g., Director of Social)" class="input-field">
+                        <input type="text" id="exec-position" placeholder="Position" class="input-field">
                         <input type="email" id="exec-email" placeholder="Email" class="input-field">
                         <select id="exec-level" class="input-field">
                             <option value="faculty">👑 Faculty Executive</option>
@@ -773,70 +819,38 @@
                             <option value="course">📘 Course Representative</option>
                         </select>
                         <input type="text" id="exec-course" placeholder="Course Code (if rep)" class="input-field">
-                        <button onclick="addExecutive()" class="bg-yellow-500 text-white px-4 py-2 rounded-xl font-bold">
+                        <button onclick="addExecutive()" class="bg-yellow-500 text-white px-4 py-2 rounded-xl font-bold col-span-3">
                             <i class="fas fa-plus mr-2"></i>Add Executive
                         </button>
                     </div>
                     
-                    <div id="execs-list" class="space-y-2 max-h-60 overflow-y-auto">
-                        <!-- Executives list -->
-                    </div>
+                    <div id="execs-list" class="space-y-2 max-h-60 overflow-y-auto"></div>
                 </div>
 
-                <!-- Course Rep Management -->
+                <!-- Member Directory -->
                 <div class="bg-card p-6 rounded-2xl border border-base">
-                    <h3 class="font-bold mb-4 text-blue-600">📘 Course Representatives</h3>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-                        <select id="rep-dept" class="input-field">
-                            <option value="">Select Department</option>
-                        </select>
-                        <input type="text" id="rep-course" placeholder="Course Code (e.g., PMT 301)" class="input-field">
-                        <input type="text" id="rep-name" placeholder="Student Name" class="input-field">
-                        <input type="email" id="rep-email" placeholder="Email" class="input-field">
-                        <button onclick="addCourseRep()" class="bg-blue-500 text-white px-4 py-2 rounded-xl font-bold">
-                            <i class="fas fa-plus mr-2"></i>Add Course Rep
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Timetable Upload -->
-                <div class="bg-card p-6 rounded-2xl border border-base">
-                    <h3 class="font-bold mb-4 text-primary">📅 Timetable Upload</h3>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <select id="tt-dept" class="input-field">
-                            <option value="">Select Department</option>
-                        </select>
-                        <select id="tt-type" class="input-field">
-                            <option value="lecture">📖 Lecture</option>
-                            <option value="test">📝 Test</option>
-                            <option value="exam">📋 Exam</option>
-                        </select>
-                        <input type="text" id="tt-course" placeholder="Course Code" class="input-field">
-                        <input type="text" id="tt-day" placeholder="Day (e.g., Monday)" class="input-field">
-                        <input type="text" id="tt-time" placeholder="Time (e.g., 10:00-12:00)" class="input-field">
-                        <input type="text" id="tt-venue" placeholder="Venue" class="input-field">
-                        <button onclick="uploadTimetable()" class="bg-primary text-white px-4 py-2 rounded-xl font-bold col-span-2">
-                            <i class="fas fa-upload mr-2"></i>Upload to Timetable
-                        </button>
-                    </div>
+                    <h3 class="font-bold mb-4 text-blue-600">👥 Member Directory</h3>
+                    <div id="member-directory" class="space-y-3 max-h-96 overflow-y-auto"></div>
                 </div>
 
                 <!-- Verification Requests -->
                 <div class="bg-card p-6 rounded-2xl border border-base">
                     <h3 class="font-bold mb-4 text-green-600">✅ Verification Requests</h3>
-                    <div id="verification-list" class="space-y-3">
-                        <!-- Verification requests -->
-                    </div>
+                    <div id="verification-list" class="space-y-3"></div>
                 </div>
 
                 <!-- Reports -->
                 <div class="bg-card p-6 rounded-2xl border border-base">
                     <h3 class="font-bold mb-4 text-red-600">⚠️ Reports</h3>
-                    <div id="reports-list" class="space-y-3">
-                        <!-- Reports -->
-                    </div>
+                    <div id="reports-list" class="space-y-3"></div>
+                </div>
+
+                <!-- Danger Zone -->
+                <div class="bg-card p-6 rounded-2xl border border-red-300">
+                    <h3 class="font-bold mb-4 text-red-600">⚠️ Danger Zone</h3>
+                    <button onclick="showDeleteAllDataModal()" class="bg-red-600 text-white px-6 py-3 rounded-xl font-bold">
+                        Delete All Data (Requires Super Admin)
+                    </button>
                 </div>
             </div>
         </section>
@@ -844,36 +858,39 @@
 
     <!-- Bottom Navigation -->
     <nav class="fixed bottom-0 left-0 right-0 bg-card border-t border-base py-2 px-4 flex justify-around z-50">
-        <button class="nav-item active" onclick="switchTab('home')">
+        <button class="nav-item flex flex-col items-center" onclick="switchTab('home')">
             <i class="fas fa-home text-xl"></i>
             <span class="text-xs">Home</span>
         </button>
-        <button class="nav-item" onclick="switchTab('academics')">
+        <button class="nav-item flex flex-col items-center" onclick="switchTab('academics')">
             <i class="fas fa-book-open text-xl"></i>
             <span class="text-xs">Learn</span>
         </button>
-        <button class="nav-item" onclick="switchTab('community')">
+        <button class="nav-item flex flex-col items-center" onclick="switchTab('community')">
             <i class="fas fa-users text-xl"></i>
             <span class="text-xs">Connect</span>
         </button>
-        <button class="nav-item" onclick="switchTab('marketplace')">
+        <button class="nav-item flex flex-col items-center" onclick="switchTab('marketplace')">
             <i class="fas fa-store text-xl"></i>
             <span class="text-xs">Trade</span>
         </button>
-        <button class="nav-item" onclick="switchTab('profile')">
+        <button class="nav-item flex flex-col items-center" onclick="switchTab('profile')">
             <i class="fas fa-user-circle text-xl"></i>
             <span class="text-xs">Profile</span>
         </button>
     </nav>
 
     <!-- Install Button -->
-    <button id="install-btn" class="fixed bottom-20 right-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-3 rounded-full shadow-lg hidden items-center gap-2 z-[9999]">
-        <i class="fas fa-download"></i>
-        <span class="text-sm font-bold">Install App</span>
+    <button id="install-btn">
+        <i class="fas fa-download"></i> Install Slit-Hub
     </button>
 
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- Modals will be inserted here dynamically -->
+
     <script type="module">
-        // Firebase imports
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, updateDoc, query, orderBy, onSnapshot, where, serverTimestamp, doc, getDoc, deleteDoc, setDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -900,102 +917,29 @@
         let isAdminMode = false;
         let unreadCount = 0;
         let lastSeenAnnouncement = parseInt(localStorage.getItem('lastSeenAnnouncement')) || 0;
-        let currentUser = {
-            name: '',
-            email: '',
-            dept: '',
-            level: '',
-            isExecutive: false,
-            isCourseRep: false
-        };
 
         // ============ UTILITY FUNCTIONS ============
         function formatPrice(price) {
             return new Intl.NumberFormat('en-NG').format(price);
         }
 
-        // Update app icon badge
-        async function updateAppBadge(count) {
-            if (navigator.setAppBadge) {
-                try {
-                    await navigator.setAppBadge(count);
-                } catch (err) {
-                    console.log('Badge error:', err);
-                }
-            }
-        }
-
-        // Show toast notification
-        function showToast(title, message, type = 'info') {
+        function showToast(message, type = 'success', duration = 3000) {
             const toast = document.createElement('div');
             toast.className = 'toast';
+            toast.style.borderLeftColor = type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#f59e0b';
             toast.innerHTML = `
                 <div class="flex items-start gap-3">
-                    <div class="text-2xl">${type === 'announcement' ? '📢' : '🔔'}</div>
+                    <div class="text-xl">${type === 'success' ? '✅' : type === 'error' ? '❌' : '⚠️'}</div>
                     <div class="flex-1">
-                        <p class="font-bold">${title}</p>
-                        <p class="text-sm text-muted">${message}</p>
+                        <p class="font-bold">${message}</p>
                     </div>
                     <button onclick="this.parentElement.parentElement.remove()" class="text-muted">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
             `;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 5000);
-        }
-
-        // ============ WELCOME TOUR ============
-        let tourStep = 1;
-
-        window.showWelcomeTour = () => {
-            document.getElementById('welcome-tour').classList.remove('hidden');
-            tourStep = 1;
-            updateTourStep();
-        };
-
-        window.hideWelcomeTour = () => {
-            document.getElementById('welcome-tour').classList.add('hidden');
-            localStorage.setItem('welcome_shown', 'true');
-        };
-
-        window.nextTourStep = () => {
-            if (tourStep < 4) {
-                tourStep++;
-                updateTourStep();
-            } else {
-                hideWelcomeTour();
-            }
-        };
-
-        window.prevTourStep = () => {
-            if (tourStep > 1) {
-                tourStep--;
-                updateTourStep();
-            }
-        };
-
-        function updateTourStep() {
-            // Hide all steps
-            for (let i = 1; i <= 4; i++) {
-                document.getElementById(`tour-step-${i}`).classList.add('hidden');
-                document.getElementById(`dot-${i}`).classList.remove('bg-primary');
-                document.getElementById(`dot-${i}`).classList.add('bg-muted');
-            }
-            
-            // Show current step
-            document.getElementById(`tour-step-${tourStep}`).classList.remove('hidden');
-            document.getElementById(`dot-${tourStep}`).classList.remove('bg-muted');
-            document.getElementById(`dot-${tourStep}`).classList.add('bg-primary');
-            
-            // Update buttons
-            document.getElementById('tour-prev').classList.toggle('hidden', tourStep === 1);
-            document.getElementById('tour-next').innerText = tourStep === 4 ? 'Get Started' : 'Next';
-        }
-
-        // Check if first time user
-        if (!localStorage.getItem('welcome_shown')) {
-            setTimeout(() => showWelcomeTour(), 1000);
+            document.getElementById('toast-container').appendChild(toast);
+            setTimeout(() => toast.remove(), duration);
         }
 
         // ============ TAB SWITCHING ============
@@ -1004,9 +948,8 @@
             document.getElementById(`${tabId}-tab`).classList.remove('hidden');
             
             document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active-nav'));
             
-            // Find and activate correct tab
             const tabs = document.querySelectorAll('.tab');
             const navItems = document.querySelectorAll('.nav-item');
             
@@ -1016,13 +959,14 @@
             }[tabId];
             
             if (tabs[tabIndex]) tabs[tabIndex].classList.add('active');
-            if (navItems[tabIndex]) navItems[tabIndex].classList.add('active');
+            if (navItems[tabIndex]) navItems[tabIndex].classList.add('active-nav');
             
-            // Load tab-specific data
+            // Load tab data
             if (tabId === 'home') loadHomeData();
-            if (tabId === 'academics') loadDepartmentsDropdown();
-            if (tabId === 'community') loadAnnouncements();
-            if (tabId === 'profile') loadProfile();
+            if (tabId === 'academics') loadAcademicsData();
+            if (tabId === 'community') loadCommunityData();
+            if (tabId === 'marketplace') loadMarketplaceData();
+            if (tabId === 'profile') loadProfileData();
         };
 
         window.switchMarketplaceTab = (tab) => {
@@ -1036,214 +980,341 @@
 
         // ============ HOME TAB ============
         async function loadHomeData() {
-            // Load user info
-            const userSnap = await getDoc(doc(db, "Users", currentUserId));
-            if (userSnap.exists()) {
-                const user = userSnap.data();
-                document.getElementById('home-user-name').innerText = user.name || 'Student';
-                document.getElementById('home-user-details').innerHTML = 
-                    `${user.dept || 'SLIT'} • ${user.level || 'Set level in profile'}`;
-            }
-            
-            // Load stats
-            const deptsSnap = await getDocs(collection(db, "departments"));
-            const execsSnap = await getDocs(collection(db, "executives"));
-            const productsSnap = await getDocs(collection(db, "Products"));
-            const announcementsSnap = await getDocs(collection(db, "announcements"));
-            
-            document.getElementById('stat-courses').innerText = deptsSnap.size;
-            document.getElementById('stat-announcements').innerText = announcementsSnap.size;
-            document.getElementById('stat-items').innerText = productsSnap.size;
-            document.getElementById('stat-execs').innerText = execsSnap.size;
-            
-            // Load today's schedule (if user has department)
-            if (currentUser.dept) {
-                const ttSnap = await getDocs(query(
-                    collection(db, "timetables"),
-                    where("departmentId", "==", currentUser.dept),
-                    where("type", "==", "lecture")
+            try {
+                const userSnap = await getDoc(doc(db, "Users", currentUserId));
+                if (userSnap.exists()) {
+                    const user = userSnap.data();
+                    document.getElementById('home-user-name').innerText = user.name || 'Student';
+                    document.getElementById('home-user-details').innerHTML = 
+                        `${user.dept ? await getDeptName(user.dept) : 'SLIT'} • ${user.level || 'Set level in profile'}`;
+                }
+                
+                // Load stats
+                const deptsSnap = await getDocs(collection(db, "departments"));
+                const execsSnap = await getDocs(collection(db, "executives"));
+                const productsSnap = await getDocs(collection(db, "Products"));
+                const announcementsSnap = await getDocs(collection(db, "announcements"));
+                
+                document.getElementById('stat-courses').innerText = deptsSnap.size;
+                document.getElementById('stat-announcements').innerText = announcementsSnap.size;
+                document.getElementById('stat-items').innerText = productsSnap.size;
+                document.getElementById('stat-execs').innerText = execsSnap.size;
+                
+                // Load recent announcements
+                const recentAnn = await getDocs(query(
+                    collection(db, "announcements"),
+                    orderBy("createdAt", "desc"),
+                    limit(3)
                 ));
                 
-                let scheduleHtml = '';
-                ttSnap.forEach(doc => {
-                    const tt = doc.data();
-                    scheduleHtml += `
-                        <div class="flex justify-between items-center p-3 bg-input rounded-lg">
-                            <div>
-                                <span class="font-bold">${tt.course}</span>
-                                <span class="text-xs text-muted ml-2">${tt.time}</span>
+                let annHtml = '';
+                recentAnn.forEach(doc => {
+                    const ann = doc.data();
+                    annHtml += `
+                        <div class="p-3 bg-input rounded-lg cursor-pointer" onclick="viewAnnouncement('${doc.id}')">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-xs font-bold text-primary">${ann.category}</span>
+                                <span class="text-xs text-muted">${ann.createdAt ? new Date(ann.createdAt.seconds*1000).toLocaleDateString() : ''}</span>
                             </div>
-                            <span class="text-sm">${tt.venue}</span>
+                            <p class="font-bold text-sm">${ann.title}</p>
                         </div>
                     `;
                 });
-                document.getElementById('today-schedule').innerHTML = scheduleHtml || '<p class="text-muted">No lectures today</p>';
+                document.getElementById('home-announcements').innerHTML = annHtml || '<p class="text-muted">No recent announcements</p>';
+            } catch (e) {
+                console.error("Error loading home data:", e);
             }
-            
-            // Load recent announcements
-            const recentAnn = await getDocs(query(
-                collection(db, "announcements"),
-                orderBy("createdAt", "desc"),
-                limit(3)
-            ));
-            
-            let annHtml = '';
-            recentAnn.forEach(doc => {
-                const ann = doc.data();
-                annHtml += `
-                    <div class="p-3 bg-input rounded-lg">
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="text-xs font-bold ${ann.category === 'sports' ? 'text-green-600' : 'text-primary'}">${ann.category}</span>
-                            <span class="text-xs text-muted">${ann.createdAt ? new Date(ann.createdAt.seconds*1000).toLocaleDateString() : ''}</span>
-                        </div>
-                        <p class="font-bold text-sm">${ann.title}</p>
-                    </div>
-                `;
-            });
-            document.getElementById('home-announcements').innerHTML = annHtml || '<p class="text-muted">No recent announcements</p>';
         }
 
         // ============ PROFILE ============
-        window.loadProfile = async () => {
-            document.getElementById('profile-id').innerText = currentUserId;
-            
-            // Load departments dropdown
-            const deptsSnap = await getDocs(collection(db, "departments"));
-            let deptOptions = '<option value="">Select Department</option>';
-            deptsSnap.forEach(doc => {
-                const dept = doc.data();
-                deptOptions += `<option value="${doc.id}">${dept.name}</option>`;
-            });
-            document.getElementById('profile-dept').innerHTML = deptOptions;
-            
-            // Load user data
-            const userSnap = await getDoc(doc(db, "Users", currentUserId));
-            if (userSnap.exists()) {
-                const user = userSnap.data();
-                document.getElementById('profile-name').innerText = user.name || 'Your Name';
-                document.getElementById('profile-name-input').value = user.name || '';
-                document.getElementById('profile-email').value = user.email || '';
-                document.getElementById('profile-dept').value = user.dept || '';
-                document.getElementById('profile-level').value = user.level || '';
-                document.getElementById('profile-bio').value = user.bio || '';
-                if (user.photo) document.getElementById('profile-pic').src = user.photo;
+        window.loadProfileData = async () => {
+            try {
+                document.getElementById('profile-id').innerText = currentUserId;
                 
-                // Check if user is executive
-                const execSnap = await getDocs(query(
-                    collection(db, "executives"),
-                    where("userId", "==", currentUserId)
-                ));
+                // Load departments
+                const deptsSnap = await getDocs(collection(db, "departments"));
+                let deptOptions = '<option value="">Select Department</option>';
+                deptsSnap.forEach(doc => {
+                    const dept = doc.data();
+                    deptOptions += `<option value="${doc.id}">${dept.name}</option>`;
+                });
+                document.getElementById('profile-dept').innerHTML = deptOptions;
                 
-                let badges = '';
-                if (!execSnap.empty) {
-                    const exec = execSnap.docs[0].data();
-                    if (exec.level === 'faculty') {
-                        badges += '<span class="gold-badge"><i class="fas fa-crown"></i> Faculty Executive</span>';
-                    } else if (exec.level === 'department') {
-                        badges += '<span class="gold-badge"><i class="fas fa-star"></i> Dept Executive</span>';
-                    } else if (exec.level === 'course') {
-                        badges += '<span class="blue-badge"><i class="fas fa-book-open"></i> Course Rep</span>';
+                // Load user data
+                const userSnap = await getDoc(doc(db, "Users", currentUserId));
+                if (userSnap.exists()) {
+                    const user = userSnap.data();
+                    document.getElementById('profile-name').innerText = user.name || 'Your Name';
+                    document.getElementById('profile-name-input').value = user.name || '';
+                    document.getElementById('profile-email').value = user.email || '';
+                    document.getElementById('profile-dept').value = user.dept || '';
+                    document.getElementById('profile-level').value = user.level || '';
+                    document.getElementById('profile-bio').value = user.bio || '';
+                    if (user.photo) document.getElementById('profile-pic').src = user.photo;
+                    
+                    // Check if user is executive
+                    const execSnap = await getDocs(query(
+                        collection(db, "executives"),
+                        where("userId", "==", currentUserId)
+                    ));
+                    
+                    let badges = '';
+                    if (!execSnap.empty) {
+                        const exec = execSnap.docs[0].data();
+                        if (exec.level === 'faculty') {
+                            badges += '<span class="gold-badge"><i class="fas fa-crown"></i> Faculty Executive</span>';
+                            document.getElementById('executive-post-card')?.classList.remove('hidden');
+                        } else if (exec.level === 'department') {
+                            badges += '<span class="gold-badge"><i class="fas fa-star"></i> Dept Executive</span>';
+                            document.getElementById('executive-post-card')?.classList.remove('hidden');
+                        } else if (exec.level === 'course') {
+                            badges += '<span class="blue-badge"><i class="fas fa-book-open"></i> Course Rep</span>';
+                            document.getElementById('course-rep-upload')?.classList.remove('hidden');
+                        }
                     }
+                    document.getElementById('profile-badges').innerHTML = badges;
                 }
-                document.getElementById('profile-badges').innerHTML = badges;
+            } catch (e) {
+                console.error("Error loading profile:", e);
             }
         };
 
         window.saveProfile = async () => {
-            const name = document.getElementById('profile-name-input').value;
-            const email = document.getElementById('profile-email').value;
-            const dept = document.getElementById('profile-dept').value;
-            const level = document.getElementById('profile-level').value;
-            const bio = document.getElementById('profile-bio').value;
-            
-            await setDoc(doc(db, "Users", currentUserId), {
-                name, email, dept, level, bio
-            }, { merge: true });
-            
-            alert('Profile saved!');
-            loadProfile();
+            try {
+                const name = document.getElementById('profile-name-input').value;
+                const email = document.getElementById('profile-email').value;
+                const dept = document.getElementById('profile-dept').value;
+                const level = document.getElementById('profile-level').value;
+                const bio = document.getElementById('profile-bio').value;
+                
+                await setDoc(doc(db, "Users", currentUserId), {
+                    name, email, dept, level, bio
+                }, { merge: true });
+                
+                showToast('Profile saved successfully!');
+                loadProfileData();
+            } catch (e) {
+                showToast('Error saving profile', 'error');
+            }
         };
 
+        // Profile photo upload
         document.getElementById('profile-upload').onchange = async (e) => {
             const file = e.target.files[0];
             if (!file) return;
             
-            // Upload to Cloudinary
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('upload_preset', 'SLIT-HUB');
-            
-            const res = await fetch('https://api.cloudinary.com/v1_1/ddm87a9p2/image/upload', {
-                method: 'POST',
-                body: formData
-            });
-            
-            if (res.ok) {
-                const data = await res.json();
-                await setDoc(doc(db, "Users", currentUserId), {
-                    photo: data.secure_url
-                }, { merge: true });
-                document.getElementById('profile-pic').src = data.secure_url;
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('upload_preset', 'SLIT-HUB');
+                
+                const res = await fetch('https://api.cloudinary.com/v1_1/ddm87a9p2/image/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    await setDoc(doc(db, "Users", currentUserId), {
+                        photo: data.secure_url
+                    }, { merge: true });
+                    document.getElementById('profile-pic').src = data.secure_url;
+                    showToast('Profile photo updated!');
+                }
+            } catch (e) {
+                showToast('Upload failed', 'error');
             }
         };
 
-        // ============ ANNOUNCEMENTS ============
-        window.loadAnnouncements = () => {
-            const container = document.getElementById('announcements-feed');
-            
-            onSnapshot(query(collection(db, "announcements"), orderBy("createdAt", "desc")), (snapshot) => {
-                if (snapshot.empty) {
-                    container.innerHTML = '<p class="text-muted text-center py-8">No announcements yet</p>';
+        // ID Verification Request
+        window.requestVerification = async () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                if (file.size > 5 * 1024 * 1024) {
+                    showToast('File too large! Max 5MB', 'error');
                     return;
                 }
                 
-                // Count unread for badge
-                let newCount = 0;
-                const oneDayAgo = Date.now() - 86400000;
-                
-                snapshot.docChanges().forEach(change => {
-                    if (change.type === 'added') {
-                        const ann = change.doc.data();
-                        const annTime = ann.createdAt ? ann.createdAt.seconds * 1000 : 0;
-                        if (annTime > lastSeenAnnouncement && annTime > oneDayAgo) {
-                            newCount++;
-                            
-                            // Show toast for new announcements
-                            if (!document.getElementById('community-tab').classList.contains('hidden')) {
-                                showToast(ann.title, ann.content.substring(0, 50) + '...', 'announcement');
-                            }
-                        }
+                try {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    formData.append('upload_preset', 'SLIT-HUB');
+                    
+                    const res = await fetch('https://api.cloudinary.com/v1_1/ddm87a9p2/image/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (res.ok) {
+                        const data = await res.json();
+                        const userSnap = await getDoc(doc(db, "Users", currentUserId));
+                        const userName = userSnap.exists() ? userSnap.data().name : 'Unknown';
+                        
+                        await setDoc(doc(db, "VerificationRequests", currentUserId), {
+                            userId: currentUserId,
+                            userName: userName,
+                            idImage: data.secure_url,
+                            timestamp: serverTimestamp(),
+                            status: 'pending'
+                        });
+                        
+                        showToast('ID uploaded! Admin will verify soon.');
                     }
+                } catch (e) {
+                    showToast('Upload failed', 'error');
+                }
+            };
+            input.click();
+        };
+
+        // Delete Profile
+        window.confirmDeleteProfile = () => {
+            if (confirm('Are you sure you want to delete your profile? This cannot be undone!')) {
+                deleteProfile();
+            }
+        };
+
+        async function deleteProfile() {
+            try {
+                await deleteDoc(doc(db, "Users", currentUserId));
+                localStorage.removeItem('slit_user_id');
+                showToast('Profile deleted. Refresh page to start fresh.');
+                setTimeout(() => window.location.reload(), 2000);
+            } catch (e) {
+                showToast('Error deleting profile', 'error');
+            }
+        }
+
+        // ============ MARKETPLACE FUNCTIONS ============
+        window.showPostProductModal = () => {
+            // Create modal HTML
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h2 class="text-2xl font-bold mb-4">Sell an Item</h2>
+                    <div class="space-y-3">
+                        <input type="text" id="product-title" placeholder="Title" class="input-field">
+                        <textarea id="product-desc" placeholder="Description" rows="3" class="input-field"></textarea>
+                        <input type="number" id="product-price" placeholder="Price (₦)" class="input-field">
+                        <select id="product-category" class="input-field">
+                            <option value="Tech">💻 Tech & Gadgets</option>
+                            <option value="Books">📚 Textbooks</option>
+                            <option value="Fashion">👕 Fashion</option>
+                            <option value="Other">➕ Other</option>
+                        </select>
+                        <select id="product-condition" class="input-field">
+                            <option value="New">New</option>
+                            <option value="Used">Used</option>
+                        </select>
+                        <div class="flex gap-2">
+                            <input type="checkbox" id="product-negotiable" class="w-4"> 
+                            <label>Negotiable</label>
+                        </div>
+                        <input type="text" id="product-location" placeholder="Location" class="input-field">
+                        <input type="tel" id="product-phone" placeholder="Phone Number" class="input-field">
+                        <input type="file" id="product-image" accept="image/*" class="input-field">
+                        <div class="flex gap-3">
+                            <button onclick="postProduct()" class="btn-primary flex-1">Post Item</button>
+                            <button onclick="this.closest('.modal-overlay').remove()" class="btn-outline">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        };
+
+        window.postProduct = async () => {
+            const title = document.getElementById('product-title')?.value;
+            const desc = document.getElementById('product-desc')?.value;
+            const price = document.getElementById('product-price')?.value;
+            const category = document.getElementById('product-category')?.value;
+            const condition = document.getElementById('product-condition')?.value;
+            const negotiable = document.getElementById('product-negotiable')?.checked;
+            const location = document.getElementById('product-location')?.value;
+            const phone = document.getElementById('product-phone')?.value;
+            const file = document.getElementById('product-image')?.files[0];
+            
+            if (!title || !desc || !price || !phone) {
+                showToast('Please fill all required fields', 'error');
+                return;
+            }
+            
+            try {
+                let imageUrl = "https://placehold.co/600x400?text=Product";
+                if (file) {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    formData.append('upload_preset', 'SLIT-HUB');
+                    const res = await fetch('https://api.cloudinary.com/v1_1/ddm87a9p2/image/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        imageUrl = data.secure_url;
+                    }
+                }
+                
+                await addDoc(collection(db, "Products"), {
+                    Title: title,
+                    Description: desc,
+                    Price: parseInt(price),
+                    Category: category,
+                    Condition: condition,
+                    Negotiable: negotiable,
+                    Location: location,
+                    Phone: phone,
+                    ImageURL: imageUrl,
+                    SellerId: currentUserId,
+                    CreatedAt: serverTimestamp(),
+                    IsSold: false
                 });
                 
-                if (newCount > 0) {
-                    unreadCount += newCount;
-                    updateAppBadge(unreadCount);
+                document.querySelector('.modal-overlay')?.remove();
+                showToast('Product posted successfully!');
+                loadProducts();
+            } catch (e) {
+                showToast('Error posting product', 'error');
+            }
+        };
+
+        async function loadProducts() {
+            const container = document.getElementById('product-grid');
+            if (!container) return;
+            
+            try {
+                const snapshot = await getDocs(query(collection(db, "Products"), orderBy("CreatedAt", "desc")));
+                
+                if (snapshot.empty) {
+                    container.innerHTML = '<p class="text-muted text-center py-8">No items for sale yet</p>';
+                    return;
                 }
                 
                 let html = '';
                 snapshot.forEach(doc => {
-                    const ann = doc.data();
-                    const date = ann.createdAt ? new Date(ann.createdAt.seconds * 1000).toLocaleDateString() : 'Just now';
-                    
+                    const p = doc.data();
                     html += `
-                        <div class="bg-card p-4 rounded-xl border border-base">
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="px-2 py-1 bg-input rounded-full text-xs font-bold">${ann.category}</span>
-                                <span class="text-xs text-muted">${date}</span>
-                            </div>
-                            <h4 class="font-bold mb-1">${ann.title}</h4>
-                            <p class="text-sm text-muted mb-2">${ann.content}</p>
-                            <div class="flex items-center gap-2 text-xs">
-                                <span class="font-bold">${ann.executiveName || 'Executive'}</span>
-                                <span class="gold-check"><i class="fas fa-check"></i></span>
+                        <div class="product-card" onclick="viewProduct('${doc.id}')">
+                            <img src="${p.ImageURL}" class="w-full h-40 object-cover">
+                            <div class="p-3">
+                                <h3 class="font-bold truncate">${p.Title}</h3>
+                                <p class="text-primary font-bold">₦${formatPrice(p.Price)}</p>
+                                <p class="text-xs text-muted">${p.Location || 'Campus'}</p>
                             </div>
                         </div>
                     `;
                 });
                 container.innerHTML = html;
-            });
-        };
+            } catch (e) {
+                console.error("Error loading products:", e);
+            }
+        }
 
         // ============ ADMIN FUNCTIONS ============
         window.toggleAdminMode = () => {
@@ -1262,61 +1333,87 @@
         };
 
         async function loadAdminData() {
-            // Load stats
-            const deptsSnap = await getDocs(collection(db, "departments"));
-            const execsSnap = await getDocs(collection(db, "executives"));
-            const usersSnap = await getDocs(collection(db, "Users"));
-            const productsSnap = await getDocs(collection(db, "Products"));
-            
-            document.getElementById('admin-stat-depts').innerText = deptsSnap.size;
-            document.getElementById('admin-stat-execs').innerText = execsSnap.size;
-            document.getElementById('admin-stat-users').innerText = usersSnap.size;
-            document.getElementById('admin-stat-products').innerText = productsSnap.size;
-            
-            // Load departments dropdowns
-            let deptOptions = '<option value="">Select Department</option>';
-            deptsSnap.forEach(doc => {
-                const dept = doc.data();
-                deptOptions += `<option value="${doc.id}">${dept.name}</option>`;
-            });
-            document.getElementById('exec-dept').innerHTML = deptOptions;
-            document.getElementById('rep-dept').innerHTML = deptOptions;
-            document.getElementById('tt-dept').innerHTML = deptOptions;
-            
-            // Load departments list
-            let deptList = '';
-            deptsSnap.forEach(doc => {
-                const dept = doc.data();
-                deptList += `
-                    <div class="flex justify-between items-center p-2 bg-input rounded-lg">
-                        <span>${dept.name} (${dept.code})</span>
-                        <button onclick="deleteDepartment('${doc.id}')" class="text-red-500">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                `;
-            });
-            document.getElementById('depts-list').innerHTML = deptList || '<p class="text-muted">No departments</p>';
-            
-            // Load executives list
-            let execList = '';
-            const execsQuery = await getDocs(query(collection(db, "executives"), orderBy("createdAt", "desc")));
-            execsQuery.forEach(doc => {
-                const exec = doc.data();
-                const badge = exec.level === 'faculty' ? '👑' : exec.level === 'department' ? '⭐' : '📘';
-                execList += `
-                    <div class="flex justify-between items-center p-2 bg-input rounded-lg">
-                        <div>
-                            <span class="font-bold">${exec.name}</span>
-                            <span class="text-xs ml-2">${badge} ${exec.position}</span>
+            try {
+                // Load stats
+                const deptsSnap = await getDocs(collection(db, "departments"));
+                const execsSnap = await getDocs(collection(db, "executives"));
+                const usersSnap = await getDocs(collection(db, "Users"));
+                const productsSnap = await getDocs(collection(db, "Products"));
+                
+                document.getElementById('admin-stat-depts').innerText = deptsSnap.size;
+                document.getElementById('admin-stat-execs').innerText = execsSnap.size;
+                document.getElementById('admin-stat-users').innerText = usersSnap.size;
+                document.getElementById('admin-stat-products').innerText = productsSnap.size;
+                
+                // Load departments dropdowns
+                let deptOptions = '<option value="">Select Department</option>';
+                deptsSnap.forEach(doc => {
+                    const dept = doc.data();
+                    deptOptions += `<option value="${doc.id}">${dept.name}</option>`;
+                });
+                document.getElementById('exec-dept').innerHTML = deptOptions;
+                
+                // Load departments list
+                let deptList = '';
+                deptsSnap.forEach(doc => {
+                    const dept = doc.data();
+                    deptList += `
+                        <div class="flex justify-between items-center p-2 bg-input rounded-lg">
+                            <span>${dept.name} (${dept.code})</span>
+                            <button onclick="deleteDepartment('${doc.id}')" class="text-red-500">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </div>
-                        <button onclick="deleteExecutive('${doc.id}')" class="text-red-500">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                `;
-            });
-            document.getElementById('execs-list').innerHTML = execList || '<p class="text-muted">No executives</p>';
+                    `;
+                });
+                document.getElementById('depts-list').innerHTML = deptList || '<p class="text-muted">No departments</p>';
+                
+                // Load executives list
+                let execList = '';
+                const execsQuery = await getDocs(query(collection(db, "executives"), orderBy("createdAt", "desc")));
+                execsQuery.forEach(doc => {
+                    const exec = doc.data();
+                    const badge = exec.level === 'faculty' ? '👑' : exec.level === 'department' ? '⭐' : '📘';
+                    execList += `
+                        <div class="flex justify-between items-center p-2 bg-input rounded-lg">
+                            <div>
+                                <span class="font-bold">${exec.name}</span>
+                                <span class="text-xs ml-2">${badge} ${exec.position}</span>
+                            </div>
+                            <button onclick="deleteExecutive('${doc.id}')" class="text-red-500">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                });
+                document.getElementById('execs-list').innerHTML = execList || '<p class="text-muted">No executives</p>';
+                
+                // Load member directory
+                let memberHtml = '';
+                usersSnap.forEach(doc => {
+                    const user = doc.data();
+                    memberHtml += `
+                        <div class="flex justify-between items-center p-3 bg-input rounded-lg">
+                            <div>
+                                <p class="font-bold">${user.name || 'Anonymous'}</p>
+                                <p class="text-xs text-muted">ID: ${doc.id}</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="window.open('https://wa.me/${user.phone || ''}')" class="text-green-600">
+                                    <i class="fab fa-whatsapp"></i>
+                                </button>
+                                <button onclick="banUser('${doc.id}')" class="text-red-500">
+                                    <i class="fas fa-ban"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                document.getElementById('member-directory').innerHTML = memberHtml;
+                
+            } catch (e) {
+                console.error("Error loading admin data:", e);
+            }
         }
 
         window.addDepartment = async () => {
@@ -1324,24 +1421,34 @@
             const code = document.getElementById('dept-code').value;
             
             if (!name || !code) {
-                alert('Please fill all fields');
+                showToast('Please fill all fields', 'error');
                 return;
             }
             
-            await addDoc(collection(db, "departments"), {
-                name, code,
-                createdAt: serverTimestamp()
-            });
-            
-            document.getElementById('dept-name').value = '';
-            document.getElementById('dept-code').value = '';
-            loadAdminData();
+            try {
+                await addDoc(collection(db, "departments"), {
+                    name, code,
+                    createdAt: serverTimestamp()
+                });
+                
+                document.getElementById('dept-name').value = '';
+                document.getElementById('dept-code').value = '';
+                showToast('Department added!');
+                loadAdminData();
+            } catch (e) {
+                showToast('Error adding department', 'error');
+            }
         };
 
         window.deleteDepartment = async (id) => {
             if (confirm('Delete this department?')) {
-                await deleteDoc(doc(db, "departments", id));
-                loadAdminData();
+                try {
+                    await deleteDoc(doc(db, "departments", id));
+                    showToast('Department deleted');
+                    loadAdminData();
+                } catch (e) {
+                    showToast('Error deleting department', 'error');
+                }
             }
         };
 
@@ -1354,114 +1461,143 @@
             const course = document.getElementById('exec-course').value;
             
             if (!deptId || !name || !position || !email) {
-                alert('Please fill required fields');
+                showToast('Please fill required fields', 'error');
                 return;
             }
             
-            await addDoc(collection(db, "executives"), {
-                departmentId: deptId,
-                name, position, email, level,
-                courseCode: course || null,
-                createdAt: serverTimestamp()
-            });
-            
-            document.getElementById('exec-name').value = '';
-            document.getElementById('exec-position').value = '';
-            document.getElementById('exec-email').value = '';
-            document.getElementById('exec-course').value = '';
-            loadAdminData();
+            try {
+                await addDoc(collection(db, "executives"), {
+                    departmentId: deptId,
+                    name, position, email, level,
+                    courseCode: course || null,
+                    createdAt: serverTimestamp()
+                });
+                
+                document.getElementById('exec-name').value = '';
+                document.getElementById('exec-position').value = '';
+                document.getElementById('exec-email').value = '';
+                document.getElementById('exec-course').value = '';
+                showToast('Executive added!');
+                loadAdminData();
+            } catch (e) {
+                showToast('Error adding executive', 'error');
+            }
         };
 
         window.deleteExecutive = async (id) => {
             if (confirm('Remove this executive?')) {
-                await deleteDoc(doc(db, "executives", id));
-                loadAdminData();
+                try {
+                    await deleteDoc(doc(db, "executives", id));
+                    showToast('Executive removed');
+                    loadAdminData();
+                } catch (e) {
+                    showToast('Error removing executive', 'error');
+                }
             }
         };
 
-        // ============ TIMETABLE ============
-        window.uploadTimetable = async () => {
-            const deptId = document.getElementById('tt-dept').value;
-            const type = document.getElementById('tt-type').value;
-            const course = document.getElementById('tt-course').value;
-            const day = document.getElementById('tt-day').value;
-            const time = document.getElementById('tt-time').value;
-            const venue = document.getElementById('tt-venue').value;
-            
-            if (!deptId || !course || !day || !time || !venue) {
-                alert('Please fill all fields');
-                return;
+        window.banUser = async (userId) => {
+            if (confirm('Ban this user?')) {
+                try {
+                    await setDoc(doc(db, "BannedUsers", userId), {
+                        bannedAt: serverTimestamp(),
+                        bannedBy: currentUserId
+                    });
+                    showToast('User banned');
+                    loadAdminData();
+                } catch (e) {
+                    showToast('Error banning user', 'error');
+                }
             }
-            
-            await addDoc(collection(db, "timetables"), {
-                departmentId: deptId,
-                type, course, day, time, venue,
-                createdAt: serverTimestamp()
-            });
-            
-            document.getElementById('tt-course').value = '';
-            document.getElementById('tt-day').value = '';
-            document.getElementById('tt-time').value = '';
-            document.getElementById('tt-venue').value = '';
-            alert('Timetable entry added!');
         };
 
-        window.showTimetable = async (type) => {
-            const deptId = document.getElementById('academics-dept').value;
-            if (!deptId) {
-                alert('Please select your department first');
+        window.sendGlobalBroadcast = async () => {
+            const msg = document.getElementById('global-broadcast-input').value;
+            if (!msg) {
+                showToast('Enter a message', 'error');
                 return;
             }
             
-            const container = document.getElementById('timetable-container');
-            const title = document.getElementById('timetable-title');
-            const content = document.getElementById('timetable-content');
-            
-            title.innerText = type === 'lecture' ? '📖 Lecture Timetable' :
-                              type === 'test' ? '📝 Test Schedule' : '📋 Exam Timetable';
-            
-            const ttSnap = await getDocs(query(
-                collection(db, "timetables"),
-                where("departmentId", "==", deptId),
-                where("type", "==", type)
-            ));
-            
-            let html = '';
-            ttSnap.forEach(doc => {
-                const tt = doc.data();
-                html += `
-                    <div class="flex justify-between items-center p-3 bg-input rounded-lg">
-                        <div>
-                            <span class="font-bold">${tt.course}</span>
-                            <span class="text-xs text-muted ml-2">${tt.day}</span>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-sm">${tt.time}</div>
-                            <div class="text-xs text-muted">${tt.venue}</div>
-                        </div>
+            try {
+                await setDoc(doc(db, "AppData", "Announcement"), {
+                    message: msg,
+                    active: true,
+                    timestamp: serverTimestamp()
+                });
+                showToast('Broadcast sent!');
+                document.getElementById('global-broadcast-input').value = '';
+            } catch (e) {
+                showToast('Error sending broadcast', 'error');
+            }
+        };
+
+        window.deleteGlobalBroadcast = async () => {
+            if (confirm('Delete global broadcast?')) {
+                try {
+                    await setDoc(doc(db, "AppData", "Announcement"), {
+                        message: '',
+                        active: false
+                    });
+                    showToast('Broadcast deleted');
+                } catch (e) {
+                    showToast('Error deleting broadcast', 'error');
+                }
+            }
+        };
+
+        // ============ CONTACT FUNCTIONS ============
+        window.showContactAdminModal = () => {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h2 class="text-2xl font-bold mb-4">Contact Admin</h2>
+                    <p class="text-muted mb-4">Your message will be sent to the admin team.</p>
+                    <textarea id="admin-message" class="input-field mb-4" rows="4" placeholder="Type your message..."></textarea>
+                    <div class="flex gap-3">
+                        <button onclick="sendAdminMessage()" class="btn-primary flex-1">Send Message</button>
+                        <button onclick="this.closest('.modal-overlay').remove()" class="btn-outline">Cancel</button>
                     </div>
-                `;
-            });
-            
-            content.innerHTML = html || '<p class="text-muted">No schedule found</p>';
-            container.classList.remove('hidden');
+                </div>
+            `;
+            document.body.appendChild(modal);
         };
 
-        window.hideTimetable = () => {
-            document.getElementById('timetable-container').classList.add('hidden');
-        };
-
-        // ============ INITIAL LOAD ============
-        window.onload = () => {
-            switchTab('home');
+        window.sendAdminMessage = async () => {
+            const message = document.getElementById('admin-message')?.value;
+            if (!message) {
+                showToast('Please enter a message', 'error');
+                return;
+            }
             
-            // Check for updates
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/sw.js').catch(console.log);
+            try {
+                await addDoc(collection(db, "AdminMessages"), {
+                    userId: currentUserId,
+                    message: message,
+                    timestamp: serverTimestamp(),
+                    read: false
+                });
+                document.querySelector('.modal-overlay')?.remove();
+                showToast('Message sent to admin!');
+            } catch (e) {
+                showToast('Error sending message', 'error');
             }
         };
 
-        // PWA Install
+        // ============ DARK MODE ============
+        window.toggleDarkMode = () => {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            localStorage.setItem('dark-mode', html.classList.contains('dark'));
+            document.getElementById('dark-icon').className = html.classList.contains('dark') ? 'fas fa-sun' : 'fas fa-moon';
+        };
+        
+        if (localStorage.getItem('dark-mode') === 'true') {
+            document.documentElement.classList.add('dark');
+            document.getElementById('dark-icon').className = 'fas fa-sun';
+        }
+
+        // ============ PWA INSTALL ============
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
@@ -1479,42 +1615,36 @@
             }
         });
 
-        // Dark mode
-        window.toggleDarkMode = () => {
-            const html = document.documentElement;
-            html.classList.toggle('dark');
-            localStorage.setItem('dark-mode', html.classList.contains('dark'));
-            document.getElementById('dark-icon').className = html.classList.contains('dark') ? 'fas fa-sun' : 'fas fa-moon';
-        };
-        
-        if (localStorage.getItem('dark-mode') === 'true') {
-            document.documentElement.classList.add('dark');
-            document.getElementById('dark-icon').className = 'fas fa-sun';
-        }
-
-        // Update banner
-        window.hideUpdateBanner = () => {
-            document.getElementById('update-banner').classList.add('hidden');
-        };
-        
-        window.updateApp = () => {
-            window.location.reload();
+        // ============ INITIAL LOAD ============
+        window.onload = () => {
+            switchTab('home');
+            
+            // Check for updates
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js').catch(console.log);
+            }
         };
 
-        // Placeholder functions
-        window.loadDepartmentsDropdown = () => {};
-        window.loadProducts = () => {};
+        // Placeholder functions to prevent errors
+        window.loadAcademicsData = () => {};
+        window.loadCommunityData = () => {};
+        window.loadMarketplaceData = () => {};
         window.loadServices = () => {};
         window.loadRequests = () => {};
-        window.showPostScreen = () => alert('Post screen coming soon');
-        window.showServiceForm = () => alert('Service form coming soon');
-        window.showRequestForm = () => alert('Request form coming soon');
         window.filterServices = () => {};
         window.filterRequests = () => {};
-        window.createStudyGroup = () => alert('Study group feature coming soon');
-        window.uploadMaterial = () => alert('Upload material feature coming soon');
-        window.postAnnouncement = () => alert('Announcement feature coming soon');
+        window.showTimetable = () => {};
+        window.hideTimetable = () => {};
+        window.showMaterials = () => {};
+        window.showCreateStudyGroupModal = () => {};
+        window.showUploadMaterialModal = () => {};
+        window.postAnnouncement = () => {};
         window.filterAnnouncements = () => {};
+        window.viewAnnouncement = () => {};
+        window.showPostServiceModal = () => {};
+        window.showPostRequestModal = () => {};
+        window.showDeleteAllDataModal = () => {};
+        window.getDeptName = async (id) => 'Department';
 
     </script>
 </body>
