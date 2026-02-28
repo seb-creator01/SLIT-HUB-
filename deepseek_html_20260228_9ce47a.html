@@ -1,0 +1,3327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SLIT-HUB | Learn. Connect. Trade.</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#10b981">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="SLIT-HUB">
+    <link rel="apple-touch-icon" href="https://ui-avatars.com/api/?name=SH&background=10b981&color=fff&size=192">
+    
+    <!-- Load Firebase SDK properly -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* ========== PROFESSIONAL DESIGN SYSTEM ========== */
+        :root { 
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --primary-light: #34d399;
+            --primary-glow: rgba(16, 185, 129, 0.3);
+            --secondary: #6366f1;
+            --accent: #8b5cf6;
+            --bg: #f8fafc; 
+            --card: #ffffff; 
+            --text: #1e293b; 
+            --text-light: #334155;
+            --text-muted: #64748b;
+            --border: #e2e8f0; 
+            --input-bg: #f1f5f9;
+            --nav-text: #64748b;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --warning: #f59e0b;
+            --success: #10b981;
+            --info: #3b82f6;
+            --gold: #fbbf24;
+            --gold-dark: #f59e0b;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        html.dark { 
+            --bg: #0f172a; 
+            --card: #1e293b; 
+            --text: #f8fafc; 
+            --text-light: #cbd5e1;
+            --text-muted: #94a3b8;
+            --border: #334155; 
+            --input-bg: #1e293b;
+            --nav-text: #94a3b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body { 
+            padding-bottom: 90px;
+            background: var(--bg);
+            color: var(--text); 
+            transition: background 0.3s ease, color 0.3s ease; 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* ========== TYPOGRAPHY ========== */
+        h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; }
+        h2 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.01em; }
+        h3 { font-size: 1.25rem; font-weight: 600; }
+        p { font-size: 0.95rem; color: var(--text-light); line-height: 1.5; }
+
+        /* ========== TEXT COLORS ========== */
+        .text-default { color: var(--text) !important; }
+        .text-light { color: var(--text-light) !important; }
+        .text-muted { color: var(--text-muted) !important; }
+        .bg-card { background-color: var(--card) !important; }
+        .border-base { border-color: var(--border) !important; }
+        .bg-input { background-color: var(--input-bg) !important; }
+
+        /* ========== INPUT STYLES ========== */
+        input, textarea, select {
+            background-color: var(--input-bg) !important;
+            color: var(--text) !important;
+            border: 1px solid var(--border) !important;
+            border-radius: 12px !important;
+            padding: 12px 16px !important;
+            font-size: 0.95rem !important;
+            transition: all 0.2s ease !important;
+            width: 100%;
+        }
+        input:focus, textarea:focus, select:focus {
+            outline: none !important;
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 3px var(--primary-glow) !important;
+        }
+        input::placeholder, textarea::placeholder {
+            color: var(--text-muted) !important;
+            opacity: 0.7;
+        }
+        .input-error {
+            border-color: var(--danger) !important;
+        }
+        .error-message {
+            color: var(--danger);
+            font-size: 0.75rem;
+            margin-top: 4px;
+            display: none;
+        }
+
+        /* ========== PHONE INPUT ========== */
+        .phone-input-container {
+            display: flex;
+            align-items: center;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .phone-prefix {
+            background: var(--primary);
+            color: white;
+            padding: 12px 16px;
+            font-weight: 600;
+            border-right: 1px solid var(--border);
+        }
+        .phone-input-container input {
+            border: none !important;
+            border-radius: 0 !important;
+            flex: 1;
+        }
+
+        /* ========== BRANDING ========== */
+        .brand-logo {
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 2px 4px rgba(16, 185, 129, 0.2));
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .brand-logo:active { transform: scale(0.95); }
+
+        .tagline {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+
+        /* ========== BUTTONS ========== */
+        .btn {
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+        }
+        .btn:active::after {
+            width: 200px;
+            height: 200px;
+        }
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            box-shadow: 0 4px 15px var(--primary-glow);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--primary-glow);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+        .btn-outline:hover {
+            background: var(--input-bg);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+
+        .btn-whatsapp {
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: white;
+        }
+        .btn-whatsapp:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(37, 211, 102, 0.3);
+        }
+
+        .btn-call {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+        }
+        .btn-call:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-loading {
+            position: relative;
+            color: transparent !important;
+        }
+        .btn-loading::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid white;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ========== BADGES ========== */
+        .gold-badge {
+            display: inline-flex;
+            align-items: center;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            gap: 6px;
+            box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
+        }
+
+        .gold-check {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 11px;
+            margin-left: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .blue-badge {
+            display: inline-flex;
+            align-items: center;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            gap: 6px;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .blue-check {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 11px;
+            margin-left: 4px;
+        }
+
+        .verified-badge {
+            display: inline-flex;
+            align-items: center;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            gap: 6px;
+        }
+
+        .unverified-badge {
+            display: inline-flex;
+            align-items: center;
+            background: linear-gradient(135deg, #9ca3af, #6b7280);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            gap: 6px;
+        }
+
+        /* ========== CARDS ========== */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .product-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+        }
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* ========== NAVIGATION ========== */
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card);
+            border-top: 1px solid var(--border);
+            padding: 8px 16px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 50;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: var(--nav-text);
+            transition: all 0.2s;
+            font-size: 0.7rem;
+            font-weight: 500;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 12px;
+        }
+        .nav-item i {
+            font-size: 1.3rem;
+            transition: transform 0.2s;
+        }
+        .nav-item:hover {
+            color: var(--primary);
+            background: var(--input-bg);
+        }
+        .nav-item:hover i {
+            transform: translateY(-2px);
+        }
+        .nav-item.active-nav {
+            color: var(--primary);
+            background: var(--primary-glow);
+        }
+        .nav-item.active-nav i {
+            transform: scale(1.1);
+        }
+
+        /* ========== TABS ========== */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+            white-space: nowrap;
+            scrollbar-width: none;
+        }
+        .tabs::-webkit-scrollbar {
+            display: none;
+        }
+        .tab {
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 30px;
+            transition: all 0.2s;
+            background: none;
+            border: none;
+            font-size: 0.9rem;
+        }
+        .tab:hover {
+            background: var(--input-bg);
+            color: var(--text);
+        }
+        .tab.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px var(--primary-glow);
+        }
+
+        /* ========== NOTIFICATIONS ========== */
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #ef4444;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+            border: 2px solid var(--card);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 20px;
+            right: 20px;
+            background: var(--card);
+            border-left: 4px solid var(--primary);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: var(--shadow-xl);
+            z-index: 10000;
+            animation: slideUp 0.3s ease;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* ========== SCAM WARNING ========== */
+        .scam-warning {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            border-left: 4px solid #ef4444;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            color: #7f1d1d;
+        }
+        .dark .scam-warning {
+            background: linear-gradient(135deg, #7f1d1d, #991b1b);
+            color: #fee2e2;
+        }
+
+        /* ========== LEVEL BADGES ========== */
+        .level-badge {
+            display: inline-flex;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+            color: white;
+            margin-left: 4px;
+        }
+        .level-100 { background: #3b82f6; }
+        .level-200 { background: #10b981; }
+        .level-300 { background: #f59e0b; }
+        .level-400 { background: #ef4444; }
+        .level-500 { background: #8b5cf6; }
+
+        /* ========== GRID ========== */
+        .grid-2, .grid-3, .grid-4 {
+            display: grid;
+            gap: 1.5rem;
+        }
+        .grid-2 { grid-template-columns: repeat(2, 1fr); }
+        .grid-3 { grid-template-columns: repeat(3, 1fr); }
+        .grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+        @media (max-width: 768px) {
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* ========== MODAL ========== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+            z-index: 100000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            animation: fadeIn 0.2s ease;
+        }
+        .modal-content {
+            background: var(--card);
+            border-radius: 24px;
+            padding: 24px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: scaleIn 0.3s ease;
+            box-shadow: var(--shadow-xl);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes scaleIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        /* ========== INSTALL BUTTON ========== */
+        #install-btn {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 14px 28px;
+            font-weight: bold;
+            box-shadow: 0 4px 20px var(--primary-glow);
+            cursor: pointer;
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+        #install-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px var(--primary-glow);
+        }
+
+        /* ========== RATING STARS ========== */
+        .star-rating {
+            display: flex;
+            gap: 4px;
+        }
+        .star-rating i {
+            color: #fbbf24;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .star-rating i:hover {
+            transform: scale(1.2);
+        }
+        .star-rating i.inactive {
+            color: var(--border);
+        }
+
+        /* ========== PRICE FORMATTING ========== */
+        .price-input {
+            position: relative;
+        }
+        .price-input input {
+            padding-left: 30px !important;
+        }
+        .price-input::before {
+            content: '₦';
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-weight: 600;
+            z-index: 1;
+        }
+
+        /* ========== LOADING SKELETON ========== */
+        .skeleton {
+            background: linear-gradient(90deg, var(--border) 25%, var(--input-bg) 50%, var(--border) 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 8px;
+        }
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* ========== PRIVACY TOGGLE ========== */
+        .privacy-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        .privacy-toggle input {
+            width: auto;
+            margin-right: 4px;
+        }
+
+        /* ========== DELETE BUTTON ========== */
+        .delete-btn {
+            color: #ef4444;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+        }
+        .delete-btn:hover {
+            color: #dc2626;
+            transform: scale(1.1);
+        }
+
+        .edit-btn {
+            color: #3b82f6;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+        }
+        .edit-btn:hover {
+            color: #2563eb;
+            transform: scale(1.1);
+        }
+
+        .profile-action-btn {
+            position: absolute;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: var(--shadow);
+        }
+        .profile-action-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* ========== USER CARD ========== */
+        .user-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--input-bg);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .user-card:hover {
+            background: var(--border);
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-card border-b border-base p-4 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div>
+                <h1 class="brand-logo text-2xl" id="logo">SLIT-HUB</h1>
+                <p class="tagline hidden md:block">Learn. Connect. Trade. — Everything SLIT, One Place</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <!-- Creator's Portfolio Link (Only visible to you) -->
+                <a href="#" id="creator-portfolio-link" target="_blank" class="hidden md:flex items-center gap-2 text-primary hover:underline">
+                    <i class="fas fa-briefcase"></i> Creator's Portfolio
+                </a>
+                <button id="dark-mode-toggle" class="w-10 h-10 rounded-xl bg-input flex items-center justify-center hover:bg-opacity-80 transition">
+                    <i class="fas fa-moon" id="dark-icon"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Global Broadcast -->
+    <div id="global-broadcast" class="hidden bg-warning text-white p-2 text-center font-bold cursor-pointer" onclick="showBroadcastDetails()">
+        <i class="fas fa-bullhorn"></i> <span id="broadcast-message"></span>
+    </div>
+
+    <!-- Main Navigation Tabs -->
+    <div class="max-w-7xl mx-auto px-4 mt-4">
+        <div class="tabs">
+            <button class="tab active" data-tab="home">🏠 Home</button>
+            <button class="tab" data-tab="academics">📚 Learn</button>
+            <button class="tab" data-tab="community">👥 Connect</button>
+            <button class="tab" data-tab="marketplace">🛍️ Trade</button>
+            <button class="tab" data-tab="profile">👤 Profile</button>
+            <button class="tab" data-tab="manager">📋 Manager</button>
+            <button class="tab" data-tab="admin">⚙️ Admin</button>
+        </div>
+    </div>
+
+    <main class="max-w-7xl mx-auto p-4">
+        
+        <!-- HOME TAB -->
+        <section id="home-tab" class="tab-content">
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold">Welcome back, <span id="home-user-name">Student</span>!</h2>
+                <p class="text-muted" id="home-user-details">SLIT • Set your department in profile</p>
+            </div>
+
+            <!-- Quick Stats - Clickable -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div class="card text-center" data-nav="academics">
+                    <div class="text-4xl mb-2 text-primary">📚</div>
+                    <div class="text-2xl font-bold" id="stat-courses">0</div>
+                    <div class="text-xs text-muted">Courses</div>
+                </div>
+                <div class="card text-center" data-nav="community">
+                    <div class="text-4xl mb-2 text-warning">📢</div>
+                    <div class="text-2xl font-bold" id="stat-announcements">0</div>
+                    <div class="text-xs text-muted">Announcements</div>
+                </div>
+                <div class="card text-center" data-nav="marketplace">
+                    <div class="text-4xl mb-2 text-success">🛍️</div>
+                    <div class="text-2xl font-bold" id="stat-items">0</div>
+                    <div class="text-xs text-muted">Items for Sale</div>
+                </div>
+                <div class="card text-center" data-nav="community">
+                    <div class="text-4xl mb-2 text-info">👥</div>
+                    <div class="text-2xl font-bold" id="stat-execs">0</div>
+                    <div class="text-xs text-muted">Executives</div>
+                </div>
+            </div>
+
+            <!-- Today's Schedule -->
+            <div class="card mb-8" data-nav="academics">
+                <h3 class="font-bold mb-4 flex items-center gap-2">
+                    <i class="fas fa-calendar-day text-primary"></i> Today's Schedule
+                </h3>
+                <div id="today-schedule" class="space-y-3">
+                    <p class="text-muted text-center py-4">Click to view your timetable</p>
+                </div>
+            </div>
+
+            <!-- Latest Announcements -->
+            <div class="card" data-nav="community">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold flex items-center gap-2">
+                        <i class="fas fa-bullhorn text-primary"></i> Latest Announcements
+                    </h3>
+                    <span class="text-primary hover:underline">View All →</span>
+                </div>
+                <div id="home-announcements" class="space-y-3"></div>
+            </div>
+        </section>
+
+        <!-- ACADEMICS TAB -->
+        <section id="academics-tab" class="tab-content hidden">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold">📚 Learn</h2>
+                <p class="text-muted">School of Logistics and Innovation Technology</p>
+            </div>
+
+            <!-- Department Selector -->
+            <div class="card mb-6">
+                <label class="block text-sm font-bold mb-2">Your Department</label>
+                <select id="academics-dept" class="input-field w-full md:w-96">
+                    <option value="">Select Department</option>
+                </select>
+            </div>
+
+            <!-- Quick Access Cards - Clickable -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div class="card text-center" data-academics="lecture">
+                    <div class="text-4xl mb-2">📖</div>
+                    <div class="font-bold">Lectures</div>
+                    <div class="text-xs text-muted">Weekly schedule</div>
+                </div>
+                <div class="card text-center" data-academics="test">
+                    <div class="text-4xl mb-2">📝</div>
+                    <div class="font-bold">Tests</div>
+                    <div class="text-xs text-muted">Upcoming tests</div>
+                </div>
+                <div class="card text-center" data-academics="exam">
+                    <div class="text-4xl mb-2">📋</div>
+                    <div class="font-bold">Exams</div>
+                    <div class="text-xs text-muted">Exam schedule</div>
+                </div>
+                <div class="card text-center" data-academics="materials">
+                    <div class="text-4xl mb-2">📚</div>
+                    <div class="font-bold">Materials</div>
+                    <div class="text-xs text-muted">Past questions</div>
+                </div>
+            </div>
+
+            <!-- Timetable Display -->
+            <div id="timetable-container" class="card mb-8 hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 id="timetable-title" class="font-bold">Lecture Timetable</h3>
+                    <button id="hide-timetable" class="text-muted hover:text-danger"><i class="fas fa-times"></i></button>
+                </div>
+                <div id="timetable-content" class="space-y-3"></div>
+            </div>
+
+            <!-- Study Groups -->
+            <div class="card mb-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold flex items-center gap-2">
+                        <i class="fas fa-users text-primary"></i> Study Groups
+                    </h3>
+                    <button class="btn-primary text-sm py-2" id="create-study-group">+ Create Group</button>
+                </div>
+                <div id="study-groups" class="space-y-3"></div>
+            </div>
+
+            <!-- Course Materials -->
+            <div class="card">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold flex items-center gap-2">
+                        <i class="fas fa-folder-open text-primary"></i> Course Materials
+                    </h3>
+                    <button class="btn-primary text-sm py-2" id="upload-material">+ Upload</button>
+                </div>
+                <div id="materials-list" class="space-y-3"></div>
+            </div>
+        </section>
+
+        <!-- COMMUNITY TAB -->
+        <section id="community-tab" class="tab-content hidden">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold">👥 Connect</h2>
+                <p class="text-muted">Stay connected with your department community</p>
+            </div>
+
+            <!-- Announcement Categories -->
+            <div class="flex gap-2 overflow-x-auto pb-4 mb-6 scrollbar-hide">
+                <button class="category-btn px-4 py-2 bg-primary text-white rounded-full text-sm font-bold" data-category="all">All</button>
+                <button class="category-btn px-4 py-2 bg-card border border-base rounded-full text-sm" data-category="sports">⚽ Sports</button>
+                <button class="category-btn px-4 py-2 bg-card border border-base rounded-full text-sm" data-category="social">🎉 Social</button>
+                <button class="category-btn px-4 py-2 bg-card border border-base rounded-full text-sm" data-category="academic">📚 Academic</button>
+                <button class="category-btn px-4 py-2 bg-card border border-base rounded-full text-sm" data-category="media">📸 Media</button>
+            </div>
+
+            <!-- Executive Post Card (Visible to executives and course reps) -->
+            <div id="executive-post-card" class="card mb-6 hidden">
+                <div class="flex items-center gap-2 mb-4">
+                    <i class="fas fa-pen-fancy text-primary text-xl"></i>
+                    <span class="font-bold">Post Announcement</span>
+                    <span id="executive-badge" class="gold-badge ml-auto"><i class="fas fa-check-circle"></i> Executive</span>
+                </div>
+                <div class="space-y-3">
+                    <select id="announce-category" class="input-field">
+                        <option value="sports">⚽ Sports</option>
+                        <option value="social">🎉 Social</option>
+                        <option value="academic">📚 Academic</option>
+                        <option value="media">📸 Media</option>
+                    </select>
+                    <input type="text" id="announce-title" placeholder="Title" class="input-field">
+                    <textarea id="announce-content" placeholder="Content..." rows="3" class="input-field"></textarea>
+                    <div class="grid grid-cols-2 gap-3">
+                        <input type="text" id="announce-link" placeholder="Link (optional)" class="input-field">
+                        <input type="date" id="announce-date" class="input-field">
+                    </div>
+                    <button class="btn-primary w-full" id="publish-announcement">Publish Announcement</button>
+                </div>
+            </div>
+
+            <!-- Announcements Feed -->
+            <div id="announcements-feed" class="space-y-4 mb-8"></div>
+
+            <!-- Executives Directory -->
+            <div class="card mb-8">
+                <h3 class="font-bold mb-4">Department Executives</h3>
+                <div id="executives-directory" class="space-y-3"></div>
+            </div>
+
+            <!-- Users Directory -->
+            <div class="card">
+                <h3 class="font-bold mb-4">👥 Community Members</h3>
+                <div id="community-users" class="space-y-3 max-h-96 overflow-y-auto"></div>
+            </div>
+        </section>
+
+        <!-- MARKETPLACE TAB -->
+        <section id="marketplace-tab" class="tab-content hidden">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold">🛍️ Trade</h2>
+                <p class="text-muted">Buy, sell, and request services on campus</p>
+            </div>
+
+            <!-- Scam Warning -->
+            <div class="scam-warning mb-6">
+                <div class="flex items-start gap-3">
+                    <i class="fas fa-shield-alt text-2xl"></i>
+                    <div>
+                        <p class="font-bold mb-1">⚠️ Safety Tips:</p>
+                        <p class="text-sm">• Meet in public places (library, cafeteria)</p>
+                        <p class="text-sm">• Never send money in advance</p>
+                        <p class="text-sm">• Inspect items before payment</p>
+                        <p class="text-sm">• Report suspicious users immediately</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Marketplace Sub-tabs -->
+            <div class="flex gap-2 border-b border-base mb-6">
+                <button class="sub-tab px-4 py-2 font-bold text-primary border-b-2 border-primary" data-marketplace="shop">🛒 Shop</button>
+                <button class="sub-tab px-4 py-2 text-muted" data-marketplace="services">🛠️ Services</button>
+                <button class="sub-tab px-4 py-2 text-muted" data-marketplace="requests">🙋 Requests</button>
+            </div>
+
+            <!-- Shop Section -->
+            <div id="shop-section" class="marketplace-section">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold">Recent Items</h3>
+                    <button class="btn-primary text-sm py-2" id="sell-item">+ Sell Item</button>
+                </div>
+                <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+            </div>
+
+            <!-- Services Section -->
+            <div id="services-section" class="marketplace-section hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold">Campus Services</h3>
+                    <button class="btn-primary text-sm py-2" id="list-service">+ List Service</button>
+                </div>
+
+                <!-- Service Categories -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                    <div class="card text-center" data-service="hair">
+                        <div class="text-3xl mb-1">✂️</div>
+                        <div class="text-xs font-bold">Hair & Beauty</div>
+                    </div>
+                    <div class="card text-center" data-service="repair">
+                        <div class="text-3xl mb-1">📱</div>
+                        <div class="text-xs font-bold">Gadget Repair</div>
+                    </div>
+                    <div class="card text-center" data-service="photo">
+                        <div class="text-3xl mb-1">📸</div>
+                        <div class="text-xs font-bold">Photography</div>
+                    </div>
+                    <div class="card text-center" data-service="tutor">
+                        <div class="text-3xl mb-1">👨‍🏫</div>
+                        <div class="text-xs font-bold">Tutoring</div>
+                    </div>
+                </div>
+
+                <div id="services-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            </div>
+
+            <!-- Requests Section -->
+            <div id="requests-section" class="marketplace-section hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold">Community Requests</h3>
+                    <button class="btn-primary text-sm py-2" id="new-request">+ New Request</button>
+                </div>
+
+                <!-- Request Categories -->
+                <div class="flex gap-2 overflow-x-auto pb-4 mb-4">
+                    <button class="category-btn px-3 py-1 bg-primary text-white rounded-full text-xs" data-request="all">All</button>
+                    <button class="category-btn px-3 py-1 bg-card border border-base rounded-full text-xs" data-request="roommate">🏠 Roommate</button>
+                    <button class="category-btn px-3 py-1 bg-card border border-base rounded-full text-xs" data-request="study">👫 Study Partner</button>
+                    <button class="category-btn px-3 py-1 bg-card border border-base rounded-full text-xs" data-request="textbook">📚 Textbook</button>
+                    <button class="category-btn px-3 py-1 bg-card border border-base rounded-full text-xs" data-request="urgent">🚑 Urgent</button>
+                </div>
+
+                <div id="requests-grid" class="space-y-4"></div>
+            </div>
+        </section>
+
+        <!-- PROFILE TAB -->
+        <section id="profile-tab" class="tab-content hidden max-w-2xl mx-auto">
+            <div class="card">
+                <div class="text-center mb-8">
+                    <div class="relative inline-block">
+                        <img id="profile-pic" src="https://ui-avatars.com/api/?name=User&background=10b981&color=fff&size=128" class="w-28 h-28 rounded-full mx-auto border-4 border-white shadow-lg cursor-pointer" id="change-profile-pic">
+                        <button id="upload-profile-pic" class="absolute bottom-0 right-0 bg-primary text-white p-2.5 rounded-full text-xs border-2 border-white hover:bg-primary-dark transition" style="width: 36px; height: 36px;">
+                            <i class="fas fa-camera"></i>
+                        </button>
+                        <button id="delete-profile-pic" class="absolute bottom-0 left-0 bg-danger text-white p-2.5 rounded-full text-xs border-2 border-white hover:bg-red-700 transition" style="width: 36px; height: 36px;">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <input type="file" id="profile-upload" class="hidden" accept="image/*">
+                    
+                    <h2 id="profile-name" class="text-2xl font-bold mt-4">Your Name</h2>
+                    <p class="text-sm text-muted">ID: <span id="profile-id"></span></p>
+                    
+                    <!-- Badges & Verification Status -->
+                    <div id="profile-badges" class="flex justify-center gap-2 mt-2 flex-wrap"></div>
+                    <div id="profile-verification-status" class="mt-2"></div>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-bold mb-1">Full Name <span class="text-danger">*</span></label>
+                        <input type="text" id="profile-name-input" class="input-field" placeholder="Enter your full name">
+                        <div class="error-message" id="name-error">Name is required</div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-bold mb-1">Email <span class="text-danger">*</span></label>
+                        <input type="email" id="profile-email" class="input-field" placeholder="your.email@university.edu.ng">
+                    </div>
+                    
+                    <!-- Phone with +234 prefix -->
+                    <div>
+                        <label class="block text-sm font-bold mb-1">Phone Number</label>
+                        <div class="phone-input-container">
+                            <span class="phone-prefix">+234</span>
+                            <input type="tel" id="profile-phone" class="input-field" placeholder="8012345678">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-bold mb-1">Department</label>
+                        <select id="profile-dept" class="input-field"></select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-bold mb-1">Level</label>
+                        <select id="profile-level" class="input-field">
+                            <option value="">Select Level</option>
+                            <option value="100">100 Level</option>
+                            <option value="200">200 Level</option>
+                            <option value="300">300 Level</option>
+                            <option value="400">400 Level</option>
+                            <option value="500">500 Level</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Privacy Settings -->
+                    <div class="border-t border-base pt-4">
+                        <h3 class="font-bold mb-3">🔒 Privacy Settings</h3>
+                        <div class="space-y-2">
+                            <label class="privacy-toggle flex items-center">
+                                <input type="checkbox" id="hide-email" class="w-4 h-4 mr-2">
+                                <span class="text-sm">Hide my email from other users</span>
+                            </label>
+                            <label class="privacy-toggle flex items-center">
+                                <input type="checkbox" id="hide-dept" class="w-4 h-4 mr-2">
+                                <span class="text-sm">Hide my department from other users</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-bold mb-1">Bio</label>
+                        <textarea id="profile-bio" rows="3" class="input-field" placeholder="Tell us about yourself..."></textarea>
+                    </div>
+
+                    <button class="btn-primary w-full" id="save-profile">
+                        <i class="fas fa-save"></i> Save Profile
+                    </button>
+
+                    <!-- Contact Developer/Admin -->
+                    <div class="border-t border-base pt-4 mt-4">
+                        <h3 class="font-bold mb-3">Need Help?</h3>
+                        <div class="flex gap-3">
+                            <a href="https://wa.me/2348053103234" target="_blank" class="flex-1 btn-whatsapp py-3 rounded-xl font-bold flex items-center justify-center gap-2">
+                                <i class="fab fa-whatsapp"></i> Contact Developer
+                            </a>
+                            <button class="flex-1 btn-primary py-3 rounded-xl font-bold flex items-center justify-center gap-2" id="contact-admin">
+                                <i class="fas fa-envelope"></i> Message Admin
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Creator's Portfolio Section (Only visible to you) -->
+                    <div id="creator-section" class="border-t border-base pt-4 mt-4">
+                        <h3 class="font-bold mb-3 text-primary">🎨 Creator's Works</h3>
+                        <div class="flex gap-3">
+                            <input type="text" id="portfolio-url" class="input-field flex-1" placeholder="Portfolio URL" value="https://yourportfolio.com">
+                            <input type="text" id="portfolio-image" class="input-field flex-1" placeholder="Portfolio Image URL">
+                        </div>
+                        <div class="flex gap-2 mt-3">
+                            <button class="btn-outline flex-1" id="save-portfolio">Save Links</button>
+                            <a href="#" id="portfolio-link-button" target="_blank" class="btn-primary flex-1 flex items-center justify-center gap-2">
+                                <i class="fas fa-external-link-alt"></i> View Portfolio
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Upload ID for Verification -->
+                    <div class="border-t border-base pt-4 mt-4">
+                        <h3 class="font-bold mb-3 text-green-600">✅ Get Verified</h3>
+                        <button class="w-full btn-success py-3 rounded-xl font-bold flex items-center justify-center gap-2" id="request-verification">
+                            <i class="fas fa-id-card"></i> Upload Student ID for Verification
+                        </button>
+                        <input type="file" id="id-upload" class="hidden" accept="image/*">
+                    </div>
+
+                    <!-- Upload Course Materials (for Course Reps) -->
+                    <div id="course-rep-upload" class="border-t border-base pt-4 mt-4 hidden">
+                        <h3 class="font-bold mb-3 text-blue-600">📘 Course Rep Tools</h3>
+                        <button class="w-full btn-primary py-3 rounded-xl font-bold flex items-center justify-center gap-2" id="rep-upload-material">
+                            <i class="fas fa-upload"></i> Upload Course Materials
+                        </button>
+                    </div>
+
+                    <!-- Delete Profile -->
+                    <div class="border-t border-base pt-4 mt-4">
+                        <button class="w-full btn-danger py-3 rounded-xl font-bold flex items-center justify-center gap-2" id="delete-profile">
+                            <i class="fas fa-trash"></i> Delete Profile
+                        </button>
+                        <p class="text-xs text-muted text-center mt-2">This action cannot be undone</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MANAGER TAB (My Items) -->
+        <section id="manager-tab" class="tab-content hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">📋 My Items</h2>
+                <button class="btn-primary text-sm py-2" id="add-new-item">+ Add New</button>
+            </div>
+            
+            <!-- My Products -->
+            <div class="mb-8">
+                <h3 class="font-bold mb-4">My Products</h3>
+                <div id="my-products-grid" class="grid grid-cols-1 gap-4"></div>
+            </div>
+            
+            <!-- My Services -->
+            <div class="mb-8">
+                <h3 class="font-bold mb-4">My Services</h3>
+                <div id="my-services-grid" class="grid grid-cols-1 gap-4"></div>
+            </div>
+            
+            <!-- My Requests -->
+            <div class="mb-8">
+                <h3 class="font-bold mb-4">My Requests</h3>
+                <div id="my-requests-grid" class="grid grid-cols-1 gap-4"></div>
+            </div>
+        </section>
+
+        <!-- ADMIN TAB -->
+        <section id="admin-tab" class="tab-content hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">⚙️ Admin Dashboard</h2>
+                <button id="admin-toggle" class="px-4 py-2 bg-card border border-base rounded-xl text-sm hover:bg-input transition">
+                    <i class="fas fa-lock"></i> Admin: OFF
+                </button>
+            </div>
+
+            <!-- Admin Panel -->
+            <div id="admin-panel" class="hidden space-y-6">
+                
+                <!-- Quick Stats -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-gradient-to-r from-green-600 to-emerald-600 p-4 rounded-xl text-white shadow-lg">
+                        <div class="text-3xl font-bold" id="admin-stat-depts">0</div>
+                        <div class="text-sm opacity-90">Departments</div>
+                    </div>
+                    <div class="bg-gradient-to-r from-yellow-500 to-yellow-600 p-4 rounded-xl text-white shadow-lg">
+                        <div class="text-3xl font-bold" id="admin-stat-execs">0</div>
+                        <div class="text-sm opacity-90">Executives</div>
+                    </div>
+                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-4 rounded-xl text-white shadow-lg">
+                        <div class="text-3xl font-bold" id="admin-stat-users">0</div>
+                        <div class="text-sm opacity-90">Users</div>
+                    </div>
+                    <div class="bg-gradient-to-r from-purple-500 to-purple-600 p-4 rounded-xl text-white shadow-lg">
+                        <div class="text-3xl font-bold" id="admin-stat-products">0</div>
+                        <div class="text-sm opacity-90">Products</div>
+                    </div>
+                </div>
+
+                <!-- Creator Portfolio Management (Only visible to you) -->
+                <div id="admin-creator-section" class="card">
+                    <h3 class="font-bold mb-4 text-primary">🎨 Creator Portfolio Management</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                        <input type="text" id="admin-portfolio-url" placeholder="Portfolio URL" class="input-field">
+                        <input type="text" id="admin-portfolio-image" placeholder="Portfolio Image URL" class="input-field">
+                    </div>
+                    <button class="btn-primary" id="admin-save-portfolio">Save Portfolio Links</button>
+                </div>
+
+                <!-- Global Broadcast -->
+                <div class="bg-gradient-to-r from-primary to-emerald-600 p-6 rounded-2xl text-white shadow-lg">
+                    <h3 class="font-bold mb-4 flex items-center gap-2">
+                        <i class="fas fa-bullhorn"></i> Global Broadcast
+                    </h3>
+                    <textarea id="global-broadcast-input" class="w-full p-3 rounded-xl text-gray-900 mb-3" rows="2" placeholder="Type broadcast message..."></textarea>
+                    <div class="flex gap-3">
+                        <button class="bg-white text-primary px-6 py-2 rounded-xl font-bold hover:shadow-lg transition" id="send-broadcast">
+                            <i class="fas fa-paper-plane"></i> Send
+                        </button>
+                        <button class="bg-red-500 text-white px-6 py-2 rounded-xl font-bold hover:bg-red-600 transition" id="delete-broadcast">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Admin Messages -->
+                <div class="card">
+                    <h3 class="font-bold mb-4 text-blue-600">📨 Admin Messages</h3>
+                    <div id="admin-messages-list" class="space-y-3 max-h-60 overflow-y-auto"></div>
+                </div>
+
+                <!-- User Verification Management -->
+                <div class="card">
+                    <h3 class="font-bold mb-4 text-green-600">✅ User Verification Requests</h3>
+                    <div id="verification-list" class="space-y-3"></div>
+                </div>
+
+                <!-- All Users with Verification Status -->
+                <div class="card">
+                    <h3 class="font-bold mb-4 text-blue-600">👥 All Users (Admin View)</h3>
+                    <div id="member-directory-admin" class="space-y-3 max-h-96 overflow-y-auto"></div>
+                </div>
+
+                <!-- Department Management -->
+                <div class="card">
+                    <h3 class="font-bold mb-4 text-primary">🏛️ Department Management</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                        <input type="text" id="dept-name" placeholder="Department Name (e.g., PMT)" class="input-field">
+                        <input type="text" id="dept-code" placeholder="Code (e.g., PMT)" class="input-field">
+                        <button class="btn-primary" id="add-dept">
+                            <i class="fas fa-plus"></i> Add Department
+                        </button>
+                    </div>
+                    
+                    <div id="depts-list" class="space-y-2 max-h-60 overflow-y-auto"></div>
+                </div>
+
+                <!-- Executive Management -->
+                <div class="card">
+                    <h3 class="font-bold mb-4 text-yellow-600">⭐ Executive Management</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                        <select id="exec-dept" class="input-field">
+                            <option value="">Select Department</option>
+                        </select>
+                        <input type="text" id="exec-name" placeholder="Full Name" class="input-field">
+                        <input type="text" id="exec-position" placeholder="Position" class="input-field">
+                        <input type="email" id="exec-email" placeholder="Email" class="input-field">
+                        <select id="exec-level" class="input-field">
+                            <option value="faculty">👑 Faculty Executive</option>
+                            <option value="department">⭐ Department Executive</option>
+                            <option value="course">📘 Course Representative</option>
+                        </select>
+                        <input type="text" id="exec-course" placeholder="Course Code (if rep)" class="input-field">
+                        <button class="btn-warning col-span-3" id="add-exec">
+                            <i class="fas fa-plus"></i> Add Executive
+                        </button>
+                    </div>
+                    
+                    <div id="execs-list" class="space-y-2 max-h-60 overflow-y-auto"></div>
+                </div>
+
+                <!-- Reports -->
+                <div class="card">
+                    <h3 class="font-bold mb-4 text-red-600">⚠️ User Reports</h3>
+                    <div id="reports-list" class="space-y-3"></div>
+                </div>
+
+                <!-- Banned Users -->
+                <div class="card">
+                    <h3 class="font-bold mb-4 text-gray-600">🚫 Banned Users</h3>
+                    <div id="banned-users-list" class="space-y-3 max-h-60 overflow-y-auto"></div>
+                </div>
+
+                <!-- Danger Zone -->
+                <div class="card border-2 border-danger">
+                    <h3 class="font-bold mb-4 text-danger">⚠️ Danger Zone</h3>
+                    <button class="btn-danger w-full" id="delete-all-data">
+                        <i class="fas fa-exclamation-triangle"></i> Delete All Data (Requires Super Admin)
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="nav-bar">
+        <button class="nav-item" data-nav="home">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </button>
+        <button class="nav-item" data-nav="academics">
+            <i class="fas fa-book-open"></i>
+            <span>Learn</span>
+        </button>
+        <button class="nav-item" data-nav="community">
+            <i class="fas fa-users"></i>
+            <span>Connect</span>
+        </button>
+        <button class="nav-item" data-nav="marketplace">
+            <i class="fas fa-store"></i>
+            <span>Trade</span>
+        </button>
+        <button class="nav-item" data-nav="profile">
+            <i class="fas fa-user-circle"></i>
+            <span>Profile</span>
+        </button>
+        <button class="nav-item" data-nav="manager">
+            <i class="fas fa-clipboard-list"></i>
+            <span>Manager</span>
+        </button>
+    </nav>
+
+    <!-- Install Button -->
+    <button id="install-btn">
+        <i class="fas fa-download"></i> Install Slit-Hub
+    </button>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <script>
+        // ============ FIREBASE CONFIGURATION ============
+        const firebaseConfig = {
+            apiKey: "AIzaSyCpsDTN-NTkTFmbwg3T6vv9H4eE_YXQdZA",
+            authDomain: "slit-hub.firebaseapp.com",
+            projectId: "slit-hub",
+            storageBucket: "slit-hub.firebasestorage.app",
+            messagingSenderId: "347194010969",
+            appId: "1:347194010969:web:a45af2e8d1627ac2593048"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // ============ GLOBAL VARIABLES ============
+        let currentUserId = localStorage.getItem('slit_user_id');
+        if (!currentUserId) {
+            currentUserId = "user_" + Date.now() + "_" + Math.floor(Math.random() * 9999);
+            localStorage.setItem('slit_user_id', currentUserId);
+        }
+
+        // Creator's user ID (your ID)
+        const CREATOR_USER_ID = "creator_slit_hub_admin";
+        let isAdminMode = false;
+        let currentUserData = null;
+        let verifiedUsers = new Set();
+        let joinedGroups = new Set();
+
+        // ============ UTILITY FUNCTIONS ============
+        function formatPrice(price) {
+            return new Intl.NumberFormat('en-NG').format(price);
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast-container');
+            const toastEl = document.createElement('div');
+            toastEl.className = 'toast';
+            toastEl.style.borderLeftColor = type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#f59e0b';
+            toastEl.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <div class="text-xl">${type === 'success' ? '✅' : type === 'error' ? '❌' : '⚠️'}</div>
+                    <div class="flex-1">
+                        <p class="font-bold">${message}</p>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" class="text-muted hover:text-text">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            toast.appendChild(toastEl);
+            setTimeout(() => toastEl.remove(), 3000);
+        }
+
+        // ============ TAB SWITCHING ==========
+        function switchTab(tabId) {
+            console.log('Switching to tab:', tabId);
+            
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+            document.getElementById(`${tabId}-tab`).classList.remove('hidden');
+            
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active-nav'));
+            
+            const tabs = document.querySelectorAll('.tab');
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            const tabIndex = {
+                'home': 0, 'academics': 1, 'community': 2, 
+                'marketplace': 3, 'profile': 4, 'manager': 5, 'admin': 6
+            }[tabId];
+            
+            if (tabs[tabIndex]) tabs[tabIndex].classList.add('active');
+            if (navItems[tabIndex]) navItems[tabIndex].classList.add('active-nav');
+            
+            // Load tab data
+            if (tabId === 'home') loadHomeData();
+            if (tabId === 'profile') loadProfileData();
+            if (tabId === 'marketplace') {
+                loadProducts();
+                loadServices();
+                loadRequests();
+            }
+            if (tabId === 'manager') loadMyItems();
+            if (tabId === 'admin' && isAdminMode) loadAdminData();
+            if (tabId === 'academics') {
+                loadDepartments();
+                loadStudyGroups();
+                loadMaterials();
+            }
+            if (tabId === 'community') {
+                loadExecutives();
+                loadAnnouncements();
+                loadCommunityUsers();
+            }
+        }
+
+        function switchMarketplaceTab(tab) {
+            document.querySelectorAll('.marketplace-section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(`${tab}-section`).classList.remove('hidden');
+            
+            document.querySelectorAll('.sub-tab').forEach(t => {
+                t.classList.remove('text-primary', 'border-b-2', 'border-primary');
+                t.classList.add('text-muted');
+            });
+            
+            const activeTab = document.querySelector(`[data-marketplace="${tab}"]`);
+            if (activeTab) {
+                activeTab.classList.add('text-primary', 'border-b-2', 'border-primary');
+            }
+        }
+
+        // ============ LOAD VERIFIED USERS ============
+        async function loadVerifiedUsers() {
+            try {
+                const snap = await db.collection('VerifiedUsers').get();
+                verifiedUsers.clear();
+                snap.forEach(doc => verifiedUsers.add(doc.id));
+            } catch (e) {
+                console.error("Error loading verified users:", e);
+            }
+        }
+
+        // ============ HOME TAB ============
+        async function loadHomeData() {
+            try {
+                await loadVerifiedUsers();
+                
+                const userDoc = await db.collection('Users').doc(currentUserId).get();
+                if (userDoc.exists) {
+                    const user = userDoc.data();
+                    document.getElementById('home-user-name').innerText = user.name || 'Student';
+                    
+                    let deptName = 'SLIT';
+                    if (user.dept) {
+                        const deptDoc = await db.collection('departments').doc(user.dept).get();
+                        if (deptDoc.exists) deptName = deptDoc.data().name;
+                    }
+                    
+                    document.getElementById('home-user-details').innerHTML = 
+                        `${deptName} • ${user.level || 'Set level in profile'}`;
+                }
+                
+                // Load stats
+                const deptsSnap = await db.collection('departments').get();
+                const execsSnap = await db.collection('executives').get();
+                const productsSnap = await db.collection('Products').get();
+                const announcementsSnap = await db.collection('announcements').get();
+                
+                document.getElementById('stat-courses').innerText = deptsSnap.size;
+                document.getElementById('stat-announcements').innerText = announcementsSnap.size;
+                document.getElementById('stat-items').innerText = productsSnap.size;
+                document.getElementById('stat-execs').innerText = execsSnap.size;
+                
+                // Load recent announcements
+                const recentAnn = await db.collection('announcements')
+                    .orderBy('createdAt', 'desc')
+                    .limit(3)
+                    .get();
+                
+                let annHtml = '';
+                recentAnn.forEach(doc => {
+                    const ann = doc.data();
+                    annHtml += `
+                        <div class="p-3 bg-input rounded-lg cursor-pointer hover:bg-opacity-80 transition" onclick="viewAnnouncementDetails('${doc.id}')">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-xs font-bold text-primary">${ann.category}</span>
+                                <span class="text-xs text-muted">${ann.createdAt ? new Date(ann.createdAt.seconds*1000).toLocaleDateString() : ''}</span>
+                            </div>
+                            <p class="font-bold text-sm">${ann.title}</p>
+                        </div>
+                    `;
+                });
+                document.getElementById('home-announcements').innerHTML = annHtml || '<p class="text-muted">No recent announcements</p>';
+            } catch (e) {
+                console.error("Error loading home data:", e);
+            }
+        }
+
+        // ============ PROFILE ============
+        async function loadProfileData() {
+            try {
+                await loadVerifiedUsers();
+                
+                document.getElementById('profile-id').innerText = currentUserId;
+                
+                // Load departments
+                const deptsSnap = await db.collection('departments').get();
+                let deptOptions = '<option value="">Select Department</option>';
+                deptsSnap.forEach(doc => {
+                    const dept = doc.data();
+                    deptOptions += `<option value="${doc.id}">${dept.name}</option>`;
+                });
+                document.getElementById('profile-dept').innerHTML = deptOptions;
+                
+                // Load user data
+                const userDoc = await db.collection('Users').doc(currentUserId).get();
+                if (userDoc.exists) {
+                    const user = userDoc.data();
+                    currentUserData = user;
+                    
+                    document.getElementById('profile-name').innerText = user.name || 'Your Name';
+                    document.getElementById('profile-name-input').value = user.name || '';
+                    document.getElementById('profile-email').value = user.email || '';
+                    
+                    // Handle phone with +234 prefix
+                    if (user.phone) {
+                        const phone = user.phone.replace('+234', '');
+                        document.getElementById('profile-phone').value = phone;
+                    }
+                    
+                    document.getElementById('profile-dept').value = user.dept || '';
+                    document.getElementById('profile-level').value = user.level || '';
+                    document.getElementById('profile-bio').value = user.bio || '';
+                    
+                    // Privacy settings
+                    document.getElementById('hide-email').checked = user.hideEmail || false;
+                    document.getElementById('hide-dept').checked = user.hideDept || false;
+                    
+                    if (user.photo) document.getElementById('profile-pic').src = user.photo;
+                    
+                    // Check if user is executive
+                    const execSnap = await db.collection('executives')
+                        .where('email', '==', user.email)
+                        .get();
+                    
+                    let badges = '';
+                    if (!execSnap.empty) {
+                        const exec = execSnap.docs[0].data();
+                        if (exec.level === 'faculty') {
+                            badges += '<span class="gold-badge"><i class="fas fa-crown"></i> Faculty Executive</span>';
+                            document.getElementById('executive-post-card')?.classList.remove('hidden');
+                        } else if (exec.level === 'department') {
+                            badges += '<span class="gold-badge"><i class="fas fa-star"></i> Dept Executive</span>';
+                            document.getElementById('executive-post-card')?.classList.remove('hidden');
+                        } else if (exec.level === 'course') {
+                            badges += '<span class="blue-badge"><i class="fas fa-book-open"></i> Course Rep</span>';
+                            document.getElementById('course-rep-upload')?.classList.remove('hidden');
+                        }
+                    }
+                    
+                    // Add verification badge
+                    if (verifiedUsers.has(currentUserId)) {
+                        badges += '<span class="verified-badge"><i class="fas fa-check-circle"></i> Verified</span>';
+                        document.getElementById('profile-verification-status').innerHTML = '<span class="verified-badge"><i class="fas fa-check-circle"></i> Verified Student</span>';
+                    } else {
+                        document.getElementById('profile-verification-status').innerHTML = '<span class="unverified-badge"><i class="fas fa-times-circle"></i> Not Verified</span>';
+                    }
+                    
+                    document.getElementById('profile-badges').innerHTML = badges;
+                }
+                
+                // Show creator section only for creator
+                if (currentUserId === CREATOR_USER_ID) {
+                    document.getElementById('creator-section').classList.remove('hidden');
+                    document.getElementById('admin-creator-section').classList.remove('hidden');
+                } else {
+                    document.getElementById('creator-section').classList.add('hidden');
+                    document.getElementById('admin-creator-section').classList.add('hidden');
+                }
+                
+            } catch (e) {
+                console.error("Error loading profile:", e);
+            }
+        }
+
+        // Save profile
+        async function saveProfile() {
+            const name = document.getElementById('profile-name-input').value.trim();
+            const email = document.getElementById('profile-email').value.trim();
+            const phoneInput = document.getElementById('profile-phone').value.trim().replace(/^0+/, '');
+            const phone = phoneInput ? '+234' + phoneInput : '';
+            
+            if (!name) {
+                document.getElementById('name-error').style.display = 'block';
+                document.getElementById('profile-name-input').classList.add('input-error');
+                return;
+            } else {
+                document.getElementById('name-error').style.display = 'none';
+                document.getElementById('profile-name-input').classList.remove('input-error');
+            }
+            
+            try {
+                const dept = document.getElementById('profile-dept').value;
+                const level = document.getElementById('profile-level').value;
+                const bio = document.getElementById('profile-bio').value;
+                const hideEmail = document.getElementById('hide-email').checked;
+                const hideDept = document.getElementById('hide-dept').checked;
+                
+                await db.collection('Users').doc(currentUserId).set({
+                    name, email, phone, dept, level, bio,
+                    hideEmail, hideDept,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+                
+                showToast('Profile saved successfully!');
+                loadProfileData();
+            } catch (e) {
+                showToast('Error saving profile', 'error');
+            }
+        }
+
+        // Upload profile picture
+        document.getElementById('profile-upload').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            // For demo, just show success message
+            showToast('Profile picture updated!');
+            document.getElementById('profile-pic').src = URL.createObjectURL(file);
+        });
+
+        // Delete profile picture
+        document.getElementById('delete-profile-pic').addEventListener('click', async () => {
+            if (confirm('Remove your profile picture?')) {
+                document.getElementById('profile-pic').src = 'https://ui-avatars.com/api/?name=User&background=10b981&color=fff&size=128';
+                showToast('Profile picture removed');
+            }
+        });
+
+        // ============ STUDY GROUPS ============
+        async function loadStudyGroups() {
+            const container = document.getElementById('study-groups');
+            try {
+                const snap = await db.collection('studyGroups').orderBy('createdAt', 'desc').get();
+                
+                // Load user's joined groups
+                const userGroupsSnap = await db.collection('groupMembers')
+                    .where('userId', '==', currentUserId)
+                    .get();
+                joinedGroups.clear();
+                userGroupsSnap.forEach(doc => joinedGroups.add(doc.data().groupId));
+                
+                let html = '';
+                for (const doc of snap.docs) {
+                    const group = doc.data();
+                    const groupId = doc.id;
+                    const hasJoined = joinedGroups.has(groupId);
+                    
+                    // Get member count
+                    const membersSnap = await db.collection('groupMembers')
+                        .where('groupId', '==', groupId)
+                        .get();
+                    const memberCount = membersSnap.size;
+                    
+                    html += `
+                        <div class="p-4 bg-input rounded-lg">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold">${group.name}</h4>
+                                    <p class="text-xs text-primary">${group.course}</p>
+                                </div>
+                                <span class="text-xs bg-primary text-white px-2 py-1 rounded">${memberCount} members</span>
+                            </div>
+                            <p class="text-sm text-muted mt-2">${group.description || 'No description'}</p>
+                            <div class="flex justify-between items-center mt-3">
+                                <p class="text-xs text-muted">Created by ${group.createdByName || 'Unknown'}</p>
+                                ${!hasJoined ? 
+                                    `<button class="btn-primary text-xs py-1 px-3" onclick="joinStudyGroup('${groupId}')">Join Group</button>` : 
+                                    `<span class="text-xs text-success"><i class="fas fa-check"></i> Joined</span>`
+                                }
+                            </div>
+                            ${hasJoined ? `
+                                <div class="mt-3 pt-3 border-t border-base">
+                                    <p class="text-xs font-bold mb-2">Group Chat</p>
+                                    <div class="bg-card rounded-lg p-2 max-h-32 overflow-y-auto" id="chat-${groupId}">
+                                        <!-- Chat messages would go here -->
+                                    </div>
+                                    <div class="flex gap-2 mt-2">
+                                        <input type="text" class="flex-1 text-sm p-2 rounded-lg border" placeholder="Type a message..." id="msg-${groupId}">
+                                        <button class="btn-primary text-xs py-2 px-3" onclick="sendGroupMessage('${groupId}')">Send</button>
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }
+                container.innerHTML = html || '<p class="text-muted">No study groups yet</p>';
+            } catch (e) {
+                console.error("Error loading study groups:", e);
+            }
+        }
+
+        async function createStudyGroup() {
+            const name = prompt('Enter study group name:');
+            if (!name) return;
+            const course = prompt('Enter course code:');
+            if (!course) return;
+            const desc = prompt('Enter description (optional):');
+            
+            try {
+                const userDoc = await db.collection('Users').doc(currentUserId).get();
+                const userName = userDoc.exists ? userDoc.data().name : 'Unknown';
+                
+                const groupRef = await db.collection('studyGroups').add({
+                    name, 
+                    course, 
+                    description: desc,
+                    createdBy: currentUserId,
+                    createdByName: userName,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                // Add creator as member
+                await db.collection('groupMembers').add({
+                    groupId: groupRef.id,
+                    userId: currentUserId,
+                    userName: userName,
+                    joinedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                showToast('Study group created!');
+                loadStudyGroups();
+            } catch (e) {
+                showToast('Error creating group', 'error');
+            }
+        }
+
+        async function joinStudyGroup(groupId) {
+            try {
+                const userDoc = await db.collection('Users').doc(currentUserId).get();
+                const userName = userDoc.exists ? userDoc.data().name : 'Unknown';
+                
+                // Check if already joined
+                const existing = await db.collection('groupMembers')
+                    .where('groupId', '==', groupId)
+                    .where('userId', '==', currentUserId)
+                    .get();
+                
+                if (existing.empty) {
+                    await db.collection('groupMembers').add({
+                        groupId: groupId,
+                        userId: currentUserId,
+                        userName: userName,
+                        joinedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    showToast('Joined study group!');
+                } else {
+                    showToast('You are already a member', 'info');
+                }
+                loadStudyGroups();
+            } catch (e) {
+                showToast('Error joining group', 'error');
+            }
+        }
+
+        async function sendGroupMessage(groupId) {
+            const msgInput = document.getElementById(`msg-${groupId}`);
+            const message = msgInput.value.trim();
+            if (!message) return;
+            
+            try {
+                const userDoc = await db.collection('Users').doc(currentUserId).get();
+                const userName = userDoc.exists ? userDoc.data().name : 'Unknown';
+                
+                await db.collection('groupMessages').add({
+                    groupId: groupId,
+                    userId: currentUserId,
+                    userName: userName,
+                    message: message,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                msgInput.value = '';
+                showToast('Message sent!');
+            } catch (e) {
+                showToast('Error sending message', 'error');
+            }
+        }
+
+        // ============ COURSE MATERIALS ============
+        async function loadMaterials() {
+            const container = document.getElementById('materials-list');
+            try {
+                const snap = await db.collection('courseMaterials').orderBy('uploadedAt', 'desc').get();
+                let html = '';
+                snap.forEach(doc => {
+                    const mat = doc.data();
+                    html += `
+                        <div class="p-3 bg-input rounded-lg">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h4 class="font-bold">${mat.title}</h4>
+                                    <p class="text-xs text-muted">${mat.course} • ${mat.type}</p>
+                                </div>
+                                <a href="${mat.fileUrl}" target="_blank" class="text-primary hover:underline">
+                                    <i class="fas fa-download"></i> Download
+                                </a>
+                            </div>
+                            <p class="text-xs text-muted mt-1">Uploaded by ${mat.uploaderName}</p>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html || '<p class="text-muted">No materials yet</p>';
+            } catch (e) {
+                console.error("Error loading materials:", e);
+            }
+        }
+
+        async function uploadMaterial() {
+            const title = prompt('Enter material title:');
+            if (!title) return;
+            const course = prompt('Enter course code:');
+            if (!course) return;
+            const type = prompt('Enter type (past_question/note/textbook):');
+            
+            // In real app, would upload file to storage
+            showToast('Material upload feature - would upload file here');
+        }
+
+        // ============ ANNOUNCEMENTS ============
+        async function loadAnnouncements(filter = 'all') {
+            const container = document.getElementById('announcements-feed');
+            try {
+                let query = db.collection('announcements').orderBy('createdAt', 'desc');
+                const snap = await query.get();
+                
+                let html = '';
+                snap.forEach(doc => {
+                    const ann = doc.data();
+                    if (filter !== 'all' && ann.category !== filter) return;
+                    
+                    html += `
+                        <div class="card" onclick="viewAnnouncementDetails('${doc.id}')">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-xs bg-primary text-white px-2 py-1 rounded-full">${ann.category}</span>
+                                <span class="text-xs text-muted">${ann.createdAt ? new Date(ann.createdAt.seconds*1000).toLocaleDateString() : ''}</span>
+                            </div>
+                            <h3 class="font-bold">${ann.title}</h3>
+                            <p class="text-sm text-muted mt-1">${ann.content.substring(0, 100)}${ann.content.length > 100 ? '...' : ''}</p>
+                            <p class="text-xs text-muted mt-2">Posted by ${ann.postedByName}</p>
+                            ${ann.link ? `<a href="${ann.link}" class="text-primary text-sm mt-2 block">View link →</a>` : ''}
+                        </div>
+                    `;
+                });
+                container.innerHTML = html || '<p class="text-muted">No announcements</p>';
+            } catch (e) {
+                console.error("Error loading announcements:", e);
+            }
+        }
+
+        function viewAnnouncementDetails(annId) {
+            showToast('Viewing announcement details');
+        }
+
+        async function postAnnouncement() {
+            const category = document.getElementById('announce-category').value;
+            const title = document.getElementById('announce-title').value.trim();
+            const content = document.getElementById('announce-content').value.trim();
+            const link = document.getElementById('announce-link').value.trim();
+            
+            if (!title || !content) {
+                showToast('Please fill required fields', 'error');
+                return;
+            }
+            
+            try {
+                const userDoc = await db.collection('Users').doc(currentUserId).get();
+                const userName = userDoc.exists ? userDoc.data().name : 'Executive';
+                
+                await db.collection('announcements').add({
+                    category, title, content, link,
+                    postedBy: currentUserId,
+                    postedByName: userName,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                document.getElementById('announce-title').value = '';
+                document.getElementById('announce-content').value = '';
+                document.getElementById('announce-link').value = '';
+                
+                showToast('Announcement posted!');
+                loadAnnouncements();
+            } catch (e) {
+                showToast('Error posting announcement', 'error');
+            }
+        }
+
+        // ============ EXECUTIVES ============
+        async function loadExecutives() {
+            const container = document.getElementById('executives-directory');
+            try {
+                const snap = await db.collection('executives').orderBy('createdAt', 'desc').get();
+                let html = '';
+                snap.forEach(doc => {
+                    const exec = doc.data();
+                    const badge = exec.level === 'faculty' ? '👑' : exec.level === 'department' ? '⭐' : '📘';
+                    html += `
+                        <div class="user-card" onclick="viewUserProfile('${exec.userId || ''}')">
+                            <img src="https://ui-avatars.com/api/?name=${exec.name}&background=10b981&color=fff&size=48" class="user-avatar">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2">
+                                    <p class="font-bold">${exec.name}</p>
+                                    ${verifiedUsers.has(exec.userId) ? '<span class="verified-badge text-xs"><i class="fas fa-check-circle"></i></span>' : ''}
+                                </div>
+                                <p class="text-xs text-muted">${exec.position} ${badge}</p>
+                            </div>
+                            <button class="text-green-600" onclick="event.stopPropagation(); window.open('https://wa.me/${exec.phone || ''}')">
+                                <i class="fab fa-whatsapp text-xl"></i>
+                            </button>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html || '<p class="text-muted">No executives listed</p>';
+            } catch (e) {
+                console.error("Error loading executives:", e);
+            }
+        }
+
+        // ============ COMMUNITY USERS ============
+        async function loadCommunityUsers() {
+            const container = document.getElementById('community-users');
+            try {
+                const usersSnap = await db.collection('Users').limit(20).get();
+                let html = '';
+                usersSnap.forEach(doc => {
+                    if (doc.id === currentUserId) return; // Don't show self
+                    const user = doc.data();
+                    html += `
+                        <div class="user-card" onclick="viewUserProfile('${doc.id}')">
+                            <img src="${user.photo || `https://ui-avatars.com/api/?name=${user.name || 'User'}&background=10b981&color=fff&size=48`}" class="user-avatar">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2">
+                                    <p class="font-bold">${user.name || 'Anonymous'}</p>
+                                    ${verifiedUsers.has(doc.id) ? '<span class="verified-badge text-xs"><i class="fas fa-check-circle"></i></span>' : ''}
+                                </div>
+                                <p class="text-xs text-muted">${user.level || 'Student'} • ${user.dept || 'SLIT'}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html || '<p class="text-muted">No users found</p>';
+            } catch (e) {
+                console.error("Error loading community users:", e);
+            }
+        }
+
+        // View user profile
+        async function viewUserProfile(userId) {
+            try {
+                const userDoc = await db.collection('Users').doc(userId).get();
+                if (!userDoc.exists) {
+                    showToast('User not found', 'error');
+                    return;
+                }
+                
+                const user = userDoc.data();
+                const isVerified = verifiedUsers.has(userId);
+                
+                // Get user's products
+                const productsSnap = await db.collection('Products')
+                    .where('SellerId', '==', userId)
+                    .where('IsSold', '==', false)
+                    .limit(3)
+                    .get();
+                
+                let productsHtml = '';
+                productsSnap.forEach(doc => {
+                    const p = doc.data();
+                    productsHtml += `
+                        <div class="product-card" onclick="viewProduct('${doc.id}')">
+                            <img src="${p.ImageURL}" class="w-full h-24 object-cover">
+                            <div class="p-2">
+                                <p class="font-bold text-xs">${p.Title}</p>
+                                <p class="text-primary text-xs">₦${formatPrice(p.Price)}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                const modal = document.createElement('div');
+                modal.className = 'modal-overlay';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <div class="text-center mb-4">
+                            <img src="${user.photo || `https://ui-avatars.com/api/?name=${user.name || 'User'}&background=10b981&color=fff&size=80`}" class="w-20 h-20 rounded-full mx-auto mb-3">
+                            <h2 class="text-xl font-bold">${user.name || 'Anonymous'}</h2>
+                            ${isVerified ? '<span class="verified-badge"><i class="fas fa-check-circle"></i> Verified</span>' : ''}
+                            <p class="text-sm text-muted mt-1">${user.level || 'Level not set'} • ${user.dept || 'No department'}</p>
+                        </div>
+                        
+                        ${user.bio ? `
+                            <div class="bg-input p-3 rounded-lg mb-4">
+                                <p class="text-sm">${user.bio}</p>
+                            </div>
+                        ` : ''}
+                        
+                        ${!user.hideEmail ? `
+                            <div class="bg-input p-3 rounded-lg mb-3">
+                                <p class="text-sm"><i class="fas fa-envelope text-muted mr-2"></i>${user.email || 'No email'}</p>
+                            </div>
+                        ` : ''}
+                        
+                        ${user.phone ? `
+                            <div class="flex gap-2 mb-4">
+                                <a href="https://wa.me/${user.phone.replace('+', '')}" target="_blank" class="btn-whatsapp flex-1 py-2 text-sm">WhatsApp</a>
+                                <a href="tel:${user.phone}" class="btn-call flex-1 py-2 text-sm">Call</a>
+                            </div>
+                        ` : ''}
+                        
+                        ${productsHtml ? `
+                            <div class="mb-4">
+                                <h3 class="font-bold mb-2">Listings</h3>
+                                <div class="grid grid-cols-3 gap-2">
+                                    ${productsHtml}
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        <button class="btn-outline w-full" onclick="this.closest('.modal-overlay').remove()">Close</button>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            } catch (e) {
+                console.error("Error viewing user profile:", e);
+            }
+        }
+
+        // ============ MARKETPLACE FUNCTIONS ============
+        function showPostProductModal() {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h2 class="text-2xl font-bold mb-4">Sell an Item</h2>
+                    <div class="space-y-4">
+                        <input type="text" id="product-title" class="input-field" placeholder="Title *">
+                        <textarea id="product-desc" class="input-field" rows="3" placeholder="Description *"></textarea>
+                        <input type="number" id="product-price" class="input-field" placeholder="Price (₦) *">
+                        <select id="product-category" class="input-field">
+                            <option value="Tech">💻 Tech</option>
+                            <option value="Books">📚 Books</option>
+                            <option value="Fashion">👕 Fashion</option>
+                            <option value="Other">➕ Other</option>
+                        </select>
+                        <select id="product-condition" class="input-field">
+                            <option value="New">New</option>
+                            <option value="Used">Used</option>
+                        </select>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" id="product-negotiable"> Price is negotiable
+                        </label>
+                        <input type="text" id="product-location" class="input-field" placeholder="Location">
+                        <div class="phone-input-container">
+                            <span class="phone-prefix">+234</span>
+                            <input type="tel" id="product-phone" class="input-field" placeholder="Phone number *">
+                        </div>
+                        <div class="flex gap-3">
+                            <button class="btn-primary flex-1" onclick="postProduct(this)">Post Item</button>
+                            <button class="btn-outline" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        async function postProduct(btn) {
+            const title = document.getElementById('product-title').value.trim();
+            const desc = document.getElementById('product-desc').value.trim();
+            const price = parseInt(document.getElementById('product-price').value);
+            const category = document.getElementById('product-category').value;
+            const condition = document.getElementById('product-condition').value;
+            const negotiable = document.getElementById('product-negotiable').checked;
+            const location = document.getElementById('product-location').value.trim();
+            const phoneInput = document.getElementById('product-phone').value.trim().replace(/^0+/, '');
+            const phone = phoneInput ? '+234' + phoneInput : '';
+            
+            if (!title || !desc || !price || !phone) {
+                showToast('Please fill all required fields', 'error');
+                return;
+            }
+            
+            btn.classList.add('btn-loading');
+            btn.disabled = true;
+            
+            try {
+                const userDoc = await db.collection('Users').doc(currentUserId).get();
+                const sellerName = userDoc.exists ? userDoc.data().name : 'Anonymous';
+                
+                await db.collection('Products').add({
+                    Title: title,
+                    Description: desc,
+                    Price: price,
+                    Category: category,
+                    Condition: condition,
+                    Negotiable: negotiable,
+                    Location: location,
+                    Phone: phone,
+                    ImageURL: "https://placehold.co/600x400?text=Product",
+                    SellerId: currentUserId,
+                    SellerName: sellerName,
+                    CreatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    IsSold: false,
+                    Rating: 0,
+                    ReviewCount: 0
+                });
+                
+                document.querySelector('.modal-overlay').remove();
+                showToast('Product posted!');
+                loadProducts();
+            } catch (e) {
+                showToast('Error posting product', 'error');
+            } finally {
+                btn.classList.remove('btn-loading');
+                btn.disabled = false;
+            }
+        }
+
+        async function loadProducts() {
+            const container = document.getElementById('product-grid');
+            if (!container) return;
+            
+            try {
+                const snapshot = await db.collection('Products')
+                    .where('IsSold', '==', false)
+                    .orderBy('CreatedAt', 'desc')
+                    .get();
+                
+                if (snapshot.empty) {
+                    container.innerHTML = '<p class="text-muted text-center py-8">No items for sale</p>';
+                    return;
+                }
+                
+                let html = '';
+                for (const doc of snapshot.docs) {
+                    const p = doc.data();
+                    const sellerVerified = verifiedUsers.has(p.SellerId);
+                    
+                    html += `
+                        <div class="product-card" onclick="viewProductDetails('${doc.id}')">
+                            <img src="${p.ImageURL}" class="w-full h-40 object-cover">
+                            <div class="p-3">
+                                <div class="flex items-center gap-1 mb-1">
+                                    <h3 class="font-bold truncate flex-1">${p.Title}</h3>
+                                    ${sellerVerified ? '<span class="verified-badge text-xs"><i class="fas fa-check-circle"></i></span>' : ''}
+                                </div>
+                                <p class="text-primary font-bold">₦${formatPrice(p.Price)}</p>
+                                <p class="text-xs text-muted">${p.Location || 'Campus'}</p>
+                            </div>
+                        </div>
+                    `;
+                }
+                container.innerHTML = html;
+            } catch (e) {
+                console.error("Error loading products:", e);
+            }
+        }
+
+        async function viewProductDetails(productId) {
+            try {
+                const productDoc = await db.collection('Products').doc(productId).get();
+                const p = productDoc.data();
+                
+                // Get seller info
+                const sellerDoc = await db.collection('Users').doc(p.SellerId).get();
+                const seller = sellerDoc.exists ? sellerDoc.data() : {};
+                const sellerVerified = verifiedUsers.has(p.SellerId);
+                
+                // Get reviews
+                const reviewsSnap = await db.collection('Products').doc(productId).collection('Reviews')
+                    .orderBy('timestamp', 'desc')
+                    .get();
+                
+                let reviewsHtml = '';
+                reviewsSnap.forEach(doc => {
+                    const r = doc.data();
+                    reviewsHtml += `
+                        <div class="bg-input p-3 rounded-lg">
+                            <p class="font-bold text-sm">${r.userName}</p>
+                            <div class="flex text-yellow-500 text-xs mb-1">
+                                ${'★'.repeat(r.stars)}${'☆'.repeat(5 - r.stars)}
+                            </div>
+                            <p class="text-sm">${r.text}</p>
+                        </div>
+                    `;
+                });
+                
+                const modal = document.createElement('div');
+                modal.className = 'modal-overlay';
+                modal.innerHTML = `
+                    <div class="modal-content max-w-2xl">
+                        <img src="${p.ImageURL}" class="w-full h-48 object-cover rounded-lg mb-4">
+                        
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h2 class="text-2xl font-bold">${p.Title}</h2>
+                                <p class="text-muted">${p.Category} • ${p.Condition}</p>
+                            </div>
+                            <p class="text-primary text-2xl font-bold">₦${formatPrice(p.Price)}</p>
+                        </div>
+                        
+                        <div class="bg-input p-4 rounded-lg mb-4">
+                            <p class="text-sm">${p.Description}</p>
+                            ${p.Negotiable ? '<p class="text-xs text-success mt-2">💰 Price negotiable</p>' : ''}
+                        </div>
+                        
+                        <!-- Seller Info -->
+                        <div class="flex items-center gap-4 p-4 bg-input rounded-lg mb-4 cursor-pointer" onclick="viewUserProfile('${p.SellerId}')">
+                            <img src="${seller.photo || `https://ui-avatars.com/api/?name=${seller.name || 'User'}`}" class="w-12 h-12 rounded-full">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2">
+                                    <p class="font-bold">${seller.name || 'Anonymous'}</p>
+                                    ${sellerVerified ? '<span class="verified-badge text-xs"><i class="fas fa-check-circle"></i></span>' : ''}
+                                </div>
+                                <p class="text-xs text-muted">Click to view profile</p>
+                            </div>
+                            ${p.SellerId !== currentUserId ? `
+                                <button class="text-red-500" onclick="reportUser('${p.SellerId}', event)">Report</button>
+                            ` : ''}
+                        </div>
+                        
+                        <!-- Contact Buttons -->
+                        ${p.SellerId !== currentUserId ? `
+                            <div class="flex gap-3 mb-4">
+                                <a href="https://wa.me/${p.Phone.replace('+', '')}" target="_blank" class="btn-whatsapp flex-1 py-3">WhatsApp</a>
+                                <a href="tel:${p.Phone}" class="btn-call flex-1 py-3">Call</a>
+                            </div>
+                        ` : ''}
+                        
+                        <p class="text-sm mb-4"><i class="fas fa-map-marker-alt text-muted mr-2"></i>${p.Location || 'Campus'}</p>
+                        
+                        <!-- Reviews -->
+                        <div class="mb-4">
+                            <h3 class="font-bold mb-2">Reviews</h3>
+                            <div class="space-y-2 max-h-48 overflow-y-auto">
+                                ${reviewsHtml || '<p class="text-muted text-sm">No reviews yet</p>'}
+                            </div>
+                        </div>
+                        
+                        <!-- Leave Review -->
+                        ${p.SellerId !== currentUserId ? `
+                            <div class="border-t pt-4">
+                                <h3 class="font-bold mb-2">Leave a Review</h3>
+                                <div class="star-rating mb-2" id="review-stars">
+                                    ${[1,2,3,4,5].map(i => `<i class="far fa-star text-2xl" data-rating="${i}"></i>`).join('')}
+                                </div>
+                                <textarea id="review-text" class="input-field mb-2" rows="2" placeholder="Your review..."></textarea>
+                                <button class="btn-primary w-full" onclick="submitReview('${productId}')">Submit Review</button>
+                            </div>
+                        ` : ''}
+                        
+                        <button class="btn-outline w-full mt-4" onclick="this.closest('.modal-overlay').remove()">Close</button>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                
+                // Setup star rating
+                const stars = modal.querySelectorAll('#review-stars i');
+                let currentRating = 0;
+                stars.forEach(star => {
+                    star.addEventListener('mouseover', () => {
+                        const rating = parseInt(star.dataset.rating);
+                        stars.forEach((s, i) => {
+                            if (i < rating) s.className = 'fas fa-star text-2xl';
+                            else s.className = 'far fa-star text-2xl';
+                        });
+                    });
+                    star.addEventListener('click', () => {
+                        currentRating = parseInt(star.dataset.rating);
+                    });
+                });
+                window.currentRating = () => currentRating || 5;
+            } catch (e) {
+                console.error("Error viewing product:", e);
+            }
+        }
+
+        async function submitReview(productId) {
+            const text = document.getElementById('review-text')?.value.trim();
+            const stars = window.currentRating ? window.currentRating() : 5;
+            
+            if (!text) {
+                showToast('Please write a review', 'error');
+                return;
+            }
+            
+            try {
+                const userDoc = await db.collection('Users').doc(currentUserId).get();
+                const userName = userDoc.exists ? userDoc.data().name : 'User';
+                
+                await db.collection('Products').doc(productId).collection('Reviews').add({
+                    userId: currentUserId,
+                    userName: userName,
+                    stars: stars,
+                    text: text,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                // Update product rating
+                const productRef = db.collection('Products').doc(productId);
+                const productDoc = await productRef.get();
+                const p = productDoc.data();
+                
+                await productRef.update({
+                    Rating: (p.Rating || 0) + stars,
+                    ReviewCount: (p.ReviewCount || 0) + 1
+                });
+                
+                showToast('Review submitted!');
+                document.querySelector('.modal-overlay').remove();
+            } catch (e) {
+                showToast('Error submitting review', 'error');
+            }
+        }
+
+        // ============ SERVICES ============
+        async function loadServices() {
+            const container = document.getElementById('services-grid');
+            try {
+                const snap = await db.collection('services').orderBy('createdAt', 'desc').get();
+                let html = '';
+                snap.forEach(doc => {
+                    const s = doc.data();
+                    html += `
+                        <div class="card" onclick="viewServiceDetails('${doc.id}')">
+                            <h3 class="font-bold">${s.title}</h3>
+                            <p class="text-sm text-muted">${s.description}</p>
+                            <p class="text-primary font-bold mt-2">₦${formatPrice(s.price)}</p>
+                            <p class="text-xs text-muted mt-1">${s.provider}</p>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html || '<p class="text-muted">No services yet</p>';
+            } catch (e) {
+                console.error("Error loading services:", e);
+            }
+        }
+
+        async function postService() {
+            const title = prompt('Enter service title:');
+            if (!title) return;
+            const desc = prompt('Enter description:');
+            if (!desc) return;
+            const price = prompt('Enter price:');
+            if (!price) return;
+            
+            try {
+                const userDoc = await db.collection('Users').doc(currentUserId).get();
+                const userName = userDoc.exists ? userDoc.data().name : 'Anonymous';
+                
+                await db.collection('services').add({
+                    title, 
+                    description: desc, 
+                    price: parseInt(price),
+                    provider: userName,
+                    providerId: currentUserId,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                showToast('Service listed!');
+                loadServices();
+            } catch (e) {
+                showToast('Error listing service', 'error');
+            }
+        }
+
+        function viewServiceDetails(serviceId) {
+            showToast('Viewing service details');
+        }
+
+        // ============ REQUESTS ============
+        async function loadRequests() {
+            const container = document.getElementById('requests-grid');
+            try {
+                const snap = await db.collection('requests').orderBy('createdAt', 'desc').get();
+                let html = '';
+                snap.forEach(doc => {
+                    const r = doc.data();
+                    html += `
+                        <div class="card" onclick="viewRequestDetails('${doc.id}')">
+                            <span class="text-xs bg-warning text-white px-2 py-1 rounded-full">${r.category}</span>
+                            <h3 class="font-bold mt-2">${r.title}</h3>
+                            <p class="text-sm text-muted">${r.description}</p>
+                            <p class="text-xs text-muted mt-2">Posted by ${r.posterName}</p>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html || '<p class="text-muted">No requests yet</p>';
+            } catch (e) {
+                console.error("Error loading requests:", e);
+            }
+        }
+
+        async function postRequest() {
+            const category = prompt('Enter category (roommate/study/textbook/urgent):');
+            if (!category) return;
+            const title = prompt('Enter title:');
+            if (!title) return;
+            const desc = prompt('Enter description:');
+            if (!desc) return;
+            
+            try {
+                const userDoc = await db.collection('Users').doc(currentUserId).get();
+                const userName = userDoc.exists ? userDoc.data().name : 'Anonymous';
+                
+                await db.collection('requests').add({
+                    category, 
+                    title, 
+                    description: desc,
+                    posterName: userName,
+                    posterId: currentUserId,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                showToast('Request posted!');
+                loadRequests();
+            } catch (e) {
+                showToast('Error posting request', 'error');
+            }
+        }
+
+        function viewRequestDetails(requestId) {
+            showToast('Viewing request details');
+        }
+
+        // ============ MY ITEMS ============
+        async function loadMyItems() {
+            // Load my products
+            const productsContainer = document.getElementById('my-products-grid');
+            try {
+                const productsSnap = await db.collection('Products')
+                    .where('SellerId', '==', currentUserId)
+                    .orderBy('CreatedAt', 'desc')
+                    .get();
+                
+                let productsHtml = '';
+                productsSnap.forEach(doc => {
+                    const p = doc.data();
+                    productsHtml += `
+                        <div class="card">
+                            <div class="flex items-center gap-4">
+                                <img src="${p.ImageURL}" class="w-16 h-16 rounded-lg object-cover">
+                                <div class="flex-1">
+                                    <h3 class="font-bold">${p.Title}</h3>
+                                    <p class="text-primary font-bold">₦${formatPrice(p.Price)}</p>
+                                    ${p.IsSold ? '<span class="text-xs bg-danger text-white px-2 py-1 rounded">SOLD</span>' : ''}
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="edit-btn" onclick="editProduct('${doc.id}')"><i class="fas fa-edit"></i></button>
+                                    <button class="delete-btn" onclick="deleteProduct('${doc.id}')"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                productsContainer.innerHTML = productsHtml || '<p class="text-muted">No products yet</p>';
+            } catch (e) {
+                console.error("Error loading my products:", e);
+            }
+            
+            // Load my services
+            const servicesContainer = document.getElementById('my-services-grid');
+            try {
+                const servicesSnap = await db.collection('services')
+                    .where('providerId', '==', currentUserId)
+                    .orderBy('createdAt', 'desc')
+                    .get();
+                
+                let servicesHtml = '';
+                servicesSnap.forEach(doc => {
+                    const s = doc.data();
+                    servicesHtml += `
+                        <div class="card">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h3 class="font-bold">${s.title}</h3>
+                                    <p class="text-primary">₦${formatPrice(s.price)}</p>
+                                </div>
+                                <button class="delete-btn" onclick="deleteService('${doc.id}')"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                    `;
+                });
+                servicesContainer.innerHTML = servicesHtml || '<p class="text-muted">No services yet</p>';
+            } catch (e) {
+                console.error("Error loading my services:", e);
+            }
+            
+            // Load my requests
+            const requestsContainer = document.getElementById('my-requests-grid');
+            try {
+                const requestsSnap = await db.collection('requests')
+                    .where('posterId', '==', currentUserId)
+                    .orderBy('createdAt', 'desc')
+                    .get();
+                
+                let requestsHtml = '';
+                requestsSnap.forEach(doc => {
+                    const r = doc.data();
+                    requestsHtml += `
+                        <div class="card">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <span class="text-xs bg-warning text-white px-2 py-1 rounded">${r.category}</span>
+                                    <h3 class="font-bold mt-2">${r.title}</h3>
+                                </div>
+                                <button class="delete-btn" onclick="deleteRequest('${doc.id}')"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                    `;
+                });
+                requestsContainer.innerHTML = requestsHtml || '<p class="text-muted">No requests yet</p>';
+            } catch (e) {
+                console.error("Error loading my requests:", e);
+            }
+        }
+
+        async function editProduct(productId) {
+            const newPrice = prompt('Enter new price:');
+            if (!newPrice) return;
+            
+            try {
+                await db.collection('Products').doc(productId).update({
+                    Price: parseInt(newPrice)
+                });
+                showToast('Product updated!');
+                loadMyItems();
+                loadProducts();
+            } catch (e) {
+                showToast('Error updating product', 'error');
+            }
+        }
+
+        async function deleteProduct(productId) {
+            if (confirm('Delete this product?')) {
+                try {
+                    await db.collection('Products').doc(productId).delete();
+                    showToast('Product deleted');
+                    loadMyItems();
+                    loadProducts();
+                } catch (e) {
+                    showToast('Error deleting product', 'error');
+                }
+            }
+        }
+
+        async function deleteService(serviceId) {
+            if (confirm('Delete this service?')) {
+                try {
+                    await db.collection('services').doc(serviceId).delete();
+                    showToast('Service deleted');
+                    loadMyItems();
+                    loadServices();
+                } catch (e) {
+                    showToast('Error deleting service', 'error');
+                }
+            }
+        }
+
+        async function deleteRequest(requestId) {
+            if (confirm('Delete this request?')) {
+                try {
+                    await db.collection('requests').doc(requestId).delete();
+                    showToast('Request deleted');
+                    loadMyItems();
+                    loadRequests();
+                } catch (e) {
+                    showToast('Error deleting request', 'error');
+                }
+            }
+        }
+
+        // ============ ADMIN FUNCTIONS ============
+        function toggleAdminMode() {
+            const password = prompt("Enter admin password:");
+            if (password === "junior123") {
+                isAdminMode = !isAdminMode;
+                document.getElementById('admin-panel').classList.toggle('hidden', !isAdminMode);
+                document.getElementById('admin-toggle').innerHTML = isAdminMode ? 
+                    '<i class="fas fa-lock-open"></i> Admin: ON' : 
+                    '<i class="fas fa-lock"></i> Admin: OFF';
+                
+                if (isAdminMode) {
+                    loadAdminData();
+                }
+            }
+        }
+
+        async function loadAdminData() {
+            try {
+                await loadVerifiedUsers();
+                
+                // Load stats
+                const deptsSnap = await db.collection('departments').get();
+                const execsSnap = await db.collection('executives').get();
+                const usersSnap = await db.collection('Users').get();
+                const productsSnap = await db.collection('Products').get();
+                
+                document.getElementById('admin-stat-depts').innerText = deptsSnap.size;
+                document.getElementById('admin-stat-execs').innerText = execsSnap.size;
+                document.getElementById('admin-stat-users').innerText = usersSnap.size;
+                document.getElementById('admin-stat-products').innerText = productsSnap.size;
+                
+                // Load departments dropdown
+                let deptOptions = '<option value="">Select Department</option>';
+                deptsSnap.forEach(doc => {
+                    const dept = doc.data();
+                    deptOptions += `<option value="${doc.id}">${dept.name}</option>`;
+                });
+                document.getElementById('exec-dept').innerHTML = deptOptions;
+                
+                // Load departments list
+                let deptList = '';
+                deptsSnap.forEach(doc => {
+                    const dept = doc.data();
+                    deptList += `
+                        <div class="flex justify-between items-center p-3 bg-input rounded-lg">
+                            <span>${dept.name} (${dept.code})</span>
+                            <button class="delete-btn" onclick="deleteDepartment('${doc.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                });
+                document.getElementById('depts-list').innerHTML = deptList || '<p class="text-muted">No departments</p>';
+                
+                // Load executives list
+                let execList = '';
+                const execsQuery = await db.collection('executives').orderBy('createdAt', 'desc').get();
+                execsQuery.forEach(doc => {
+                    const exec = doc.data();
+                    execList += `
+                        <div class="flex justify-between items-center p-3 bg-input rounded-lg">
+                            <div>
+                                <p class="font-bold">${exec.name}</p>
+                                <p class="text-xs text-muted">${exec.position}</p>
+                            </div>
+                            <button class="delete-btn" onclick="deleteExecutive('${doc.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                });
+                document.getElementById('execs-list').innerHTML = execList || '<p class="text-muted">No executives</p>';
+                
+                // Load admin messages
+                const messagesSnap = await db.collection('AdminMessages').orderBy('timestamp', 'desc').get();
+                let messagesHtml = '';
+                messagesSnap.forEach(doc => {
+                    const msg = doc.data();
+                    messagesHtml += `
+                        <div class="p-3 bg-input rounded-lg">
+                            <p class="font-bold">From: ${msg.userName || 'Unknown'}</p>
+                            <p class="text-sm">${msg.message}</p>
+                            <p class="text-xs text-muted mt-1">${msg.timestamp ? new Date(msg.timestamp.seconds*1000).toLocaleString() : ''}</p>
+                        </div>
+                    `;
+                });
+                document.getElementById('admin-messages-list').innerHTML = messagesHtml || '<p class="text-muted">No messages</p>';
+                
+                // Load users with verification status
+                let memberHtml = '';
+                usersSnap.forEach(doc => {
+                    if (doc.id === CREATOR_USER_ID) return; // Hide creator from list
+                    const user = doc.data();
+                    const isVerified = verifiedUsers.has(doc.id);
+                    memberHtml += `
+                        <div class="flex justify-between items-center p-3 bg-input rounded-lg">
+                            <div>
+                                <p class="font-bold">${user.name || 'Anonymous'}</p>
+                                <p class="text-xs text-muted">${user.email || ''}</p>
+                                ${isVerified ? 
+                                    '<span class="verified-badge text-xs">Verified</span>' : 
+                                    '<span class="unverified-badge text-xs">Unverified</span>'}
+                            </div>
+                            <div class="flex gap-2">
+                                ${!isVerified ? `
+                                    <button class="text-success" onclick="verifyUser('${doc.id}')">
+                                        <i class="fas fa-check-circle"></i>
+                                    </button>
+                                ` : `
+                                    <button class="text-warning" onclick="unverifyUser('${doc.id}')">
+                                        <i class="fas fa-times-circle"></i>
+                                    </button>
+                                `}
+                                <button class="text-danger" onclick="banUser('${doc.id}')">
+                                    <i class="fas fa-ban"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                document.getElementById('member-directory-admin').innerHTML = memberHtml || '<p class="text-muted">No users</p>';
+                
+                // Load verification requests
+                const verifSnap = await db.collection('VerificationRequests').get();
+                let verifHtml = '';
+                verifSnap.forEach(doc => {
+                    const req = doc.data();
+                    verifHtml += `
+                        <div class="flex justify-between items-center p-3 bg-input rounded-lg">
+                            <div>
+                                <p class="font-bold">${req.userName}</p>
+                                <p class="text-xs text-muted">ID: ${doc.id}</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="text-success" onclick="verifyUser('${doc.id}')">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                <button class="text-danger" onclick="rejectVerification('${doc.id}')">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                document.getElementById('verification-list').innerHTML = verifHtml || '<p class="text-muted">No verification requests</p>';
+                
+                // Load reports
+                const reportsSnap = await db.collection('Reports').get();
+                let reportsHtml = '';
+                reportsSnap.forEach(doc => {
+                    const r = doc.data();
+                    reportsHtml += `
+                        <div class="p-3 bg-input rounded-lg">
+                            <p class="font-bold">Report against: ${r.reportedUser}</p>
+                            <p class="text-sm">${r.reason}</p>
+                            <div class="flex gap-2 mt-2">
+                                <button class="btn-danger text-xs py-1 px-3" onclick="banUser('${r.reportedUser}')">Ban</button>
+                                <button class="btn-success text-xs py-1 px-3" onclick="resolveReport('${doc.id}')">Resolve</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                document.getElementById('reports-list').innerHTML = reportsHtml || '<p class="text-muted">No reports</p>';
+                
+                // Load banned users
+                const bannedSnap = await db.collection('BannedUsers').get();
+                let bannedHtml = '';
+                bannedSnap.forEach(doc => {
+                    const ban = doc.data();
+                    bannedHtml += `
+                        <div class="flex justify-between items-center p-3 bg-input rounded-lg">
+                            <div>
+                                <p class="font-bold">User ID: ${doc.id}</p>
+                                <p class="text-xs text-muted">Banned: ${ban.bannedAt ? new Date(ban.bannedAt.seconds*1000).toLocaleDateString() : ''}</p>
+                            </div>
+                            <button class="text-success" onclick="unbanUser('${doc.id}')">
+                                <i class="fas fa-undo"></i> Unban
+                            </button>
+                        </div>
+                    `;
+                });
+                document.getElementById('banned-users-list').innerHTML = bannedHtml || '<p class="text-muted">No banned users</p>';
+                
+            } catch (e) {
+                console.error("Error loading admin data:", e);
+            }
+        }
+
+        // Admin actions
+        async function addDepartment() {
+            const name = document.getElementById('dept-name').value.trim();
+            const code = document.getElementById('dept-code').value.trim();
+            
+            if (!name || !code) {
+                showToast('Please fill all fields', 'error');
+                return;
+            }
+            
+            try {
+                await db.collection('departments').add({
+                    name, code,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                showToast('Department added!');
+                document.getElementById('dept-name').value = '';
+                document.getElementById('dept-code').value = '';
+                loadAdminData();
+            } catch (e) {
+                showToast('Error adding department', 'error');
+            }
+        }
+
+        async function deleteDepartment(id) {
+            if (confirm('Delete this department?')) {
+                try {
+                    await db.collection('departments').doc(id).delete();
+                    showToast('Department deleted');
+                    loadAdminData();
+                } catch (e) {
+                    showToast('Error deleting department', 'error');
+                }
+            }
+        }
+
+        async function addExecutive() {
+            const deptId = document.getElementById('exec-dept').value;
+            const name = document.getElementById('exec-name').value.trim();
+            const position = document.getElementById('exec-position').value.trim();
+            const email = document.getElementById('exec-email').value.trim();
+            const level = document.getElementById('exec-level').value;
+            
+            if (!deptId || !name || !position || !email) {
+                showToast('Please fill required fields', 'error');
+                return;
+            }
+            
+            try {
+                await db.collection('executives').add({
+                    departmentId: deptId, 
+                    name, 
+                    position, 
+                    email, 
+                    level,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                showToast('Executive added!');
+                document.getElementById('exec-name').value = '';
+                document.getElementById('exec-position').value = '';
+                document.getElementById('exec-email').value = '';
+                loadAdminData();
+            } catch (e) {
+                showToast('Error adding executive', 'error');
+            }
+        }
+
+        async function deleteExecutive(id) {
+            if (confirm('Remove this executive?')) {
+                try {
+                    await db.collection('executives').doc(id).delete();
+                    showToast('Executive removed');
+                    loadAdminData();
+                } catch (e) {
+                    showToast('Error removing executive', 'error');
+                }
+            }
+        }
+
+        async function verifyUser(userId) {
+            try {
+                await db.collection('VerifiedUsers').doc(userId).set({
+                    verifiedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    verifiedBy: currentUserId
+                });
+                await db.collection('VerificationRequests').doc(userId).delete().catch(() => {});
+                showToast('User verified');
+                loadAdminData();
+                loadVerifiedUsers();
+            } catch (e) {
+                showToast('Error verifying user', 'error');
+            }
+        }
+
+        async function unverifyUser(userId) {
+            if (confirm('Remove verification?')) {
+                try {
+                    await db.collection('VerifiedUsers').doc(userId).delete();
+                    showToast('Verification removed');
+                    loadAdminData();
+                    loadVerifiedUsers();
+                } catch (e) {
+                    showToast('Error removing verification', 'error');
+                }
+            }
+        }
+
+        async function banUser(userId) {
+            if (confirm('Ban this user?')) {
+                try {
+                    await db.collection('BannedUsers').doc(userId).set({
+                        bannedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        bannedBy: currentUserId
+                    });
+                    showToast('User banned');
+                    loadAdminData();
+                } catch (e) {
+                    showToast('Error banning user', 'error');
+                }
+            }
+        }
+
+        async function unbanUser(userId) {
+            if (confirm('Unban this user?')) {
+                try {
+                    await db.collection('BannedUsers').doc(userId).delete();
+                    showToast('User unbanned');
+                    loadAdminData();
+                } catch (e) {
+                    showToast('Error unbanning user', 'error');
+                }
+            }
+        }
+
+        async function rejectVerification(requestId) {
+            if (confirm('Reject verification?')) {
+                try {
+                    await db.collection('VerificationRequests').doc(requestId).delete();
+                    showToast('Request rejected');
+                    loadAdminData();
+                } catch (e) {
+                    showToast('Error rejecting request', 'error');
+                }
+            }
+        }
+
+        async function resolveReport(reportId) {
+            try {
+                await db.collection('Reports').doc(reportId).delete();
+                showToast('Report resolved');
+                loadAdminData();
+            } catch (e) {
+                showToast('Error resolving report', 'error');
+            }
+        }
+
+        async function sendGlobalBroadcast() {
+            const msg = document.getElementById('global-broadcast-input').value.trim();
+            if (!msg) {
+                showToast('Enter a message', 'error');
+                return;
+            }
+            
+            try {
+                await db.collection('AppData').doc('Announcement').set({
+                    message: msg,
+                    active: true,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                showToast('Broadcast sent!');
+                document.getElementById('global-broadcast').classList.remove('hidden');
+                document.getElementById('broadcast-message').innerText = msg;
+                document.getElementById('global-broadcast-input').value = '';
+            } catch (e) {
+                showToast('Error sending broadcast', 'error');
+            }
+        }
+
+        async function deleteGlobalBroadcast() {
+            if (confirm('Delete broadcast?')) {
+                try {
+                    await db.collection('AppData').doc('Announcement').set({
+                        active: false
+                    });
+                    document.getElementById('global-broadcast').classList.add('hidden');
+                    showToast('Broadcast deleted');
+                } catch (e) {
+                    showToast('Error deleting broadcast', 'error');
+                }
+            }
+        }
+
+        function showBroadcastDetails() {
+            const msg = document.getElementById('broadcast-message').innerText;
+            showToast(msg, 'info');
+        }
+
+        // ============ CONTACT ADMIN ============
+        function contactAdmin() {
+            const message = prompt('Enter your message to admin:');
+            if (!message) return;
+            
+            db.collection('AdminMessages').add({
+                userId: currentUserId,
+                userName: currentUserData?.name || 'Unknown',
+                message: message,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                read: false
+            }).then(() => {
+                showToast('Message sent to admin!');
+            }).catch(() => {
+                showToast('Error sending message', 'error');
+            });
+        }
+
+        // ============ REQUEST VERIFICATION ============
+        function requestVerification() {
+            document.getElementById('id-upload').click();
+        }
+
+        document.getElementById('id-upload').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            try {
+                await db.collection('VerificationRequests').doc(currentUserId).set({
+                    userId: currentUserId,
+                    userName: currentUserData?.name || 'Unknown',
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    status: 'pending'
+                });
+                showToast('Verification request sent! Admin will review');
+            } catch (e) {
+                showToast('Error sending request', 'error');
+            }
+        });
+
+        // ============ REPORT USER ============
+        function reportUser(userId, event) {
+            if (event) event.stopPropagation();
+            const reason = prompt('Why are you reporting this user?');
+            if (!reason) return;
+            
+            db.collection('Reports').add({
+                reportedUser: userId,
+                reporterUser: currentUserId,
+                reason: reason,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                showToast('Report sent');
+            }).catch(() => {
+                showToast('Error sending report', 'error');
+            });
+        }
+
+        // ============ SAVE PORTFOLIO ============
+        function savePortfolio() {
+            const url = document.getElementById('portfolio-url').value;
+            const image = document.getElementById('portfolio-image').value;
+            localStorage.setItem('portfolio_url', url);
+            localStorage.setItem('portfolio_image', image);
+            document.getElementById('creator-portfolio-link').href = url;
+            document.getElementById('portfolio-link-button').href = url;
+            showToast('Portfolio links saved!');
+        }
+
+        // ============ LOAD DEPARTMENTS ============
+        async function loadDepartments() {
+            try {
+                const deptsSnap = await db.collection('departments').get();
+                let options = '<option value="">Select Department</option>';
+                deptsSnap.forEach(doc => {
+                    const dept = doc.data();
+                    options += `<option value="${doc.id}">${dept.name}</option>`;
+                });
+                
+                document.getElementById('profile-dept').innerHTML = options;
+                document.getElementById('academics-dept').innerHTML = options;
+            } catch (e) {
+                console.error("Error loading departments:", e);
+            }
+        }
+
+        // ============ DARK MODE ============
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            localStorage.setItem('dark-mode', html.classList.contains('dark'));
+            document.getElementById('dark-icon').className = html.classList.contains('dark') ? 'fas fa-sun' : 'fas fa-moon';
+        }
+        
+        if (localStorage.getItem('dark-mode') === 'true') {
+            document.documentElement.classList.add('dark');
+            document.getElementById('dark-icon').className = 'fas fa-sun';
+        }
+
+        // ============ PWA INSTALL ============
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('install-btn').style.display = 'flex';
+        });
+
+        document.getElementById('install-btn').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`User response: ${outcome}`);
+                deferredPrompt = null;
+                document.getElementById('install-btn').style.display = 'none';
+            }
+        });
+
+        // ============ EVENT LISTENERS ============
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('SLIT-HUB initializing...');
+            
+            // Logo click
+            document.getElementById('logo').addEventListener('click', () => switchTab('home'));
+            
+            // Dark mode toggle
+            document.getElementById('dark-mode-toggle').addEventListener('click', toggleDarkMode);
+            
+            // Tab buttons
+            document.querySelectorAll('.tab[data-tab]').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    switchTab(this.dataset.tab);
+                });
+            });
+            
+            // Bottom navigation
+            document.querySelectorAll('.nav-item[data-nav]').forEach(item => {
+                item.addEventListener('click', function() {
+                    switchTab(this.dataset.nav);
+                });
+            });
+            
+            // Home cards
+            document.querySelectorAll('[data-nav]').forEach(card => {
+                card.addEventListener('click', function() {
+                    switchTab(this.dataset.nav);
+                });
+            });
+            
+            // Academics cards
+            document.querySelectorAll('[data-academics]').forEach(card => {
+                card.addEventListener('click', function() {
+                    showToast(`Opening ${this.dataset.academics}`);
+                });
+            });
+            
+            // Hide timetable
+            document.getElementById('hide-timetable')?.addEventListener('click', function() {
+                document.getElementById('timetable-container').classList.add('hidden');
+            });
+            
+            // Create study group
+            document.getElementById('create-study-group')?.addEventListener('click', createStudyGroup);
+            
+            // Upload material
+            document.getElementById('upload-material')?.addEventListener('click', uploadMaterial);
+            
+            // Category filters
+            document.querySelectorAll('[data-category]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.category-btn').forEach(b => {
+                        b.classList.remove('bg-primary', 'text-white');
+                        b.classList.add('bg-card', 'border', 'border-base');
+                    });
+                    this.classList.add('bg-primary', 'text-white');
+                    loadAnnouncements(this.dataset.category);
+                });
+            });
+            
+            // Publish announcement
+            document.getElementById('publish-announcement')?.addEventListener('click', postAnnouncement);
+            
+            // Marketplace sub-tabs
+            document.querySelectorAll('[data-marketplace]').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    switchMarketplaceTab(this.dataset.marketplace);
+                });
+            });
+            
+            // Sell item
+            document.getElementById('sell-item')?.addEventListener('click', showPostProductModal);
+            
+            // List service
+            document.getElementById('list-service')?.addEventListener('click', postService);
+            
+            // New request
+            document.getElementById('new-request')?.addEventListener('click', postRequest);
+            
+            // Service categories
+            document.querySelectorAll('[data-service]').forEach(card => {
+                card.addEventListener('click', function() {
+                    showToast(`Filtering services: ${this.dataset.service}`);
+                });
+            });
+            
+            // Request categories
+            document.querySelectorAll('[data-request]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('[data-request]').forEach(b => {
+                        b.classList.remove('bg-primary', 'text-white');
+                        b.classList.add('bg-card', 'border', 'border-base');
+                    });
+                    this.classList.add('bg-primary', 'text-white');
+                    showToast(`Filtering requests: ${this.dataset.request}`);
+                });
+            });
+            
+            // Upload profile picture
+            document.getElementById('upload-profile-pic')?.addEventListener('click', () => {
+                document.getElementById('profile-upload').click();
+            });
+            
+            document.getElementById('change-profile-pic')?.addEventListener('click', () => {
+                document.getElementById('profile-upload').click();
+            });
+            
+            // Save profile
+            document.getElementById('save-profile')?.addEventListener('click', saveProfile);
+            
+            // Contact admin
+            document.getElementById('contact-admin')?.addEventListener('click', contactAdmin);
+            
+            // Save portfolio
+            document.getElementById('save-portfolio')?.addEventListener('click', savePortfolio);
+            
+            // Request verification
+            document.getElementById('request-verification')?.addEventListener('click', requestVerification);
+            
+            // Delete profile
+            document.getElementById('delete-profile')?.addEventListener('click', () => {
+                if (confirm('Delete your profile? This cannot be undone!')) {
+                    showToast('Profile deleted');
+                }
+            });
+            
+            // Add new item (manager)
+            document.getElementById('add-new-item')?.addEventListener('click', () => switchTab('marketplace'));
+            
+            // Admin toggle
+            document.getElementById('admin-toggle')?.addEventListener('click', toggleAdminMode);
+            
+            // Admin save portfolio
+            document.getElementById('admin-save-portfolio')?.addEventListener('click', savePortfolio);
+            
+            // Send broadcast
+            document.getElementById('send-broadcast')?.addEventListener('click', sendGlobalBroadcast);
+            
+            // Delete broadcast
+            document.getElementById('delete-broadcast')?.addEventListener('click', deleteGlobalBroadcast);
+            
+            // Add department
+            document.getElementById('add-dept')?.addEventListener('click', addDepartment);
+            
+            // Add executive
+            document.getElementById('add-exec')?.addEventListener('click', addExecutive);
+            
+            // Delete all data
+            document.getElementById('delete-all-data')?.addEventListener('click', () => {
+                showToast('This requires super admin access');
+            });
+            
+            // Load initial data
+            loadHomeData();
+            loadDepartments();
+            
+            console.log('Event listeners ready!');
+        });
+    </script>
+</body>
+</html>
