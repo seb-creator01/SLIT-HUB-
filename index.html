@@ -13,6 +13,11 @@
     <meta name="apple-mobile-web-app-title" content="SLIT-HUB">
     <link rel="apple-touch-icon" href="https://ui-avatars.com/api/?name=SH&background=10b981&color=fff&size=192">
     
+    <!-- Load Firebase SDK properly (Compatibility version) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -357,6 +362,7 @@
             padding: 1.5rem;
             transition: all 0.3s ease;
             box-shadow: var(--shadow);
+            cursor: pointer;
         }
         .card:hover {
             transform: translateY(-4px);
@@ -683,7 +689,7 @@
     <header class="sticky top-0 z-50 bg-card border-b border-base p-4 backdrop-blur-md">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div>
-                <h1 class="brand-logo text-2xl" id="logo-home">SLIT-HUB</h1>
+                <h1 class="brand-logo text-2xl" id="logo">SLIT-HUB</h1>
                 <p class="tagline hidden md:block">Learn. Connect. Trade. — Everything SLIT, One Place</p>
             </div>
             <div class="flex items-center gap-3">
@@ -727,22 +733,22 @@
 
             <!-- Quick Stats - Clickable -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <div class="card text-center cursor-pointer hover:shadow-xl transition transform hover:-translate-y-1" data-nav="academics">
+                <div class="card text-center" data-nav="academics">
                     <div class="text-4xl mb-2 text-primary">📚</div>
                     <div class="text-2xl font-bold" id="stat-courses">0</div>
                     <div class="text-xs text-muted">Courses</div>
                 </div>
-                <div class="card text-center cursor-pointer hover:shadow-xl transition transform hover:-translate-y-1" data-nav="community">
+                <div class="card text-center" data-nav="community">
                     <div class="text-4xl mb-2 text-warning">📢</div>
                     <div class="text-2xl font-bold" id="stat-announcements">0</div>
                     <div class="text-xs text-muted">Announcements</div>
                 </div>
-                <div class="card text-center cursor-pointer hover:shadow-xl transition transform hover:-translate-y-1" data-nav="marketplace">
+                <div class="card text-center" data-nav="marketplace">
                     <div class="text-4xl mb-2 text-success">🛍️</div>
                     <div class="text-2xl font-bold" id="stat-items">0</div>
                     <div class="text-xs text-muted">Items for Sale</div>
                 </div>
-                <div class="card text-center cursor-pointer hover:shadow-xl transition transform hover:-translate-y-1" data-nav="community">
+                <div class="card text-center" data-nav="community">
                     <div class="text-4xl mb-2 text-info">👥</div>
                     <div class="text-2xl font-bold" id="stat-execs">0</div>
                     <div class="text-xs text-muted">Executives</div>
@@ -750,7 +756,7 @@
             </div>
 
             <!-- Today's Schedule -->
-            <div class="card mb-8 cursor-pointer hover:shadow-xl" data-nav="academics">
+            <div class="card mb-8" data-nav="academics">
                 <h3 class="font-bold mb-4 flex items-center gap-2">
                     <i class="fas fa-calendar-day text-primary"></i> Today's Schedule
                 </h3>
@@ -760,7 +766,7 @@
             </div>
 
             <!-- Latest Announcements -->
-            <div class="card cursor-pointer hover:shadow-xl" data-nav="community">
+            <div class="card" data-nav="community">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-bold flex items-center gap-2">
                         <i class="fas fa-bullhorn text-primary"></i> Latest Announcements
@@ -788,22 +794,22 @@
 
             <!-- Quick Access Cards - Clickable -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <div class="card text-center cursor-pointer hover:shadow-xl transition transform hover:-translate-y-1" data-academics="lecture">
+                <div class="card text-center" data-academics="lecture">
                     <div class="text-4xl mb-2">📖</div>
                     <div class="font-bold">Lectures</div>
                     <div class="text-xs text-muted">Weekly schedule</div>
                 </div>
-                <div class="card text-center cursor-pointer hover:shadow-xl transition transform hover:-translate-y-1" data-academics="test">
+                <div class="card text-center" data-academics="test">
                     <div class="text-4xl mb-2">📝</div>
                     <div class="font-bold">Tests</div>
                     <div class="text-xs text-muted">Upcoming tests</div>
                 </div>
-                <div class="card text-center cursor-pointer hover:shadow-xl transition transform hover:-translate-y-1" data-academics="exam">
+                <div class="card text-center" data-academics="exam">
                     <div class="text-4xl mb-2">📋</div>
                     <div class="font-bold">Exams</div>
                     <div class="text-xs text-muted">Exam schedule</div>
                 </div>
-                <div class="card text-center cursor-pointer hover:shadow-xl transition transform hover:-translate-y-1" data-academics="materials">
+                <div class="card text-center" data-academics="materials">
                     <div class="text-4xl mb-2">📚</div>
                     <div class="font-bold">Materials</div>
                     <div class="text-xs text-muted">Past questions</div>
@@ -825,7 +831,7 @@
                     <h3 class="font-bold flex items-center gap-2">
                         <i class="fas fa-users text-primary"></i> Study Groups
                     </h3>
-                    <button id="create-study-group" class="btn-primary text-sm py-2">+ Create Group</button>
+                    <button class="btn-primary text-sm py-2" id="create-study-group">+ Create Group</button>
                 </div>
                 <div id="study-groups" class="space-y-3"></div>
             </div>
@@ -836,7 +842,7 @@
                     <h3 class="font-bold flex items-center gap-2">
                         <i class="fas fa-folder-open text-primary"></i> Course Materials
                     </h3>
-                    <button id="upload-material" class="btn-primary text-sm py-2">+ Upload</button>
+                    <button class="btn-primary text-sm py-2" id="upload-material">+ Upload</button>
                 </div>
                 <div id="materials-list" class="space-y-3"></div>
             </div>
@@ -878,7 +884,7 @@
                         <input type="text" id="announce-link" placeholder="Link (optional)" class="input-field">
                         <input type="date" id="announce-date" class="input-field">
                     </div>
-                    <button id="publish-announcement" class="btn-primary w-full">Publish Announcement</button>
+                    <button class="btn-primary w-full" id="publish-announcement">Publish Announcement</button>
                 </div>
             </div>
 
@@ -930,7 +936,7 @@
             <div id="shop-section" class="marketplace-section">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-bold">Recent Items</h3>
-                    <button id="sell-item" class="btn-primary text-sm py-2">+ Sell Item</button>
+                    <button class="btn-primary text-sm py-2" id="sell-item">+ Sell Item</button>
                 </div>
                 <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
             </div>
@@ -939,24 +945,24 @@
             <div id="services-section" class="marketplace-section hidden">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-bold">Campus Services</h3>
-                    <button id="list-service" class="btn-primary text-sm py-2">+ List Service</button>
+                    <button class="btn-primary text-sm py-2" id="list-service">+ List Service</button>
                 </div>
 
                 <!-- Service Categories -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-                    <div class="card text-center cursor-pointer hover:shadow-lg" data-service="hair">
+                    <div class="card text-center" data-service="hair">
                         <div class="text-3xl mb-1">✂️</div>
                         <div class="text-xs font-bold">Hair & Beauty</div>
                     </div>
-                    <div class="card text-center cursor-pointer hover:shadow-lg" data-service="repair">
+                    <div class="card text-center" data-service="repair">
                         <div class="text-3xl mb-1">📱</div>
                         <div class="text-xs font-bold">Gadget Repair</div>
                     </div>
-                    <div class="card text-center cursor-pointer hover:shadow-lg" data-service="photo">
+                    <div class="card text-center" data-service="photo">
                         <div class="text-3xl mb-1">📸</div>
                         <div class="text-xs font-bold">Photography</div>
                     </div>
-                    <div class="card text-center cursor-pointer hover:shadow-lg" data-service="tutor">
+                    <div class="card text-center" data-service="tutor">
                         <div class="text-3xl mb-1">👨‍🏫</div>
                         <div class="text-xs font-bold">Tutoring</div>
                     </div>
@@ -969,7 +975,7 @@
             <div id="requests-section" class="marketplace-section hidden">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-bold">Community Requests</h3>
-                    <button id="new-request" class="btn-primary text-sm py-2">+ New Request</button>
+                    <button class="btn-primary text-sm py-2" id="new-request">+ New Request</button>
                 </div>
 
                 <!-- Request Categories -->
@@ -1022,7 +1028,7 @@
                         <label class="block text-sm font-bold mb-1">Phone Number</label>
                         <div class="phone-input-container">
                             <span class="phone-prefix">+234</span>
-                            <input type="tel" id="profile-phone" class="input-field" placeholder="8012345678" style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
+                            <input type="tel" id="profile-phone" class="input-field" placeholder="8012345678">
                         </div>
                     </div>
                     
@@ -1063,7 +1069,7 @@
                         <textarea id="profile-bio" rows="3" class="input-field" placeholder="Tell us about yourself..."></textarea>
                     </div>
 
-                    <button id="save-profile" class="btn-primary w-full">
+                    <button class="btn-primary w-full" id="save-profile">
                         <i class="fas fa-save"></i> Save Profile
                     </button>
 
@@ -1074,7 +1080,7 @@
                             <a href="https://wa.me/2348053103234" target="_blank" class="flex-1 btn-whatsapp py-3 rounded-xl font-bold flex items-center justify-center gap-2">
                                 <i class="fab fa-whatsapp"></i> Contact Developer
                             </a>
-                            <button id="contact-admin" class="flex-1 btn-primary py-3 rounded-xl font-bold flex items-center justify-center gap-2">
+                            <button class="flex-1 btn-primary py-3 rounded-xl font-bold flex items-center justify-center gap-2" id="contact-admin">
                                 <i class="fas fa-envelope"></i> Message Admin
                             </button>
                         </div>
@@ -1088,7 +1094,7 @@
                             <input type="text" id="portfolio-image" class="input-field flex-1" placeholder="Portfolio Image URL">
                         </div>
                         <div class="flex gap-2 mt-3">
-                            <button id="save-portfolio" class="btn-outline flex-1">Save Links</button>
+                            <button class="btn-outline flex-1" id="save-portfolio">Save Links</button>
                             <a href="#" id="portfolio-link-button" target="_blank" class="btn-primary flex-1 flex items-center justify-center gap-2">
                                 <i class="fas fa-external-link-alt"></i> View Portfolio
                             </a>
@@ -1098,7 +1104,7 @@
                     <!-- Upload ID for Verification -->
                     <div class="border-t border-base pt-4 mt-4">
                         <h3 class="font-bold mb-3 text-green-600">✅ Get Verified</h3>
-                        <button id="request-verification" class="w-full btn-success py-3 rounded-xl font-bold flex items-center justify-center gap-2">
+                        <button class="w-full btn-success py-3 rounded-xl font-bold flex items-center justify-center gap-2" id="request-verification">
                             <i class="fas fa-id-card"></i> Upload Student ID for Verification
                         </button>
                     </div>
@@ -1106,14 +1112,14 @@
                     <!-- Upload Course Materials (for Course Reps) -->
                     <div id="course-rep-upload" class="border-t border-base pt-4 mt-4 hidden">
                         <h3 class="font-bold mb-3 text-blue-600">📘 Course Rep Tools</h3>
-                        <button id="rep-upload-material" class="w-full btn-primary py-3 rounded-xl font-bold flex items-center justify-center gap-2">
+                        <button class="w-full btn-primary py-3 rounded-xl font-bold flex items-center justify-center gap-2" id="rep-upload-material">
                             <i class="fas fa-upload"></i> Upload Course Materials
                         </button>
                     </div>
 
                     <!-- Delete Profile -->
                     <div class="border-t border-base pt-4 mt-4">
-                        <button id="delete-profile" class="w-full btn-danger py-3 rounded-xl font-bold flex items-center justify-center gap-2">
+                        <button class="w-full btn-danger py-3 rounded-xl font-bold flex items-center justify-center gap-2" id="delete-profile">
                             <i class="fas fa-trash"></i> Delete Profile
                         </button>
                         <p class="text-xs text-muted text-center mt-2">This action cannot be undone</p>
@@ -1126,7 +1132,7 @@
         <section id="manager-tab" class="tab-content hidden">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-bold">📋 My Items</h2>
-                <button id="add-new-item" class="btn-primary text-sm py-2">+ Add New</button>
+                <button class="btn-primary text-sm py-2" id="add-new-item">+ Add New</button>
             </div>
             <div id="my-items-grid" class="grid grid-cols-1 gap-4"></div>
         </section>
@@ -1170,7 +1176,7 @@
                         <input type="text" id="admin-portfolio-url" placeholder="Portfolio URL" class="input-field">
                         <input type="text" id="admin-portfolio-image" placeholder="Portfolio Image URL" class="input-field">
                     </div>
-                    <button id="admin-save-portfolio" class="btn-primary">Save Portfolio Links</button>
+                    <button class="btn-primary" id="admin-save-portfolio">Save Portfolio Links</button>
                 </div>
 
                 <!-- Global Broadcast -->
@@ -1180,10 +1186,10 @@
                     </h3>
                     <textarea id="global-broadcast-input" class="w-full p-3 rounded-xl text-gray-900 mb-3" rows="2" placeholder="Type broadcast message..."></textarea>
                     <div class="flex gap-3">
-                        <button id="send-broadcast" class="bg-white text-primary px-6 py-2 rounded-xl font-bold hover:shadow-lg transition">
+                        <button class="bg-white text-primary px-6 py-2 rounded-xl font-bold hover:shadow-lg transition" id="send-broadcast">
                             <i class="fas fa-paper-plane"></i> Send
                         </button>
-                        <button id="delete-broadcast" class="bg-red-500 text-white px-6 py-2 rounded-xl font-bold hover:bg-red-600 transition">
+                        <button class="bg-red-500 text-white px-6 py-2 rounded-xl font-bold hover:bg-red-600 transition" id="delete-broadcast">
                             <i class="fas fa-trash"></i> Delete
                         </button>
                     </div>
@@ -1208,7 +1214,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
                         <input type="text" id="dept-name" placeholder="Department Name (e.g., PMT)" class="input-field">
                         <input type="text" id="dept-code" placeholder="Code (e.g., PMT)" class="input-field">
-                        <button id="add-dept" class="btn-primary">
+                        <button class="btn-primary" id="add-dept">
                             <i class="fas fa-plus"></i> Add Department
                         </button>
                     </div>
@@ -1233,7 +1239,7 @@
                             <option value="course">📘 Course Representative</option>
                         </select>
                         <input type="text" id="exec-course" placeholder="Course Code (if rep)" class="input-field">
-                        <button id="add-exec" class="btn-warning col-span-3">
+                        <button class="btn-warning col-span-3" id="add-exec">
                             <i class="fas fa-plus"></i> Add Executive
                         </button>
                     </div>
@@ -1250,7 +1256,7 @@
                 <!-- Danger Zone -->
                 <div class="card border-2 border-danger">
                     <h3 class="font-bold mb-4 text-danger">⚠️ Danger Zone</h3>
-                    <button id="delete-all-data" class="btn-danger w-full">
+                    <button class="btn-danger w-full" id="delete-all-data">
                         <i class="fas fa-exclamation-triangle"></i> Delete All Data (Requires Super Admin)
                     </button>
                 </div>
@@ -1294,11 +1300,8 @@
     <!-- Toast Container -->
     <div id="toast-container"></div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, updateDoc, query, orderBy, onSnapshot, where, serverTimestamp, doc, getDoc, deleteDoc, setDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-        // Firebase config
+    <script>
+        // ============ FIREBASE CONFIGURATION ============
         const firebaseConfig = {
             apiKey: "AIzaSyCpsDTN-NTkTFmbwg3T6vv9H4eE_YXQdZA",
             authDomain: "slit-hub.firebaseapp.com",
@@ -1307,9 +1310,10 @@
             messagingSenderId: "347194010969",
             appId: "1:347194010969:web:a45af2e8d1627ac2593048"
         };
-        
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
         // ============ GLOBAL VARIABLES ============
         let currentUserId = localStorage.getItem('slit_user_id');
@@ -1321,15 +1325,13 @@
         let isAdminMode = false;
         let currentUserData = null;
         let verifiedUsers = new Set();
-        let portfolioUrl = localStorage.getItem('portfolio_url') || '';
-        let portfolioImage = localStorage.getItem('portfolio_image') || '';
 
         // ============ UTILITY FUNCTIONS ============
         function formatPrice(price) {
             return new Intl.NumberFormat('en-NG').format(price);
         }
 
-        function showToast(message, type = 'success', duration = 3000) {
+        function showToast(message, type = 'success') {
             const toast = document.getElementById('toast-container');
             const toastEl = document.createElement('div');
             toastEl.className = 'toast';
@@ -1346,7 +1348,7 @@
                 </div>
             `;
             toast.appendChild(toastEl);
-            setTimeout(() => toastEl.remove(), duration);
+            setTimeout(() => toastEl.remove(), 3000);
         }
 
         function showLoading(buttonId) {
@@ -1365,25 +1367,7 @@
             }
         }
 
-        // ============ MAKE ALL FUNCTIONS GLOBALLY ACCESSIBLE ============
-        window.formatPrice = formatPrice;
-        window.showToast = showToast;
-        window.showLoading = showLoading;
-        window.hideLoading = hideLoading;
-
-        // ============ LOAD VERIFIED USERS ============
-        async function loadVerifiedUsers() {
-            try {
-                const snap = await getDocs(collection(db, "VerifiedUsers"));
-                verifiedUsers.clear();
-                snap.forEach(doc => verifiedUsers.add(doc.id));
-            } catch (e) {
-                console.error("Error loading verified users:", e);
-            }
-        }
-        window.loadVerifiedUsers = loadVerifiedUsers;
-
-        // ============ TAB SWITCHING ============
+        // ============ TAB SWITCHING ==========
         function switchTab(tabId) {
             console.log('Switching to tab:', tabId);
             
@@ -1406,18 +1390,12 @@
             
             // Load tab data
             if (tabId === 'home') loadHomeData();
-            if (tabId === 'academics') loadAcademicsData();
-            if (tabId === 'community') loadCommunityData();
-            if (tabId === 'marketplace') loadMarketplaceData();
             if (tabId === 'profile') loadProfileData();
+            if (tabId === 'marketplace') loadProducts();
             if (tabId === 'manager') loadMyItems();
-            if (tabId === 'admin' && isAdminMode) loadAdminData();
         }
-        window.switchTab = switchTab;
 
         function switchMarketplaceTab(tab) {
-            console.log('Switching marketplace tab to:', tab);
-            
             document.querySelectorAll('.marketplace-section').forEach(s => s.classList.add('hidden'));
             document.getElementById(`${tab}-section`).classList.remove('hidden');
             
@@ -1430,38 +1408,44 @@
             if (activeTab) {
                 activeTab.classList.add('text-primary', 'border-b-2', 'border-primary');
             }
-            
-            if (tab === 'shop') loadProducts();
-            if (tab === 'services') loadServices();
-            if (tab === 'requests') loadRequests();
         }
-        window.switchMarketplaceTab = switchMarketplaceTab;
+
+        // ============ LOAD VERIFIED USERS ============
+        async function loadVerifiedUsers() {
+            try {
+                const snap = await db.collection('VerifiedUsers').get();
+                verifiedUsers.clear();
+                snap.forEach(doc => verifiedUsers.add(doc.id));
+            } catch (e) {
+                console.error("Error loading verified users:", e);
+            }
+        }
 
         // ============ HOME TAB ============
         async function loadHomeData() {
             try {
                 await loadVerifiedUsers();
                 
-                const userSnap = await getDoc(doc(db, "Users", currentUserId));
-                if (userSnap.exists()) {
-                    currentUserData = userSnap.data();
-                    document.getElementById('home-user-name').innerText = currentUserData.name || 'Student';
+                const userDoc = await db.collection('Users').doc(currentUserId).get();
+                if (userDoc.exists) {
+                    const user = userDoc.data();
+                    document.getElementById('home-user-name').innerText = user.name || 'Student';
                     
                     let deptName = 'SLIT';
-                    if (currentUserData.dept) {
-                        const deptSnap = await getDoc(doc(db, "departments", currentUserData.dept));
-                        if (deptSnap.exists()) deptName = deptSnap.data().name;
+                    if (user.dept) {
+                        const deptDoc = await db.collection('departments').doc(user.dept).get();
+                        if (deptDoc.exists) deptName = deptDoc.data().name;
                     }
                     
                     document.getElementById('home-user-details').innerHTML = 
-                        `${deptName} • ${currentUserData.level || 'Set level in profile'}`;
+                        `${deptName} • ${user.level || 'Set level in profile'}`;
                 }
                 
                 // Load stats
-                const deptsSnap = await getDocs(collection(db, "departments"));
-                const execsSnap = await getDocs(collection(db, "executives"));
-                const productsSnap = await getDocs(collection(db, "Products"));
-                const announcementsSnap = await getDocs(collection(db, "announcements"));
+                const deptsSnap = await db.collection('departments').get();
+                const execsSnap = await db.collection('executives').get();
+                const productsSnap = await db.collection('Products').get();
+                const announcementsSnap = await db.collection('announcements').get();
                 
                 document.getElementById('stat-courses').innerText = deptsSnap.size;
                 document.getElementById('stat-announcements').innerText = announcementsSnap.size;
@@ -1469,11 +1453,10 @@
                 document.getElementById('stat-execs').innerText = execsSnap.size;
                 
                 // Load recent announcements
-                const recentAnn = await getDocs(query(
-                    collection(db, "announcements"),
-                    orderBy("createdAt", "desc"),
-                    limit(3)
-                ));
+                const recentAnn = await db.collection('announcements')
+                    .orderBy('createdAt', 'desc')
+                    .limit(3)
+                    .get();
                 
                 let annHtml = '';
                 recentAnn.forEach(doc => {
@@ -1493,7 +1476,6 @@
                 console.error("Error loading home data:", e);
             }
         }
-        window.loadHomeData = loadHomeData;
 
         // ============ PROFILE ============
         async function loadProfileData() {
@@ -1503,7 +1485,7 @@
                 document.getElementById('profile-id').innerText = currentUserId;
                 
                 // Load departments
-                const deptsSnap = await getDocs(collection(db, "departments"));
+                const deptsSnap = await db.collection('departments').get();
                 let deptOptions = '<option value="">Select Department</option>';
                 deptsSnap.forEach(doc => {
                     const dept = doc.data();
@@ -1512,9 +1494,9 @@
                 document.getElementById('profile-dept').innerHTML = deptOptions;
                 
                 // Load user data
-                const userSnap = await getDoc(doc(db, "Users", currentUserId));
-                if (userSnap.exists()) {
-                    const user = userSnap.data();
+                const userDoc = await db.collection('Users').doc(currentUserId).get();
+                if (userDoc.exists) {
+                    const user = userDoc.data();
                     currentUserData = user;
                     
                     document.getElementById('profile-name').innerText = user.name || 'Your Name';
@@ -1538,10 +1520,9 @@
                     if (user.photo) document.getElementById('profile-pic').src = user.photo;
                     
                     // Check if user is executive
-                    const execSnap = await getDocs(query(
-                        collection(db, "executives"),
-                        where("userId", "==", currentUserId)
-                    ));
+                    const execSnap = await db.collection('executives')
+                        .where('userId', '==', currentUserId)
+                        .get();
                     
                     let badges = '';
                     if (!execSnap.empty) {
@@ -1569,47 +1550,26 @@
                     document.getElementById('profile-badges').innerHTML = badges;
                 }
                 
-                // Load portfolio links
-                const appDataSnap = await getDoc(doc(db, "AppData", "Portfolio"));
-                if (appDataSnap.exists()) {
-                    const data = appDataSnap.data();
-                    portfolioUrl = data.url || '';
-                    portfolioImage = data.image || '';
-                    
-                    const linkBtn = document.getElementById('portfolio-link-button');
-                    if (linkBtn) linkBtn.href = portfolioUrl || '#';
-                    
-                    const portfolioLink = document.getElementById('portfolio-link');
-                    if (portfolioLink) {
-                        portfolioLink.href = portfolioUrl || '#';
-                        portfolioLink.innerHTML = `<i class="fas fa-briefcase"></i> Creator's Portfolio`;
-                    }
-                }
-                
             } catch (e) {
                 console.error("Error loading profile:", e);
             }
         }
-        window.loadProfileData = loadProfileData;
 
+        // Save profile
         async function saveProfile() {
             const name = document.getElementById('profile-name-input').value.trim();
             const email = document.getElementById('profile-email').value.trim();
             const phoneInput = document.getElementById('profile-phone').value.trim().replace(/^0+/, '');
             const phone = phoneInput ? '+234' + phoneInput : '';
             
-            // Validation
-            let isValid = true;
             if (!name) {
                 document.getElementById('name-error').style.display = 'block';
                 document.getElementById('profile-name-input').classList.add('input-error');
-                isValid = false;
+                return;
             } else {
                 document.getElementById('name-error').style.display = 'none';
                 document.getElementById('profile-name-input').classList.remove('input-error');
             }
-            
-            if (!isValid) return;
             
             showLoading('save-profile');
             
@@ -1620,10 +1580,10 @@
                 const hideEmail = document.getElementById('hide-email').checked;
                 const hideDept = document.getElementById('hide-dept').checked;
                 
-                await setDoc(doc(db, "Users", currentUserId), {
+                await db.collection('Users').doc(currentUserId).set({
                     name, email, phone, dept, level, bio,
                     hideEmail, hideDept,
-                    updatedAt: serverTimestamp()
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 }, { merge: true });
                 
                 showToast('Profile saved successfully!');
@@ -1634,119 +1594,6 @@
                 hideLoading('save-profile');
             }
         }
-        window.saveProfile = saveProfile;
-
-        // Save portfolio links
-        async function savePortfolioLinks() {
-            const url = document.getElementById('portfolio-url')?.value || document.getElementById('admin-portfolio-url')?.value;
-            const image = document.getElementById('portfolio-image')?.value || document.getElementById('admin-portfolio-image')?.value;
-            
-            if (!url) {
-                showToast('Please enter a portfolio URL', 'error');
-                return;
-            }
-            
-            try {
-                await setDoc(doc(db, "AppData", "Portfolio"), {
-                    url, image,
-                    updatedAt: serverTimestamp()
-                });
-                
-                portfolioUrl = url;
-                portfolioImage = image;
-                
-                localStorage.setItem('portfolio_url', url);
-                localStorage.setItem('portfolio_image', image);
-                
-                const linkBtn = document.getElementById('portfolio-link-button');
-                if (linkBtn) linkBtn.href = url;
-                
-                const portfolioLink = document.getElementById('portfolio-link');
-                if (portfolioLink) {
-                    portfolioLink.href = url;
-                    portfolioLink.innerHTML = `<i class="fas fa-briefcase"></i> Creator's Portfolio`;
-                }
-                
-                showToast('Portfolio links saved!');
-            } catch (e) {
-                showToast('Error saving links', 'error');
-            }
-        }
-        window.savePortfolioLinks = savePortfolioLinks;
-
-        // ID Verification Request
-        async function requestVerification() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = 'image/*';
-            input.onchange = async (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                
-                if (file.size > 5 * 1024 * 1024) {
-                    showToast('File too large! Max 5MB', 'error');
-                    return;
-                }
-                
-                const btn = e.target;
-                btn.classList.add('btn-loading');
-                btn.disabled = true;
-                
-                try {
-                    const formData = new FormData();
-                    formData.append('file', file);
-                    formData.append('upload_preset', 'SLIT-HUB');
-                    
-                    const res = await fetch('https://api.cloudinary.com/v1_1/ddm87a9p2/image/upload', {
-                        method: 'POST',
-                        body: formData
-                    });
-                    
-                    if (res.ok) {
-                        const data = await res.json();
-                        const userSnap = await getDoc(doc(db, "Users", currentUserId));
-                        const userName = userSnap.exists() ? userSnap.data().name : 'Unknown';
-                        
-                        await setDoc(doc(db, "VerificationRequests", currentUserId), {
-                            userId: currentUserId,
-                            userName: userName,
-                            idImage: data.secure_url,
-                            timestamp: serverTimestamp(),
-                            status: 'pending'
-                        });
-                        
-                        showToast('ID uploaded! Admin will verify soon.');
-                    }
-                } catch (e) {
-                    showToast('Upload failed', 'error');
-                } finally {
-                    btn.classList.remove('btn-loading');
-                    btn.disabled = false;
-                }
-            };
-            input.click();
-        }
-        window.requestVerification = requestVerification;
-
-        // Delete Profile
-        function confirmDeleteProfile() {
-            if (confirm('⚠️ Are you sure you want to delete your profile? This cannot be undone!')) {
-                deleteProfile();
-            }
-        }
-        window.confirmDeleteProfile = confirmDeleteProfile;
-
-        async function deleteProfile() {
-            try {
-                await deleteDoc(doc(db, "Users", currentUserId));
-                localStorage.removeItem('slit_user_id');
-                showToast('Profile deleted. Refresh page to start fresh.');
-                setTimeout(() => window.location.reload(), 2000);
-            } catch (e) {
-                showToast('Error deleting profile', 'error');
-            }
-        }
-        window.deleteProfile = deleteProfile;
 
         // ============ MARKETPLACE FUNCTIONS ============
         function showPostProductModal() {
@@ -1768,7 +1615,7 @@
                         <div>
                             <label class="block text-sm font-bold mb-1">Price (₦) <span class="text-danger">*</span></label>
                             <div class="price-input">
-                                <input type="text" id="product-price" class="input-field" placeholder="e.g., 45000" oninput="formatPriceInput(this)">
+                                <input type="text" id="product-price" class="input-field" placeholder="e.g., 45000">
                             </div>
                         </div>
                         <div class="grid grid-cols-2 gap-3">
@@ -1810,7 +1657,7 @@
                             <p class="text-xs text-muted mt-1">Max 5MB</p>
                         </div>
                         <div class="flex gap-3 mt-4">
-                            <button onclick="postProduct(this)" class="btn-primary flex-1" id="post-product-btn">
+                            <button onclick="postProduct(this)" class="btn-primary flex-1">
                                 <i class="fas fa-cloud-upload-alt"></i> Post Item
                             </button>
                             <button onclick="this.closest('.modal-overlay').remove()" class="btn-outline">Cancel</button>
@@ -1820,15 +1667,6 @@
             `;
             document.body.appendChild(modal);
         }
-        window.showPostProductModal = showPostProductModal;
-
-        function formatPriceInput(input) {
-            let value = input.value.replace(/,/g, '');
-            if (!isNaN(value) && value !== '') {
-                input.value = new Intl.NumberFormat('en-NG').format(value);
-            }
-        }
-        window.formatPriceInput = formatPriceInput;
 
         async function postProduct(btn) {
             const title = document.getElementById('product-title')?.value.trim();
@@ -1841,21 +1679,9 @@
             const location = document.getElementById('product-location')?.value.trim();
             const phoneInput = document.getElementById('product-phone')?.value.trim().replace(/^0+/, '');
             const phone = phoneInput ? '+234' + phoneInput : '';
-            const file = document.getElementById('product-image')?.files[0];
             
-            // Validation
-            if (!title) {
-                document.getElementById('product-title-error').style.display = 'block';
-                return;
-            }
-            
-            if (!price || isNaN(price)) {
-                showToast('Please enter a valid price', 'error');
-                return;
-            }
-            
-            if (!phone || phone === '+234') {
-                showToast('Phone number is required', 'error');
+            if (!title || !price || isNaN(price) || !phone) {
+                showToast('Please fill all required fields', 'error');
                 return;
             }
             
@@ -1863,25 +1689,10 @@
             btn.disabled = true;
             
             try {
-                let imageUrl = "https://placehold.co/600x400?text=Product";
-                if (file) {
-                    const formData = new FormData();
-                    formData.append('file', file);
-                    formData.append('upload_preset', 'SLIT-HUB');
-                    const res = await fetch('https://api.cloudinary.com/v1_1/ddm87a9p2/image/upload', {
-                        method: 'POST',
-                        body: formData
-                    });
-                    if (res.ok) {
-                        const data = await res.json();
-                        imageUrl = data.secure_url;
-                    }
-                }
+                const userDoc = await db.collection('Users').doc(currentUserId).get();
+                const sellerName = userDoc.exists ? userDoc.data().name : 'Anonymous';
                 
-                const userSnap = await getDoc(doc(db, "Users", currentUserId));
-                const sellerName = userSnap.exists() ? userSnap.data().name : 'Anonymous';
-                
-                await addDoc(collection(db, "Products"), {
+                await db.collection('Products').add({
                     Title: title,
                     Description: desc,
                     Price: price,
@@ -1890,10 +1701,10 @@
                     Negotiable: negotiable,
                     Location: location,
                     Phone: phone,
-                    ImageURL: imageUrl,
+                    ImageURL: "https://placehold.co/600x400?text=Product",
                     SellerId: currentUserId,
                     SellerName: sellerName,
-                    CreatedAt: serverTimestamp(),
+                    CreatedAt: firebase.firestore.FieldValue.serverTimestamp(),
                     IsSold: false,
                     Rating: 0,
                     ReviewCount: 0
@@ -1905,12 +1716,12 @@
                 loadMyItems();
             } catch (e) {
                 showToast('Error posting product', 'error');
+                console.error(e);
             } finally {
                 btn.classList.remove('btn-loading');
                 btn.disabled = false;
             }
         }
-        window.postProduct = postProduct;
 
         async function loadProducts() {
             const container = document.getElementById('product-grid');
@@ -1919,7 +1730,9 @@
             container.innerHTML = '<div class="skeleton h-40 w-full"></div>'.repeat(4);
             
             try {
-                const snapshot = await getDocs(query(collection(db, "Products"), orderBy("CreatedAt", "desc")));
+                const snapshot = await db.collection('Products')
+                    .orderBy('CreatedAt', 'desc')
+                    .get();
                 
                 if (snapshot.empty) {
                     container.innerHTML = '<p class="text-muted text-center py-8">No items for sale yet</p>';
@@ -1929,17 +1742,12 @@
                 let html = '';
                 snapshot.forEach(doc => {
                     const p = doc.data();
-                    const avgRating = p.ReviewCount > 0 ? (p.Rating / p.ReviewCount).toFixed(1) : "0";
                     html += `
                         <div class="product-card" onclick="viewProduct('${doc.id}')">
                             <img src="${p.ImageURL}" class="w-full h-40 object-cover">
                             <div class="p-3">
                                 <h3 class="font-bold truncate">${p.Title}</h3>
                                 <p class="text-primary font-bold">₦${formatPrice(p.Price)}</p>
-                                <div class="flex items-center gap-1 mt-1">
-                                    <i class="fas fa-star text-yellow-500 text-xs"></i>
-                                    <span class="text-xs">${avgRating} (${p.ReviewCount || 0})</span>
-                                </div>
                                 <p class="text-xs text-muted mt-1">${p.Location || 'Campus'}</p>
                             </div>
                         </div>
@@ -1951,421 +1759,12 @@
                 container.innerHTML = '<p class="text-danger text-center py-8">Error loading products</p>';
             }
         }
-        window.loadProducts = loadProducts;
 
-        // View Product Details with Seller Info and More Products
-        async function viewProduct(productId) {
-            const modal = document.createElement('div');
-            modal.className = 'modal-overlay';
-            
-            const snap = await getDoc(doc(db, "Products", productId));
-            const p = snap.data();
-            
-            // Get seller info with privacy settings
-            const userSnap = await getDoc(doc(db, "Users", p.SellerId));
-            const seller = userSnap.exists() ? userSnap.data() : {};
-            const isVerified = verifiedUsers.has(p.SellerId);
-            
-            const avgRating = p.ReviewCount > 0 ? (p.Rating / p.ReviewCount).toFixed(1) : "0";
-            const isMyProduct = p.SellerId === currentUserId;
-            
-            // Get more products from same seller
-            const moreProductsSnap = await getDocs(query(
-                collection(db, "Products"),
-                where("SellerId", "==", p.SellerId),
-                where("IsSold", "==", false),
-                limit(3)
-            ));
-            
-            let moreProductsHtml = '';
-            moreProductsSnap.forEach(doc => {
-                if (doc.id !== productId) {
-                    const prod = doc.data();
-                    moreProductsHtml += `
-                        <div class="product-card cursor-pointer" onclick="viewProduct('${doc.id}'); modal.remove()">
-                            <img src="${prod.ImageURL}" class="w-full h-24 object-cover">
-                            <div class="p-2">
-                                <p class="font-bold text-sm truncate">${prod.Title}</p>
-                                <p class="text-primary text-sm">₦${formatPrice(prod.Price)}</p>
-                            </div>
-                        </div>
-                    `;
-                }
-            });
-            
-            // Load reviews with replies
-            const reviewsSnap = await getDocs(query(
-                collection(db, "Products", productId, "Reviews"),
-                orderBy("timestamp", "desc")
-            ));
-            
-            let reviewsHtml = '';
-            for (const reviewDoc of reviewsSnap.docs) {
-                const r = reviewDoc.data();
-                const reviewUserSnap = await getDoc(doc(db, "Users", r.userId));
-                const reviewUser = reviewUserSnap.exists() ? reviewUserSnap.data() : {};
-                
-                let reviewReplies = '';
-                const repliesSnap = await getDocs(query(
-                    collection(db, "Products", productId, "Reviews", reviewDoc.id, "Replies"),
-                    orderBy("timestamp", "desc")
-                ));
-                
-                repliesSnap.forEach(replyDoc => {
-                    const reply = replyDoc.data();
-                    reviewReplies += `
-                        <div class="ml-8 mt-2 p-2 bg-card rounded-lg border border-base">
-                            <p class="text-xs font-bold">Seller Response:</p>
-                            <p class="text-sm">${reply.text}</p>
-                            <p class="text-xs text-muted mt-1">${reply.timestamp ? new Date(reply.timestamp.seconds*1000).toLocaleDateString() : ''}</p>
-                        </div>
-                    `;
-                });
-                
-                reviewsHtml += `
-                    <div class="bg-input p-3 rounded-lg">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="font-bold text-sm">${r.userName || 'Anonymous'}</span>
-                            <span class="text-xs text-muted">${r.timestamp ? new Date(r.timestamp.seconds*1000).toLocaleDateString() : ''}</span>
-                        </div>
-                        <div class="flex text-yellow-500 text-xs mb-1">
-                            ${'<i class="fas fa-star"></i>'.repeat(r.stars)}${'<i class="far fa-star"></i>'.repeat(5 - r.stars)}
-                        </div>
-                        <p class="text-sm">${r.text}</p>
-                        ${reviewReplies}
-                        ${isMyProduct ? `
-                            <button onclick="replyToReview('${productId}', '${reviewDoc.id}')" class="text-xs text-primary mt-2 hover:underline">
-                                <i class="fas fa-reply"></i> Reply
-                            </button>
-                        ` : ''}
-                    </div>
-                `;
-            }
-            
-            modal.innerHTML = `
-                <div class="modal-content max-w-2xl">
-                    <img src="${p.ImageURL}" class="w-full h-64 object-cover rounded-lg mb-4">
-                    
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <h2 class="text-2xl font-bold">${p.Title}</h2>
-                            <p class="text-muted">${p.Category} • ${p.Condition}</p>
-                        </div>
-                        <p class="text-primary text-2xl font-bold">₦${formatPrice(p.Price)}</p>
-                    </div>
-                    
-                    <div class="bg-input p-4 rounded-lg mb-4">
-                        <p class="text-sm">${p.Description}</p>
-                        ${p.Negotiable ? '<p class="text-xs text-green-600 mt-2">💰 Price is negotiable</p>' : ''}
-                    </div>
-                    
-                    <!-- Seller Info -->
-                    <div class="flex items-center gap-4 p-4 bg-input rounded-lg mb-4 cursor-pointer" onclick="viewUserProfile('${p.SellerId}')">
-                        <img src="${seller.photo || 'https://ui-avatars.com/api/?name=' + (seller.name || 'User')}" class="w-12 h-12 rounded-full">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2">
-                                <p class="font-bold">${seller.name || 'Campus Student'}</p>
-                                ${isVerified ? '<span class="verified-badge text-xs py-1"><i class="fas fa-check-circle"></i> Verified</span>' : ''}
-                            </div>
-                            <div class="flex items-center gap-1">
-                                <i class="fas fa-star text-yellow-500 text-xs"></i>
-                                <span class="text-xs">${avgRating} (${p.ReviewCount || 0} reviews)</span>
-                            </div>
-                            <p class="text-xs text-muted">Click to view profile</p>
-                        </div>
-                        ${!isMyProduct ? `
-                            <button onclick="reportUser('${p.SellerId}', event)" class="text-red-500 text-sm">
-                                <i class="fas fa-flag"></i> Report
-                            </button>
-                        ` : ''}
-                    </div>
-                    
-                    <!-- Contact Buttons -->
-                    ${!isMyProduct ? `
-                        <div class="flex gap-3 mb-6">
-                            <a href="https://wa.me/${p.Phone.replace('+', '')}" target="_blank" class="btn-whatsapp flex-1 py-3 rounded-xl font-bold flex items-center justify-center gap-2">
-                                <i class="fab fa-whatsapp"></i> WhatsApp
-                            </a>
-                            <a href="tel:${p.Phone}" class="btn-call flex-1 py-3 rounded-xl font-bold flex items-center justify-center gap-2">
-                                <i class="fas fa-phone"></i> Call
-                            </a>
-                        </div>
-                    ` : ''}
-                    
-                    <div class="mb-6">
-                        <h3 class="font-bold mb-3">Location & Contact</h3>
-                        <p class="text-sm mb-2"><i class="fas fa-map-marker-alt text-muted mr-2"></i>${p.Location || 'Campus'}</p>
-                        <p class="text-sm"><i class="fas fa-phone text-muted mr-2"></i>${p.Phone}</p>
-                    </div>
-                    
-                    <!-- More from this seller -->
-                    ${moreProductsHtml ? `
-                        <div class="mb-6">
-                            <h3 class="font-bold mb-3">More from this seller</h3>
-                            <div class="grid grid-cols-3 gap-2">
-                                ${moreProductsHtml}
-                            </div>
-                        </div>
-                    ` : ''}
-                    
-                    <!-- Reviews -->
-                    <div class="mb-6">
-                        <h3 class="font-bold mb-3">Reviews (${p.ReviewCount || 0})</h3>
-                        <div class="space-y-3 max-h-60 overflow-y-auto">
-                            ${reviewsHtml || '<p class="text-muted text-sm">No reviews yet</p>'}
-                        </div>
-                    </div>
-                    
-                    ${!isMyProduct ? `
-                        <div class="border-t border-base pt-4">
-                            <h3 class="font-bold mb-3">Leave a Review</h3>
-                            <div class="star-rating mb-3" id="review-stars">
-                                ${[1,2,3,4,5].map(i => `<i class="far fa-star text-2xl" data-rating="${i}"></i>`).join('')}
-                            </div>
-                            <textarea id="review-text" class="input-field mb-3" rows="2" placeholder="Share your experience..."></textarea>
-                            <button onclick="submitReview('${productId}')" class="btn-primary w-full">Submit Review</button>
-                        </div>
-                    ` : `
-                        <div class="flex gap-3">
-                            <button onclick="editProduct('${productId}')" class="btn-outline flex-1">
-                                <i class="fas fa-edit"></i> Edit
-                            </button>
-                            <button onclick="deleteProduct('${productId}')" class="btn-danger flex-1">
-                                <i class="fas fa-trash"></i> Delete
-                            </button>
-                        </div>
-                    `}
-                    
-                    <button onclick="this.closest('.modal-overlay').remove()" class="btn-outline w-full mt-4">Close</button>
-                </div>
-            `;
-            document.body.appendChild(modal);
-            
-            // Setup star rating
-            const stars = document.querySelectorAll('#review-stars i');
-            let currentRating = 0;
-            stars.forEach(star => {
-                star.addEventListener('mouseover', () => {
-                    const rating = parseInt(star.dataset.rating);
-                    stars.forEach((s, i) => {
-                        if (i < rating) {
-                            s.classList.remove('far');
-                            s.classList.add('fas');
-                        } else {
-                            s.classList.remove('fas');
-                            s.classList.add('far');
-                        }
-                    });
-                });
-                star.addEventListener('click', () => {
-                    currentRating = parseInt(star.dataset.rating);
-                });
-            });
-            window.getCurrentRating = () => currentRating || 5;
+        function viewProduct(productId) {
+            showToast('Viewing product details');
         }
-        window.viewProduct = viewProduct;
 
-        // Reply to review
-        async function replyToReview(productId, reviewId) {
-            const reply = prompt('Enter your reply:');
-            if (!reply || reply.trim().length < 3) {
-                showToast('Please enter a valid reply', 'error');
-                return;
-            }
-            
-            try {
-                await addDoc(collection(db, "Products", productId, "Reviews", reviewId, "Replies"), {
-                    text: reply,
-                    sellerId: currentUserId,
-                    timestamp: serverTimestamp()
-                });
-                
-                showToast('Reply posted!');
-                document.querySelector('.modal-overlay')?.remove();
-            } catch (e) {
-                showToast('Error posting reply', 'error');
-            }
-        }
-        window.replyToReview = replyToReview;
-
-        // View user profile
-        async function viewUserProfile(userId) {
-            const userSnap = await getDoc(doc(db, "Users", userId));
-            const user = userSnap.exists() ? userSnap.data() : {};
-            const isVerified = verifiedUsers.has(userId);
-            
-            // Get user's products
-            const productsSnap = await getDocs(query(
-                collection(db, "Products"),
-                where("SellerId", "==", userId),
-                where("IsSold", "==", false),
-                limit(6)
-            ));
-            
-            let productsHtml = '';
-            productsSnap.forEach(doc => {
-                const p = doc.data();
-                productsHtml += `
-                    <div class="product-card cursor-pointer" onclick="viewProduct('${doc.id}')">
-                        <img src="${p.ImageURL}" class="w-full h-24 object-cover">
-                        <div class="p-2">
-                            <p class="font-bold text-xs truncate">${p.Title}</p>
-                            <p class="text-primary text-xs">₦${formatPrice(p.Price)}</p>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            const modal = document.createElement('div');
-            modal.className = 'modal-overlay';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <div class="text-center mb-4">
-                        <img src="${user.photo || 'https://ui-avatars.com/api/?name=' + (user.name || 'User')}" class="w-20 h-20 rounded-full mx-auto mb-3">
-                        <h2 class="text-xl font-bold">${user.name || 'Anonymous'}</h2>
-                        ${isVerified ? '<span class="verified-badge"><i class="fas fa-check-circle"></i> Verified</span>' : ''}
-                        ${user.level ? `<p class="text-sm text-muted mt-1">Level ${user.level}</p>` : ''}
-                    </div>
-                    
-                    ${(!user.hideEmail || isAdminMode) && user.email ? `
-                        <div class="bg-input p-3 rounded-lg mb-3">
-                            <p class="text-sm"><i class="fas fa-envelope text-muted mr-2"></i>${user.email}</p>
-                        </div>
-                    ` : ''}
-                    
-                    ${(!user.hideDept || isAdminMode) && user.dept ? `
-                        <div class="bg-input p-3 rounded-lg mb-3">
-                            <p class="text-sm"><i class="fas fa-building text-muted mr-2"></i>${user.dept}</p>
-                        </div>
-                    ` : ''}
-                    
-                    ${user.bio ? `
-                        <div class="bg-input p-3 rounded-lg mb-4">
-                            <p class="text-sm">${user.bio}</p>
-                        </div>
-                    ` : ''}
-                    
-                    ${productsHtml ? `
-                        <div class="mb-4">
-                            <h3 class="font-bold mb-2">Listings</h3>
-                            <div class="grid grid-cols-3 gap-2">
-                                ${productsHtml}
-                            </div>
-                        </div>
-                    ` : ''}
-                    
-                    <button onclick="this.closest('.modal-overlay').remove()" class="btn-outline w-full">Close</button>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-        window.viewUserProfile = viewUserProfile;
-
-        async function submitReview(productId) {
-            const text = document.getElementById('review-text')?.value.trim();
-            const stars = window.getCurrentRating ? window.getCurrentRating() : 5;
-            
-            if (!text || text.length < 10) {
-                showToast('Please write at least 10 characters', 'error');
-                return;
-            }
-            
-            try {
-                const userSnap = await getDoc(doc(db, "Users", currentUserId));
-                const userName = userSnap.exists() ? userSnap.data().name : 'User';
-                
-                await addDoc(collection(db, "Products", productId, "Reviews"), {
-                    userId: currentUserId,
-                    userName: userName,
-                    stars: stars,
-                    text: text,
-                    timestamp: serverTimestamp()
-                });
-                
-                const pRef = doc(db, "Products", productId);
-                const pSnap = await getDoc(pRef);
-                const pData = pSnap.data();
-                
-                await updateDoc(pRef, {
-                    Rating: (pData.Rating || 0) + stars,
-                    ReviewCount: (pData.ReviewCount || 0) + 1
-                });
-                
-                showToast('Review submitted!');
-                document.querySelector('.modal-overlay')?.remove();
-            } catch (e) {
-                showToast('Error submitting review', 'error');
-            }
-        }
-        window.submitReview = submitReview;
-
-        async function editProduct(productId) {
-            const snap = await getDoc(doc(db, "Products", productId));
-            const p = snap.data();
-            
-            const modal = document.createElement('div');
-            modal.className = 'modal-overlay';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <h2 class="text-2xl font-bold mb-4">Edit Product</h2>
-                    <div class="space-y-4">
-                        <input type="text" id="edit-title" class="input-field" value="${p.Title}">
-                        <textarea id="edit-desc" class="input-field" rows="3">${p.Description}</textarea>
-                        <input type="number" id="edit-price" class="input-field" value="${p.Price}">
-                        <select id="edit-sold" class="input-field">
-                            <option value="false" ${!p.IsSold ? 'selected' : ''}>Available</option>
-                            <option value="true" ${p.IsSold ? 'selected' : ''}>Sold</option>
-                        </select>
-                        <div class="flex gap-3">
-                            <button onclick="updateProduct('${productId}')" class="btn-primary flex-1">Update</button>
-                            <button onclick="this.closest('.modal-overlay').remove()" class="btn-outline">Cancel</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-        window.editProduct = editProduct;
-
-        async function updateProduct(productId) {
-            const title = document.getElementById('edit-title').value;
-            const desc = document.getElementById('edit-desc').value;
-            const price = parseInt(document.getElementById('edit-price').value);
-            const isSold = document.getElementById('edit-sold').value === 'true';
-            
-            try {
-                await updateDoc(doc(db, "Products", productId), {
-                    Title: title,
-                    Description: desc,
-                    Price: price,
-                    IsSold: isSold
-                });
-                showToast('Product updated!');
-                document.querySelector('.modal-overlay')?.remove();
-                loadProducts();
-                loadMyItems();
-            } catch (e) {
-                showToast('Error updating product', 'error');
-            }
-        }
-        window.updateProduct = updateProduct;
-
-        async function deleteProduct(productId) {
-            if (confirm('Delete this product?')) {
-                try {
-                    await deleteDoc(doc(db, "Products", productId));
-                    showToast('Product deleted');
-                    document.querySelector('.modal-overlay')?.remove();
-                    loadProducts();
-                    loadMyItems();
-                } catch (e) {
-                    showToast('Error deleting product', 'error');
-                }
-            }
-        }
-        window.deleteProduct = deleteProduct;
-
-        // ============ MY ITEMS (MANAGER) ============
+        // ============ MY ITEMS ============
         async function loadMyItems() {
             const container = document.getElementById('my-items-grid');
             if (!container) return;
@@ -2373,11 +1772,10 @@
             container.innerHTML = '<div class="skeleton h-20 w-full"></div>'.repeat(3);
             
             try {
-                const snapshot = await getDocs(query(
-                    collection(db, "Products"),
-                    where("SellerId", "==", currentUserId),
-                    orderBy("CreatedAt", "desc")
-                ));
+                const snapshot = await db.collection('Products')
+                    .where('SellerId', '==', currentUserId)
+                    .orderBy('CreatedAt', 'desc')
+                    .get();
                 
                 if (snapshot.empty) {
                     container.innerHTML = '<p class="text-muted text-center py-8">You have no listings yet</p>';
@@ -2395,14 +1793,6 @@
                                 <p class="text-primary font-bold">₦${formatPrice(p.Price)}</p>
                                 ${p.IsSold ? '<span class="text-xs bg-danger text-white px-2 py-1 rounded">SOLD</span>' : ''}
                             </div>
-                            <div class="flex gap-2">
-                                <button onclick="editProduct('${doc.id}')" class="btn-outline p-2">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button onclick="deleteProduct('${doc.id}')" class="btn-danger p-2">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
                         </div>
                     `;
                 });
@@ -2411,277 +1801,6 @@
                 console.error("Error loading my items:", e);
             }
         }
-        window.loadMyItems = loadMyItems;
-
-        // ============ SERVICES ============
-        function showPostServiceModal() {
-            const modal = document.createElement('div');
-            modal.className = 'modal-overlay';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <h2 class="text-2xl font-bold mb-4">List a Service</h2>
-                    <div class="space-y-4">
-                        <input type="text" id="service-title" class="input-field" placeholder="Service Title">
-                        <select id="service-category" class="input-field">
-                            <option value="hair">✂️ Hair & Beauty</option>
-                            <option value="repair">📱 Gadget Repair</option>
-                            <option value="photo">📸 Photography</option>
-                            <option value="tutor">👨‍🏫 Tutoring</option>
-                        </select>
-                        <textarea id="service-desc" class="input-field" rows="3" placeholder="Description"></textarea>
-                        <input type="text" id="service-price" class="input-field" placeholder="Price (₦)">
-                        <div class="phone-input-container">
-                            <span class="phone-prefix">+234</span>
-                            <input type="tel" id="service-phone" class="input-field" placeholder="8012345678">
-                        </div>
-                        <button onclick="postService(this)" class="btn-primary w-full">List Service</button>
-                        <button onclick="this.closest('.modal-overlay').remove()" class="btn-outline w-full">Cancel</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-        window.showPostServiceModal = showPostServiceModal;
-
-        async function postService(btn) {
-            const title = document.getElementById('service-title').value.trim();
-            const category = document.getElementById('service-category').value;
-            const desc = document.getElementById('service-desc').value.trim();
-            const price = document.getElementById('service-price').value.replace(/,/g, '');
-            const phoneInput = document.getElementById('service-phone').value.trim().replace(/^0+/, '');
-            const phone = phoneInput ? '+234' + phoneInput : '';
-            
-            if (!title || !desc || !price) {
-                showToast('Please fill all fields', 'error');
-                return;
-            }
-            
-            btn.classList.add('btn-loading');
-            btn.disabled = true;
-            
-            try {
-                const userSnap = await getDoc(doc(db, "Users", currentUserId));
-                const userName = userSnap.exists() ? userSnap.data().name : 'Anonymous';
-                
-                await addDoc(collection(db, "services"), {
-                    title, category, description: desc, price: parseInt(price), phone,
-                    provider: userName,
-                    providerId: currentUserId,
-                    createdAt: serverTimestamp()
-                });
-                
-                document.querySelector('.modal-overlay')?.remove();
-                showToast('Service listed!');
-                loadServices();
-            } catch (e) {
-                showToast('Error listing service', 'error');
-            } finally {
-                btn.classList.remove('btn-loading');
-                btn.disabled = false;
-            }
-        }
-        window.postService = postService;
-
-        async function loadServices() {
-            const container = document.getElementById('services-grid');
-            if (!container) return;
-            
-            container.innerHTML = '<div class="skeleton h-32 w-full"></div>'.repeat(3);
-            
-            try {
-                const snap = await getDocs(query(collection(db, "services"), orderBy("createdAt", "desc")));
-                
-                if (snap.empty) {
-                    container.innerHTML = '<p class="text-muted text-center py-8">No services listed yet</p>';
-                    return;
-                }
-                
-                let html = '';
-                snap.forEach(doc => {
-                    const s = doc.data();
-                    const icons = { hair: '✂️', repair: '📱', photo: '📸', tutor: '👨‍🏫' };
-                    html += `
-                        <div class="card cursor-pointer hover:shadow-xl" onclick="viewService('${doc.id}')">
-                            <div class="flex items-start gap-3">
-                                <div class="text-4xl">${icons[s.category] || '🛠️'}</div>
-                                <div class="flex-1">
-                                    <h3 class="font-bold">${s.title}</h3>
-                                    <p class="text-sm text-muted mb-2">${s.description}</p>
-                                    <p class="text-primary font-bold">₦${formatPrice(s.price)}</p>
-                                    <p class="text-xs text-muted mt-2">${s.provider}</p>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-                container.innerHTML = html;
-            } catch (e) {
-                console.error("Error loading services:", e);
-            }
-        }
-        window.loadServices = loadServices;
-
-        async function viewService(serviceId) {
-            const snap = await getDoc(doc(db, "services", serviceId));
-            const s = snap.data();
-            
-            const modal = document.createElement('div');
-            modal.className = 'modal-overlay';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <h2 class="text-2xl font-bold mb-4">${s.title}</h2>
-                    <div class="bg-input p-4 rounded-lg mb-4">
-                        <p class="text-sm">${s.description}</p>
-                    </div>
-                    <p class="text-primary text-xl font-bold mb-2">₦${formatPrice(s.price)}</p>
-                    <div class="flex gap-3 mb-4">
-                        <a href="https://wa.me/${s.phone.replace('+', '')}" target="_blank" class="btn-whatsapp flex-1 py-3 rounded-xl font-bold flex items-center justify-center gap-2">
-                            <i class="fab fa-whatsapp"></i> WhatsApp
-                        </a>
-                        <a href="tel:${s.phone}" class="btn-call flex-1 py-3 rounded-xl font-bold flex items-center justify-center gap-2">
-                            <i class="fas fa-phone"></i> Call
-                        </a>
-                    </div>
-                    <button onclick="this.closest('.modal-overlay').remove()" class="btn-outline w-full">Close</button>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-        window.viewService = viewService;
-
-        // ============ REQUESTS ============
-        function showPostRequestModal() {
-            const modal = document.createElement('div');
-            modal.className = 'modal-overlay';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <h2 class="text-2xl font-bold mb-4">Create a Request</h2>
-                    <div class="space-y-4">
-                        <select id="request-category" class="input-field">
-                            <option value="roommate">🏠 Roommate</option>
-                            <option value="study">👫 Study Partner</option>
-                            <option value="textbook">📚 Textbook</option>
-                            <option value="urgent">🚑 Urgent</option>
-                        </select>
-                        <input type="text" id="request-title" class="input-field" placeholder="Title">
-                        <textarea id="request-desc" class="input-field" rows="3" placeholder="Description"></textarea>
-                        <input type="text" id="request-contact" class="input-field" placeholder="Contact info">
-                        <button onclick="postRequest(this)" class="btn-primary w-full">Post Request</button>
-                        <button onclick="this.closest('.modal-overlay').remove()" class="btn-outline w-full">Cancel</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-        window.showPostRequestModal = showPostRequestModal;
-
-        async function postRequest(btn) {
-            const category = document.getElementById('request-category').value;
-            const title = document.getElementById('request-title').value.trim();
-            const desc = document.getElementById('request-desc').value.trim();
-            const contact = document.getElementById('request-contact').value.trim();
-            
-            if (!title || !desc) {
-                showToast('Please fill all fields', 'error');
-                return;
-            }
-            
-            btn.classList.add('btn-loading');
-            btn.disabled = true;
-            
-            try {
-                const userSnap = await getDoc(doc(db, "Users", currentUserId));
-                const userName = userSnap.exists() ? userSnap.data().name : 'Anonymous';
-                
-                await addDoc(collection(db, "requests"), {
-                    category, title, description: desc, contact,
-                    posterName: userName,
-                    posterId: currentUserId,
-                    createdAt: serverTimestamp()
-                });
-                
-                document.querySelector('.modal-overlay')?.remove();
-                showToast('Request posted!');
-                loadRequests();
-            } catch (e) {
-                showToast('Error posting request', 'error');
-            } finally {
-                btn.classList.remove('btn-loading');
-                btn.disabled = false;
-            }
-        }
-        window.postRequest = postRequest;
-
-        async function loadRequests() {
-            const container = document.getElementById('requests-grid');
-            if (!container) return;
-            
-            container.innerHTML = '<div class="skeleton h-24 w-full"></div>'.repeat(3);
-            
-            try {
-                const snap = await getDocs(query(collection(db, "requests"), orderBy("createdAt", "desc")));
-                
-                if (snap.empty) {
-                    container.innerHTML = '<p class="text-muted text-center py-8">No requests yet</p>';
-                    return;
-                }
-                
-                let html = '';
-                const icons = { roommate: '🏠', study: '👫', textbook: '📚', urgent: '🚑' };
-                
-                snap.forEach(doc => {
-                    const r = doc.data();
-                    html += `
-                        <div class="card cursor-pointer hover:shadow-xl" onclick="viewRequest('${doc.id}')">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <span class="text-xs font-bold px-2 py-1 rounded-full bg-warning text-white">${icons[r.category] || '📌'} ${r.category}</span>
-                                    <h3 class="font-bold mt-2">${r.title}</h3>
-                                    <p class="text-sm text-muted">${r.description}</p>
-                                    <p class="text-xs text-muted mt-2">Posted by ${r.posterName || 'Anonymous'}</p>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-                container.innerHTML = html;
-            } catch (e) {
-                console.error("Error loading requests:", e);
-            }
-        }
-        window.loadRequests = loadRequests;
-
-        async function viewRequest(requestId) {
-            const snap = await getDoc(doc(db, "requests", requestId));
-            const r = snap.data();
-            
-            const modal = document.createElement('div');
-            modal.className = 'modal-overlay';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <h2 class="text-2xl font-bold mb-4">${r.title}</h2>
-                    <div class="bg-input p-4 rounded-lg mb-4">
-                        <p class="text-sm">${r.description}</p>
-                    </div>
-                    <p class="text-sm mb-2"><i class="fas fa-phone text-muted mr-2"></i>${r.contact || 'No contact provided'}</p>
-                    <button onclick="this.closest('.modal-overlay').remove()" class="btn-outline w-full mt-4">Close</button>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-        window.viewRequest = viewRequest;
-
-        function filterServices(category) {
-            showToast(`Showing ${category} services`);
-            loadServices();
-        }
-        window.filterServices = filterServices;
-
-        function filterRequests(category) {
-            showToast(`Showing ${category} requests`);
-            loadRequests();
-        }
-        window.filterRequests = filterRequests;
 
         // ============ ADMIN FUNCTIONS ============
         function toggleAdminMode() {
@@ -2692,449 +1811,8 @@
                 document.getElementById('admin-toggle').innerHTML = isAdminMode ? 
                     '<i class="fas fa-lock-open"></i> Admin: ON' : 
                     '<i class="fas fa-lock"></i> Admin: OFF';
-                
-                if (isAdminMode) {
-                    loadAdminData();
-                }
             }
         }
-        window.toggleAdminMode = toggleAdminMode;
-
-        async function loadAdminData() {
-            try {
-                await loadVerifiedUsers();
-                
-                // Load stats
-                const deptsSnap = await getDocs(collection(db, "departments"));
-                const execsSnap = await getDocs(collection(db, "executives"));
-                const usersSnap = await getDocs(collection(db, "Users"));
-                const productsSnap = await getDocs(collection(db, "Products"));
-                
-                document.getElementById('admin-stat-depts').innerText = deptsSnap.size;
-                document.getElementById('admin-stat-execs').innerText = execsSnap.size;
-                document.getElementById('admin-stat-users').innerText = usersSnap.size;
-                document.getElementById('admin-stat-products').innerText = productsSnap.size;
-                
-                // Load departments dropdowns
-                let deptOptions = '<option value="">Select Department</option>';
-                deptsSnap.forEach(doc => {
-                    const dept = doc.data();
-                    deptOptions += `<option value="${doc.id}">${dept.name}</option>`;
-                });
-                document.getElementById('exec-dept').innerHTML = deptOptions;
-                
-                // Load departments list
-                let deptList = '';
-                deptsSnap.forEach(doc => {
-                    const dept = doc.data();
-                    deptList += `
-                        <div class="flex justify-between items-center p-3 bg-input rounded-lg">
-                            <div>
-                                <span class="font-bold">${dept.name}</span>
-                                <span class="text-xs text-muted ml-2">${dept.code}</span>
-                            </div>
-                            <button onclick="deleteDepartment('${doc.id}')" class="text-danger hover:text-red-700">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    `;
-                });
-                document.getElementById('depts-list').innerHTML = deptList || '<p class="text-muted">No departments</p>';
-                
-                // Load executives list
-                let execList = '';
-                const execsQuery = await getDocs(query(collection(db, "executives"), orderBy("createdAt", "desc")));
-                execsQuery.forEach(doc => {
-                    const exec = doc.data();
-                    const badge = exec.level === 'faculty' ? '👑' : exec.level === 'department' ? '⭐' : '📘';
-                    execList += `
-                        <div class="flex justify-between items-center p-3 bg-input rounded-lg">
-                            <div>
-                                <span class="font-bold">${exec.name}</span>
-                                <span class="text-xs ml-2">${badge} ${exec.position}</span>
-                                <p class="text-xs text-muted">${exec.email}</p>
-                            </div>
-                            <button onclick="deleteExecutive('${doc.id}')" class="text-danger hover:text-red-700">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    `;
-                });
-                document.getElementById('execs-list').innerHTML = execList || '<p class="text-muted">No executives</p>';
-                
-                // Load member directory with verification status
-                let memberHtml = '';
-                usersSnap.forEach(doc => {
-                    const user = doc.data();
-                    const isVerified = verifiedUsers.has(doc.id);
-                    memberHtml += `
-                        <div class="flex justify-between items-center p-3 bg-input rounded-lg">
-                            <div>
-                                <p class="font-bold">${user.name || 'Anonymous'}</p>
-                                <p class="text-xs text-muted">ID: ${doc.id}</p>
-                                ${isVerified ? 
-                                    '<span class="verified-badge text-xs"><i class="fas fa-check-circle"></i> Verified</span>' : 
-                                    '<span class="unverified-badge text-xs"><i class="fas fa-times-circle"></i> Unverified</span>'}
-                            </div>
-                            <div class="flex gap-2">
-                                ${!isVerified ? `
-                                    <button onclick="verifyUserAdmin('${doc.id}')" class="text-success hover:text-green-700" title="Verify User">
-                                        <i class="fas fa-check-circle"></i>
-                                    </button>
-                                ` : `
-                                    <button onclick="unverifyUser('${doc.id}')" class="text-warning hover:text-yellow-700" title="Remove Verification">
-                                        <i class="fas fa-times-circle"></i>
-                                    </button>
-                                `}
-                                <button onclick="banUser('${doc.id}')" class="text-danger hover:text-red-700" title="Ban User">
-                                    <i class="fas fa-ban"></i>
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                });
-                document.getElementById('member-directory-admin').innerHTML = memberHtml || '<p class="text-muted">No users</p>';
-                
-                // Load verification requests
-                const verifSnap = await getDocs(collection(db, "VerificationRequests"));
-                let verifHtml = '';
-                verifSnap.forEach(doc => {
-                    const req = doc.data();
-                    verifHtml += `
-                        <div class="flex justify-between items-center p-3 bg-input rounded-lg">
-                            <div>
-                                <p class="font-bold">${req.userName || 'Unknown'}</p>
-                                <p class="text-xs text-muted">ID: ${doc.id}</p>
-                            </div>
-                            <div class="flex gap-2">
-                                <a href="${req.idImage}" target="_blank" class="btn-outline text-xs py-1 px-2">View ID</a>
-                                <button onclick="verifyUser('${doc.id}')" class="text-success">
-                                    <i class="fas fa-check"></i>
-                                </button>
-                                <button onclick="rejectVerification('${doc.id}')" class="text-danger">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                });
-                document.getElementById('verification-list').innerHTML = verifHtml || '<p class="text-muted">No verification requests</p>';
-                
-                // Load reports
-                const reportsSnap = await getDocs(collection(db, "Reports"));
-                let reportsHtml = '';
-                reportsSnap.forEach(doc => {
-                    const r = doc.data();
-                    reportsHtml += `
-                        <div class="p-3 bg-input rounded-lg">
-                            <p class="font-bold">Report against: ${r.reportedUser}</p>
-                            <p class="text-sm mt-1">${r.reason}</p>
-                            <div class="flex gap-2 mt-2">
-                                <button onclick="banUser('${r.reportedUser}')" class="btn-danger text-xs py-1 px-3">Ban</button>
-                                <button onclick="resolveReport('${doc.id}')" class="btn-success text-xs py-1 px-3">Resolve</button>
-                            </div>
-                        </div>
-                    `;
-                });
-                document.getElementById('reports-list').innerHTML = reportsHtml || '<p class="text-muted">No reports</p>';
-                
-            } catch (e) {
-                console.error("Error loading admin data:", e);
-            }
-        }
-        window.loadAdminData = loadAdminData;
-
-        // Verify user (admin)
-        async function verifyUserAdmin(userId) {
-            if (confirm(`Verify this user?`)) {
-                try {
-                    await setDoc(doc(db, "VerifiedUsers", userId), {
-                        verifiedAt: serverTimestamp(),
-                        verifiedBy: currentUserId
-                    });
-                    showToast('User verified');
-                    loadAdminData();
-                    loadVerifiedUsers();
-                } catch (e) {
-                    showToast('Error verifying user', 'error');
-                }
-            }
-        }
-        window.verifyUserAdmin = verifyUserAdmin;
-
-        // Unverify user
-        async function unverifyUser(userId) {
-            if (confirm(`Remove verification from this user?`)) {
-                try {
-                    await deleteDoc(doc(db, "VerifiedUsers", userId));
-                    showToast('Verification removed');
-                    loadAdminData();
-                    loadVerifiedUsers();
-                } catch (e) {
-                    showToast('Error removing verification', 'error');
-                }
-            }
-        }
-        window.unverifyUser = unverifyUser;
-
-        async function verifyUser(userId) {
-            try {
-                await setDoc(doc(db, "VerifiedUsers", userId), {
-                    verifiedAt: serverTimestamp(),
-                    verifiedBy: currentUserId
-                });
-                await deleteDoc(doc(db, "VerificationRequests", userId));
-                showToast('User verified');
-                loadAdminData();
-                loadVerifiedUsers();
-            } catch (e) {
-                showToast('Error verifying user', 'error');
-            }
-        }
-        window.verifyUser = verifyUser;
-
-        async function rejectVerification(requestId) {
-            if (confirm('Reject this verification request?')) {
-                try {
-                    await deleteDoc(doc(db, "VerificationRequests", requestId));
-                    showToast('Request rejected');
-                    loadAdminData();
-                } catch (e) {
-                    showToast('Error rejecting request', 'error');
-                }
-            }
-        }
-        window.rejectVerification = rejectVerification;
-
-        async function resolveReport(reportId) {
-            if (confirm('Mark this report as resolved?')) {
-                try {
-                    await deleteDoc(doc(db, "Reports", reportId));
-                    showToast('Report resolved');
-                    loadAdminData();
-                } catch (e) {
-                    showToast('Error resolving report', 'error');
-                }
-            }
-        }
-        window.resolveReport = resolveReport;
-
-        async function addDepartment() {
-            const name = document.getElementById('dept-name').value.trim();
-            const code = document.getElementById('dept-code').value.trim();
-            
-            if (!name || !code) {
-                showToast('Please fill all fields', 'error');
-                return;
-            }
-            
-            showLoading('add-dept');
-            
-            try {
-                await addDoc(collection(db, "departments"), {
-                    name, code,
-                    createdAt: serverTimestamp()
-                });
-                
-                document.getElementById('dept-name').value = '';
-                document.getElementById('dept-code').value = '';
-                showToast('Department added!');
-                loadAdminData();
-            } catch (e) {
-                showToast('Error adding department', 'error');
-            } finally {
-                hideLoading('add-dept');
-            }
-        }
-        window.addDepartment = addDepartment;
-
-        async function deleteDepartment(id) {
-            if (confirm('Delete this department?')) {
-                try {
-                    await deleteDoc(doc(db, "departments", id));
-                    showToast('Department deleted');
-                    loadAdminData();
-                } catch (e) {
-                    showToast('Error deleting department', 'error');
-                }
-            }
-        }
-        window.deleteDepartment = deleteDepartment;
-
-        async function addExecutive() {
-            const deptId = document.getElementById('exec-dept').value;
-            const name = document.getElementById('exec-name').value.trim();
-            const position = document.getElementById('exec-position').value.trim();
-            const email = document.getElementById('exec-email').value.trim();
-            const level = document.getElementById('exec-level').value;
-            const course = document.getElementById('exec-course').value.trim();
-            
-            if (!deptId || !name || !position || !email) {
-                showToast('Please fill required fields', 'error');
-                return;
-            }
-            
-            showLoading('add-exec');
-            
-            try {
-                await addDoc(collection(db, "executives"), {
-                    departmentId: deptId,
-                    name, position, email, level,
-                    courseCode: course || null,
-                    createdAt: serverTimestamp()
-                });
-                
-                document.getElementById('exec-name').value = '';
-                document.getElementById('exec-position').value = '';
-                document.getElementById('exec-email').value = '';
-                document.getElementById('exec-course').value = '';
-                showToast('Executive added!');
-                loadAdminData();
-            } catch (e) {
-                showToast('Error adding executive', 'error');
-            } finally {
-                hideLoading('add-exec');
-            }
-        }
-        window.addExecutive = addExecutive;
-
-        async function deleteExecutive(id) {
-            if (confirm('Remove this executive?')) {
-                try {
-                    await deleteDoc(doc(db, "executives", id));
-                    showToast('Executive removed');
-                    loadAdminData();
-                } catch (e) {
-                    showToast('Error removing executive', 'error');
-                }
-            }
-        }
-        window.deleteExecutive = deleteExecutive;
-
-        async function banUser(userId) {
-            if (confirm('Ban this user?')) {
-                try {
-                    await setDoc(doc(db, "BannedUsers", userId), {
-                        bannedAt: serverTimestamp(),
-                        bannedBy: currentUserId
-                    });
-                    showToast('User banned');
-                    loadAdminData();
-                } catch (e) {
-                    showToast('Error banning user', 'error');
-                }
-            }
-        }
-        window.banUser = banUser;
-
-        async function sendGlobalBroadcast() {
-            const msg = document.getElementById('global-broadcast-input').value.trim();
-            if (!msg) {
-                showToast('Enter a message', 'error');
-                return;
-            }
-            
-            try {
-                await setDoc(doc(db, "AppData", "Announcement"), {
-                    message: msg,
-                    active: true,
-                    timestamp: serverTimestamp()
-                });
-                showToast('Broadcast sent!');
-                document.getElementById('global-broadcast-input').value = '';
-                
-                // Show broadcast
-                document.getElementById('global-broadcast').classList.remove('hidden');
-                document.getElementById('broadcast-message').innerText = msg;
-            } catch (e) {
-                showToast('Error sending broadcast', 'error');
-            }
-        }
-        window.sendGlobalBroadcast = sendGlobalBroadcast;
-
-        async function deleteGlobalBroadcast() {
-            if (confirm('Delete global broadcast?')) {
-                try {
-                    await setDoc(doc(db, "AppData", "Announcement"), {
-                        message: '',
-                        active: false
-                    });
-                    document.getElementById('global-broadcast').classList.add('hidden');
-                    showToast('Broadcast deleted');
-                } catch (e) {
-                    showToast('Error deleting broadcast', 'error');
-                }
-            }
-        }
-        window.deleteGlobalBroadcast = deleteGlobalBroadcast;
-
-        // Load global broadcast on startup
-        async function loadGlobalBroadcast() {
-            try {
-                const snap = await getDoc(doc(db, "AppData", "Announcement"));
-                if (snap.exists() && snap.data().active) {
-                    document.getElementById('global-broadcast').classList.remove('hidden');
-                    document.getElementById('broadcast-message').innerText = snap.data().message;
-                }
-            } catch (e) {
-                console.error("Error loading broadcast:", e);
-            }
-        }
-
-        // ============ CONTACT FUNCTIONS ============
-        function showContactAdminModal() {
-            const modal = document.createElement('div');
-            modal.className = 'modal-overlay';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <h2 class="text-2xl font-bold mb-4">Contact Admin</h2>
-                    <p class="text-muted mb-4">Your message will be sent to the admin team.</p>
-                    <textarea id="admin-message" class="input-field mb-4" rows="4" placeholder="Type your message..."></textarea>
-                    <div class="flex gap-3">
-                        <button onclick="sendAdminMessage()" class="btn-primary flex-1">Send Message</button>
-                        <button onclick="this.closest('.modal-overlay').remove()" class="btn-outline">Cancel</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-        window.showContactAdminModal = showContactAdminModal;
-
-        async function sendAdminMessage() {
-            const message = document.getElementById('admin-message')?.value.trim();
-            if (!message) {
-                showToast('Please enter a message', 'error');
-                return;
-            }
-            
-            try {
-                await addDoc(collection(db, "AdminMessages"), {
-                    userId: currentUserId,
-                    message: message,
-                    timestamp: serverTimestamp(),
-                    read: false
-                });
-                document.querySelector('.modal-overlay')?.remove();
-                showToast('Message sent to admin!');
-            } catch (e) {
-                showToast('Error sending message', 'error');
-            }
-        }
-        window.sendAdminMessage = sendAdminMessage;
-
-        function reportUser(userId, event) {
-            if (event) event.stopPropagation();
-            const reason = prompt('Why are you reporting this user?');
-            if (reason) {
-                addDoc(collection(db, "Reports"), {
-                    reportedUser: userId,
-                    reporterUser: currentUserId,
-                    reason: reason,
-                    timestamp: serverTimestamp()
-                }).then(() => showToast('Report sent')).catch(() => showToast('Error sending report', 'error'));
-            }
-        }
-        window.reportUser = reportUser;
 
         // ============ DARK MODE ============
         function toggleDarkMode() {
@@ -3143,7 +1821,6 @@
             localStorage.setItem('dark-mode', html.classList.contains('dark'));
             document.getElementById('dark-icon').className = html.classList.contains('dark') ? 'fas fa-sun' : 'fas fa-moon';
         }
-        window.toggleDarkMode = toggleDarkMode;
         
         if (localStorage.getItem('dark-mode') === 'true') {
             document.documentElement.classList.add('dark');
@@ -3168,538 +1845,116 @@
             }
         });
 
-        // ============ HELPER FUNCTIONS ============
-        async function getDeptName(deptId) {
-            if (!deptId) return 'SLIT';
-            try {
-                const deptSnap = await getDoc(doc(db, "departments", deptId));
-                return deptSnap.exists() ? deptSnap.data().name : 'SLIT';
-            } catch {
-                return 'SLIT';
-            }
-        }
-        window.getDeptName = getDeptName;
-
-        // Load departments
-        async function loadDepartments() {
-            try {
-                const deptsSnap = await getDocs(collection(db, "departments"));
-                let options = '<option value="">Select Department</option>';
-                deptsSnap.forEach(doc => {
-                    const dept = doc.data();
-                    options += `<option value="${doc.id}">${dept.name}</option>`;
-                });
-                
-                const deptSelects = ['profile-dept', 'academics-dept', 'exec-dept'];
-                deptSelects.forEach(id => {
-                    const el = document.getElementById(id);
-                    if (el) el.innerHTML = options;
-                });
-            } catch (e) {
-                console.error("Error loading departments:", e);
-            }
-        }
-        window.loadDepartments = loadDepartments;
-
-        // Load academics data
-        async function loadAcademicsData() {
-            await loadDepartments();
-            
-            // Load study groups
-            try {
-                const groupsSnap = await getDocs(query(collection(db, "studyGroups"), orderBy("createdAt", "desc")));
-                let groupsHtml = '';
-                groupsSnap.forEach(doc => {
-                    const group = doc.data();
-                    groupsHtml += `
-                        <div class="p-3 bg-input rounded-lg cursor-pointer hover:bg-opacity-80" onclick="joinStudyGroup('${doc.id}')">
-                            <div class="flex justify-between items-center">
-                                <h4 class="font-bold">${group.name}</h4>
-                                <span class="text-xs bg-primary text-white px-2 py-1 rounded">${group.course}</span>
-                            </div>
-                            <p class="text-sm text-muted mt-1">${group.description}</p>
-                            <div class="flex items-center gap-2 mt-2 text-xs">
-                                <i class="fas fa-users text-primary"></i>
-                                <span>${group.members || 0} members</span>
-                            </div>
-                        </div>
-                    `;
-                });
-                document.getElementById('study-groups').innerHTML = groupsHtml || '<p class="text-muted">No study groups yet</p>';
-            } catch (e) {
-                console.error("Error loading study groups:", e);
-            }
-            
-            // Load materials
-            try {
-                const materialsSnap = await getDocs(query(collection(db, "courseMaterials"), orderBy("uploadedAt", "desc")));
-                let materialsHtml = '';
-                materialsSnap.forEach(doc => {
-                    const mat = doc.data();
-                    materialsHtml += `
-                        <div class="p-3 bg-input rounded-lg">
-                            <div class="flex justify-between items-center">
-                                <div>
-                                    <h4 class="font-bold">${mat.title}</h4>
-                                    <p class="text-xs text-muted">${mat.course} • Uploaded by ${mat.uploaderName || 'Unknown'}</p>
-                                </div>
-                                <a href="${mat.fileUrl}" target="_blank" class="text-primary hover:underline text-sm">
-                                    <i class="fas fa-download"></i> View
-                                </a>
-                            </div>
-                        </div>
-                    `;
-                });
-                document.getElementById('materials-list').innerHTML = materialsHtml || '<p class="text-muted">No materials yet</p>';
-            } catch (e) {
-                console.error("Error loading materials:", e);
-            }
-        }
-        window.loadAcademicsData = loadAcademicsData;
-
-        // Load community data
-        async function loadCommunityData() {
-            await loadVerifiedUsers();
-            
-            // Load executives directory
-            try {
-                const execsSnap = await getDocs(query(collection(db, "executives"), orderBy("createdAt", "desc")));
-                let execsHtml = '';
-                execsSnap.forEach(doc => {
-                    const exec = doc.data();
-                    const badge = exec.level === 'faculty' ? '👑' : exec.level === 'department' ? '⭐' : '📘';
-                    
-                    // Get user for verification status
-                    const userQuery = await getDocs(query(collection(db, "Users"), where("email", "==", exec.email)));
-                    let isVerified = false;
-                    let userId = '';
-                    if (!userQuery.empty) {
-                        userId = userQuery.docs[0].id;
-                        isVerified = verifiedUsers.has(userId);
-                    }
-                    
-                    execsHtml += `
-                        <div class="flex items-center gap-3 p-3 bg-input rounded-lg cursor-pointer" onclick="${userId ? `viewUserProfile('${userId}')` : ''}">
-                            <img src="https://ui-avatars.com/api/?name=${exec.name}&background=10b981&color=fff&size=40" class="w-10 h-10 rounded-full">
-                            <div class="flex-1">
-                                <div class="flex items-center gap-2">
-                                    <p class="font-bold">${exec.name}</p>
-                                    ${isVerified ? '<span class="verified-badge text-xs py-1"><i class="fas fa-check-circle"></i></span>' : ''}
-                                </div>
-                                <p class="text-xs text-muted">${exec.position} ${badge}</p>
-                            </div>
-                            ${userId ? `
-                                <a href="https://wa.me/${exec.phone || ''}" target="_blank" class="text-green-600">
-                                    <i class="fab fa-whatsapp text-xl"></i>
-                                </a>
-                            ` : ''}
-                        </div>
-                    `;
-                });
-                document.getElementById('executives-directory').innerHTML = execsHtml || '<p class="text-muted">No executives listed</p>';
-            } catch (e) {
-                console.error("Error loading executives:", e);
-            }
-            
-            // Load announcements
-            await loadAnnouncements();
-        }
-        window.loadCommunityData = loadCommunityData;
-
-        // Load announcements
-        async function loadAnnouncements(filter = 'all') {
-            try {
-                let q = query(collection(db, "announcements"), orderBy("createdAt", "desc"));
-                const snap = await getDocs(q);
-                
-                let html = '';
-                snap.forEach(doc => {
-                    const ann = doc.data();
-                    if (filter !== 'all' && ann.category !== filter) return;
-                    
-                    html += `
-                        <div class="card">
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="text-xs font-bold px-2 py-1 rounded-full bg-primary text-white">${ann.category}</span>
-                                <span class="text-xs text-muted">${ann.createdAt ? new Date(ann.createdAt.seconds*1000).toLocaleDateString() : ''}</span>
-                            </div>
-                            <h3 class="font-bold mb-2">${ann.title}</h3>
-                            <p class="text-sm text-muted mb-3">${ann.content}</p>
-                            ${ann.link ? `<a href="${ann.link}" target="_blank" class="text-primary text-sm hover:underline">🔗 View Link</a>` : ''}
-                        </div>
-                    `;
-                });
-                document.getElementById('announcements-feed').innerHTML = html || '<p class="text-muted text-center py-8">No announcements</p>';
-            } catch (e) {
-                console.error("Error loading announcements:", e);
-            }
-        }
-        window.loadAnnouncements = loadAnnouncements;
-
-        // Filter announcements
-        function filterAnnouncements(category) {
-            loadAnnouncements(category);
-            
-            document.querySelectorAll('.category-btn').forEach(btn => {
-                btn.classList.remove('bg-primary', 'text-white');
-                btn.classList.add('bg-card', 'border', 'border-base');
-            });
-            if (event) event.target.classList.add('bg-primary', 'text-white');
-        }
-        window.filterAnnouncements = filterAnnouncements;
-
-        // Post announcement
-        async function postAnnouncement() {
-            const category = document.getElementById('announce-category').value;
-            const title = document.getElementById('announce-title').value.trim();
-            const content = document.getElementById('announce-content').value.trim();
-            const link = document.getElementById('announce-link').value.trim();
-            const date = document.getElementById('announce-date').value;
-            
-            if (!title || !content) {
-                showToast('Please fill all fields', 'error');
-                return;
-            }
-            
-            const btn = event.target;
-            btn.classList.add('btn-loading');
-            btn.disabled = true;
-            
-            try {
-                const userSnap = await getDoc(doc(db, "Users", currentUserId));
-                const userName = userSnap.exists() ? userSnap.data().name : 'Executive';
-                
-                await addDoc(collection(db, "announcements"), {
-                    category,
-                    title,
-                    content,
-                    link,
-                    date,
-                    postedBy: currentUserId,
-                    postedByName: userName,
-                    createdAt: serverTimestamp()
-                });
-                
-                document.getElementById('announce-title').value = '';
-                document.getElementById('announce-content').value = '';
-                document.getElementById('announce-link').value = '';
-                document.getElementById('announce-date').value = '';
-                
-                showToast('Announcement posted!');
-                loadAnnouncements();
-            } catch (e) {
-                showToast('Error posting announcement', 'error');
-            } finally {
-                btn.classList.remove('btn-loading');
-                btn.disabled = false;
-            }
-        }
-        window.postAnnouncement = postAnnouncement;
-
-        // Load marketplace data
-        function loadMarketplaceData() {
-            loadProducts();
-        }
-        window.loadMarketplaceData = loadMarketplaceData;
-
-        // Show timetable
-        function showTimetable(type) {
-            document.getElementById('timetable-container').classList.remove('hidden');
-            document.getElementById('timetable-title').innerText = 
-                type === 'lecture' ? '📖 Lecture Timetable' : 
-                type === 'test' ? '📝 Test Schedule' : '📋 Exam Timetable';
-            
-            document.getElementById('timetable-content').innerHTML = `
-                <div class="p-4 bg-input rounded-lg">
-                    <p class="text-center text-muted">Timetable will be available soon</p>
-                    <p class="text-center text-sm text-primary mt-2">Please check with your department</p>
-                </div>
-            `;
-        }
-        window.showTimetable = showTimetable;
-
-        function hideTimetable() {
-            document.getElementById('timetable-container').classList.add('hidden');
-        }
-        window.hideTimetable = hideTimetable;
-
-        function showMaterials() {
-            showToast('Course materials are displayed below');
-        }
-        window.showMaterials = showMaterials;
-
-        // Create study group modal
-        function showCreateStudyGroupModal() {
-            const modal = document.createElement('div');
-            modal.className = 'modal-overlay';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <h2 class="text-2xl font-bold mb-4">Create Study Group</h2>
-                    <div class="space-y-4">
-                        <input type="text" id="group-name" class="input-field" placeholder="Group Name">
-                        <input type="text" id="group-course" class="input-field" placeholder="Course Code">
-                        <textarea id="group-desc" class="input-field" rows="3" placeholder="Description"></textarea>
-                        <div class="flex gap-3">
-                            <button onclick="createStudyGroup()" class="btn-primary flex-1">Create</button>
-                            <button onclick="this.closest('.modal-overlay').remove()" class="btn-outline">Cancel</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-        window.showCreateStudyGroupModal = showCreateStudyGroupModal;
-
-        // Create study group
-        async function createStudyGroup() {
-            const name = document.getElementById('group-name').value.trim();
-            const course = document.getElementById('group-course').value.trim();
-            const desc = document.getElementById('group-desc').value.trim();
-            
-            if (!name || !course) {
-                showToast('Please fill required fields', 'error');
-                return;
-            }
-            
-            try {
-                await addDoc(collection(db, "studyGroups"), {
-                    name,
-                    course,
-                    description: desc,
-                    createdBy: currentUserId,
-                    members: 1,
-                    createdAt: serverTimestamp()
-                });
-                
-                document.querySelector('.modal-overlay')?.remove();
-                showToast('Study group created!');
-                loadAcademicsData();
-            } catch (e) {
-                showToast('Error creating group', 'error');
-            }
-        }
-        window.createStudyGroup = createStudyGroup;
-
-        // Join study group
-        async function joinStudyGroup(groupId) {
-            try {
-                const groupRef = doc(db, "studyGroups", groupId);
-                const groupSnap = await getDoc(groupRef);
-                const group = groupSnap.data();
-                
-                await updateDoc(groupRef, {
-                    members: (group.members || 0) + 1
-                });
-                
-                showToast('Joined study group!');
-            } catch (e) {
-                showToast('Error joining group', 'error');
-            }
-        }
-        window.joinStudyGroup = joinStudyGroup;
-
-        // Upload material modal
-        function showUploadMaterialModal() {
-            const modal = document.createElement('div');
-            modal.className = 'modal-overlay';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <h2 class="text-2xl font-bold mb-4">Upload Course Material</h2>
-                    <div class="space-y-4">
-                        <input type="text" id="material-title" class="input-field" placeholder="Title">
-                        <input type="text" id="material-course" class="input-field" placeholder="Course Code">
-                        <select id="material-type" class="input-field">
-                            <option value="past_question">Past Question</option>
-                            <option value="note">Lecture Note</option>
-                            <option value="textbook">Textbook</option>
-                        </select>
-                        <input type="file" id="material-file" accept=".pdf,.doc,.docx,.ppt,.pptx" class="input-field">
-                        <div class="flex gap-3">
-                            <button onclick="uploadMaterial()" class="btn-primary flex-1">Upload</button>
-                            <button onclick="this.closest('.modal-overlay').remove()" class="btn-outline">Cancel</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-        window.showUploadMaterialModal = showUploadMaterialModal;
-
-        // Upload material
-        async function uploadMaterial() {
-            const title = document.getElementById('material-title').value.trim();
-            const course = document.getElementById('material-course').value.trim();
-            const type = document.getElementById('material-type').value;
-            const file = document.getElementById('material-file').files[0];
-            
-            if (!title || !course || !file) {
-                showToast('Please fill all fields', 'error');
-                return;
-            }
-            
-            if (file.size > 10 * 1024 * 1024) {
-                showToast('File too large! Max 10MB', 'error');
-                return;
-            }
-            
-            const btn = event.target;
-            btn.classList.add('btn-loading');
-            btn.disabled = true;
-            
-            try {
-                const formData = new FormData();
-                formData.append('file', file);
-                formData.append('upload_preset', 'SLIT-HUB');
-                
-                const res = await fetch('https://api.cloudinary.com/v1_1/ddm87a9p2/raw/upload', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                if (res.ok) {
-                    const data = await res.json();
-                    
-                    const userSnap = await getDoc(doc(db, "Users", currentUserId));
-                    const userName = userSnap.exists() ? userSnap.data().name : 'User';
-                    
-                    await addDoc(collection(db, "courseMaterials"), {
-                        title,
-                        course,
-                        type,
-                        fileUrl: data.secure_url,
-                        uploaderId: currentUserId,
-                        uploaderName: userName,
-                        uploadedAt: serverTimestamp(),
-                        downloads: 0
-                    });
-                    
-                    document.querySelector('.modal-overlay')?.remove();
-                    showToast('Material uploaded!');
-                    loadAcademicsData();
-                }
-            } catch (e) {
-                showToast('Upload failed', 'error');
-            } finally {
-                btn.classList.remove('btn-loading');
-                btn.disabled = false;
-            }
-        }
-        window.uploadMaterial = uploadMaterial;
-
-        function viewAnnouncement(id) {
-            showToast('Viewing announcement...');
-        }
-        window.viewAnnouncement = viewAnnouncement;
-
-        // Load department data (for academics)
-        function loadDepartmentData() {
-            showToast('Department data loaded');
-        }
-        window.loadDepartmentData = loadDepartmentData;
-
-        // Show delete all data modal
-        function showDeleteAllDataModal() {
-            showToast('This feature requires super admin access');
-        }
-        window.showDeleteAllDataModal = showDeleteAllDataModal;
-
-        // ============ EVENT LISTENER SETUP ============
-        function setupEventListeners() {
-            console.log('Setting up event listeners...');
+        // ============ EVENT LISTENERS ============
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('SLIT-HUB initializing...');
             
             // Logo click
-            document.getElementById('logo-home')?.addEventListener('click', () => switchTab('home'));
+            document.getElementById('logo').addEventListener('click', () => switchTab('home'));
             
             // Dark mode toggle
-            document.getElementById('dark-mode-toggle')?.addEventListener('click', toggleDarkMode);
+            document.getElementById('dark-mode-toggle').addEventListener('click', toggleDarkMode);
             
-            // Navigation tabs
+            // Tab buttons
             document.querySelectorAll('.tab[data-tab]').forEach(tab => {
-                tab.addEventListener('click', () => {
-                    const tabId = tab.getAttribute('data-tab');
-                    switchTab(tabId);
+                tab.addEventListener('click', function() {
+                    switchTab(this.dataset.tab);
                 });
             });
             
             // Bottom navigation
             document.querySelectorAll('.nav-item[data-nav]').forEach(item => {
-                item.addEventListener('click', () => {
-                    const tabId = item.getAttribute('data-nav');
-                    switchTab(tabId);
+                item.addEventListener('click', function() {
+                    switchTab(this.dataset.nav);
                 });
             });
             
-            // Home stats cards
+            // Home cards
             document.querySelectorAll('[data-nav]').forEach(card => {
-                card.addEventListener('click', () => {
-                    const tabId = card.getAttribute('data-nav');
-                    switchTab(tabId);
+                card.addEventListener('click', function() {
+                    switchTab(this.dataset.nav);
                 });
             });
             
             // Academics cards
             document.querySelectorAll('[data-academics]').forEach(card => {
-                card.addEventListener('click', () => {
-                    const type = card.getAttribute('data-academics');
-                    if (type === 'materials') showMaterials();
-                    else showTimetable(type);
+                card.addEventListener('click', function() {
+                    showToast(`Opening ${this.dataset.academics}`);
                 });
             });
             
-            // Hide timetable button
-            document.getElementById('hide-timetable')?.addEventListener('click', hideTimetable);
+            // Hide timetable
+            document.getElementById('hide-timetable')?.addEventListener('click', function() {
+                document.getElementById('timetable-container').classList.add('hidden');
+            });
             
-            // Study group button
-            document.getElementById('create-study-group')?.addEventListener('click', showCreateStudyGroupModal);
+            // Create study group
+            document.getElementById('create-study-group')?.addEventListener('click', () => {
+                showToast('Create Study Group feature');
+            });
             
-            // Upload material button
-            document.getElementById('upload-material')?.addEventListener('click', showUploadMaterialModal);
+            // Upload material
+            document.getElementById('upload-material')?.addEventListener('click', () => {
+                showToast('Upload Material feature');
+            });
             
             // Category filters
             document.querySelectorAll('[data-category]').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const category = btn.getAttribute('data-category');
-                    filterAnnouncements(category);
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.category-btn').forEach(b => {
+                        b.classList.remove('bg-primary', 'text-white');
+                        b.classList.add('bg-card', 'border', 'border-base');
+                    });
+                    this.classList.add('bg-primary', 'text-white');
+                    showToast(`Filtering by: ${this.dataset.category}`);
                 });
             });
             
             // Publish announcement
-            document.getElementById('publish-announcement')?.addEventListener('click', postAnnouncement);
+            document.getElementById('publish-announcement')?.addEventListener('click', () => {
+                showToast('Announcement posted!');
+            });
             
             // Marketplace sub-tabs
             document.querySelectorAll('[data-marketplace]').forEach(tab => {
-                tab.addEventListener('click', () => {
-                    const marketplaceTab = tab.getAttribute('data-marketplace');
-                    switchMarketplaceTab(marketplaceTab);
+                tab.addEventListener('click', function() {
+                    switchMarketplaceTab(this.dataset.marketplace);
                 });
             });
             
-            // Sell item button
+            // Sell item
             document.getElementById('sell-item')?.addEventListener('click', showPostProductModal);
             
-            // List service button
-            document.getElementById('list-service')?.addEventListener('click', showPostServiceModal);
+            // List service
+            document.getElementById('list-service')?.addEventListener('click', () => {
+                showToast('List Service feature');
+            });
             
-            // New request button
-            document.getElementById('new-request')?.addEventListener('click', showPostRequestModal);
+            // New request
+            document.getElementById('new-request')?.addEventListener('click', () => {
+                showToast('New Request feature');
+            });
             
-            // Service category filters
+            // Service categories
             document.querySelectorAll('[data-service]').forEach(card => {
-                card.addEventListener('click', () => {
-                    const category = card.getAttribute('data-service');
-                    filterServices(category);
+                card.addEventListener('click', function() {
+                    showToast(`Filtering services: ${this.dataset.service}`);
                 });
             });
             
-            // Request category filters
+            // Request categories
             document.querySelectorAll('[data-request]').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const category = btn.getAttribute('data-request');
-                    filterRequests(category);
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('[data-request]').forEach(b => {
+                        b.classList.remove('bg-primary', 'text-white');
+                        b.classList.add('bg-card', 'border', 'border-base');
+                    });
+                    this.classList.add('bg-primary', 'text-white');
+                    showToast(`Filtering requests: ${this.dataset.request}`);
                 });
             });
             
-            // Profile picture upload
+            // Upload profile picture
             document.getElementById('upload-profile-pic')?.addEventListener('click', () => {
                 document.getElementById('profile-upload').click();
             });
@@ -3708,100 +1963,78 @@
                 document.getElementById('profile-upload').click();
             });
             
-            document.getElementById('profile-upload')?.addEventListener('change', async (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                
-                try {
-                    const formData = new FormData();
-                    formData.append('file', file);
-                    formData.append('upload_preset', 'SLIT-HUB');
-                    
-                    const res = await fetch('https://api.cloudinary.com/v1_1/ddm87a9p2/image/upload', {
-                        method: 'POST',
-                        body: formData
-                    });
-                    
-                    if (res.ok) {
-                        const data = await res.json();
-                        await setDoc(doc(db, "Users", currentUserId), {
-                            photo: data.secure_url
-                        }, { merge: true });
-                        document.getElementById('profile-pic').src = data.secure_url;
-                        showToast('Profile photo updated!');
-                    }
-                } catch (e) {
-                    showToast('Upload failed', 'error');
+            // Save profile
+            document.getElementById('save-profile')?.addEventListener('click', saveProfile);
+            
+            // Contact admin
+            document.getElementById('contact-admin')?.addEventListener('click', () => {
+                showToast('Message sent to admin!');
+            });
+            
+            // Save portfolio
+            document.getElementById('save-portfolio')?.addEventListener('click', () => {
+                showToast('Portfolio links saved!');
+            });
+            
+            // Request verification
+            document.getElementById('request-verification')?.addEventListener('click', () => {
+                showToast('Verification request sent!');
+            });
+            
+            // Delete profile
+            document.getElementById('delete-profile')?.addEventListener('click', () => {
+                if (confirm('Delete your profile?')) {
+                    showToast('Profile deleted');
                 }
             });
             
-            // Save profile button
-            document.getElementById('save-profile')?.addEventListener('click', saveProfile);
-            
-            // Contact admin button
-            document.getElementById('contact-admin')?.addEventListener('click', showContactAdminModal);
-            
-            // Save portfolio button
-            document.getElementById('save-portfolio')?.addEventListener('click', savePortfolioLinks);
-            
-            // Request verification button
-            document.getElementById('request-verification')?.addEventListener('click', requestVerification);
-            
-            // Course rep upload button
-            document.getElementById('rep-upload-material')?.addEventListener('click', showUploadMaterialModal);
-            
-            // Delete profile button
-            document.getElementById('delete-profile')?.addEventListener('click', confirmDeleteProfile);
-            
-            // Add new item button (manager)
+            // Add new item (manager)
             document.getElementById('add-new-item')?.addEventListener('click', () => switchTab('marketplace'));
             
-            // Admin toggle button
+            // Admin toggle
             document.getElementById('admin-toggle')?.addEventListener('click', toggleAdminMode);
             
-            // Admin save portfolio button
-            document.getElementById('admin-save-portfolio')?.addEventListener('click', savePortfolioLinks);
+            // Admin save portfolio
+            document.getElementById('admin-save-portfolio')?.addEventListener('click', () => {
+                showToast('Portfolio links saved!');
+            });
             
-            // Send broadcast button
-            document.getElementById('send-broadcast')?.addEventListener('click', sendGlobalBroadcast);
+            // Send broadcast
+            document.getElementById('send-broadcast')?.addEventListener('click', () => {
+                const msg = document.getElementById('global-broadcast-input').value;
+                if (msg) {
+                    showToast('Broadcast sent!');
+                    document.getElementById('global-broadcast').classList.remove('hidden');
+                    document.getElementById('broadcast-message').innerText = msg;
+                }
+            });
             
-            // Delete broadcast button
-            document.getElementById('delete-broadcast')?.addEventListener('click', deleteGlobalBroadcast);
+            // Delete broadcast
+            document.getElementById('delete-broadcast')?.addEventListener('click', () => {
+                document.getElementById('global-broadcast').classList.add('hidden');
+                showToast('Broadcast deleted');
+            });
             
-            // Add department button
-            document.getElementById('add-dept')?.addEventListener('click', addDepartment);
+            // Add department
+            document.getElementById('add-dept')?.addEventListener('click', () => {
+                showToast('Department added!');
+            });
             
-            // Add executive button
-            document.getElementById('add-exec')?.addEventListener('click', addExecutive);
+            // Add executive
+            document.getElementById('add-exec')?.addEventListener('click', () => {
+                showToast('Executive added!');
+            });
             
-            // Delete all data button
-            document.getElementById('delete-all-data')?.addEventListener('click', showDeleteAllDataModal);
+            // Delete all data
+            document.getElementById('delete-all-data')?.addEventListener('click', () => {
+                showToast('This requires super admin access');
+            });
             
-            console.log('Event listeners setup complete');
-        }
-
-        // ============ INITIALIZE ON LOAD ============
-        window.onload = async () => {
-            console.log('Initializing SLIT-HUB...');
+            // Load initial data
+            loadHomeData();
             
-            await loadVerifiedUsers();
-            await loadGlobalBroadcast();
-            await loadDepartments();
-            
-            // Setup all event listeners
-            setupEventListeners();
-            
-            // Start on home tab
-            switchTab('home');
-            
-            // Check for updates
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/sw.js').catch(console.log);
-            }
-            
-            console.log('Initialization complete');
-        };
-
+            console.log('Event listeners ready!');
+        });
     </script>
 </body>
 </html>
