@@ -13,7 +13,7 @@
     <meta name="apple-mobile-web-app-title" content="SLIT-HUB">
     <link rel="apple-touch-icon" href="https://ui-avatars.com/api/?name=SH&background=10b981&color=fff&size=192">
     
-    <!-- Load Firebase SDK properly (Compatibility version) -->
+    <!-- Load Firebase SDK properly -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
@@ -681,6 +681,27 @@
             width: auto;
             margin-right: 4px;
         }
+
+        /* ========== DELETE BUTTON ========== */
+        .delete-btn {
+            color: #ef4444;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .delete-btn:hover {
+            color: #dc2626;
+            transform: scale(1.1);
+        }
+
+        .edit-btn {
+            color: #3b82f6;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .edit-btn:hover {
+            color: #2563eb;
+            transform: scale(1.1);
+        }
     </style>
 </head>
 <body>
@@ -999,6 +1020,9 @@
                         <img id="profile-pic" src="https://ui-avatars.com/api/?name=User&background=10b981&color=fff&size=128" class="w-28 h-28 rounded-full mx-auto border-4 border-white shadow-lg cursor-pointer" id="change-profile-pic">
                         <button id="upload-profile-pic" class="absolute bottom-0 right-0 bg-primary text-white p-2.5 rounded-full text-xs border-2 border-white hover:bg-primary-dark transition">
                             <i class="fas fa-camera"></i>
+                        </button>
+                        <button id="delete-profile-pic" class="absolute bottom-0 left-0 bg-danger text-white p-2.5 rounded-full text-xs border-2 border-white hover:bg-red-700 transition">
+                            <i class="fas fa-trash"></i>
                         </button>
                     </div>
                     <input type="file" id="profile-upload" class="hidden" accept="image/*">
@@ -1391,8 +1415,22 @@
             // Load tab data
             if (tabId === 'home') loadHomeData();
             if (tabId === 'profile') loadProfileData();
-            if (tabId === 'marketplace') loadProducts();
+            if (tabId === 'marketplace') {
+                loadProducts();
+                loadServices();
+                loadRequests();
+            }
             if (tabId === 'manager') loadMyItems();
+            if (tabId === 'admin' && isAdminMode) loadAdminData();
+            if (tabId === 'academics') {
+                loadDepartments();
+                loadStudyGroups();
+                loadMaterials();
+            }
+            if (tabId === 'community') {
+                loadExecutives();
+                loadAnnouncements();
+            }
         }
 
         function switchMarketplaceTab(tab) {
@@ -1595,6 +1633,212 @@
             }
         }
 
+        // Delete profile picture
+        async function deleteProfilePicture() {
+            if (confirm('Remove your profile picture?')) {
+                try {
+                    await db.collection('Users').doc(currentUserId).update({
+                        photo: firebase.firestore.FieldValue.delete()
+                    });
+                    document.getElementById('profile-pic').src = 'https://ui-avatars.com/api/?name=User&background=10b981&color=fff&size=128';
+                    showToast('Profile picture removed');
+                } catch (e) {
+                    showToast('Error removing picture', 'error');
+                }
+            }
+        }
+
+        // ============ STUDY GROUPS ============
+        async function loadStudyGroups() {
+            const container = document.getElementById('study-groups');
+            try {
+                const snap = await db.collection('studyGroups').orderBy('createdAt', 'desc').get();
+                let html = '';
+                snap.forEach(doc => {
+                    const group = doc.data();
+                    html += `
+                        <div class="p-3 bg-input rounded-lg">
+                            <div class="flex justify-between">
+                                <h4 class="font-bold">${group.name}</h4>
+                                <span class="text-xs bg-primary text-white px-2 py-1 rounded">${group.course}</span>
+                            </div>
+                            <p class="text-sm text-muted mt-1">${group.description}</p>
+                            <div class="flex justify-between items-center mt-2">
+                                <span class="text-xs"><i class="fas fa-users text-primary"></i> ${group.members || 1} members</span>
+                                <button class="text-primary text-sm" onclick="joinStudyGroup('${doc.id}')">Join</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html || '<p class="text-muted">No study groups yet</p>';
+            } catch (e) {
+                console.error("Error loading study groups:", e);
+            }
+        }
+
+        async function createStudyGroup() {
+            const name = prompt('Enter study group name:');
+            if (!name) return;
+            const course = prompt('Enter course code:');
+            if (!course) return;
+            const desc = prompt('Enter description:');
+            
+            try {
+                await db.collection('studyGroups').add({
+                    name, course, description: desc,
+                    createdBy: currentUserId,
+                    members: 1,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                showToast('Study group created!');
+                loadStudyGroups();
+            } catch (e) {
+                showToast('Error creating group', 'error');
+            }
+        }
+
+        async function joinStudyGroup(groupId) {
+            try {
+                const groupRef = db.collection('studyGroups').doc(groupId);
+                const group = await groupRef.get();
+                const data = group.data();
+                await groupRef.update({
+                    members: (data.members || 1) + 1
+                });
+                showToast('Joined study group!');
+            } catch (e) {
+                showToast('Error joining group', 'error');
+            }
+        }
+
+        // ============ COURSE MATERIALS ============
+        async function loadMaterials() {
+            const container = document.getElementById('materials-list');
+            try {
+                const snap = await db.collection('courseMaterials').orderBy('uploadedAt', 'desc').get();
+                let html = '';
+                snap.forEach(doc => {
+                    const mat = doc.data();
+                    html += `
+                        <div class="p-3 bg-input rounded-lg">
+                            <div class="flex justify-between">
+                                <div>
+                                    <h4 class="font-bold">${mat.title}</h4>
+                                    <p class="text-xs text-muted">${mat.course} • ${mat.type}</p>
+                                </div>
+                                <a href="${mat.fileUrl}" target="_blank" class="text-primary">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                            </div>
+                            <p class="text-xs text-muted mt-1">Uploaded by ${mat.uploaderName}</p>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html || '<p class="text-muted">No materials yet</p>';
+            } catch (e) {
+                console.error("Error loading materials:", e);
+            }
+        }
+
+        async function uploadMaterial() {
+            const title = prompt('Enter material title:');
+            if (!title) return;
+            const course = prompt('Enter course code:');
+            if (!course) return;
+            const type = prompt('Enter type (past_question/note/textbook):');
+            
+            // Simulate file upload
+            showToast('Material upload feature - would upload file here');
+        }
+
+        // ============ ANNOUNCEMENTS ============
+        async function loadAnnouncements(filter = 'all') {
+            const container = document.getElementById('announcements-feed');
+            try {
+                let query = db.collection('announcements').orderBy('createdAt', 'desc');
+                const snap = await query.get();
+                
+                let html = '';
+                snap.forEach(doc => {
+                    const ann = doc.data();
+                    if (filter !== 'all' && ann.category !== filter) return;
+                    
+                    html += `
+                        <div class="card">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-xs bg-primary text-white px-2 py-1 rounded-full">${ann.category}</span>
+                                <span class="text-xs text-muted">${ann.createdAt ? new Date(ann.createdAt.seconds*1000).toLocaleDateString() : ''}</span>
+                            </div>
+                            <h3 class="font-bold">${ann.title}</h3>
+                            <p class="text-sm text-muted mt-1">${ann.content}</p>
+                            ${ann.link ? `<a href="${ann.link}" class="text-primary text-sm mt-2 block">View link →</a>` : ''}
+                        </div>
+                    `;
+                });
+                container.innerHTML = html || '<p class="text-muted">No announcements</p>';
+            } catch (e) {
+                console.error("Error loading announcements:", e);
+            }
+        }
+
+        async function postAnnouncement() {
+            const category = document.getElementById('announce-category').value;
+            const title = document.getElementById('announce-title').value.trim();
+            const content = document.getElementById('announce-content').value.trim();
+            const link = document.getElementById('announce-link').value.trim();
+            
+            if (!title || !content) {
+                showToast('Please fill required fields', 'error');
+                return;
+            }
+            
+            try {
+                const userDoc = await db.collection('Users').doc(currentUserId).get();
+                const userName = userDoc.exists ? userDoc.data().name : 'Executive';
+                
+                await db.collection('announcements').add({
+                    category, title, content, link,
+                    postedBy: currentUserId,
+                    postedByName: userName,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                document.getElementById('announce-title').value = '';
+                document.getElementById('announce-content').value = '';
+                document.getElementById('announce-link').value = '';
+                
+                showToast('Announcement posted!');
+                loadAnnouncements();
+            } catch (e) {
+                showToast('Error posting announcement', 'error');
+            }
+        }
+
+        // ============ EXECUTIVES ============
+        async function loadExecutives() {
+            const container = document.getElementById('executives-directory');
+            try {
+                const snap = await db.collection('executives').orderBy('createdAt', 'desc').get();
+                let html = '';
+                snap.forEach(doc => {
+                    const exec = doc.data();
+                    const badge = exec.level === 'faculty' ? '👑' : exec.level === 'department' ? '⭐' : '📘';
+                    html += `
+                        <div class="flex items-center gap-3 p-3 bg-input rounded-lg">
+                            <img src="https://ui-avatars.com/api/?name=${exec.name}&background=10b981&color=fff&size=40" class="w-10 h-10 rounded-full">
+                            <div class="flex-1">
+                                <p class="font-bold">${exec.name}</p>
+                                <p class="text-xs text-muted">${exec.position} ${badge}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html || '<p class="text-muted">No executives listed</p>';
+            } catch (e) {
+                console.error("Error loading executives:", e);
+            }
+        }
+
         // ============ MARKETPLACE FUNCTIONS ============
         function showPostProductModal() {
             const modal = document.createElement('div');
@@ -1604,16 +1848,15 @@
                     <h2 class="text-2xl font-bold mb-4">Sell an Item</h2>
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-bold mb-1">Title <span class="text-danger">*</span></label>
+                            <label class="block text-sm font-bold mb-1">Title *</label>
                             <input type="text" id="product-title" class="input-field" placeholder="e.g., MacBook Pro">
-                            <div class="error-message" id="product-title-error">Title is required</div>
                         </div>
                         <div>
-                            <label class="block text-sm font-bold mb-1">Description <span class="text-danger">*</span></label>
+                            <label class="block text-sm font-bold mb-1">Description *</label>
                             <textarea id="product-desc" class="input-field" rows="3" placeholder="Describe your item..."></textarea>
                         </div>
                         <div>
-                            <label class="block text-sm font-bold mb-1">Price (₦) <span class="text-danger">*</span></label>
+                            <label class="block text-sm font-bold mb-1">Price (₦) *</label>
                             <div class="price-input">
                                 <input type="text" id="product-price" class="input-field" placeholder="e.g., 45000">
                             </div>
@@ -1622,8 +1865,8 @@
                             <div>
                                 <label class="block text-sm font-bold mb-1">Category</label>
                                 <select id="product-category" class="input-field">
-                                    <option value="Tech">💻 Tech & Gadgets</option>
-                                    <option value="Books">📚 Textbooks</option>
+                                    <option value="Tech">💻 Tech</option>
+                                    <option value="Books">📚 Books</option>
                                     <option value="Fashion">👕 Fashion</option>
                                     <option value="Other">➕ Other</option>
                                 </select>
@@ -1645,16 +1888,11 @@
                             <input type="text" id="product-location" class="input-field" placeholder="e.g., Hostel B">
                         </div>
                         <div>
-                            <label class="block text-sm font-bold mb-1">Phone Number <span class="text-danger">*</span></label>
+                            <label class="block text-sm font-bold mb-1">Phone Number *</label>
                             <div class="phone-input-container">
                                 <span class="phone-prefix">+234</span>
                                 <input type="tel" id="product-phone" class="input-field" placeholder="8012345678">
                             </div>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-bold mb-1">Photos</label>
-                            <input type="file" id="product-image" accept="image/*" class="input-field">
-                            <p class="text-xs text-muted mt-1">Max 5MB</p>
                         </div>
                         <div class="flex gap-3 mt-4">
                             <button onclick="postProduct(this)" class="btn-primary flex-1">
@@ -1727,8 +1965,6 @@
             const container = document.getElementById('product-grid');
             if (!container) return;
             
-            container.innerHTML = '<div class="skeleton h-40 w-full"></div>'.repeat(4);
-            
             try {
                 const snapshot = await db.collection('Products')
                     .orderBy('CreatedAt', 'desc')
@@ -1749,6 +1985,7 @@
                                 <h3 class="font-bold truncate">${p.Title}</h3>
                                 <p class="text-primary font-bold">₦${formatPrice(p.Price)}</p>
                                 <p class="text-xs text-muted mt-1">${p.Location || 'Campus'}</p>
+                                ${p.IsSold ? '<span class="text-xs bg-danger text-white px-2 py-1 rounded">SOLD</span>' : ''}
                             </div>
                         </div>
                     `;
@@ -1756,20 +1993,125 @@
                 container.innerHTML = html;
             } catch (e) {
                 console.error("Error loading products:", e);
-                container.innerHTML = '<p class="text-danger text-center py-8">Error loading products</p>';
             }
         }
 
         function viewProduct(productId) {
-            showToast('Viewing product details');
+            showToast('Viewing product details - Full product view would open');
+        }
+
+        // ============ SERVICES ============
+        async function loadServices() {
+            const container = document.getElementById('services-grid');
+            if (!container) return;
+            
+            try {
+                const snap = await db.collection('services').orderBy('createdAt', 'desc').get();
+                let html = '';
+                snap.forEach(doc => {
+                    const s = doc.data();
+                    html += `
+                        <div class="card" onclick="viewService('${doc.id}')">
+                            <h3 class="font-bold">${s.title}</h3>
+                            <p class="text-sm text-muted">${s.description}</p>
+                            <p class="text-primary font-bold mt-2">₦${formatPrice(s.price)}</p>
+                            <p class="text-xs text-muted mt-1">${s.provider}</p>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html || '<p class="text-muted">No services yet</p>';
+            } catch (e) {
+                console.error("Error loading services:", e);
+            }
+        }
+
+        async function postService() {
+            const title = prompt('Enter service title:');
+            if (!title) return;
+            const desc = prompt('Enter description:');
+            if (!desc) return;
+            const price = prompt('Enter price:');
+            if (!price) return;
+            
+            try {
+                const userDoc = await db.collection('Users').doc(currentUserId).get();
+                const userName = userDoc.exists ? userDoc.data().name : 'Anonymous';
+                
+                await db.collection('services').add({
+                    title, description: desc, price: parseInt(price),
+                    provider: userName,
+                    providerId: currentUserId,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                showToast('Service listed!');
+                loadServices();
+            } catch (e) {
+                showToast('Error listing service', 'error');
+            }
+        }
+
+        function viewService(serviceId) {
+            showToast('Viewing service details');
+        }
+
+        // ============ REQUESTS ============
+        async function loadRequests() {
+            const container = document.getElementById('requests-grid');
+            if (!container) return;
+            
+            try {
+                const snap = await db.collection('requests').orderBy('createdAt', 'desc').get();
+                let html = '';
+                snap.forEach(doc => {
+                    const r = doc.data();
+                    html += `
+                        <div class="card" onclick="viewRequest('${doc.id}')">
+                            <span class="text-xs bg-warning text-white px-2 py-1 rounded-full">${r.category}</span>
+                            <h3 class="font-bold mt-2">${r.title}</h3>
+                            <p class="text-sm text-muted">${r.description}</p>
+                            <p class="text-xs text-muted mt-2">Posted by ${r.posterName}</p>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html || '<p class="text-muted">No requests yet</p>';
+            } catch (e) {
+                console.error("Error loading requests:", e);
+            }
+        }
+
+        async function postRequest() {
+            const category = prompt('Enter category (roommate/study/textbook/urgent):');
+            if (!category) return;
+            const title = prompt('Enter title:');
+            if (!title) return;
+            const desc = prompt('Enter description:');
+            if (!desc) return;
+            
+            try {
+                const userDoc = await db.collection('Users').doc(currentUserId).get();
+                const userName = userDoc.exists ? userDoc.data().name : 'Anonymous';
+                
+                await db.collection('requests').add({
+                    category, title, description: desc,
+                    posterName: userName,
+                    posterId: currentUserId,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                showToast('Request posted!');
+                loadRequests();
+            } catch (e) {
+                showToast('Error posting request', 'error');
+            }
+        }
+
+        function viewRequest(requestId) {
+            showToast('Viewing request details');
         }
 
         // ============ MY ITEMS ============
         async function loadMyItems() {
             const container = document.getElementById('my-items-grid');
             if (!container) return;
-            
-            container.innerHTML = '<div class="skeleton h-20 w-full"></div>'.repeat(3);
             
             try {
                 const snapshot = await db.collection('Products')
@@ -1786,12 +2128,22 @@
                 snapshot.forEach(doc => {
                     const p = doc.data();
                     html += `
-                        <div class="card flex items-center gap-4">
-                            <img src="${p.ImageURL}" class="w-16 h-16 rounded-lg object-cover">
-                            <div class="flex-1">
-                                <h3 class="font-bold">${p.Title}</h3>
-                                <p class="text-primary font-bold">₦${formatPrice(p.Price)}</p>
-                                ${p.IsSold ? '<span class="text-xs bg-danger text-white px-2 py-1 rounded">SOLD</span>' : ''}
+                        <div class="card">
+                            <div class="flex items-center gap-4">
+                                <img src="${p.ImageURL}" class="w-16 h-16 rounded-lg object-cover">
+                                <div class="flex-1">
+                                    <h3 class="font-bold">${p.Title}</h3>
+                                    <p class="text-primary font-bold">₦${formatPrice(p.Price)}</p>
+                                    ${p.IsSold ? '<span class="text-xs bg-danger text-white px-2 py-1 rounded">SOLD</span>' : ''}
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="edit-btn" onclick="editProduct('${doc.id}')">
+                                        <i class="fas fa-edit text-xl"></i>
+                                    </button>
+                                    <button class="delete-btn" onclick="deleteProduct('${doc.id}')">
+                                        <i class="fas fa-trash text-xl"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     `;
@@ -1799,6 +2151,35 @@
                 container.innerHTML = html;
             } catch (e) {
                 console.error("Error loading my items:", e);
+            }
+        }
+
+        async function editProduct(productId) {
+            const newPrice = prompt('Enter new price:');
+            if (!newPrice) return;
+            
+            try {
+                await db.collection('Products').doc(productId).update({
+                    Price: parseInt(newPrice)
+                });
+                showToast('Product updated!');
+                loadMyItems();
+                loadProducts();
+            } catch (e) {
+                showToast('Error updating product', 'error');
+            }
+        }
+
+        async function deleteProduct(productId) {
+            if (confirm('Delete this product?')) {
+                try {
+                    await db.collection('Products').doc(productId).delete();
+                    showToast('Product deleted');
+                    loadMyItems();
+                    loadProducts();
+                } catch (e) {
+                    showToast('Error deleting product', 'error');
+                }
             }
         }
 
@@ -1811,6 +2192,321 @@
                 document.getElementById('admin-toggle').innerHTML = isAdminMode ? 
                     '<i class="fas fa-lock-open"></i> Admin: ON' : 
                     '<i class="fas fa-lock"></i> Admin: OFF';
+                
+                if (isAdminMode) {
+                    loadAdminData();
+                }
+            }
+        }
+
+        async function loadAdminData() {
+            try {
+                await loadVerifiedUsers();
+                
+                // Load stats
+                const deptsSnap = await db.collection('departments').get();
+                const execsSnap = await db.collection('executives').get();
+                const usersSnap = await db.collection('Users').get();
+                const productsSnap = await db.collection('Products').get();
+                
+                document.getElementById('admin-stat-depts').innerText = deptsSnap.size;
+                document.getElementById('admin-stat-execs').innerText = execsSnap.size;
+                document.getElementById('admin-stat-users').innerText = usersSnap.size;
+                document.getElementById('admin-stat-products').innerText = productsSnap.size;
+                
+                // Load departments dropdown
+                let deptOptions = '<option value="">Select Department</option>';
+                deptsSnap.forEach(doc => {
+                    const dept = doc.data();
+                    deptOptions += `<option value="${doc.id}">${dept.name}</option>`;
+                });
+                document.getElementById('exec-dept').innerHTML = deptOptions;
+                
+                // Load departments list
+                let deptList = '';
+                deptsSnap.forEach(doc => {
+                    const dept = doc.data();
+                    deptList += `
+                        <div class="flex justify-between items-center p-3 bg-input rounded-lg">
+                            <span>${dept.name} (${dept.code})</span>
+                            <button class="delete-btn" onclick="deleteDepartment('${doc.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                });
+                document.getElementById('depts-list').innerHTML = deptList || '<p class="text-muted">No departments</p>';
+                
+                // Load executives list
+                let execList = '';
+                const execsQuery = await db.collection('executives').orderBy('createdAt', 'desc').get();
+                execsQuery.forEach(doc => {
+                    const exec = doc.data();
+                    execList += `
+                        <div class="flex justify-between items-center p-3 bg-input rounded-lg">
+                            <div>
+                                <p class="font-bold">${exec.name}</p>
+                                <p class="text-xs text-muted">${exec.position}</p>
+                            </div>
+                            <button class="delete-btn" onclick="deleteExecutive('${doc.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                });
+                document.getElementById('execs-list').innerHTML = execList || '<p class="text-muted">No executives</p>';
+                
+                // Load users with verification status
+                let memberHtml = '';
+                usersSnap.forEach(doc => {
+                    const user = doc.data();
+                    const isVerified = verifiedUsers.has(doc.id);
+                    memberHtml += `
+                        <div class="flex justify-between items-center p-3 bg-input rounded-lg">
+                            <div>
+                                <p class="font-bold">${user.name || 'Anonymous'}</p>
+                                <p class="text-xs text-muted">${user.email || ''}</p>
+                                ${isVerified ? 
+                                    '<span class="verified-badge text-xs">Verified</span>' : 
+                                    '<span class="unverified-badge text-xs">Unverified</span>'}
+                            </div>
+                            <div class="flex gap-2">
+                                ${!isVerified ? `
+                                    <button class="text-success" onclick="verifyUser('${doc.id}')">
+                                        <i class="fas fa-check-circle"></i>
+                                    </button>
+                                ` : `
+                                    <button class="text-warning" onclick="unverifyUser('${doc.id}')">
+                                        <i class="fas fa-times-circle"></i>
+                                    </button>
+                                `}
+                                <button class="text-danger" onclick="banUser('${doc.id}')">
+                                    <i class="fas fa-ban"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                document.getElementById('member-directory-admin').innerHTML = memberHtml || '<p class="text-muted">No users</p>';
+                
+                // Load verification requests
+                const verifSnap = await db.collection('VerificationRequests').get();
+                let verifHtml = '';
+                verifSnap.forEach(doc => {
+                    const req = doc.data();
+                    verifHtml += `
+                        <div class="flex justify-between items-center p-3 bg-input rounded-lg">
+                            <div>
+                                <p class="font-bold">${req.userName}</p>
+                                <p class="text-xs text-muted">ID: ${doc.id}</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="text-success" onclick="verifyUser('${doc.id}')">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                <button class="text-danger" onclick="rejectVerification('${doc.id}')">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                document.getElementById('verification-list').innerHTML = verifHtml || '<p class="text-muted">No verification requests</p>';
+                
+                // Load reports
+                const reportsSnap = await db.collection('Reports').get();
+                let reportsHtml = '';
+                reportsSnap.forEach(doc => {
+                    const r = doc.data();
+                    reportsHtml += `
+                        <div class="p-3 bg-input rounded-lg">
+                            <p class="font-bold">Report against: ${r.reportedUser}</p>
+                            <p class="text-sm">${r.reason}</p>
+                            <div class="flex gap-2 mt-2">
+                                <button class="btn-danger text-xs py-1 px-3" onclick="banUser('${r.reportedUser}')">Ban</button>
+                                <button class="btn-success text-xs py-1 px-3" onclick="resolveReport('${doc.id}')">Resolve</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                document.getElementById('reports-list').innerHTML = reportsHtml || '<p class="text-muted">No reports</p>';
+                
+            } catch (e) {
+                console.error("Error loading admin data:", e);
+            }
+        }
+
+        // Admin actions
+        async function addDepartment() {
+            const name = document.getElementById('dept-name').value.trim();
+            const code = document.getElementById('dept-code').value.trim();
+            
+            if (!name || !code) {
+                showToast('Please fill all fields', 'error');
+                return;
+            }
+            
+            try {
+                await db.collection('departments').add({
+                    name, code,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                showToast('Department added!');
+                document.getElementById('dept-name').value = '';
+                document.getElementById('dept-code').value = '';
+                loadAdminData();
+            } catch (e) {
+                showToast('Error adding department', 'error');
+            }
+        }
+
+        async function deleteDepartment(id) {
+            if (confirm('Delete this department?')) {
+                try {
+                    await db.collection('departments').doc(id).delete();
+                    showToast('Department deleted');
+                    loadAdminData();
+                } catch (e) {
+                    showToast('Error deleting department', 'error');
+                }
+            }
+        }
+
+        async function addExecutive() {
+            const deptId = document.getElementById('exec-dept').value;
+            const name = document.getElementById('exec-name').value.trim();
+            const position = document.getElementById('exec-position').value.trim();
+            const email = document.getElementById('exec-email').value.trim();
+            const level = document.getElementById('exec-level').value;
+            
+            if (!deptId || !name || !position || !email) {
+                showToast('Please fill required fields', 'error');
+                return;
+            }
+            
+            try {
+                await db.collection('executives').add({
+                    departmentId: deptId, name, position, email, level,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                showToast('Executive added!');
+                document.getElementById('exec-name').value = '';
+                document.getElementById('exec-position').value = '';
+                document.getElementById('exec-email').value = '';
+                loadAdminData();
+            } catch (e) {
+                showToast('Error adding executive', 'error');
+            }
+        }
+
+        async function deleteExecutive(id) {
+            if (confirm('Remove this executive?')) {
+                try {
+                    await db.collection('executives').doc(id).delete();
+                    showToast('Executive removed');
+                    loadAdminData();
+                } catch (e) {
+                    showToast('Error removing executive', 'error');
+                }
+            }
+        }
+
+        async function verifyUser(userId) {
+            try {
+                await db.collection('VerifiedUsers').doc(userId).set({
+                    verifiedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    verifiedBy: currentUserId
+                });
+                await db.collection('VerificationRequests').doc(userId).delete().catch(() => {});
+                showToast('User verified');
+                loadAdminData();
+                loadVerifiedUsers();
+            } catch (e) {
+                showToast('Error verifying user', 'error');
+            }
+        }
+
+        async function unverifyUser(userId) {
+            if (confirm('Remove verification?')) {
+                try {
+                    await db.collection('VerifiedUsers').doc(userId).delete();
+                    showToast('Verification removed');
+                    loadAdminData();
+                    loadVerifiedUsers();
+                } catch (e) {
+                    showToast('Error removing verification', 'error');
+                }
+            }
+        }
+
+        async function banUser(userId) {
+            if (confirm('Ban this user?')) {
+                try {
+                    await db.collection('BannedUsers').doc(userId).set({
+                        bannedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        bannedBy: currentUserId
+                    });
+                    showToast('User banned');
+                } catch (e) {
+                    showToast('Error banning user', 'error');
+                }
+            }
+        }
+
+        async function rejectVerification(requestId) {
+            if (confirm('Reject verification?')) {
+                try {
+                    await db.collection('VerificationRequests').doc(requestId).delete();
+                    showToast('Request rejected');
+                    loadAdminData();
+                } catch (e) {
+                    showToast('Error rejecting request', 'error');
+                }
+            }
+        }
+
+        async function resolveReport(reportId) {
+            try {
+                await db.collection('Reports').doc(reportId).delete();
+                showToast('Report resolved');
+                loadAdminData();
+            } catch (e) {
+                showToast('Error resolving report', 'error');
+            }
+        }
+
+        async function sendGlobalBroadcast() {
+            const msg = document.getElementById('global-broadcast-input').value.trim();
+            if (!msg) {
+                showToast('Enter a message', 'error');
+                return;
+            }
+            
+            try {
+                await db.collection('AppData').doc('Announcement').set({
+                    message: msg,
+                    active: true,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                showToast('Broadcast sent!');
+                document.getElementById('global-broadcast').classList.remove('hidden');
+                document.getElementById('broadcast-message').innerText = msg;
+            } catch (e) {
+                showToast('Error sending broadcast', 'error');
+            }
+        }
+
+        async function deleteGlobalBroadcast() {
+            if (confirm('Delete broadcast?')) {
+                try {
+                    await db.collection('AppData').doc('Announcement').set({
+                        active: false
+                    });
+                    document.getElementById('global-broadcast').classList.add('hidden');
+                    showToast('Broadcast deleted');
+                } catch (e) {
+                    showToast('Error deleting broadcast', 'error');
+                }
             }
         }
 
@@ -1827,23 +2523,46 @@
             document.getElementById('dark-icon').className = 'fas fa-sun';
         }
 
-        // ============ PWA INSTALL ============
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            document.getElementById('install-btn').style.display = 'flex';
-        });
-
-        document.getElementById('install-btn').addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                console.log(`User response: ${outcome}`);
-                deferredPrompt = null;
-                document.getElementById('install-btn').style.display = 'none';
+        // ============ LOAD DEPARTMENTS ============
+        async function loadDepartments() {
+            try {
+                const deptsSnap = await db.collection('departments').get();
+                let options = '<option value="">Select Department</option>';
+                deptsSnap.forEach(doc => {
+                    const dept = doc.data();
+                    options += `<option value="${doc.id}">${dept.name}</option>`;
+                });
+                
+                document.getElementById('profile-dept').innerHTML = options;
+                document.getElementById('academics-dept').innerHTML = options;
+            } catch (e) {
+                console.error("Error loading departments:", e);
             }
-        });
+        }
+
+        // ============ CONTACT ADMIN ============
+        function contactAdmin() {
+            const message = prompt('Enter your message to admin:');
+            if (message) {
+                showToast('Message sent to admin!');
+            }
+        }
+
+        // ============ REQUEST VERIFICATION ============
+        function requestVerification() {
+            showToast('Verification request sent! Admin will review');
+        }
+
+        // ============ SAVE PORTFOLIO ============
+        function savePortfolio() {
+            const url = document.getElementById('portfolio-url').value;
+            const image = document.getElementById('portfolio-image').value;
+            localStorage.setItem('portfolio_url', url);
+            localStorage.setItem('portfolio_image', image);
+            document.getElementById('portfolio-link').href = url;
+            document.getElementById('portfolio-link-button').href = url;
+            showToast('Portfolio links saved!');
+        }
 
         // ============ EVENT LISTENERS ============
         document.addEventListener('DOMContentLoaded', function() {
@@ -1889,14 +2608,10 @@
             });
             
             // Create study group
-            document.getElementById('create-study-group')?.addEventListener('click', () => {
-                showToast('Create Study Group feature');
-            });
+            document.getElementById('create-study-group')?.addEventListener('click', createStudyGroup);
             
             // Upload material
-            document.getElementById('upload-material')?.addEventListener('click', () => {
-                showToast('Upload Material feature');
-            });
+            document.getElementById('upload-material')?.addEventListener('click', uploadMaterial);
             
             // Category filters
             document.querySelectorAll('[data-category]').forEach(btn => {
@@ -1906,14 +2621,12 @@
                         b.classList.add('bg-card', 'border', 'border-base');
                     });
                     this.classList.add('bg-primary', 'text-white');
-                    showToast(`Filtering by: ${this.dataset.category}`);
+                    loadAnnouncements(this.dataset.category);
                 });
             });
             
             // Publish announcement
-            document.getElementById('publish-announcement')?.addEventListener('click', () => {
-                showToast('Announcement posted!');
-            });
+            document.getElementById('publish-announcement')?.addEventListener('click', postAnnouncement);
             
             // Marketplace sub-tabs
             document.querySelectorAll('[data-marketplace]').forEach(tab => {
@@ -1926,14 +2639,10 @@
             document.getElementById('sell-item')?.addEventListener('click', showPostProductModal);
             
             // List service
-            document.getElementById('list-service')?.addEventListener('click', () => {
-                showToast('List Service feature');
-            });
+            document.getElementById('list-service')?.addEventListener('click', postService);
             
             // New request
-            document.getElementById('new-request')?.addEventListener('click', () => {
-                showToast('New Request feature');
-            });
+            document.getElementById('new-request')?.addEventListener('click', postRequest);
             
             // Service categories
             document.querySelectorAll('[data-service]').forEach(card => {
@@ -1963,27 +2672,33 @@
                 document.getElementById('profile-upload').click();
             });
             
+            // Delete profile picture
+            document.getElementById('delete-profile-pic')?.addEventListener('click', deleteProfilePicture);
+            
+            // Profile upload change
+            document.getElementById('profile-upload')?.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    showToast('Profile picture updated!');
+                    document.getElementById('profile-pic').src = URL.createObjectURL(file);
+                }
+            });
+            
             // Save profile
             document.getElementById('save-profile')?.addEventListener('click', saveProfile);
             
             // Contact admin
-            document.getElementById('contact-admin')?.addEventListener('click', () => {
-                showToast('Message sent to admin!');
-            });
+            document.getElementById('contact-admin')?.addEventListener('click', contactAdmin);
             
             // Save portfolio
-            document.getElementById('save-portfolio')?.addEventListener('click', () => {
-                showToast('Portfolio links saved!');
-            });
+            document.getElementById('save-portfolio')?.addEventListener('click', savePortfolio);
             
             // Request verification
-            document.getElementById('request-verification')?.addEventListener('click', () => {
-                showToast('Verification request sent!');
-            });
+            document.getElementById('request-verification')?.addEventListener('click', requestVerification);
             
             // Delete profile
             document.getElementById('delete-profile')?.addEventListener('click', () => {
-                if (confirm('Delete your profile?')) {
+                if (confirm('Delete your profile? This cannot be undone!')) {
                     showToast('Profile deleted');
                 }
             });
@@ -1995,35 +2710,19 @@
             document.getElementById('admin-toggle')?.addEventListener('click', toggleAdminMode);
             
             // Admin save portfolio
-            document.getElementById('admin-save-portfolio')?.addEventListener('click', () => {
-                showToast('Portfolio links saved!');
-            });
+            document.getElementById('admin-save-portfolio')?.addEventListener('click', savePortfolio);
             
             // Send broadcast
-            document.getElementById('send-broadcast')?.addEventListener('click', () => {
-                const msg = document.getElementById('global-broadcast-input').value;
-                if (msg) {
-                    showToast('Broadcast sent!');
-                    document.getElementById('global-broadcast').classList.remove('hidden');
-                    document.getElementById('broadcast-message').innerText = msg;
-                }
-            });
+            document.getElementById('send-broadcast')?.addEventListener('click', sendGlobalBroadcast);
             
             // Delete broadcast
-            document.getElementById('delete-broadcast')?.addEventListener('click', () => {
-                document.getElementById('global-broadcast').classList.add('hidden');
-                showToast('Broadcast deleted');
-            });
+            document.getElementById('delete-broadcast')?.addEventListener('click', deleteGlobalBroadcast);
             
             // Add department
-            document.getElementById('add-dept')?.addEventListener('click', () => {
-                showToast('Department added!');
-            });
+            document.getElementById('add-dept')?.addEventListener('click', addDepartment);
             
             // Add executive
-            document.getElementById('add-exec')?.addEventListener('click', () => {
-                showToast('Executive added!');
-            });
+            document.getElementById('add-exec')?.addEventListener('click', addExecutive);
             
             // Delete all data
             document.getElementById('delete-all-data')?.addEventListener('click', () => {
@@ -2032,6 +2731,7 @@
             
             // Load initial data
             loadHomeData();
+            loadDepartments();
             
             console.log('Event listeners ready!');
         });
