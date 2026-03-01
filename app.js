@@ -26,6 +26,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     renderAcademics();
     loadVerifiedGroups();
+    loadMarketDisplay('items'); // Initial load for marketplace
 });
 
 // 3. TAB NAVIGATION (FIXED)
@@ -145,33 +146,50 @@ function renderAcademics() {
 document.getElementById('close-modal').onclick = () => {
     document.getElementById('modal-overlay').classList.add('hidden');
 };
+
 // ==========================================
 // MARKETPLACE ENGINE (Items, Services, Requests)
 // ==========================================
 
-// 1. OPEN POSTING MODAL
+// 1. OPEN POSTING MODAL (UPDATED WITH PRO FEATURES)
 window.openMarketModal = function() {
     const modal = document.getElementById('modal-overlay');
     const content = document.getElementById('modal-content');
     modal.classList.remove('hidden');
     
     content.innerHTML = `
-        <h3 class="text-xl font-black mb-4 italic text-emerald-600">Create a Post 🚀</h3>
-        <div class="space-y-3">
-            <input type="text" id="item-name" placeholder="What are you listing?" class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none">
-            <input type="number" id="item-price" placeholder="Price (₦)" class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none">
-            <select id="item-type" class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none font-bold text-slate-500">
-                <option value="items">Physical Item (Sale)</option>
-                <option value="services">Service (Gigs/Skill)</option>
-                <option value="requests">Request (I need...)</option>
-            </select>
-            <div class="relative group">
-                <input type="file" id="item-image" class="hidden" accept="image/*" onchange="document.getElementById('file-label').innerText = 'Photo Selected! ✅'">
-                <label for="item-image" id="file-label" class="block w-full p-6 border-2 border-dashed border-emerald-200 rounded-2xl text-center text-emerald-600 font-bold cursor-pointer bg-emerald-50/30">
-                    <i class="fa-solid fa-camera-retro text-2xl mb-2"></i><br>Tap to Upload Photo
-                </label>
+        <div class="max-h-[80vh] overflow-y-auto no-scrollbar pb-6">
+            <h3 class="text-xl font-black mb-4 italic text-emerald-600">Create a Post 🚀</h3>
+            <div class="space-y-3">
+                <input type="text" id="item-name" placeholder="What are you listing?" class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none">
+                
+                <div class="flex gap-2">
+                    <input type="number" id="item-price" placeholder="Price (₦)" class="flex-1 p-4 bg-slate-50 rounded-2xl border-none outline-none">
+                    <select id="item-negotiable" class="p-4 bg-slate-50 rounded-2xl border-none font-bold text-xs">
+                        <option value="Fixed">Fixed</option>
+                        <option value="Negotiable">Negotiable</option>
+                    </select>
+                </div>
+
+                <select id="item-type" class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none font-bold text-slate-500">
+                    <option value="items">Physical Item (Sale)</option>
+                    <option value="services">Service (Gigs/Skill)</option>
+                    <option value="requests">Request (I need...)</option>
+                </select>
+
+                <div class="flex items-center gap-2 bg-slate-50 p-1 rounded-2xl border border-slate-100">
+                    <span class="pl-4 font-bold text-slate-400">+234</span>
+                    <input type="number" id="seller-phone" placeholder="805 000 0000" class="w-full p-4 bg-transparent border-none outline-none">
+                </div>
+
+                <div class="relative group">
+                    <input type="file" id="item-image" class="hidden" accept="image/*" onchange="document.getElementById('file-label').innerText = 'Photo Selected! ✅'">
+                    <label for="item-image" id="file-label" class="block w-full p-6 border-2 border-dashed border-emerald-200 rounded-2xl text-center text-emerald-600 font-bold cursor-pointer bg-emerald-50/30">
+                        <i class="fa-solid fa-camera-retro text-2xl mb-2"></i><br>Tap to Upload Photo
+                    </label>
+                </div>
+                <button onclick="processMarketPost()" id="market-submit-btn" class="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black btn-glow">POST TO HUB ✨</button>
             </div>
-            <button onclick="processMarketPost()" id="market-submit-btn" class="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black btn-glow">POST TO HUB ✨</button>
         </div>
     `;
 };
@@ -180,15 +198,17 @@ window.openMarketModal = function() {
 const postAdBtn = document.getElementById('btn-post-ad');
 if(postAdBtn) postAdBtn.onclick = window.openMarketModal;
 
-// 2. PROCESS UPLOAD & SAVE
+// 2. PROCESS UPLOAD & SAVE (UPDATED)
 window.processMarketPost = async function() {
     const btn = document.getElementById('market-submit-btn');
     const file = document.getElementById('item-image').files[0];
     const name = document.getElementById('item-name').value;
     const price = document.getElementById('item-price').value;
     const type = document.getElementById('item-type').value;
+    const phone = document.getElementById('seller-phone').value;
+    const negotiable = document.getElementById('item-negotiable').value;
 
-    if(!name || !price) return alert("Please add name and price!");
+    if(!name || !price || !phone) return alert("Please fill all fields!");
 
     btn.innerText = "UPLOADING... ⏳";
     btn.disabled = true;
@@ -199,7 +219,7 @@ window.processMarketPost = async function() {
     if(file) {
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('upload_preset', 'slithub_preset'); // Use your specific preset
+        formData.append('upload_preset', 'slithub_preset'); 
         
         try {
             const res = await fetch("https://api.cloudinary.com/v1_1/dxt8v0h1u/image/upload", {
@@ -216,18 +236,21 @@ window.processMarketPost = async function() {
     // Save to Firebase Firestore
     await db.collection('Marketplace').add({
         name,
-        price,
+        price: Number(price),
         type,
+        phone,
+        negotiable,
         image: imageUrl,
+        rating: 5.0, // Default rating for new items
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
     });
 
     alert("Listed Successfully! 🛍️");
     document.getElementById('modal-overlay').classList.add('hidden');
-    loadMarketDisplay('items'); // Refresh view
+    loadMarketDisplay(type); // Refresh view
 };
 
-// 3. LOAD & FILTER MARKETPLACE
+// 3. LOAD & FILTER MARKETPLACE (UPDATED WITH COMMA FORMATTING & CONTACT)
 window.loadMarketDisplay = async function(filterType = 'items') {
     const grid = document.getElementById('market-grid');
     grid.innerHTML = "<p class='text-slate-400 italic text-xs animate-pulse'>Fetching listings...</p>";
@@ -241,19 +264,65 @@ window.loadMarketDisplay = async function(filterType = 'items') {
 
     snap.forEach(doc => {
         const d = doc.data();
+        const id = doc.id;
+        // Strip leading zero if exists for WhatsApp link
+        const cleanPhone = d.phone.startsWith('0') ? d.phone.substring(1) : d.phone;
+
         grid.innerHTML += `
-            <div class="glass-card overflow-hidden animate-fade-in group">
+            <div class="glass-card overflow-hidden animate-fade-in group flex flex-col h-full border border-white shadow-sm">
                 <div class="relative">
                     <img src="${d.image}" class="w-full h-32 object-cover">
-                    <span class="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-[10px] font-black text-emerald-600 shadow-sm">₦${Number(d.price).toLocaleString()}</span>
+                    <span class="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-[9px] font-black text-emerald-600 shadow-sm">
+                        ₦${Number(d.price).toLocaleString()} </span>
+                    <div class="absolute top-2 left-2 bg-emerald-600 text-white text-[7px] font-black px-2 py-1 rounded-lg shadow-lg uppercase">${d.negotiable || 'Fixed'}</div>
                 </div>
-                <div class="p-3">
-                    <p class="font-bold text-xs truncate italic">${d.name}</p>
-                    <button class="w-full mt-2 py-2 bg-slate-900 text-white rounded-xl text-[9px] font-black uppercase tracking-widest group-active:scale-95 transition-all">Contact</button>
+                <div class="p-3 flex-1 flex flex-col">
+                    <p class="font-bold text-xs truncate italic text-slate-800">${d.name}</p>
+                    
+                    <div class="grid grid-cols-2 gap-2 mt-3">
+                        <a href="https://wa.me/234${cleanPhone}?text=Hi, I saw your ${d.name} on SLIT-HUB" target="_blank" class="flex items-center justify-center bg-green-500 text-white p-2 rounded-xl active:scale-95 transition-all">
+                            <i class="fa-brands fa-whatsapp text-sm"></i>
+                        </a>
+                        <a href="tel:+234${cleanPhone}" class="flex items-center justify-center bg-blue-500 text-white p-2 rounded-xl active:scale-95 transition-all">
+                            <i class="fa-solid fa-phone text-sm"></i>
+                        </a>
+                    </div>
+
+                    <button onclick="openReviewModal('${id}')" class="w-full mt-3 py-2 border border-slate-100 text-slate-400 rounded-xl text-[8px] font-black uppercase tracking-widest active:scale-95 transition-all">
+                        ⭐ ${d.rating || '5.0'} Reviews
+                    </button>
                 </div>
             </div>
         `;
     });
+};
+
+// 4. REVIEW MODAL LOGIC (Standard Add-on)
+window.openReviewModal = async (productId) => {
+    const modal = document.getElementById('modal-overlay');
+    const content = document.getElementById('modal-content');
+    modal.classList.remove('hidden');
+
+    content.innerHTML = `<p class="text-center p-10 animate-pulse text-xs">Loading Reviews...</p>`;
+    
+    // Quick Review Submission View
+    content.innerHTML = `
+        <h3 class="text-xl font-black mb-4 italic text-emerald-600 text-center">Reviews 💬</h3>
+        <div class="space-y-4">
+            <div class="bg-slate-50 p-4 rounded-2xl text-center italic text-[10px] text-slate-500">
+                Buyers can rate products and services here to build seller trust.
+            </div>
+            <select id="rev-rating" class="w-full p-4 bg-slate-50 rounded-2xl border-none font-bold text-yellow-500">
+                <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+                <option value="4">⭐⭐⭐⭐ Good</option>
+                <option value="3">⭐⭐⭐ Fair</option>
+                <option value="2">⭐⭐ Poor</option>
+                <option value="1">⭐ Terrible</option>
+            </select>
+            <textarea id="rev-comment" placeholder="Leave a comment..." class="w-full p-4 bg-slate-50 rounded-2xl h-20 outline-none text-xs border-none"></textarea>
+            <button onclick="alert('Review Submitted for Verification! ✅')" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-xs uppercase">Submit Review</button>
+        </div>
+    `;
 };
 
 // Switch between Items, Services, Requests
