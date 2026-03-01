@@ -1,1 +1,149 @@
+/* SLIT-HUB PROFESSIONAL DESIGN SYSTEM 
+   Theme: Emerald Glow & Glassmorphism
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+
+:root {
+    --primary: #10b981;
+    --primary-glow: rgba(16, 185, 129, 0.4);
+    --dark-slate: #0f172a;
+    --glass-bg: rgba(255, 255, 255, 0.75);
+    --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+}
+
+/* 1. Global Reset & Performance */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+body {
+    background: radial-gradient(circle at top right, #ecfdf5, #f8fafc);
+    color: var(--dark-slate);
+    line-height: 1.5;
+    overflow-x: hidden;
+    /* Prevents the 'bounce' on mobile scrolling */
+    overscroll-behavior-y: contain;
+}
+
+/* 2. Professional Animations */
+@keyframes slideUpFade {
+    0% { opacity: 0; transform: translateY(25px) scale(0.98); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-6px); }
+}
+
+@keyframes pulse-glow {
+    0%, 100% { text-shadow: 0 0 10px var(--primary-glow); }
+    50% { text-shadow: 0 0 20px var(--primary-glow), 0 0 30px var(--primary-glow); }
+}
+
+.animate-fade-in {
+    animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.float-emoji {
+    display: inline-block;
+    animation: float 3s ease-in-out infinite;
+}
+
+/* 3. Branding & The Glow */
+.logo-glow {
+    color: var(--primary);
+    animation: pulse-glow 3s infinite;
+    letter-spacing: -1.5px;
+}
+
+/* 4. Glassmorphism Cards */
+.glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 24px;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.2s ease;
+}
+
+.glass-card:active {
+    transform: scale(0.98);
+}
+
+/* 5. Navigation Bar (Premium Look) */
+nav {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.nav-btn {
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.nav-btn.active {
+    color: var(--primary);
+}
+
+.nav-btn.active i {
+    transform: translateY(-8px);
+    filter: drop-shadow(0 6px 10px var(--primary-glow));
+}
+
+.nav-btn.active span {
+    font-weight: 800;
+    opacity: 1;
+}
+
+/* 6. Marketplace & Pills Styling */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.m-filter {
+    transition: all 0.3s ease;
+}
+
+.m-filter.active {
+    background: white;
+    color: var(--primary);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+}
+
+.market-card img {
+    aspect-ratio: 1/1;
+    object-fit: cover;
+    border-radius: 20px;
+}
+
+/* 7. Buttons & Interactions */
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    box-shadow: 0 8px 20px -6px var(--primary-glow);
+    transition: all 0.3s ease;
+}
+
+.btn-primary:active {
+    transform: scale(0.96);
+}
+
+/* 8. Skeleton Loading States */
+.skeleton {
+    background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite linear;
+}
+
+@keyframes shimmer {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
+}
 
