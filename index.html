@@ -1,1 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SLIT-HUB | Professional Student Portal</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray-50 text-slate-900 pb-24 font-sans select-none">
+
+    <header class="bg-white border-b sticky top-0 z-40 px-4 py-3 flex justify-between items-center shadow-sm">
+        <h1 class="font-black text-xl text-emerald-600 tracking-tighter italic">SLIT-HUB</h1>
+        <div class="flex gap-4 items-center">
+            <button id="notification-trigger" class="text-slate-400 relative">
+                <i class="fa-solid fa-bell text-lg"></i>
+                <span id="notif-dot" class="hidden absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+            </button>
+            <button id="admin-trigger" class="text-slate-400 hover:text-emerald-600 transition-colors">
+                <i class="fa-solid fa-shield-halved text-lg"></i>
+            </button>
+        </div>
+    </header>
+
+    <main id="app-viewport" class="max-w-md mx-auto p-4 space-y-6">
+        
+        <section id="tab-home" class="tab-content animate-fade-in">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold">Welcome, <span id="user-name" class="text-emerald-600 italic">User</span></h2>
+                <p class="text-slate-500 text-sm">Everything you need, in one hub.</p>
+            </div>
+            
+            <div id="broadcast-card" class="hidden bg-emerald-600 text-white p-4 rounded-2xl shadow-lg shadow-emerald-100 mb-6 relative overflow-hidden">
+                <i class="fa-solid fa-bullhorn absolute -right-4 -bottom-4 text-6xl opacity-10"></i>
+                <p class="text-[10px] font-black uppercase tracking-widest opacity-80">Announcement</p>
+                <p id="broadcast-msg" class="font-bold text-sm mt-1 leading-snug"></p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="p-4 bg-white border rounded-2xl shadow-sm border-emerald-100">
+                    <p class="text-xs text-slate-400 mb-1">Status</p>
+                    <p class="font-black text-emerald-600">Verified Student</p>
+                </div>
+                <div class="p-4 bg-white border rounded-2xl shadow-sm">
+                    <p class="text-xs text-slate-400 mb-1">Marketplace</p>
+                    <p id="market-count" class="font-black text-slate-700">Loading...</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-academics" class="tab-content hidden animate-fade-in space-y-4">
+            <div class="flex justify-between items-center">
+                <h2 class="text-xl font-bold italic">Academics</h2>
+                <button onclick="openModal('group-modal')" class="text-emerald-600 text-xs font-black uppercase">+ New Study Group</button>
+            </div>
+
+            <div id="study-pills" class="flex gap-2 overflow-x-auto no-scrollbar py-1">
+                </div>
+
+            <div id="groups-list" class="space-y-3">
+                </div>
+        </section>
+
+        <section id="tab-marketplace" class="tab-content hidden animate-fade-in space-y-4">
+            <div class="flex justify-between items-center">
+                <h2 class="text-xl font-bold italic">Marketplace</h2>
+                <button onclick="openModal('post-modal')" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-black shadow-md">
+                    POST AD
+                </button>
+            </div>
+
+            <div class="flex bg-slate-200/50 p-1 rounded-xl">
+                <button data-filter="items" class="m-filter active flex-1 py-2 text-[10px] font-black rounded-lg">ITEMS</button>
+                <button data-filter="services" class="m-filter flex-1 py-2 text-[10px] font-black rounded-lg">SERVICES</button>
+                <button data-filter="requests" class="m-filter flex-1 py-2 text-[10px] font-black rounded-lg">REQUESTS</button>
+            </div>
+
+            <div id="market-grid" class="grid grid-cols-2 gap-3">
+                </div>
+        </section>
+
+        <section id="tab-admin" class="tab-content hidden animate-fade-in space-y-4">
+            <h2 class="text-xl font-bold text-red-600 italic">Admin Terminal</h2>
+            <div class="bg-slate-900 text-emerald-400 p-4 rounded-2xl font-mono text-xs space-y-4 border-2 border-slate-800">
+                <div>
+                    <p class="text-white mb-2 underline italic text-[10px]">PENDING VERIFICATIONS</p>
+                    <div id="admin-verification-list" class="space-y-2 italic">
+                        </div>
+                </div>
+                <hr class="border-slate-800">
+                <button onclick="openModal('broadcast-modal')" class="w-full bg-emerald-600 text-white py-2 rounded-lg font-bold">SEND GLOBAL BROADCAST</button>
+            </div>
+        </section>
+
+    </main>
+
+    <nav class="fixed bottom-0 inset-x-0 bg-white/90 backdrop-blur-lg border-t flex justify-around items-center py-3 px-2 z-50">
+        <button onclick="switchTab('home')" class="nav-btn active flex flex-col items-center gap-1 text-emerald-600" data-tab="home">
+            <i class="fa-solid fa-house-chimney text-lg"></i>
+            <span class="text-[9px] font-black uppercase tracking-tighter">Home</span>
+        </button>
+        <button onclick="switchTab('academics')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" data-tab="academics">
+            <i class="fa-solid fa-graduation-cap text-lg"></i>
+            <span class="text-[9px] font-black uppercase tracking-tighter">Learn</span>
+        </button>
+        <button onclick="switchTab('marketplace')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" data-tab="marketplace">
+            <i class="fa-solid fa-shop text-lg"></i>
+            <span class="text-[9px] font-black uppercase tracking-tighter">Trade</span>
+        </button>
+        <button onclick="switchTab('profile')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" data-tab="profile">
+            <i class="fa-solid fa-user-ninja text-lg"></i>
+            <span class="text-[9px] font-black uppercase tracking-tighter">Profile</span>
+        </button>
+    </nav>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
 
