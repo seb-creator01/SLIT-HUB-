@@ -8,6 +8,27 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Level Filter Styles */
+        .lvl-btn {
+            padding: 8px 16px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 99px;
+            font-size: 10px;
+            font-weight: 800;
+            color: #64748b;
+            white-space: nowrap;
+            transition: all 0.3s;
+        }
+
+        .lvl-btn.active-lvl {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+        }
+    </style>
 </head>
 <body class="bg-gray-50 text-slate-900 pb-24 font-sans select-none">
 
@@ -54,7 +75,28 @@
         <section id="tab-academics" class="tab-content hidden animate-fade-in space-y-4">
             <div class="flex justify-between items-center">
                 <h2 class="text-xl font-bold italic">Academics <span class="float-emoji">📚</span></h2>
-                <button id="btn-new-group" class="text-emerald-600 text-[10px] font-black uppercase bg-emerald-50 px-3 py-2 rounded-lg border border-emerald-100">+ Study Group</button>
+                <div class="flex gap-2">
+                    <button onclick="openAcademicModal()" class="bg-emerald-600 text-white text-[10px] font-black uppercase px-3 py-2 rounded-lg shadow-lg shadow-emerald-100">Post Hub</button>
+                    <button id="btn-new-group" class="text-emerald-600 text-[10px] font-black uppercase bg-emerald-50 px-3 py-2 rounded-lg border border-emerald-100">+ Group</button>
+                </div>
+            </div>
+
+            <div class="flex gap-2 overflow-x-auto no-scrollbar py-2">
+                <button onclick="filterByLevel('all')" data-level="all" class="lvl-btn active-lvl">All Levels</button>
+                <button onclick="filterByLevel('100')" data-level="100" class="lvl-btn">100L</button>
+                <button onclick="filterByLevel('200')" data-level="200" class="lvl-btn">200L</button>
+                <button onclick="filterByLevel('300')" data-level="300" class="lvl-btn">300L</button>
+                <button onclick="filterByLevel('400')" data-level="400" class="lvl-btn">400L</button>
+                <button onclick="filterByLevel('500')" data-level="500" class="lvl-btn">500L</button>
+            </div>
+
+            <div id="academic-list" class="space-y-3 min-h-[100px]">
+                </div>
+
+            <hr class="border-slate-100">
+
+            <div class="flex justify-between items-center">
+                <p class="text-[10px] font-black text-slate-400 uppercase">Study WhatsApp Groups</p>
             </div>
             <div id="study-pills" class="flex gap-2 overflow-x-auto no-scrollbar py-1"></div>
             <div id="groups-list" class="grid gap-3"></div>
