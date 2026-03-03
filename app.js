@@ -2,7 +2,7 @@ import { DEPARTMENTS, EXECUTIVES, STUDY_CATEGORIES, UI_CONFIG } from './data.js'
 
 // 1. INITIALIZE FIREBASE (Using your slithub-17a41 config)
 const firebaseConfig = {
-    apiKey: "AIzaSyAsS...", // Ensure this is your full key
+    apiKey: "AIzaSyAsS...", 
     authDomain: "slithub-17a41.firebaseapp.com",
     projectId: "slithub-17a41",
     storageBucket: "slithub-17a41.appspot.com",
@@ -26,18 +26,16 @@ window.addEventListener('DOMContentLoaded', () => {
 
     renderAcademics();
     loadVerifiedGroups();
-    loadMarketDisplay('items'); // Initial load for marketplace
+    loadMarketDisplay('items'); 
+    loadAcademicMaterials(); // NEW: Sync Academic Feed on start
 });
 
 // 3. TAB NAVIGATION (FIXED)
 window.switchTab = function(tabId) {
-    // Hide all
     document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
-    // Show selected
     const target = document.getElementById(`tab-${tabId}`);
     if(target) target.classList.remove('hidden');
 
-    // Update Nav Icons Glow
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.classList.remove('text-emerald-600', 'active');
         btn.classList.add('text-slate-400');
@@ -58,7 +56,141 @@ document.getElementById('admin-trigger').onclick = () => {
     }
 };
 
-// 5. STUDY GROUP LOGIC (The "WhatsApp Verification" Workflow)
+// ==========================================
+// ACADEMIC HUB (Lectures, Exams, Materials)
+// ==========================================
+
+// 1. OPEN ACADEMIC MODAL (Role Protected)
+window.openAcademicModal = function() {
+    const isRep = confirm("Are you a Course Rep? 🎓\nOnly Reps can post Schedules, Tests, and Exams.");
+    if(!isRep) return;
+
+    const repKey = prompt("Enter Course Rep Secret Key:");
+    if(repKey !== "REP2026") return alert("Unauthorized Key! ❌");
+
+    const modal = document.getElementById('modal-overlay');
+    const content = document.getElementById('modal-content');
+    modal.classList.remove('hidden');
+    
+    content.innerHTML = `
+        <h3 class="text-xl font-black mb-4 italic text-emerald-600">Post Academic Update 📖</h3>
+        <div class="space-y-3">
+            <select id="acad-type" class="w-full p-4 bg-slate-50 rounded-2xl border-none font-bold">
+                <option value="lecture">📅 Lecture Schedule</option>
+                <option value="test">📝 Upcoming Test</option>
+                <option value="exam">🎓 Exam Update</option>
+                <option value="material">📚 Material/Past Question</option>
+            </select>
+
+            <select id="acad-level" class="w-full p-4 bg-slate-50 rounded-2xl border-none font-bold">
+                <option value="100">100 Level</option>
+                <option value="200">200 Level</option>
+                <option value="300">300 Level</option>
+                <option value="400">400 Level</option>
+                <option value="500">500 Level</option>
+            </select>
+
+            <input type="text" id="acad-title" placeholder="Course Code (e.g. GST 111)" class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none">
+            
+            <textarea id="acad-desc" placeholder="Details/Instructions..." class="w-full p-4 bg-slate-50 rounded-2xl border-none h-24 outline-none text-xs"></textarea>
+
+            <div class="relative group">
+                <input type="file" id="acad-file" class="hidden" accept="image/*,application/pdf" onchange="document.getElementById('acad-file-label').innerText = 'File Selected! ✅'">
+                <label for="acad-file" id="acad-file-label" class="block w-full p-6 border-2 border-dashed border-emerald-200 rounded-2xl text-center text-emerald-600 font-bold cursor-pointer">
+                    Upload PDF or Picture
+                </label>
+            </div>
+
+            <button onclick="processAcademicPost()" id="acad-submit-btn" class="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black btn-glow">PUBLISH TO HUB 🚀</button>
+        </div>
+    `;
+};
+
+// 2. PROCESS ACADEMIC POST
+window.processAcademicPost = async function() {
+    const btn = document.getElementById('acad-submit-btn');
+    const file = document.getElementById('acad-file').files[0];
+    const type = document.getElementById('acad-type').value;
+    const level = document.getElementById('acad-level').value;
+    const title = document.getElementById('acad-title').value;
+    const desc = document.getElementById('acad-desc').value;
+
+    if(!title || !desc) return alert("Please fill Title and Description!");
+
+    btn.innerText = "UPLOADING... ⏳";
+    btn.disabled = true;
+
+    let fileUrl = "";
+    if(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', 'slithub_preset');
+        
+        try {
+            const res = await fetch("https://api.cloudinary.com/v1_1/dxt8v0h1u/image/upload", {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            fileUrl = data.secure_url;
+        } catch (err) { console.error(err); }
+    }
+
+    await db.collection('Academics').add({
+        type, level, title, desc, fileUrl,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    alert("Academic Update Published! 📚");
+    document.getElementById('modal-overlay').classList.add('hidden');
+    loadAcademicMaterials();
+};
+
+// 3. LOAD ACADEMIC UPDATES
+window.loadAcademicMaterials = async function(levelFilter = 'all') {
+    const container = document.getElementById('academic-list');
+    if(!container) return;
+    
+    container.innerHTML = "<p class='text-center p-10 animate-pulse text-xs text-slate-400'>Loading Resources...</p>";
+    
+    let query = db.collection('Academics').orderBy('timestamp', 'desc');
+    if(levelFilter !== 'all') query = query.where('level', '==', levelFilter);
+    
+    const snap = await query.get();
+    container.innerHTML = snap.empty ? "<p class='text-center text-slate-300 py-10 italic'>No updates for this level.</p>" : "";
+
+    snap.forEach(doc => {
+        const d = doc.data();
+        const icon = d.type === 'exam' ? '🎓' : d.type === 'test' ? '📝' : d.type === 'lecture' ? '📅' : '📚';
+        
+        container.innerHTML += `
+            <div class="glass-card p-4 mb-3 border-l-4 border-emerald-500 animate-fade-in">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="bg-emerald-100 text-emerald-700 text-[8px] font-black px-2 py-1 rounded-md uppercase">${d.level}L</span>
+                    <span class="text-lg">${icon}</span>
+                </div>
+                <h4 class="font-bold text-sm text-slate-800">${d.title}</h4>
+                <p class="text-[11px] text-slate-500 mt-1">${d.desc}</p>
+                ${d.fileUrl ? `<a href="${d.fileUrl}" target="_blank" class="inline-block mt-3 text-emerald-600 font-black text-[9px] underline">VIEW ATTACHMENT <i class="fa-solid fa-up-right-from-square"></i></a>` : ''}
+            </div>
+        `;
+    });
+};
+
+// 4. NEW: FILTER ACADEMIC HUB BY LEVEL
+window.filterByLevel = function(level) {
+    document.querySelectorAll('.lvl-btn').forEach(btn => {
+        btn.classList.remove('active-lvl');
+        if(btn.dataset.level === level) {
+            btn.classList.add('active-lvl');
+        }
+    });
+    loadAcademicMaterials(level);
+};
+
+// ==========================================
+// STUDY GROUP LOGIC
+// ==========================================
 window.openGroupModal = function() {
     const modal = document.getElementById('modal-overlay');
     const content = document.getElementById('modal-content');
@@ -72,34 +204,27 @@ window.openGroupModal = function() {
     `;
 };
 
-// Link the HTML button to the function
 const studyBtn = document.getElementById('btn-new-group');
 if(studyBtn) studyBtn.onclick = window.openGroupModal;
 
 window.submitToFirebase = async () => {
     const name = document.getElementById('group-name').value;
     const link = document.getElementById('group-link').value;
-
     if(!name || !link) return alert("Please fill all fields!");
-
     await db.collection('StudyGroups').add({
         name: name,
         link: link,
         status: 'pending',
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
     });
-
     alert("Sent! Junior will verify this shortly. 🚀");
     document.getElementById('modal-overlay').classList.add('hidden');
 };
 
-// 6. ADMIN VERIFICATION PANEL
 async function loadAdminPanel() {
     const list = document.getElementById('admin-verification-list');
     const snap = await db.collection('StudyGroups').where('status', '==', 'pending').get();
-    
     list.innerHTML = snap.empty ? "<p class='text-slate-500 italic'>No pending groups.</p>" : "";
-    
     snap.forEach(doc => {
         const d = doc.data();
         list.innerHTML += `
@@ -133,25 +258,10 @@ async function loadVerifiedGroups() {
     });
 }
 
-function renderAcademics() {
-    const pContainer = document.getElementById('study-pills');
-    if(pContainer) {
-        STUDY_CATEGORIES.forEach(cat => {
-            pContainer.innerHTML += `<button class="whitespace-nowrap px-4 py-2 bg-white border border-emerald-100 rounded-full text-[10px] font-bold text-slate-500 shadow-sm">${cat}</button>`;
-        });
-    }
-}
-
-// Close Modal Logic
-document.getElementById('close-modal').onclick = () => {
-    document.getElementById('modal-overlay').classList.add('hidden');
-};
-
 // ==========================================
-// MARKETPLACE ENGINE (Items, Services, Requests)
+// MARKETPLACE ENGINE
 // ==========================================
 
-// 1. OPEN POSTING MODAL (UPDATED WITH PRO FEATURES)
 window.openMarketModal = function() {
     const modal = document.getElementById('modal-overlay');
     const content = document.getElementById('modal-content');
@@ -194,14 +304,13 @@ window.openMarketModal = function() {
     `;
 };
 
-// Hook the Post Ad button from HTML
 const postAdBtn = document.getElementById('btn-post-ad');
 if(postAdBtn) postAdBtn.onclick = window.openMarketModal;
 
-// 2. PROCESS UPLOAD & SAVE (UPDATED)
 window.processMarketPost = async function() {
     const btn = document.getElementById('market-submit-btn');
-    const file = document.getElementById('item-image').files[0];
+    const fileInput = document.getElementById('item-image');
+    const file = fileInput.files[0];
     const name = document.getElementById('item-name').value;
     const price = document.getElementById('item-price').value;
     const type = document.getElementById('item-type').value;
@@ -210,18 +319,20 @@ window.processMarketPost = async function() {
 
     if(!name || !price || !phone) return alert("Please fill all fields!");
 
-    btn.innerText = "UPLOADING... ⏳";
+    btn.innerHTML = `<i class="fa-solid fa-circle-notch animate-spin"></i> OPTIMIZING...`;
     btn.disabled = true;
 
-    let imageUrl = "https://ui-avatars.com/api/?name=Hub&background=10b981&color=fff"; // Default
+    let imageUrl = "https://ui-avatars.com/api/?name=Hub&background=10b981&color=fff"; 
 
-    // Cloudinary Upload Logic
     if(file) {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('upload_preset', 'slithub_preset'); 
-        
         try {
+            const compressedFile = await compressImage(file);
+            btn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up animate-bounce"></i> UPLOADING...`;
+
+            const formData = new FormData();
+            formData.append('file', compressedFile);
+            formData.append('upload_preset', 'slithub_preset'); 
+            
             const res = await fetch("https://api.cloudinary.com/v1_1/dxt8v0h1u/image/upload", {
                 method: 'POST',
                 body: formData
@@ -229,107 +340,88 @@ window.processMarketPost = async function() {
             const cloudData = await res.json();
             imageUrl = cloudData.secure_url;
         } catch (err) {
-            console.error("Cloudinary Error:", err);
+            btn.innerText = "RETRY POST";
+            btn.disabled = false;
+            return alert("Upload failed!");
         }
     }
 
-    // Save to Firebase Firestore
     await db.collection('Marketplace').add({
-        name,
-        price: Number(price),
-        type,
-        phone,
-        negotiable,
-        image: imageUrl,
-        rating: 5.0, // Default rating for new items
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        name, price: Number(price), type, phone, negotiable,
+        image: imageUrl, rating: 5.0, timestamp: firebase.firestore.FieldValue.serverTimestamp()
     });
 
-    alert("Listed Successfully! 🛍️");
-    document.getElementById('modal-overlay').classList.add('hidden');
-    loadMarketDisplay(type); // Refresh view
+    btn.innerHTML = "SUCCESS! 🎉";
+    btn.classList.replace('bg-emerald-600', 'bg-blue-500');
+    
+    setTimeout(() => {
+        alert("Post is live! 🛍️");
+        document.getElementById('modal-overlay').classList.add('hidden');
+        loadMarketDisplay(type);
+    }, 800);
 };
 
-// 3. LOAD & FILTER MARKETPLACE (UPDATED WITH COMMA FORMATTING & CONTACT)
+async function compressImage(file) {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 800; 
+                const scaleSize = MAX_WIDTH / img.width;
+                canvas.width = MAX_WIDTH;
+                canvas.height = img.height * scaleSize;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.7);
+            };
+        };
+    });
+}
+
 window.loadMarketDisplay = async function(filterType = 'items') {
     const grid = document.getElementById('market-grid');
     grid.innerHTML = "<p class='text-slate-400 italic text-xs animate-pulse'>Fetching listings...</p>";
 
-    const snap = await db.collection('Marketplace')
-                         .where('type', '==', filterType)
-                         .orderBy('timestamp', 'desc')
-                         .get();
-    
+    const snap = await db.collection('Marketplace').where('type', '==', filterType).orderBy('timestamp', 'desc').get();
     grid.innerHTML = snap.empty ? `<p class='col-span-2 text-center text-slate-300 py-10 italic'>No ${filterType} yet.</p>` : "";
 
     snap.forEach(doc => {
         const d = doc.data();
         const id = doc.id;
-        // Strip leading zero if exists for WhatsApp link
         const cleanPhone = d.phone.startsWith('0') ? d.phone.substring(1) : d.phone;
 
         grid.innerHTML += `
             <div class="glass-card overflow-hidden animate-fade-in group flex flex-col h-full border border-white shadow-sm">
                 <div class="relative">
                     <img src="${d.image}" class="w-full h-32 object-cover">
-                    <span class="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-[9px] font-black text-emerald-600 shadow-sm">
-                        ₦${Number(d.price).toLocaleString()} </span>
+                    <span class="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-[9px] font-black text-emerald-600 shadow-sm">₦${Number(d.price).toLocaleString()}</span>
                     <div class="absolute top-2 left-2 bg-emerald-600 text-white text-[7px] font-black px-2 py-1 rounded-lg shadow-lg uppercase">${d.negotiable || 'Fixed'}</div>
                 </div>
                 <div class="p-3 flex-1 flex flex-col">
                     <p class="font-bold text-xs truncate italic text-slate-800">${d.name}</p>
-                    
                     <div class="grid grid-cols-2 gap-2 mt-3">
-                        <a href="https://wa.me/234${cleanPhone}?text=Hi, I saw your ${d.name} on SLIT-HUB" target="_blank" class="flex items-center justify-center bg-green-500 text-white p-2 rounded-xl active:scale-95 transition-all">
-                            <i class="fa-brands fa-whatsapp text-sm"></i>
-                        </a>
-                        <a href="tel:+234${cleanPhone}" class="flex items-center justify-center bg-blue-500 text-white p-2 rounded-xl active:scale-95 transition-all">
-                            <i class="fa-solid fa-phone text-sm"></i>
-                        </a>
+                        <a href="https://wa.me/234${cleanPhone}?text=Hi, I saw your ${d.name} on SLIT-HUB" target="_blank" class="flex items-center justify-center bg-green-500 text-white p-2 rounded-xl active:scale-95 transition-all"><i class="fa-brands fa-whatsapp text-sm"></i></a>
+                        <a href="tel:+234${cleanPhone}" class="flex items-center justify-center bg-blue-500 text-white p-2 rounded-xl active:scale-95 transition-all"><i class="fa-solid fa-phone text-sm"></i></a>
                     </div>
-
-                    <button onclick="openReviewModal('${id}')" class="w-full mt-3 py-2 border border-slate-100 text-slate-400 rounded-xl text-[8px] font-black uppercase tracking-widest active:scale-95 transition-all">
-                        ⭐ ${d.rating || '5.0'} Reviews
-                    </button>
                 </div>
             </div>
         `;
     });
 };
 
-// 4. REVIEW MODAL LOGIC (Standard Add-on)
-window.openReviewModal = async (productId) => {
-    const modal = document.getElementById('modal-overlay');
-    const content = document.getElementById('modal-content');
-    modal.classList.remove('hidden');
+function renderAcademics() {
+    const pContainer = document.getElementById('study-pills');
+    if(pContainer) {
+        STUDY_CATEGORIES.forEach(cat => {
+            pContainer.innerHTML += `<button class="whitespace-nowrap px-4 py-2 bg-white border border-emerald-100 rounded-full text-[10px] font-bold text-slate-500 shadow-sm">${cat}</button>`;
+        });
+    }
+}
 
-    content.innerHTML = `<p class="text-center p-10 animate-pulse text-xs">Loading Reviews...</p>`;
-    
-    // Quick Review Submission View
-    content.innerHTML = `
-        <h3 class="text-xl font-black mb-4 italic text-emerald-600 text-center">Reviews 💬</h3>
-        <div class="space-y-4">
-            <div class="bg-slate-50 p-4 rounded-2xl text-center italic text-[10px] text-slate-500">
-                Buyers can rate products and services here to build seller trust.
-            </div>
-            <select id="rev-rating" class="w-full p-4 bg-slate-50 rounded-2xl border-none font-bold text-yellow-500">
-                <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
-                <option value="4">⭐⭐⭐⭐ Good</option>
-                <option value="3">⭐⭐⭐ Fair</option>
-                <option value="2">⭐⭐ Poor</option>
-                <option value="1">⭐ Terrible</option>
-            </select>
-            <textarea id="rev-comment" placeholder="Leave a comment..." class="w-full p-4 bg-slate-50 rounded-2xl h-20 outline-none text-xs border-none"></textarea>
-            <button onclick="alert('Review Submitted for Verification! ✅')" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-xs uppercase">Submit Review</button>
-        </div>
-    `;
+document.getElementById('close-modal').onclick = () => {
+    document.getElementById('modal-overlay').classList.add('hidden');
 };
-
-// Switch between Items, Services, Requests
-document.querySelectorAll('.m-filter').forEach(btn => {
-    btn.onclick = function() {
-        document.querySelectorAll('.m-filter').forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-        loadMarketDisplay(this.dataset.filter);
-    };
-});
