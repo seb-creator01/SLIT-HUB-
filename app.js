@@ -1,6 +1,6 @@
 import { DEPARTMENTS, EXECUTIVES, STUDY_CATEGORIES, UI_CONFIG } from './data.js';
 
-// 1. INITIALIZE FIREBASE (Using your slithub-17a41 config)
+// 1. INITIALIZE FIREBASE
 const firebaseConfig = {
     apiKey: "AIzaSyAsS...", 
     authDomain: "slithub-17a41.firebaseapp.com",
@@ -15,7 +15,6 @@ const db = firebase.firestore();
 
 // 2. BOOTUP SEQUENCE
 window.addEventListener('DOMContentLoaded', () => {
-    // Kill the Spinner
     setTimeout(() => {
         const splash = document.getElementById('splash-screen');
         if(splash) {
@@ -27,10 +26,10 @@ window.addEventListener('DOMContentLoaded', () => {
     renderAcademics();
     loadVerifiedGroups();
     loadMarketDisplay('items'); 
-    loadAcademicMaterials(); // NEW: Sync Academic Feed on start
+    loadAcademicMaterials(); 
 });
 
-// 3. TAB NAVIGATION (FIXED)
+// 3. TAB NAVIGATION
 window.switchTab = function(tabId) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
     const target = document.getElementById(`tab-${tabId}`);
@@ -45,7 +44,7 @@ window.switchTab = function(tabId) {
     if(activeBtn) activeBtn.classList.add('text-emerald-600', 'active');
 };
 
-// 4. ADMIN TRIGGER (FIXED)
+// 4. ADMIN TRIGGER
 document.getElementById('admin-trigger').onclick = () => {
     const pass = prompt("Enter Developer Secret 🛡️:");
     if(pass === "junior123") {
@@ -57,10 +56,9 @@ document.getElementById('admin-trigger').onclick = () => {
 };
 
 // ==========================================
-// ACADEMIC HUB (Lectures, Exams, Materials)
+// ACADEMIC HUB
 // ==========================================
 
-// 1. OPEN ACADEMIC MODAL (Role Protected)
 window.openAcademicModal = function() {
     const isRep = confirm("Are you a Course Rep? 🎓\nOnly Reps can post Schedules, Tests, and Exams.");
     if(!isRep) return;
@@ -81,7 +79,6 @@ window.openAcademicModal = function() {
                 <option value="exam">🎓 Exam Update</option>
                 <option value="material">📚 Material/Past Question</option>
             </select>
-
             <select id="acad-level" class="w-full p-4 bg-slate-50 rounded-2xl border-none font-bold">
                 <option value="100">100 Level</option>
                 <option value="200">200 Level</option>
@@ -89,24 +86,19 @@ window.openAcademicModal = function() {
                 <option value="400">400 Level</option>
                 <option value="500">500 Level</option>
             </select>
-
             <input type="text" id="acad-title" placeholder="Course Code (e.g. GST 111)" class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none">
-            
             <textarea id="acad-desc" placeholder="Details/Instructions..." class="w-full p-4 bg-slate-50 rounded-2xl border-none h-24 outline-none text-xs"></textarea>
-
             <div class="relative group">
                 <input type="file" id="acad-file" class="hidden" accept="image/*,application/pdf" onchange="document.getElementById('acad-file-label').innerText = 'File Selected! ✅'">
                 <label for="acad-file" id="acad-file-label" class="block w-full p-6 border-2 border-dashed border-emerald-200 rounded-2xl text-center text-emerald-600 font-bold cursor-pointer">
                     Upload PDF or Picture
                 </label>
             </div>
-
             <button onclick="processAcademicPost()" id="acad-submit-btn" class="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black btn-glow">PUBLISH TO HUB 🚀</button>
         </div>
     `;
 };
 
-// 2. PROCESS ACADEMIC POST
 window.processAcademicPost = async function() {
     const btn = document.getElementById('acad-submit-btn');
     const file = document.getElementById('acad-file').files[0];
@@ -146,23 +138,17 @@ window.processAcademicPost = async function() {
     loadAcademicMaterials();
 };
 
-// 3. LOAD ACADEMIC UPDATES
 window.loadAcademicMaterials = async function(levelFilter = 'all') {
     const container = document.getElementById('academic-list');
     if(!container) return;
-    
     container.innerHTML = "<p class='text-center p-10 animate-pulse text-xs text-slate-400'>Loading Resources...</p>";
-    
     let query = db.collection('Academics').orderBy('timestamp', 'desc');
     if(levelFilter !== 'all') query = query.where('level', '==', levelFilter);
-    
     const snap = await query.get();
     container.innerHTML = snap.empty ? "<p class='text-center text-slate-300 py-10 italic'>No updates for this level.</p>" : "";
-
     snap.forEach(doc => {
         const d = doc.data();
         const icon = d.type === 'exam' ? '🎓' : d.type === 'test' ? '📝' : d.type === 'lecture' ? '📅' : '📚';
-        
         container.innerHTML += `
             <div class="glass-card p-4 mb-3 border-l-4 border-emerald-500 animate-fade-in">
                 <div class="flex justify-between items-start mb-2">
@@ -177,13 +163,10 @@ window.loadAcademicMaterials = async function(levelFilter = 'all') {
     });
 };
 
-// 4. NEW: FILTER ACADEMIC HUB BY LEVEL
 window.filterByLevel = function(level) {
     document.querySelectorAll('.lvl-btn').forEach(btn => {
         btn.classList.remove('active-lvl');
-        if(btn.dataset.level === level) {
-            btn.classList.add('active-lvl');
-        }
+        if(btn.dataset.level === level) btn.classList.add('active-lvl');
     });
     loadAcademicMaterials(level);
 };
@@ -195,7 +178,6 @@ window.openGroupModal = function() {
     const modal = document.getElementById('modal-overlay');
     const content = document.getElementById('modal-content');
     modal.classList.remove('hidden');
-    
     content.innerHTML = `
         <h3 class="text-xl font-black mb-4 italic text-emerald-600">New Study Group 📚</h3>
         <input type="text" id="group-name" placeholder="Course Name (e.g. MMT 211)" class="w-full p-4 bg-slate-50 rounded-2xl mb-3 border-none outline-none">
@@ -259,20 +241,18 @@ async function loadVerifiedGroups() {
 }
 
 // ==========================================
-// MARKETPLACE ENGINE (OPTIMIZED)
+// MARKETPLACE ENGINE
 // ==========================================
 
 window.openMarketModal = function() {
     const modal = document.getElementById('modal-overlay');
     const content = document.getElementById('modal-content');
     modal.classList.remove('hidden');
-    
     content.innerHTML = `
         <div class="max-h-[80vh] overflow-y-auto no-scrollbar pb-6">
             <h3 class="text-xl font-black mb-4 italic text-emerald-600">Create a Post 🚀</h3>
             <div class="space-y-3">
                 <input type="text" id="item-name" placeholder="What are you listing?" class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none">
-                
                 <div class="flex gap-2">
                     <input type="number" id="item-price" placeholder="Price (₦)" class="flex-1 p-4 bg-slate-50 rounded-2xl border-none outline-none">
                     <select id="item-negotiable" class="p-4 bg-slate-50 rounded-2xl border-none font-bold text-xs">
@@ -280,18 +260,15 @@ window.openMarketModal = function() {
                         <option value="Negotiable">Negotiable</option>
                     </select>
                 </div>
-
                 <select id="item-type" class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none font-bold text-slate-500">
                     <option value="items">Physical Item (Sale)</option>
                     <option value="services">Service (Gigs/Skill)</option>
                     <option value="requests">Request (I need...)</option>
                 </select>
-
                 <div class="flex items-center gap-2 bg-slate-50 p-1 rounded-2xl border border-slate-100">
                     <span class="pl-4 font-bold text-slate-400">+234</span>
                     <input type="number" id="seller-phone" placeholder="805 000 0000" class="w-full p-4 bg-transparent border-none outline-none">
                 </div>
-
                 <div class="relative group">
                     <input type="file" id="item-image" class="hidden" accept="image/*" onchange="document.getElementById('file-label').innerText = 'Photo Selected! ✅'">
                     <label for="item-image" id="file-label" class="block w-full p-6 border-2 border-dashed border-emerald-200 rounded-2xl text-center text-emerald-600 font-bold cursor-pointer bg-emerald-50/30">
@@ -319,35 +296,38 @@ window.processMarketPost = async function() {
 
     if(!name || !price || !phone) return alert("Please fill all fields!");
 
-    btn.innerHTML = `<i class="fa-solid fa-circle-notch animate-spin"></i> OPTIMIZING...`;
+    btn.innerHTML = `<i class="fa-solid fa-circle-notch animate-spin"></i> PREPARING...`;
     btn.disabled = true;
 
     let imageUrl = "https://ui-avatars.com/api/?name=Hub&background=10b981&color=fff"; 
 
     if(file) {
         try {
-            // Updated compression: Quality set to 0.6 and max width 600 for faster mobile performance
-            const compressedBlob = await compressImage(file, 0.6);
+            const compressedBlob = await compressImage(file, 0.6); 
             btn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up animate-bounce"></i> UPLOADING...`;
 
             const formData = new FormData();
             formData.append('file', compressedBlob);
             formData.append('upload_preset', 'slithub_preset'); 
             
+            // diagnostic: check if we can even reach the server
             const res = await fetch("https://api.cloudinary.com/v1_1/dxt8v0h1u/image/upload", {
                 method: 'POST',
                 body: formData
             });
 
-            if (!res.ok) throw new Error('Cloudinary Upload Failed');
-
             const cloudData = await res.json();
+
+            if (!res.ok) {
+                // This will alert the EXACT error from Cloudinary settings
+                throw new Error(cloudData.error.message || 'Server error');
+            }
+
             imageUrl = cloudData.secure_url;
         } catch (err) {
-            console.error("Upload Error:", err);
             btn.innerText = "RETRY POST";
             btn.disabled = false;
-            return alert("Upload failed! Check your connection.");
+            return alert(`Cloudinary Error: ${err.message}`);
         }
     }
 
@@ -366,29 +346,28 @@ window.processMarketPost = async function() {
     }, 800);
 };
 
-// Optimized Image Compression Function
 async function compressImage(file, quality = 0.6) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
-        reader.onerror = reject;
         reader.onload = (event) => {
             const img = new Image();
             img.src = event.target.result;
             img.onload = () => {
                 const canvas = document.createElement('canvas');
                 const MAX_WIDTH = 600; 
-                const scaleSize = MAX_WIDTH / img.width;
+                const scale = MAX_WIDTH / img.width;
                 canvas.width = MAX_WIDTH;
-                canvas.height = img.height * scaleSize;
+                canvas.height = img.height * scale;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                 canvas.toBlob((blob) => {
                     if (blob) resolve(blob);
-                    else reject(new Error('Compression Error'));
+                    else reject(new Error('Compression failed'));
                 }, 'image/jpeg', quality);
             };
         };
+        reader.onerror = reject;
     });
 }
 
@@ -401,9 +380,7 @@ window.loadMarketDisplay = async function(filterType = 'items') {
 
     snap.forEach(doc => {
         const d = doc.data();
-        const id = doc.id;
         const cleanPhone = d.phone.startsWith('0') ? d.phone.substring(1) : d.phone;
-
         grid.innerHTML += `
             <div class="glass-card overflow-hidden animate-fade-in group flex flex-col h-full border border-white shadow-sm">
                 <div class="relative">
