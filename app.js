@@ -106,7 +106,7 @@ window.openAcademicModal = function() {
     `;
 };
 
-// 2. PROCESS ACADEMIC POST
+// 2. PROCESS ACADEMIC POST (PRO PERFORMANCE)
 window.processAcademicPost = async function() {
     const btn = document.getElementById('acad-submit-btn');
     const file = document.getElementById('acad-file').files[0];
@@ -117,17 +117,24 @@ window.processAcademicPost = async function() {
 
     if(!title || !desc) return alert("Please fill Title and Description!");
 
-    btn.innerText = "UPLOADING... ⏳";
+    btn.innerHTML = `<i class="fa-solid fa-bolt animate-pulse"></i> PREPARING...`;
     btn.disabled = true;
 
     let fileUrl = "";
     if(file) {
-        const formData = new FormData();
-        formData.append('file', file);
-        // UPDATED: Using 'SLIT-HUB' to match your dashboard
-        formData.append('upload_preset', 'SLIT-HUB');
-        
         try {
+            // PRO FIX: Fast compression for images
+            let uploadBlob = file;
+            if (file.type.startsWith('image/')) {
+                uploadBlob = await compressImage(file, 0.5, 500);
+            }
+
+            btn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up animate-bounce"></i> SYNCING...`;
+            
+            const formData = new FormData();
+            formData.append('file', uploadBlob);
+            formData.append('upload_preset', 'SLIT-HUB');
+            
             const res = await fetch("https://api.cloudinary.com/v1_1/ddm87a9p2/auto/upload", {
                 method: 'POST',
                 body: formData
@@ -137,7 +144,9 @@ window.processAcademicPost = async function() {
             fileUrl = data.secure_url;
         } catch (err) { 
             console.error(err); 
-            alert(`File Upload Error: ${err.message}`);
+            btn.disabled = false;
+            btn.innerText = "RETRY PUBLISH";
+            return alert(`File Upload Error: ${err.message}`);
         }
     }
 
@@ -146,9 +155,11 @@ window.processAcademicPost = async function() {
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
     });
 
-    alert("Academic Update Published! 📚");
-    document.getElementById('modal-overlay').classList.add('hidden');
-    loadAcademicMaterials();
+    btn.innerText = "SUCCESS! 🎉";
+    setTimeout(() => {
+        document.getElementById('modal-overlay').classList.add('hidden');
+        loadAcademicMaterials();
+    }, 500);
 };
 
 // 3. LOAD ACADEMIC UPDATES
@@ -264,7 +275,7 @@ async function loadVerifiedGroups() {
 }
 
 // ==========================================
-// MARKETPLACE ENGINE (OPTIMIZED)
+// MARKETPLACE ENGINE (HIGH PERFORMANCE)
 // ==========================================
 
 window.openMarketModal = function() {
@@ -324,19 +335,19 @@ window.processMarketPost = async function() {
 
     if(!name || !price || !phone) return alert("Please fill all fields!");
 
-    btn.innerHTML = `<i class="fa-solid fa-circle-notch animate-spin"></i> OPTIMIZING...`;
+    btn.innerHTML = `<i class="fa-solid fa-bolt animate-pulse"></i> OPTIMIZING...`;
     btn.disabled = true;
 
     let imageUrl = "https://ui-avatars.com/api/?name=Hub&background=10b981&color=fff"; 
 
     if(file) {
         try {
-            const compressedBlob = await compressImage(file, 0.6);
-            btn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up animate-bounce"></i> UPLOADING...`;
+            // PRO PERFORMANCE: Max 500px and 0.5 quality for lightning speed
+            const compressedBlob = await compressImage(file, 0.5, 500);
+            btn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up animate-bounce"></i> SENDING...`;
 
             const formData = new FormData();
             formData.append('file', compressedBlob);
-            // UPDATED: Using 'SLIT-HUB' to match your dashboard
             formData.append('upload_preset', 'SLIT-HUB'); 
             
             const res = await fetch("https://api.cloudinary.com/v1_1/ddm87a9p2/image/upload", {
@@ -352,7 +363,7 @@ window.processMarketPost = async function() {
             console.error("Upload Error:", err);
             btn.innerText = "RETRY POST";
             btn.disabled = false;
-            return alert(`Cloudinary Error: ${err.message}`);
+            return alert(`Upload failed. Check your network!`);
         }
     }
 
@@ -361,18 +372,16 @@ window.processMarketPost = async function() {
         image: imageUrl, rating: 5.0, timestamp: firebase.firestore.FieldValue.serverTimestamp()
     });
 
-    btn.innerHTML = "SUCCESS! 🎉";
-    btn.classList.replace('bg-emerald-600', 'bg-blue-500');
+    btn.innerHTML = "DONE! 🚀";
     
     setTimeout(() => {
-        alert("Post is live! 🛍️");
         document.getElementById('modal-overlay').classList.add('hidden');
         loadMarketDisplay(type);
-    }, 800);
+    }, 500);
 };
 
-// Optimized Image Compression Function
-async function compressImage(file, quality = 0.6) {
+// PROFESSIONAL IMAGE COMPRESSION (PRO VERSION)
+async function compressImage(file, quality = 0.5, maxWidth = 500) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
@@ -382,11 +391,12 @@ async function compressImage(file, quality = 0.6) {
             img.src = event.target.result;
             img.onload = () => {
                 const canvas = document.createElement('canvas');
-                const MAX_WIDTH = 600; 
-                const scaleSize = MAX_WIDTH / img.width;
-                canvas.width = MAX_WIDTH;
-                canvas.height = img.height * scaleSize;
+                const scale = maxWidth / img.width;
+                canvas.width = maxWidth;
+                canvas.height = img.height * scale;
                 const ctx = canvas.getContext('2d');
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                 canvas.toBlob((blob) => {
                     if (blob) resolve(blob);
