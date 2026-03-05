@@ -10,7 +10,10 @@ const firebaseConfig = {
     appId: "1:1056588267605:web:0786..."
 };
 
-firebase.initializeApp(firebaseConfig);
+// Check if firebase is defined (compat mode)
+if (typeof firebase !== 'undefined') {
+    firebase.initializeApp(firebaseConfig);
+}
 const db = firebase.firestore();
 
 // 2. BOOTUP SEQUENCE
@@ -23,6 +26,18 @@ window.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => splash.classList.add('hidden'), 500);
         }
     }, 1500);
+
+    // BRIDGE: Setup Marketplace Filter Click Listeners
+    document.querySelectorAll('.m-filter').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const type = this.getAttribute('data-filter');
+            // Remove active class from all
+            document.querySelectorAll('.m-filter').forEach(b => b.classList.remove('active', 'bg-white', 'text-emerald-600', 'shadow-sm'));
+            // Add to this one
+            this.classList.add('active', 'bg-white', 'text-emerald-600', 'shadow-sm');
+            loadMarketDisplay(type);
+        });
+    });
 
     renderAcademics();
     loadVerifiedGroups();
@@ -41,8 +56,12 @@ window.switchTab = function(tabId) {
         btn.classList.add('text-slate-400');
     });
     
-    const activeBtn = document.querySelector(`[onclick="switchTab('${tabId}')"]`);
-    if(activeBtn) activeBtn.classList.add('text-emerald-600', 'active');
+    // Select based on the data-tab attribute used in your HTML
+    const activeBtn = document.querySelector(`.nav-btn[data-tab="${tabId}"]`);
+    if(activeBtn) {
+        activeBtn.classList.add('text-emerald-600', 'active');
+        activeBtn.classList.remove('text-slate-400');
+    }
 };
 
 // 4. ADMIN TRIGGER (FIXED)
@@ -123,7 +142,6 @@ window.processAcademicPost = async function() {
     let fileUrl = "";
     if(file) {
         try {
-            // PRO FIX: Fast compression for images
             let uploadBlob = file;
             if (file.type.startsWith('image/')) {
                 uploadBlob = await compressImage(file, 0.5, 500);
@@ -135,7 +153,6 @@ window.processAcademicPost = async function() {
             formData.append('file', uploadBlob);
             formData.append('upload_preset', 'SLIT-HUB');
             
-            // FIX: Using dedicated image endpoint for Unsigned uploads
             const res = await fetch("https://api.cloudinary.com/v1_1/ddm87a9p2/image/upload", {
                 method: 'POST',
                 body: formData
@@ -245,7 +262,7 @@ async function loadAdminPanel() {
     snap.forEach(doc => {
         const d = doc.data();
         list.innerHTML += `
-            <div class="border border-slate-700 p-4 rounded-2xl flex justify-between items-center bg-slate-800/50">
+            <div class="border border-slate-700 p-4 rounded-2xl flex justify-between items-center bg-slate-800/50 mb-2">
                 <span class="text-white font-bold">${d.name}</span>
                 <button onclick="verifyGroup('${doc.id}')" class="text-emerald-400 font-black underline">APPROVE</button>
             </div>
@@ -262,12 +279,13 @@ window.verifyGroup = async (id) => {
 
 async function loadVerifiedGroups() {
     const list = document.getElementById('groups-list');
+    if(!list) return;
     const snap = await db.collection('StudyGroups').where('status', '==', 'verified').get();
     list.innerHTML = "";
     snap.forEach(doc => {
         const d = doc.data();
         list.innerHTML += `
-            <div class="glass-card p-4 flex justify-between items-center border-l-4 border-emerald-500">
+            <div class="glass-card p-4 flex justify-between items-center border-l-4 border-emerald-50">
                 <p class="font-bold italic">${d.name}</p>
                 <a href="${d.link}" target="_blank" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-[10px] font-black italic">JOIN</a>
             </div>
@@ -343,7 +361,6 @@ window.processMarketPost = async function() {
 
     if(file) {
         try {
-            // PRO PERFORMANCE: Max 500px and 0.5 quality for lightning speed
             const compressedBlob = await compressImage(file, 0.5, 500);
             btn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up animate-bounce"></i> SENDING...`;
 
@@ -351,7 +368,6 @@ window.processMarketPost = async function() {
             formData.append('file', compressedBlob);
             formData.append('upload_preset', 'SLIT-HUB'); 
             
-            // FIX: Using dedicated image endpoint for Unsigned uploads
             const res = await fetch("https://api.cloudinary.com/v1_1/ddm87a9p2/image/upload", {
                 method: 'POST',
                 body: formData
@@ -382,7 +398,7 @@ window.processMarketPost = async function() {
     }, 500);
 };
 
-// PROFESSIONAL IMAGE COMPRESSION (PRO VERSION)
+// PROFESSIONAL IMAGE COMPRESSION
 async function compressImage(file, quality = 0.5, maxWidth = 500) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -411,6 +427,7 @@ async function compressImage(file, quality = 0.5, maxWidth = 500) {
 
 window.loadMarketDisplay = async function(filterType = 'items') {
     const grid = document.getElementById('market-grid');
+    if(!grid) return;
     grid.innerHTML = "<p class='text-slate-400 italic text-xs animate-pulse'>Fetching listings...</p>";
 
     const snap = await db.collection('Marketplace').where('type', '==', filterType).orderBy('timestamp', 'desc').get();
@@ -418,7 +435,7 @@ window.loadMarketDisplay = async function(filterType = 'items') {
 
     snap.forEach(doc => {
         const d = doc.data();
-        const cleanPhone = d.phone.startsWith('0') ? d.phone.substring(1) : d.phone;
+        const cleanPhone = d.phone.toString().startsWith('0') ? d.phone.toString().substring(1) : d.phone;
 
         grid.innerHTML += `
             <div class="glass-card overflow-hidden animate-fade-in group flex flex-col h-full border border-white shadow-sm">
@@ -441,7 +458,8 @@ window.loadMarketDisplay = async function(filterType = 'items') {
 
 function renderAcademics() {
     const pContainer = document.getElementById('study-pills');
-    if(pContainer) {
+    if(pContainer && STUDY_CATEGORIES) {
+        pContainer.innerHTML = ""; // Clear existing
         STUDY_CATEGORIES.forEach(cat => {
             pContainer.innerHTML += `<button class="whitespace-nowrap px-4 py-2 bg-white border border-emerald-100 rounded-full text-[10px] font-bold text-slate-500 shadow-sm">${cat}</button>`;
         });
