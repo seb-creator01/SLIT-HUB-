@@ -95,7 +95,7 @@ window.openAcademicModal = function() {
             <textarea id="acad-desc" placeholder="Details/Instructions..." class="w-full p-4 bg-slate-50 rounded-2xl border-none h-24 outline-none text-xs"></textarea>
 
             <div class="relative group">
-                <input type="file" id="acad-file" class="hidden" accept="image/*,application/pdf" onchange="document.getElementById('acad-file-label').innerText = this.files[0] ? 'File Selected! ✅' : 'Upload PDF or Picture'">
+                <input type="file" id="acad-file" class="hidden" accept="image/*,application/pdf" onchange="document.getElementById('acad-file-label').innerText = 'File Selected! ✅'">
                 <label for="acad-file" id="acad-file-label" class="block w-full p-6 border-2 border-dashed border-emerald-200 rounded-2xl text-center text-emerald-600 font-bold cursor-pointer">
                     Upload PDF or Picture
                 </label>
@@ -133,29 +133,15 @@ window.processAcademicPost = async function() {
             
             const formData = new FormData();
             formData.append('file', uploadBlob);
-            formData.append('upload_preset', 'ml_default'); // FIXED: Changed to default preset
+            formData.append('upload_preset', 'SLIT-HUB');
             
-            // FIX: Determine correct endpoint based on file type
-            let endpoint = "https://api.cloudinary.com/v1_1/ddm87a9p2/";
-            if (file.type.startsWith('image/')) {
-                endpoint += "image/upload";
-            } else if (file.type === 'application/pdf') {
-                endpoint += "raw/upload";
-            } else {
-                endpoint += "auto/upload";
-            }
-            
-            const res = await fetch(endpoint, {
+            // FIX: Using dedicated image endpoint for Unsigned uploads
+            const res = await fetch("https://api.cloudinary.com/v1_1/ddm87a9p2/image/upload", {
                 method: 'POST',
                 body: formData
             });
-            
-            if (!res.ok) {
-                const errorText = await res.text();
-                throw new Error(`Upload failed: ${res.status} - ${errorText}`);
-            }
-            
             const data = await res.json();
+            if (!res.ok) throw new Error(data.error.message || 'Cloudinary Failed');
             fileUrl = data.secure_url;
         } catch (err) { 
             console.error(err); 
@@ -324,7 +310,7 @@ window.openMarketModal = function() {
                 </div>
 
                 <div class="relative group">
-                    <input type="file" id="item-image" class="hidden" accept="image/*" onchange="document.getElementById('file-label').innerHTML = this.files[0] ? '<i class=\'fa-solid fa-check-circle text-emerald-600\'></i> ' + this.files[0].name + ' Selected! ✅' : '<i class=\'fa-solid fa-camera-retro text-2xl mb-2\'></i><br>Tap to Upload Photo'">
+                    <input type="file" id="item-image" class="hidden" accept="image/*" onchange="document.getElementById('file-label').innerText = 'Photo Selected! ✅'">
                     <label for="item-image" id="file-label" class="block w-full p-6 border-2 border-dashed border-emerald-200 rounded-2xl text-center text-emerald-600 font-bold cursor-pointer bg-emerald-50/30">
                         <i class="fa-solid fa-camera-retro text-2xl mb-2"></i><br>Tap to Upload Photo
                     </label>
@@ -341,7 +327,7 @@ if(postAdBtn) postAdBtn.onclick = window.openMarketModal;
 window.processMarketPost = async function() {
     const btn = document.getElementById('market-submit-btn');
     const fileInput = document.getElementById('item-image');
-    const file = fileInput ? fileInput.files[0] : null;
+    const file = fileInput.files[0];
     const name = document.getElementById('item-name').value;
     const price = document.getElementById('item-price').value;
     const type = document.getElementById('item-type').value;
@@ -363,47 +349,37 @@ window.processMarketPost = async function() {
 
             const formData = new FormData();
             formData.append('file', compressedBlob);
-            formData.append('upload_preset', 'ml_default'); // FIXED: Changed to default preset
+            formData.append('upload_preset', 'SLIT-HUB'); 
             
-            // FIX: Using dedicated image endpoint with proper error handling
+            // FIX: Using dedicated image endpoint for Unsigned uploads
             const res = await fetch("https://api.cloudinary.com/v1_1/ddm87a9p2/image/upload", {
                 method: 'POST',
                 body: formData
             });
 
-            if (!res.ok) {
-                const errorText = await res.text();
-                throw new Error(`Upload failed: ${res.status} - ${errorText}`);
-            }
-
             const cloudData = await res.json();
+            if (!res.ok) throw new Error(cloudData.error.message || 'Cloudinary Failed');
+
             imageUrl = cloudData.secure_url;
         } catch (err) {
             console.error("Upload Error:", err);
-            btn.innerHTML = "RETRY POST";
+            btn.innerText = "RETRY POST";
             btn.disabled = false;
-            return alert(`Upload failed: ${err.message}. Using default image.`);
+            return alert(`Upload failed. Check your network!`);
         }
     }
 
-    try {
-        await db.collection('Marketplace').add({
-            name, price: Number(price), type, phone, negotiable,
-            image: imageUrl, rating: 5.0, timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
+    await db.collection('Marketplace').add({
+        name, price: Number(price), type, phone, negotiable,
+        image: imageUrl, rating: 5.0, timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
 
-        btn.innerHTML = "DONE! 🚀";
-        
-        setTimeout(() => {
-            document.getElementById('modal-overlay').classList.add('hidden');
-            loadMarketDisplay(type);
-        }, 500);
-    } catch (dbError) {
-        console.error("Database Error:", dbError);
-        btn.innerHTML = "RETRY POST";
-        btn.disabled = false;
-        alert("Failed to save to database. Please try again.");
-    }
+    btn.innerHTML = "DONE! 🚀";
+    
+    setTimeout(() => {
+        document.getElementById('modal-overlay').classList.add('hidden');
+        loadMarketDisplay(type);
+    }, 500);
 };
 
 // PROFESSIONAL IMAGE COMPRESSION (PRO VERSION)
@@ -417,65 +393,50 @@ async function compressImage(file, quality = 0.5, maxWidth = 500) {
             img.src = event.target.result;
             img.onload = () => {
                 const canvas = document.createElement('canvas');
-                let width = img.width;
-                let height = img.height;
-                
-                if (width > maxWidth) {
-                    height = Math.floor(height * (maxWidth / width));
-                    width = maxWidth;
-                }
-                
-                canvas.width = width;
-                canvas.height = height;
+                const scale = maxWidth / img.width;
+                canvas.width = maxWidth;
+                canvas.height = img.height * scale;
                 const ctx = canvas.getContext('2d');
                 ctx.imageSmoothingEnabled = true;
                 ctx.imageSmoothingQuality = 'high';
-                ctx.drawImage(img, 0, 0, width, height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                 canvas.toBlob((blob) => {
                     if (blob) resolve(blob);
                     else reject(new Error('Compression Error'));
                 }, 'image/jpeg', quality);
             };
-            img.onerror = reject;
         };
     });
 }
 
 window.loadMarketDisplay = async function(filterType = 'items') {
     const grid = document.getElementById('market-grid');
-    if (!grid) return;
-    
     grid.innerHTML = "<p class='text-slate-400 italic text-xs animate-pulse'>Fetching listings...</p>";
 
-    try {
-        const snap = await db.collection('Marketplace').where('type', '==', filterType).orderBy('timestamp', 'desc').get();
-        grid.innerHTML = snap.empty ? `<p class='col-span-2 text-center text-slate-300 py-10 italic'>No ${filterType} yet.</p>` : "";
+    const snap = await db.collection('Marketplace').where('type', '==', filterType).orderBy('timestamp', 'desc').get();
+    grid.innerHTML = snap.empty ? `<p class='col-span-2 text-center text-slate-300 py-10 italic'>No ${filterType} yet.</p>` : "";
 
-        snap.forEach(doc => {
-            const d = doc.data();
-            const cleanPhone = d.phone.startsWith('0') ? d.phone.substring(1) : d.phone;
+    snap.forEach(doc => {
+        const d = doc.data();
+        const cleanPhone = d.phone.startsWith('0') ? d.phone.substring(1) : d.phone;
 
-            grid.innerHTML += `
-                <div class="glass-card overflow-hidden animate-fade-in group flex flex-col h-full border border-white shadow-sm">
-                    <div class="relative">
-                        <img src="${d.image}" class="w-full h-32 object-cover" loading="lazy" onerror="this.src='https://ui-avatars.com/api/?name=Hub&background=10b981&color=fff'">
-                        <span class="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-[9px] font-black text-emerald-600 shadow-sm">₦${Number(d.price).toLocaleString()}</span>
-                        <div class="absolute top-2 left-2 bg-emerald-600 text-white text-[7px] font-black px-2 py-1 rounded-lg shadow-lg uppercase">${d.negotiable || 'Fixed'}</div>
-                    </div>
-                    <div class="p-3 flex-1 flex flex-col">
-                        <p class="font-bold text-xs truncate italic text-slate-800">${d.name}</p>
-                        <div class="grid grid-cols-2 gap-2 mt-3">
-                            <a href="https://wa.me/234${cleanPhone}?text=Hi, I saw your ${d.name} on SLIT-HUB" target="_blank" class="flex items-center justify-center bg-green-500 text-white p-2 rounded-xl active:scale-95 transition-all"><i class="fa-brands fa-whatsapp text-sm"></i></a>
-                            <a href="tel:+234${cleanPhone}" class="flex items-center justify-center bg-blue-500 text-white p-2 rounded-xl active:scale-95 transition-all"><i class="fa-solid fa-phone text-sm"></i></a>
-                        </div>
+        grid.innerHTML += `
+            <div class="glass-card overflow-hidden animate-fade-in group flex flex-col h-full border border-white shadow-sm">
+                <div class="relative">
+                    <img src="${d.image}" class="w-full h-32 object-cover" loading="lazy">
+                    <span class="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-[9px] font-black text-emerald-600 shadow-sm">₦${Number(d.price).toLocaleString()}</span>
+                    <div class="absolute top-2 left-2 bg-emerald-600 text-white text-[7px] font-black px-2 py-1 rounded-lg shadow-lg uppercase">${d.negotiable || 'Fixed'}</div>
+                </div>
+                <div class="p-3 flex-1 flex flex-col">
+                    <p class="font-bold text-xs truncate italic text-slate-800">${d.name}</p>
+                    <div class="grid grid-cols-2 gap-2 mt-3">
+                        <a href="https://wa.me/234${cleanPhone}?text=Hi, I saw your ${d.name} on SLIT-HUB" target="_blank" class="flex items-center justify-center bg-green-500 text-white p-2 rounded-xl active:scale-95 transition-all"><i class="fa-brands fa-whatsapp text-sm"></i></a>
+                        <a href="tel:+234${cleanPhone}" class="flex items-center justify-center bg-blue-500 text-white p-2 rounded-xl active:scale-95 transition-all"><i class="fa-solid fa-phone text-sm"></i></a>
                     </div>
                 </div>
-            `;
-        });
-    } catch (error) {
-        console.error("Error loading marketplace:", error);
-        grid.innerHTML = "<p class='col-span-2 text-center text-red-500 py-10 italic'>Error loading listings. Please refresh.</p>";
-    }
+            </div>
+        `;
+    });
 };
 
 function renderAcademics() {
