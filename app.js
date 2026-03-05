@@ -124,10 +124,10 @@ window.processAcademicPost = async function() {
     if(file) {
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('upload_preset', 'slithub_preset');
+        // UPDATED: Using 'SLIT-HUB' to match your dashboard
+        formData.append('upload_preset', 'SLIT-HUB');
         
         try {
-            // Updated with correct Cloud Name: ddm87a9p2
             const res = await fetch("https://api.cloudinary.com/v1_1/ddm87a9p2/auto/upload", {
                 method: 'POST',
                 body: formData
@@ -331,15 +331,14 @@ window.processMarketPost = async function() {
 
     if(file) {
         try {
-            // Updated compression: Quality set to 0.6 and max width 600 for faster mobile performance
             const compressedBlob = await compressImage(file, 0.6);
             btn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up animate-bounce"></i> UPLOADING...`;
 
             const formData = new FormData();
             formData.append('file', compressedBlob);
-            formData.append('upload_preset', 'slithub_preset'); 
+            // UPDATED: Using 'SLIT-HUB' to match your dashboard
+            formData.append('upload_preset', 'SLIT-HUB'); 
             
-            // Updated with correct Cloud Name: ddm87a9p2
             const res = await fetch("https://api.cloudinary.com/v1_1/ddm87a9p2/image/upload", {
                 method: 'POST',
                 body: formData
