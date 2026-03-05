@@ -135,7 +135,8 @@ window.processAcademicPost = async function() {
             formData.append('file', uploadBlob);
             formData.append('upload_preset', 'SLIT-HUB');
             
-            const res = await fetch("https://api.cloudinary.com/v1_1/ddm87a9p2/auto/upload", {
+            // FIX: Using dedicated image endpoint for Unsigned uploads
+            const res = await fetch("https://api.cloudinary.com/v1_1/ddm87a9p2/image/upload", {
                 method: 'POST',
                 body: formData
             });
@@ -350,6 +351,7 @@ window.processMarketPost = async function() {
             formData.append('file', compressedBlob);
             formData.append('upload_preset', 'SLIT-HUB'); 
             
+            // FIX: Using dedicated image endpoint for Unsigned uploads
             const res = await fetch("https://api.cloudinary.com/v1_1/ddm87a9p2/image/upload", {
                 method: 'POST',
                 body: formData
