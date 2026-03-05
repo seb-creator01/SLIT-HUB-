@@ -259,7 +259,7 @@ async function loadVerifiedGroups() {
 }
 
 // ==========================================
-// MARKETPLACE ENGINE
+// MARKETPLACE ENGINE (OPTIMIZED)
 // ==========================================
 
 window.openMarketModal = function() {
@@ -326,23 +326,28 @@ window.processMarketPost = async function() {
 
     if(file) {
         try {
-            const compressedFile = await compressImage(file);
+            // Updated compression: Quality set to 0.6 and max width 600 for faster mobile performance
+            const compressedBlob = await compressImage(file, 0.6);
             btn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up animate-bounce"></i> UPLOADING...`;
 
             const formData = new FormData();
-            formData.append('file', compressedFile);
+            formData.append('file', compressedBlob);
             formData.append('upload_preset', 'slithub_preset'); 
             
             const res = await fetch("https://api.cloudinary.com/v1_1/dxt8v0h1u/image/upload", {
                 method: 'POST',
                 body: formData
             });
+
+            if (!res.ok) throw new Error('Cloudinary Upload Failed');
+
             const cloudData = await res.json();
             imageUrl = cloudData.secure_url;
         } catch (err) {
+            console.error("Upload Error:", err);
             btn.innerText = "RETRY POST";
             btn.disabled = false;
-            return alert("Upload failed!");
+            return alert("Upload failed! Check your connection.");
         }
     }
 
@@ -361,22 +366,27 @@ window.processMarketPost = async function() {
     }, 800);
 };
 
-async function compressImage(file) {
-    return new Promise((resolve) => {
+// Optimized Image Compression Function
+async function compressImage(file, quality = 0.6) {
+    return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
+        reader.onerror = reject;
         reader.onload = (event) => {
             const img = new Image();
             img.src = event.target.result;
             img.onload = () => {
                 const canvas = document.createElement('canvas');
-                const MAX_WIDTH = 800; 
+                const MAX_WIDTH = 600; 
                 const scaleSize = MAX_WIDTH / img.width;
                 canvas.width = MAX_WIDTH;
                 canvas.height = img.height * scaleSize;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.7);
+                canvas.toBlob((blob) => {
+                    if (blob) resolve(blob);
+                    else reject(new Error('Compression Error'));
+                }, 'image/jpeg', quality);
             };
         };
     });
@@ -397,7 +407,7 @@ window.loadMarketDisplay = async function(filterType = 'items') {
         grid.innerHTML += `
             <div class="glass-card overflow-hidden animate-fade-in group flex flex-col h-full border border-white shadow-sm">
                 <div class="relative">
-                    <img src="${d.image}" class="w-full h-32 object-cover">
+                    <img src="${d.image}" class="w-full h-32 object-cover" loading="lazy">
                     <span class="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-[9px] font-black text-emerald-600 shadow-sm">₦${Number(d.price).toLocaleString()}</span>
                     <div class="absolute top-2 left-2 bg-emerald-600 text-white text-[7px] font-black px-2 py-1 rounded-lg shadow-lg uppercase">${d.negotiable || 'Fixed'}</div>
                 </div>
