@@ -1,20 +1,26 @@
 import { DEPARTMENTS, EXECUTIVES, STUDY_CATEGORIES, UI_CONFIG } from './data.js';
 
 // ============================
-// SIMPLE STORAGE USING LOCALSTORAGE
+// FIREBASE CONFIG - EVERYONE SEES SAME DATA
 // ============================
+const firebaseConfig = {
+    apiKey: "AIzaSyAsS...", 
+    authDomain: "slithub-17a41.firebaseapp.com",
+    projectId: "slithub-17a41",
+    storageBucket: "slithub-17a41.appspot.com",
+    messagingSenderId: "1056588267605",
+    appId: "1:1056588267605:web:0786..."
+};
 
-let academicsData = JSON.parse(localStorage.getItem('academics')) || [];
-let marketplaceData = JSON.parse(localStorage.getItem('marketplace')) || [];
-let groupsData = JSON.parse(localStorage.getItem('groups')) || [];
-let broadcastData = localStorage.getItem('broadcast') || "Welcome to SLIT-HUB! 🎓";
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
 
-function saveAcademics() { localStorage.setItem('academics', JSON.stringify(academicsData)); }
-function saveMarketplace() { localStorage.setItem('marketplace', JSON.stringify(marketplaceData)); }
-function saveGroups() { localStorage.setItem('groups', JSON.stringify(groupsData)); }
+// Anonymous login - allows everyone to read/write
+auth.signInAnonymously().catch(err => console.log("Auth error:", err));
 
 // ============================
-// CLOUDINARY UPLOAD (WORKS FOR BOTH IMAGES AND PDFS)
+// CLOUDINARY UPLOAD (WORKS FOR IMAGES AND PDFS)
 // ============================
 const CLOUDINARY_UPLOAD_PRESET = "sebastian_preset";
 
@@ -25,7 +31,6 @@ async function uploadFile(file) {
     formData.append('file', file);
     formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
     
-    // Use different endpoint for PDFs vs Images
     const uploadUrl = isPDF 
         ? "https://api.cloudinary.com/v1_1/dwsc9eumf/raw/upload"
         : "https://api.cloudinary.com/v1_1/dwsc9eumf/image/upload";
@@ -97,7 +102,7 @@ document.getElementById('admin-trigger').onclick = () => {
 };
 
 // ============================
-// ACADEMICS
+// ACADEMICS - SHARED DATABASE
 // ============================
 window.openAcademicModal = function() {
     const isRep = confirm("Are you a Course Rep? 🎓\nOnly Reps can post Schedules, Tests, and Exams.");
@@ -172,76 +177,85 @@ window.processAcademicPost = async function() {
         }
     }
 
-    const newPost = {
-        id: Date.now(),
-        type, level, title, desc, fileUrl,
-        fileName: file ? file.name : null,
-        fileType: file ? file.type : null,
-        timestamp: new Date().toISOString()
-    };
-    
-    academicsData.unshift(newPost);
-    saveAcademics();
+    try {
+        await db.collection('Academics').add({
+            type, level, title, desc, fileUrl,
+            fileName: file ? file.name : null,
+            fileType: file ? file.type : null,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
 
-    btn.innerHTML = "SUCCESS! 🎉";
-    setTimeout(() => {
-        document.getElementById('modal-overlay').classList.add('hidden');
-        loadAcademicMaterials();
-    }, 500);
+        btn.innerHTML = "SUCCESS! 🎉";
+        setTimeout(() => {
+            document.getElementById('modal-overlay').classList.add('hidden');
+            loadAcademicMaterials();
+        }, 500);
+    } catch(err) {
+        alert("Database error: " + err.message);
+        btn.disabled = false;
+        btn.innerHTML = "RETRY PUBLISH";
+    }
 };
 
 window.loadAcademicMaterials = async function(levelFilter='all'){
     const container = document.getElementById('academic-list');
     if(!container) return;
-    
-    let data = academicsData;
-    if(levelFilter !== 'all') {
-        data = academicsData.filter(item => item.level === levelFilter);
-    }
-    
-    if(data.length === 0) {
-        container.innerHTML = "<p class='text-center text-slate-300 py-10 italic'>No updates.</p>";
-        return;
-    }
-    
-    container.innerHTML = "";
-    data.forEach(d => {
-        const icon = d.type==='exam'?'🎓':d.type==='test'?'📝':d.type==='lecture'?'📅':'📚';
-        const isPDF = d.fileType === 'application/pdf' || (d.fileUrl && d.fileUrl.includes('raw/upload'));
+    container.innerHTML = "<p class='text-center p-10 animate-pulse text-xs text-slate-400'>Loading...</p>";
+
+    try {
+        let query = db.collection('Academics').orderBy('timestamp', 'desc');
+        if(levelFilter !== 'all') {
+            query = query.where('level', '==', levelFilter);
+        }
+
+        const snap = await query.get();
         
-        let fileHtml = '';
-        if(d.fileUrl) {
-            if(isPDF) {
-                // Both VIEW ONLINE and DOWNLOAD options for PDFs
-                fileHtml = `
-                    <div class="flex gap-2 mt-3">
-                        <a href="${d.fileUrl}" target="_blank" class="flex-1 text-center bg-emerald-600 text-white px-3 py-2 rounded-xl text-[10px] font-black">📖 OPEN PDF</a>
-                        <a href="${d.fileUrl}" download="${d.fileName || 'document.pdf'}" class="flex-1 text-center bg-slate-600 text-white px-3 py-2 rounded-xl text-[10px] font-black">📥 DOWNLOAD</a>
+        if(snap.empty) {
+            container.innerHTML = "<p class='text-center text-slate-300 py-10 italic'>No updates.</p>";
+        } else {
+            container.innerHTML = "";
+            snap.forEach(doc => {
+                const d = doc.data();
+                const icon = d.type==='exam'?'🎓':d.type==='test'?'📝':d.type==='lecture'?'📅':'📚';
+                const isPDF = d.fileType === 'application/pdf' || (d.fileUrl && d.fileUrl.includes('raw/upload'));
+                
+                let fileHtml = '';
+                if(d.fileUrl) {
+                    if(isPDF) {
+                        fileHtml = `
+                            <div class="flex gap-2 mt-3">
+                                <a href="${d.fileUrl}" target="_blank" class="flex-1 text-center bg-emerald-600 text-white px-3 py-2 rounded-xl text-[10px] font-black">📖 OPEN PDF</a>
+                                <a href="${d.fileUrl}" download="${d.fileName || 'document.pdf'}" class="flex-1 text-center bg-slate-600 text-white px-3 py-2 rounded-xl text-[10px] font-black">📥 DOWNLOAD</a>
+                            </div>
+                        `;
+                    } else {
+                        fileHtml = `<a href="${d.fileUrl}" target="_blank" class="inline-block mt-3 text-emerald-600 font-black text-[9px] underline">🖼️ VIEW IMAGE <i class="fa-solid fa-up-right-from-square"></i></a>`;
+                    }
+                }
+                
+                container.innerHTML += `
+                    <div class="glass-card p-4 mb-3 border-l-4 border-emerald-500 animate-fade-in">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="bg-emerald-100 text-emerald-700 text-[8px] font-black px-2 py-1 rounded-md uppercase">${d.level}L</span>
+                            <span class="text-lg">${icon}</span>
+                        </div>
+                        <h4 class="font-bold text-sm text-slate-800">${escapeHtml(d.title)}</h4>
+                        <p class="text-[11px] text-slate-500 mt-1">${escapeHtml(d.desc)}</p>
+                        ${fileHtml}
                     </div>
                 `;
-            } else {
-                fileHtml = `<a href="${d.fileUrl}" target="_blank" class="inline-block mt-3 text-emerald-600 font-black text-[9px] underline">🖼️ VIEW IMAGE <i class="fa-solid fa-up-right-from-square"></i></a>`;
-            }
+            });
         }
-        
-        container.innerHTML += `
-            <div class="glass-card p-4 mb-3 border-l-4 border-emerald-500 animate-fade-in">
-                <div class="flex justify-between items-start mb-2">
-                    <span class="bg-emerald-100 text-emerald-700 text-[8px] font-black px-2 py-1 rounded-md uppercase">${d.level}L</span>
-                    <span class="text-lg">${icon}</span>
-                </div>
-                <h4 class="font-bold text-sm text-slate-800">${escapeHtml(d.title)}</h4>
-                <p class="text-[11px] text-slate-500 mt-1">${escapeHtml(d.desc)}</p>
-                ${fileHtml}
-            </div>
-        `;
-    });
+    } catch(e) {
+        console.error(e);
+        container.innerHTML = "<p class='text-center text-red-500 py-10'>Error loading data</p>";
+    }
 };
 
 function renderAcademics() {}
 
 // ============================
-// STUDY GROUPS
+// STUDY GROUPS - SHARED DATABASE
 // ============================
 window.openGroupModal = function(){
     const modal = document.getElementById('modal-overlay');
@@ -252,23 +266,22 @@ window.openGroupModal = function(){
         <h3 class="text-xl font-black mb-4 italic text-emerald-600">New Study Group 📚</h3>
         <input type="text" id="group-name" placeholder="Course Name" class="w-full p-4 bg-slate-50 rounded-2xl mb-3 border-none outline-none">
         <input type="url" id="group-link" placeholder="WhatsApp Link" class="w-full p-4 bg-slate-50 rounded-2xl mb-4 border-none outline-none">
-        <button onclick="submitToFirebase()" class="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black btn-glow">SUBMIT</button>
+        <button onclick="submitGroup()" class="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black btn-glow">SUBMIT</button>
     `;
 };
 
 const studyBtn = document.getElementById('btn-new-group');
 if(studyBtn) studyBtn.onclick = window.openGroupModal;
 
-window.submitToFirebase = async()=>{
+window.submitGroup = async()=>{
     const name = document.getElementById('group-name').value;
     const link = document.getElementById('group-link').value;
     if(!name||!link) return alert("Fill all fields!");
 
-    groupsData.push({
-        id: Date.now(),
-        name, link, status:'pending'
+    await db.collection('StudyGroups').add({
+        name, link, status:'pending',
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
     });
-    saveGroups();
 
     alert("Sent! Junior will verify 🚀");
     document.getElementById('modal-overlay').classList.add('hidden');
@@ -276,24 +289,21 @@ window.submitToFirebase = async()=>{
 
 async function loadAdminPanel(){
     const list = document.getElementById('admin-verification-list');
-    const pending = groupsData.filter(g => g.status === 'pending');
-    list.innerHTML = pending.length === 0 ? "<p class='text-slate-500 italic'>No pending groups.</p>" : "";
-    pending.forEach(g => {
+    const snap = await db.collection('StudyGroups').where('status','==','pending').get();
+    list.innerHTML = snap.empty ? "<p class='text-slate-500 italic'>No pending groups.</p>" : "";
+    snap.forEach(doc => {
+        const d = doc.data();
         list.innerHTML += `
             <div class="border p-4 rounded-2xl flex justify-between items-center bg-slate-800/50 mb-2">
-                <span class="text-white font-bold">${escapeHtml(g.name)}</span>
-                <button onclick="verifyGroup('${g.id}')" class="text-emerald-400 font-black underline">APPROVE</button>
+                <span class="text-white font-bold">${escapeHtml(d.name)}</span>
+                <button onclick="verifyGroup('${doc.id}')" class="text-emerald-400 font-black underline">APPROVE</button>
             </div>
         `;
     });
 }
 
 window.verifyGroup = async (id)=>{
-    const group = groupsData.find(g => g.id == id);
-    if(group) {
-        group.status = 'verified';
-        saveGroups();
-    }
+    await db.collection('StudyGroups').doc(id).update({status:'verified'});
     alert("Group is now Live! ✅");
     loadAdminPanel();
     loadVerifiedGroups();
@@ -302,20 +312,21 @@ window.verifyGroup = async (id)=>{
 async function loadVerifiedGroups(){
     const list = document.getElementById('groups-list');
     if(!list) return;
-    const verified = groupsData.filter(g => g.status === 'verified');
+    const snap = await db.collection('StudyGroups').where('status','==','verified').get();
     list.innerHTML = "";
-    verified.forEach(g => {
+    snap.forEach(doc => {
+        const d = doc.data();
         list.innerHTML += `
             <div class="glass-card p-4 flex justify-between items-center border-l-4 border-emerald-50">
-                <p class="font-bold italic">${escapeHtml(g.name)}</p>
-                <a href="${g.link}" target="_blank" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-[10px] font-black italic">JOIN</a>
+                <p class="font-bold italic">${escapeHtml(d.name)}</p>
+                <a href="${d.link}" target="_blank" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-[10px] font-black italic">JOIN</a>
             </div>
         `;
     });
 }
 
 // ============================
-// MARKETPLACE
+// MARKETPLACE - SHARED DATABASE
 // ============================
 window.openMarketModal = function(){
     const modal = document.getElementById('modal-overlay');
@@ -389,15 +400,11 @@ window.processMarketPost = async function(){
         }
     }
 
-    const newItem = {
-        id: Date.now(),
-        name, price:Number(price), type, phone, negotiable, image:imageUrl,
-        rating:5.0,
-        timestamp: new Date().toISOString()
-    };
-    
-    marketplaceData.unshift(newItem);
-    saveMarketplace();
+    await db.collection('Marketplace').add({
+        name, price: Number(price), type, phone, negotiable, image: imageUrl,
+        rating: 5.0,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
 
     btn.innerHTML = "DONE! 🚀";
     setTimeout(() => {
@@ -416,8 +423,10 @@ document.getElementById('btn-broadcast')?.addEventListener('click', async()=>{
     const msg = prompt("Enter broadcast message:");
     if(!msg) return alert("Cannot be empty!");
 
-    broadcastData = msg;
-    localStorage.setItem('broadcast', msg);
+    await db.collection('Broadcasts').add({
+        message: msg,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
     alert("Broadcast sent 🚀");
     loadBroadcastMessage();
 });
@@ -425,7 +434,19 @@ document.getElementById('btn-broadcast')?.addEventListener('click', async()=>{
 async function loadBroadcastMessage() {
     const msgContainer = document.getElementById('broadcast-msg');
     if (!msgContainer) return;
-    msgContainer.innerText = broadcastData;
+
+    const snap = await db.collection('Broadcasts')
+        .orderBy('timestamp', 'desc')
+        .limit(1)
+        .get();
+
+    if (snap.empty) {
+        msgContainer.innerText = "No announcements yet.";
+    } else {
+        snap.forEach(doc => {
+            msgContainer.innerText = doc.data().message;
+        });
+    }
 }
 
 // ============================
@@ -435,26 +456,36 @@ window.loadMarketDisplay = async function(type='items') {
     const grid = document.getElementById('market-grid');
     if (!grid) return;
 
-    const filtered = marketplaceData.filter(item => item.type === type);
-    
-    if(filtered.length === 0) {
-        grid.innerHTML = "<p class='text-center py-10 text-slate-400 italic'>No posts yet.</p>";
-    } else {
-        grid.innerHTML = "";
-        filtered.forEach(data => {
-            grid.innerHTML += `
-                <div class="glass-card p-4 border-l-4 border-emerald-500 animate-fade-in">
-                    <img src="${data.image}" class="w-full h-32 object-cover rounded-xl mb-2" onerror="this.src='https://ui-avatars.com/api/?name=Hub&background=10b981&color=fff'">
-                    <h4 class="font-bold text-sm text-slate-800">${escapeHtml(data.name)}</h4>
-                    <p class="text-xs text-slate-500 mt-1">₦${data.price} | ${data.negotiable}</p>
-                    <p class="text-[10px] italic text-slate-400 mt-1">Call: ${data.phone}</p>
-                </div>
-            `;
-        });
-    }
+    grid.innerHTML = "<p class='text-center py-10 text-slate-400 animate-pulse'>Loading...</p>";
 
-    const countEl = document.getElementById('market-count');
-    if(countEl) countEl.innerText = filtered.length;
+    try {
+        const snap = await db.collection('Marketplace')
+            .where('type', '==', type)
+            .orderBy('timestamp', 'desc')
+            .get();
+
+        if(snap.empty) {
+            grid.innerHTML = "<p class='text-center py-10 text-slate-400 italic'>No posts yet.</p>";
+        } else {
+            grid.innerHTML = "";
+            snap.forEach(doc => {
+                const data = doc.data();
+                grid.innerHTML += `
+                    <div class="glass-card p-4 border-l-4 border-emerald-500 animate-fade-in">
+                        <img src="${data.image}" class="w-full h-32 object-cover rounded-xl mb-2" onerror="this.src='https://ui-avatars.com/api/?name=Hub&background=10b981&color=fff'">
+                        <h4 class="font-bold text-sm text-slate-800">${escapeHtml(data.name)}</h4>
+                        <p class="text-xs text-slate-500 mt-1">₦${data.price} | ${data.negotiable}</p>
+                        <p class="text-[10px] italic text-slate-400 mt-1">Call: ${data.phone}</p>
+                    </div>
+                `;
+            });
+        }
+
+        const countEl = document.getElementById('market-count');
+        if(countEl) countEl.innerText = snap.size;
+    } catch(e) {
+        grid.innerHTML = "<p class='text-center text-red-500 py-10'>Error loading data</p>";
+    }
 };
 
 function escapeHtml(str) {
@@ -477,6 +508,9 @@ document.getElementById('close-modal')?.addEventListener('click', () => {
     document.getElementById('modal-overlay').classList.add('hidden');
 });
 
+// ============================
+// INITIAL LOADS
+// ============================
 loadAcademicMaterials();
 loadVerifiedGroups();
 loadMarketDisplay('items');
