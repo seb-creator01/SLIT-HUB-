@@ -1,7 +1,7 @@
 import { DEPARTMENTS, EXECUTIVES, STUDY_CATEGORIES, UI_CONFIG } from './data.js';
 
 // ============================
-// FIREBASE INIT - MATCHING YOUR WORKING PROJECT
+// FIREBASE CONFIG
 // ============================
 const firebaseConfig = {
     apiKey: "AIzaSyAsS...", 
@@ -12,75 +12,40 @@ const firebaseConfig = {
     appId: "1:1056588267605:web:0786..."
 };
 
-// Initialize Firebase the same way as your working project
+// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+const auth = firebase.auth();
 
-// Cloudinary Config - EXACTLY LIKE YOUR WORKING PROJECT
+// Anonymous login - allows writes without login page
+auth.signInAnonymously().catch(err => console.log("Auth error:", err));
+
+// ============================
+// CLOUDINARY CONFIG (WORKING FROM YOUR OTHER PROJECT)
+// ============================
 const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dwsc9eumf/image/upload";
 const CLOUDINARY_UPLOAD_PRESET = "sebastian_preset";
 
 // ============================
-// HELPER: UPLOAD FILE (EXACTLY LIKE YOUR WORKING PROJECT)
+// UPLOAD FUNCTION (EXACTLY LIKE YOUR WORKING PROJECT)
 // ============================
 async function uploadFile(file) {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-            
-            const res = await fetch(CLOUDINARY_URL, { 
-                method: 'POST', 
-                body: formData 
-            });
-            
-            const data = await res.json();
-            
-            if (res.ok) {
-                resolve(data.secure_url);
-            } else {
-                reject(data.error?.message || "Upload failed");
-            }
-        } catch (err) {
-            reject(err.message);
-        }
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    
+    const res = await fetch(CLOUDINARY_URL, { 
+        method: 'POST', 
+        body: formData 
     });
-}
-
-// ============================
-// COMPRESS IMAGE FUNCTION (OPTIONAL - FOR LARGE FILES)
-// ============================
-async function compressImage(file, maxWidth = 800, quality = 0.7) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = (e) => {
-            const img = new Image();
-            img.src = e.target.result;
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                let width = img.width;
-                let height = img.height;
-                
-                if (width > maxWidth) {
-                    height = (height * maxWidth) / width;
-                    width = maxWidth;
-                }
-                
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, width, height);
-                
-                canvas.toBlob((blob) => {
-                    resolve(blob);
-                }, 'image/jpeg', quality);
-            };
-            img.onerror = reject;
-        };
-        reader.onerror = reject;
-    });
+    
+    const data = await res.json();
+    
+    if (!res.ok) {
+        throw new Error(data.error?.message || "Upload failed");
+    }
+    
+    return data.secure_url;
 }
 
 // ============================
@@ -208,23 +173,7 @@ window.processAcademicPost = async function() {
     
     if(file){
         try {
-            // Use the same upload method as your working project
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-            
-            const res = await fetch(CLOUDINARY_URL, { 
-                method: 'POST', 
-                body: formData 
-            });
-            
-            const data = await res.json();
-            
-            if (res.ok) {
-                fileUrl = data.secure_url;
-            } else {
-                throw new Error(data.error?.message || "Upload failed");
-            }
+            fileUrl = await uploadFile(file);
         } catch(err) {
             alert("Upload failed: " + err.message);
             btn.disabled = false;
@@ -302,7 +251,7 @@ window.loadAcademicMaterials = async function(levelFilter='all'){
 function renderAcademics() {}
 
 // ============================
-// STUDY GROUPS (Keep your existing code)
+// STUDY GROUPS
 // ============================
 window.openGroupModal = function(){
     const modal = document.getElementById('modal-overlay');
@@ -437,23 +386,7 @@ window.processMarketPost = async function(){
 
     if(file){
         try {
-            // Use the same upload method as your working project
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-            
-            const res = await fetch(CLOUDINARY_URL, { 
-                method: 'POST', 
-                body: formData 
-            });
-            
-            const data = await res.json();
-            
-            if (res.ok) {
-                imageUrl = data.secure_url;
-            } else {
-                throw new Error(data.error?.message || "Upload failed");
-            }
+            imageUrl = await uploadFile(file);
         } catch(err) {
             alert("Upload failed: " + err.message);
             btn.disabled = false;
