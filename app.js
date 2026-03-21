@@ -12,10 +12,11 @@ const firebaseConfig = {
     appId: "1:1056588267605:web:0786..."
 };
 
-// Add error catching for Firebase
 try {
     if(typeof firebase !== 'undefined') {
-        firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
         console.log("✅ Firebase initialized");
     } else {
         console.error("❌ Firebase not loaded!");
@@ -326,7 +327,7 @@ async function loadVerifiedGroups(){
 }
 
 // ============================
-// MARKETPLACE
+// MARKETPLACE - FIXED VERSION
 // ============================
 window.openMarketModal = function(){
     const modal = document.getElementById('modal-overlay');
@@ -353,10 +354,10 @@ window.openMarketModal = function(){
                 </select>
                 <div class="flex items-center gap-2 bg-slate-50 p-1 rounded-2xl border border-slate-100">
                     <span class="pl-4 font-bold text-slate-400">+234</span>
-                    <input type="number" id="seller-phone" placeholder="805 000 0000" class="w-full p-4 bg-transparent border-none outline-none">
+                    <input type="tel" id="seller-phone" placeholder="805 000 0000" class="w-full p-4 bg-transparent border-none outline-none">
                 </div>
                 <div class="relative group">
-                    <input type="file" id="item-image" class="hidden" accept="image/*" onchange="document.getElementById('file-label').innerText = 'Photo Selected! ✅'">
+                    <input type="file" id="item-image" class="hidden" accept="image/*" onchange="handleFileSelect(this)">
                     <label for="item-image" id="file-label" class="block w-full p-6 border-2 border-dashed border-emerald-200 rounded-2xl text-center text-emerald-600 font-bold cursor-pointer bg-emerald-50/30">
                         <i class="fa-solid fa-camera-retro text-2xl mb-2"></i><br>Tap to Upload Photo
                     </label>
@@ -365,6 +366,15 @@ window.openMarketModal = function(){
             </div>
         </div>
     `;
+};
+
+// Handle file selection
+window.handleFileSelect = function(input) {
+    const label = document.getElementById('file-label');
+    if(input.files && input.files[0]) {
+        const fileName = input.files[0].name;
+        label.innerHTML = `<i class="fa-solid fa-check-circle text-2xl mb-2"></i><br>${fileName.substring(0, 20)} ✅`;
+    }
 };
 
 const postAdBtn = document.getElementById('btn-post-ad');
@@ -377,52 +387,94 @@ if(postAdBtn) {
 window.processMarketPost = async function(){
     const btn = document.getElementById('market-submit-btn');
     const fileInput = document.getElementById('item-image');
-    const file = fileInput.files[0];
+    const file = fileInput ? fileInput.files[0] : null;
     const name = document.getElementById('item-name').value;
     const price = document.getElementById('item-price').value;
     const type = document.getElementById('item-type').value;
     const phone = document.getElementById('seller-phone').value;
     const negotiable = document.getElementById('item-negotiable').value;
 
-    if(!name||!price||!phone) return alert("Fill all fields!");
+    if(!name || !price || !phone) {
+        alert("Please fill all fields!");
+        return;
+    }
 
-    btn.innerHTML = `<i class="fa-solid fa-bolt animate-pulse"></i> OPTIMIZING...`;
+    btn.innerHTML = `<i class="fa-solid fa-bolt animate-pulse"></i> UPLOADING...`;
     btn.disabled = true;
 
     let imageUrl = "https://ui-avatars.com/api/?name=Hub&background=10b981&color=fff";
 
     if(file){
-        try{
-            const compressedBlob = await compressImage(file,0.5,500);
+        try {
+            console.log("Starting image upload...");
+            
+            // Compress image
+            const compressedBlob = await compressImage(file, 0.7, 800);
+            console.log("Image compressed, size:", compressedBlob.size);
+            
             const formData = new FormData();
             formData.append('file', compressedBlob);
-            formData.append('upload_preset','SLIT-HUB');
-
+            formData.append('upload_preset', 'SLIT-HUB');
+            
+            console.log("Uploading to Cloudinary...");
             const res = await fetch("https://api.cloudinary.com/v1_1/ddm87a9p2/image/upload", {
-                method:'POST', body: formData
+                method: 'POST', 
+                body: formData
             });
+            
             const data = await res.json();
-            if(!res.ok) throw new Error(data.error?.message || "Cloudinary failed");
+            console.log("Cloudinary response:", data);
+            
+            if(!res.ok) {
+                throw new Error(data.error?.message || "Cloudinary upload failed");
+            }
+            
             imageUrl = data.secure_url;
-        } catch(err){
+            console.log("Upload successful! URL:", imageUrl);
+            
+        } catch(err) {
             console.error("Upload Error:", err);
-            btn.innerText="RETRY POST";
-            btn.disabled=false;
-            return alert("Upload failed. Check network!");
+            btn.innerText = "RETRY POST";
+            btn.disabled = false;
+            alert("Upload failed: " + err.message + "\n\nCheck Cloudinary preset 'SLIT-HUB' exists.");
+            return;
         }
+    } else {
+        console.log("No image selected, using default avatar");
     }
 
-    await db.collection('Marketplace').add({
-        name, price:Number(price), type, phone, negotiable, image:imageUrl,
-        rating:5.0,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    btn.innerText="DONE! 🚀";
-    setTimeout(()=>{
-        document.getElementById('modal-overlay').classList.add('hidden');
-        loadMarketDisplay(type);
-    },500);
+    try {
+        btn.innerHTML = `<i class="fa-solid fa-bolt animate-pulse"></i> SAVING...`;
+        
+        await db.collection('Marketplace').add({
+            name, 
+            price: Number(price), 
+            type, 
+            phone, 
+            negotiable, 
+            image: imageUrl,
+            rating: 5.0,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        console.log("Item saved to Firebase!");
+        btn.innerHTML = "DONE! 🚀";
+        
+        setTimeout(() => {
+            document.getElementById('modal-overlay').classList.add('hidden');
+            loadMarketDisplay(type);
+            // Reset form
+            if(fileInput) fileInput.value = '';
+            const label = document.getElementById('file-label');
+            if(label) label.innerHTML = `<i class="fa-solid fa-camera-retro text-2xl mb-2"></i><br>Tap to Upload Photo`;
+        }, 500);
+        
+    } catch(err) {
+        console.error("Firebase save error:", err);
+        btn.innerHTML = "RETRY POST";
+        btn.disabled = false;
+        alert("Failed to save to database: " + err.message);
+    }
 };
 
 // ============================
@@ -483,19 +535,22 @@ window.loadMarketDisplay = async function(type='items') {
             .orderBy('timestamp', 'desc')
             .get();
 
-        grid.innerHTML = snap.empty ? "<p class='text-center py-10 text-slate-400 italic'>No posts yet.</p>" : "";
-
-        snap.forEach(doc => {
-            const data = doc.data();
-            grid.innerHTML += `
-                <div class="glass-card p-4 border-l-4 border-emerald-500 animate-fade-in">
-                    <img src="${data.image}" class="w-full h-32 object-cover rounded-xl mb-2">
-                    <h4 class="font-bold text-sm text-slate-800">${data.name}</h4>
-                    <p class="text-xs text-slate-500 mt-1">₦${data.price} | ${data.negotiable}</p>
-                    <p class="text-[10px] italic text-slate-400 mt-1">Call: ${data.phone}</p>
-                </div>
-            `;
-        });
+        if(snap.empty) {
+            grid.innerHTML = "<p class='text-center py-10 text-slate-400 italic'>No posts yet.</p>";
+        } else {
+            grid.innerHTML = "";
+            snap.forEach(doc => {
+                const data = doc.data();
+                grid.innerHTML += `
+                    <div class="glass-card p-4 border-l-4 border-emerald-500 animate-fade-in">
+                        <img src="${data.image}" class="w-full h-32 object-cover rounded-xl mb-2" onerror="this.src='https://ui-avatars.com/api/?name=Hub&background=10b981&color=fff'">
+                        <h4 class="font-bold text-sm text-slate-800">${escapeHtml(data.name)}</h4>
+                        <p class="text-xs text-slate-500 mt-1">₦${data.price} | ${data.negotiable}</p>
+                        <p class="text-[10px] italic text-slate-400 mt-1">Call: ${data.phone}</p>
+                    </div>
+                `;
+            });
+        }
 
         // Update market count
         const countEl = document.getElementById('market-count');
@@ -507,6 +562,17 @@ window.loadMarketDisplay = async function(type='items') {
         grid.innerHTML = "<p class='text-center text-red-500 py-10'>Error loading marketplace. Check console.</p>";
     }
 };
+
+// Helper function to escape HTML
+function escapeHtml(str) {
+    if(!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+        if(m === '&') return '&amp;';
+        if(m === '<') return '&lt;';
+        if(m === '>') return '&gt;';
+        return m;
+    });
+}
 
 // ============================
 // LEVEL FILTERS FOR ACADEMICS
@@ -520,7 +586,7 @@ window.filterByLevel = function(level='all') {
 // ============================
 // HELPER: COMPRESS IMAGE
 // ============================
-async function compressImage(file, quality=0.6, maxWidth=800) {
+async function compressImage(file, quality=0.7, maxWidth=800) {
     return new Promise((resolve, reject) => {
         const img = new Image();
         const reader = new FileReader();
@@ -530,11 +596,18 @@ async function compressImage(file, quality=0.6, maxWidth=800) {
 
         img.onload = () => {
             const canvas = document.createElement('canvas');
-            const scale = Math.min(maxWidth / img.width, 1);
-            canvas.width = img.width * scale;
-            canvas.height = img.height * scale;
+            let width = img.width;
+            let height = img.height;
+            
+            if (width > maxWidth) {
+                height = (height * maxWidth) / width;
+                width = maxWidth;
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
             const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0, width, height);
             canvas.toBlob(blob => resolve(blob), 'image/jpeg', quality);
         };
         img.onerror = err => reject(err);
