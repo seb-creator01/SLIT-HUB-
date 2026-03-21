@@ -12,67 +12,55 @@ const firebaseConfig = {
     appId: "1:1056588267605:web:0786..."
 };
 
-try {
-    if(typeof firebase !== 'undefined') {
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        console.log("✅ Firebase initialized");
-    } else {
-        console.error("❌ Firebase not loaded!");
-        alert("Firebase failed to load. Check your internet connection.");
+if(typeof firebase !== 'undefined') {
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
     }
-} catch(e) {
-    console.error("Firebase init error:", e);
-    alert("Firebase error: " + e.message);
+    console.log("✅ Firebase initialized");
 }
 
 const db = firebase.firestore();
+
+// Cloudinary config
+const CLOUDINARY_CLOUD_NAME = "ddm87a9p2";
+const CLOUDINARY_UPLOAD_PRESET = "slit_hub"; // Your preset name
 
 // ============================
 // BOOTUP
 // ============================
 window.addEventListener('DOMContentLoaded', () => {
-    console.log("🚀 DOM Content Loaded - Starting app...");
+    console.log("🚀 Starting app...");
     
-    try {
-        // Hide splash
-        setTimeout(() => {
-            const splash = document.getElementById('splash-screen');
-            if(splash) {
-                splash.style.opacity = '0';
-                setTimeout(() => splash.classList.add('hidden'), 500);
-            }
-        }, 1500);
+    setTimeout(() => {
+        const splash = document.getElementById('splash-screen');
+        if(splash) {
+            splash.style.opacity = '0';
+            setTimeout(() => splash.classList.add('hidden'), 500);
+        }
+    }, 1500);
 
-        // Marketplace filter listeners
-        document.querySelectorAll('.m-filter').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const type = this.getAttribute('data-filter');
-                document.querySelectorAll('.m-filter').forEach(b => b.classList.remove('active', 'bg-white', 'text-emerald-600', 'shadow-sm'));
-                this.classList.add('active', 'bg-white', 'text-emerald-600', 'shadow-sm');
-                loadMarketDisplay(type);
-            });
+    document.querySelectorAll('.m-filter').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const type = this.getAttribute('data-filter');
+            document.querySelectorAll('.m-filter').forEach(b => b.classList.remove('active', 'bg-white', 'text-emerald-600', 'shadow-sm'));
+            this.classList.add('active', 'bg-white', 'text-emerald-600', 'shadow-sm');
+            loadMarketDisplay(type);
         });
+    });
 
-        renderAcademics();
-        loadVerifiedGroups();
-        loadMarketDisplay('items');
-        loadAcademicMaterials();
-        loadBroadcastMessage();
-        
-        console.log("✅ All functions called successfully");
-    } catch(e) {
-        console.error("❌ DOMContentLoaded error:", e);
-        alert("Page load error: " + e.message);
-    }
+    renderAcademics();
+    loadVerifiedGroups();
+    loadMarketDisplay('items');
+    loadAcademicMaterials();
+    loadBroadcastMessage();
+    
+    console.log("✅ App started");
 });
 
 // ============================
 // TAB NAVIGATION
 // ============================
 window.switchTab = function(tabId) {
-    console.log("Switching to tab:", tabId);
     document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
     const target = document.getElementById(`tab-${tabId}`);
     if(target) target.classList.remove('hidden');
@@ -91,18 +79,13 @@ window.switchTab = function(tabId) {
 // ============================
 // ADMIN TRIGGER
 // ============================
-const adminTrigger = document.getElementById('admin-trigger');
-if(adminTrigger) {
-    adminTrigger.onclick = () => {
-        const pass = prompt("Enter Developer Secret 🛡️:");
-        if(pass === "junior123") {
-            window.switchTab('admin');
-            loadAdminPanel();
-        } else alert("Access Denied ❌");
-    };
-} else {
-    console.warn("⚠️ admin-trigger element not found");
-}
+document.getElementById('admin-trigger').onclick = () => {
+    const pass = prompt("Enter Developer Secret 🛡️:");
+    if(pass === "junior123") {
+        window.switchTab('admin');
+        loadAdminPanel();
+    } else alert("Access Denied ❌");
+};
 
 // ============================
 // ACADEMICS
@@ -116,10 +99,6 @@ window.openAcademicModal = function() {
 
     const modal = document.getElementById('modal-overlay');
     const content = document.getElementById('modal-content');
-    if(!modal || !content) {
-        console.error("Modal elements not found");
-        return;
-    }
     modal.classList.remove('hidden');
 
     content.innerHTML = `
@@ -155,6 +134,46 @@ window.openAcademicModal = function() {
     `;
 };
 
+// UPLOAD FUNCTION - Works for Images AND PDFs
+async function uploadToCloudinary(file) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            console.log("📤 Uploading file:", file.name, "Type:", file.type);
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+            
+            // Check if it's a PDF
+            const isPDF = file.type === 'application/pdf';
+            
+            // Use different endpoint for PDFs vs Images
+            const uploadUrl = isPDF 
+                ? `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/raw/upload`
+                : `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+            
+            console.log("📡 Uploading to:", uploadUrl);
+            
+            const response = await fetch(uploadUrl, {
+                method: 'POST',
+                body: formData
+            });
+            
+            const data = await response.json();
+            console.log("✅ Cloudinary response:", data);
+            
+            if (!response.ok) {
+                throw new Error(data.error?.message || "Upload failed");
+            }
+            
+            resolve(data.secure_url);
+        } catch (error) {
+            console.error("❌ Upload error:", error);
+            reject(error);
+        }
+    });
+}
+
 window.processAcademicPost = async function() {
     const btn = document.getElementById('acad-submit-btn');
     const file = document.getElementById('acad-file').files[0];
@@ -165,30 +184,19 @@ window.processAcademicPost = async function() {
 
     if(!title || !desc) return alert("Fill Title & Description!");
 
-    btn.innerHTML = `<i class="fa-solid fa-bolt animate-pulse"></i> PREPARING...`;
+    btn.innerHTML = `<i class="fa-solid fa-bolt animate-pulse"></i> UPLOADING...`;
     btn.disabled = true;
 
     let fileUrl = "";
     if(file){
-        try{
-            let uploadBlob = file;
-            if(file.type.startsWith('image/')) uploadBlob = await compressImage(file,0.5,500);
-
-            const formData = new FormData();
-            formData.append('file', uploadBlob);
-            formData.append('upload_preset', 'SLIT-HUB');
-
-            const res = await fetch("https://api.cloudinary.com/v1_1/ddm87a9p2/image/upload", {
-                method:'POST', body: formData
-            });
-            const data = await res.json();
-            if(!res.ok) throw new Error(data.error?.message || "Cloudinary Failed");
-            fileUrl = data.secure_url;
-        } catch(err){
-            console.error(err);
+        try {
+            fileUrl = await uploadToCloudinary(file);
+            console.log("🎉 Upload successful:", fileUrl);
+        } catch(err) {
+            alert(`Upload failed: ${err.message}\n\nCheck that your Cloudinary preset "${CLOUDINARY_UPLOAD_PRESET}" exists and is set to Unsigned mode.`);
             btn.disabled = false;
             btn.innerText = "RETRY PUBLISH";
-            return alert(`Upload Error: ${err.message}`);
+            return;
         }
     }
 
@@ -205,41 +213,32 @@ window.processAcademicPost = async function() {
 };
 
 window.loadAcademicMaterials = async function(levelFilter='all'){
-    console.log("Loading academic materials...");
     const container = document.getElementById('academic-list');
-    if(!container) {
-        console.warn("academic-list element not found");
-        return;
-    }
+    if(!container) return;
     container.innerHTML = "<p class='text-center p-10 animate-pulse text-xs text-slate-400'>Loading...</p>";
 
-    try {
-        let query = db.collection('Academics').orderBy('timestamp','desc');
-        if(levelFilter!=='all') query = query.where('level','==',levelFilter);
+    let query = db.collection('Academics').orderBy('timestamp','desc');
+    if(levelFilter!=='all') query = query.where('level','==',levelFilter);
 
-        const snap = await query.get();
-        container.innerHTML = snap.empty ? "<p class='text-center text-slate-300 py-10 italic'>No updates.</p>": "";
+    const snap = await query.get();
+    container.innerHTML = snap.empty ? "<p class='text-center text-slate-300 py-10 italic'>No updates.</p>": "";
 
-        snap.forEach(doc=>{
-            const d = doc.data();
-            const icon = d.type==='exam'?'🎓':d.type==='test'?'📝':d.type==='lecture'?'📅':'📚';
-            container.innerHTML += `
-                <div class="glass-card p-4 mb-3 border-l-4 border-emerald-500 animate-fade-in">
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="bg-emerald-100 text-emerald-700 text-[8px] font-black px-2 py-1 rounded-md uppercase">${d.level}L</span>
-                        <span class="text-lg">${icon}</span>
-                    </div>
-                    <h4 class="font-bold text-sm text-slate-800">${d.title}</h4>
-                    <p class="text-[11px] text-slate-500 mt-1">${d.desc}</p>
-                    ${d.fileUrl?`<a href="${d.fileUrl}" target="_blank" class="inline-block mt-3 text-emerald-600 font-black text-[9px] underline">VIEW ATTACHMENT <i class="fa-solid fa-up-right-from-square"></i></a>`:""}
+    snap.forEach(doc=>{
+        const d = doc.data();
+        const icon = d.type==='exam'?'🎓':d.type==='test'?'📝':d.type==='lecture'?'📅':'📚';
+        const fileType = d.fileUrl ? (d.fileUrl.includes('.pdf') ? '📄 PDF' : '🖼️ Image') : '';
+        container.innerHTML += `
+            <div class="glass-card p-4 mb-3 border-l-4 border-emerald-500 animate-fade-in">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="bg-emerald-100 text-emerald-700 text-[8px] font-black px-2 py-1 rounded-md uppercase">${d.level}L</span>
+                    <span class="text-lg">${icon}</span>
                 </div>
-            `;
-        });
-        console.log("✅ Academics loaded, count:", snap.size);
-    } catch(e) {
-        console.error("Error loading academics:", e);
-        container.innerHTML = "<p class='text-center text-red-500 py-10'>Error loading data. Check console.</p>";
-    }
+                <h4 class="font-bold text-sm text-slate-800">${d.title}</h4>
+                <p class="text-[11px] text-slate-500 mt-1">${d.desc}</p>
+                ${d.fileUrl?`<a href="${d.fileUrl}" target="_blank" class="inline-block mt-3 text-emerald-600 font-black text-[9px] underline">VIEW ${fileType} <i class="fa-solid fa-up-right-from-square"></i></a>`:""}
+            </div>
+        `;
+    });
 };
 
 // ============================
@@ -255,7 +254,6 @@ function renderAcademics() {
 window.openGroupModal = function(){
     const modal = document.getElementById('modal-overlay');
     const content = document.getElementById('modal-content');
-    if(!modal || !content) return;
     modal.classList.remove('hidden');
 
     content.innerHTML = `
@@ -267,11 +265,7 @@ window.openGroupModal = function(){
 };
 
 const studyBtn = document.getElementById('btn-new-group');
-if(studyBtn) {
-    studyBtn.onclick = window.openGroupModal;
-} else {
-    console.warn("btn-new-group not found");
-}
+if(studyBtn) studyBtn.onclick = window.openGroupModal;
 
 window.submitToFirebase = async()=>{
     const name = document.getElementById('group-name').value;
@@ -289,7 +283,6 @@ window.submitToFirebase = async()=>{
 // Admin panel
 async function loadAdminPanel(){
     const list = document.getElementById('admin-verification-list');
-    if(!list) return;
     const snap = await db.collection('StudyGroups').where('status','==','pending').get();
     list.innerHTML = snap.empty? "<p class='text-slate-500 italic'>No pending groups.</p>" : "";
     snap.forEach(doc=>{
@@ -327,12 +320,11 @@ async function loadVerifiedGroups(){
 }
 
 // ============================
-// MARKETPLACE - FIXED VERSION
+// MARKETPLACE
 // ============================
 window.openMarketModal = function(){
     const modal = document.getElementById('modal-overlay');
     const content = document.getElementById('modal-content');
-    if(!modal || !content) return;
     modal.classList.remove('hidden');
 
     content.innerHTML = `
@@ -357,7 +349,7 @@ window.openMarketModal = function(){
                     <input type="tel" id="seller-phone" placeholder="805 000 0000" class="w-full p-4 bg-transparent border-none outline-none">
                 </div>
                 <div class="relative group">
-                    <input type="file" id="item-image" class="hidden" accept="image/*" onchange="handleFileSelect(this)">
+                    <input type="file" id="item-image" class="hidden" accept="image/*" onchange="document.getElementById('file-label').innerText = 'Photo Selected! ✅'">
                     <label for="item-image" id="file-label" class="block w-full p-6 border-2 border-dashed border-emerald-200 rounded-2xl text-center text-emerald-600 font-bold cursor-pointer bg-emerald-50/30">
                         <i class="fa-solid fa-camera-retro text-2xl mb-2"></i><br>Tap to Upload Photo
                     </label>
@@ -368,134 +360,74 @@ window.openMarketModal = function(){
     `;
 };
 
-// Handle file selection
-window.handleFileSelect = function(input) {
-    const label = document.getElementById('file-label');
-    if(input.files && input.files[0]) {
-        const fileName = input.files[0].name;
-        label.innerHTML = `<i class="fa-solid fa-check-circle text-2xl mb-2"></i><br>${fileName.substring(0, 20)} ✅`;
-    }
-};
-
 const postAdBtn = document.getElementById('btn-post-ad');
-if(postAdBtn) {
-    postAdBtn.onclick = window.openMarketModal;
-} else {
-    console.warn("btn-post-ad not found");
-}
+if(postAdBtn) postAdBtn.onclick = window.openMarketModal;
 
 window.processMarketPost = async function(){
     const btn = document.getElementById('market-submit-btn');
     const fileInput = document.getElementById('item-image');
-    const file = fileInput ? fileInput.files[0] : null;
+    const file = fileInput.files[0];
     const name = document.getElementById('item-name').value;
     const price = document.getElementById('item-price').value;
     const type = document.getElementById('item-type').value;
     const phone = document.getElementById('seller-phone').value;
     const negotiable = document.getElementById('item-negotiable').value;
 
-    if(!name || !price || !phone) {
-        alert("Please fill all fields!");
-        return;
-    }
+    if(!name||!price||!phone) return alert("Fill all fields!");
 
-    btn.innerHTML = `<i class="fa-solid fa-bolt animate-pulse"></i> UPLOADING...`;
+    btn.innerHTML = `<i class="fa-solid fa-bolt animate-pulse"></i> OPTIMIZING...`;
     btn.disabled = true;
 
     let imageUrl = "https://ui-avatars.com/api/?name=Hub&background=10b981&color=fff";
 
     if(file){
-        try {
-            console.log("Starting image upload...");
-            
-            // Compress image
-            const compressedBlob = await compressImage(file, 0.7, 800);
-            console.log("Image compressed, size:", compressedBlob.size);
-            
+        try{
+            const compressedBlob = await compressImage(file,0.7,800);
             const formData = new FormData();
             formData.append('file', compressedBlob);
-            formData.append('upload_preset', 'SLIT-HUB');
-            
-            console.log("Uploading to Cloudinary...");
-            const res = await fetch("https://api.cloudinary.com/v1_1/ddm87a9p2/image/upload", {
-                method: 'POST', 
-                body: formData
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+            const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+                method:'POST', body: formData
             });
-            
             const data = await res.json();
-            console.log("Cloudinary response:", data);
-            
-            if(!res.ok) {
-                throw new Error(data.error?.message || "Cloudinary upload failed");
-            }
-            
+            if(!res.ok) throw new Error(data.error?.message || "Cloudinary failed");
             imageUrl = data.secure_url;
-            console.log("Upload successful! URL:", imageUrl);
-            
-        } catch(err) {
+        } catch(err){
             console.error("Upload Error:", err);
-            btn.innerText = "RETRY POST";
-            btn.disabled = false;
-            alert("Upload failed: " + err.message + "\n\nCheck Cloudinary preset 'SLIT-HUB' exists.");
-            return;
+            btn.innerText="RETRY POST";
+            btn.disabled=false;
+            return alert("Upload failed: " + err.message);
         }
-    } else {
-        console.log("No image selected, using default avatar");
     }
 
-    try {
-        btn.innerHTML = `<i class="fa-solid fa-bolt animate-pulse"></i> SAVING...`;
-        
-        await db.collection('Marketplace').add({
-            name, 
-            price: Number(price), 
-            type, 
-            phone, 
-            negotiable, 
-            image: imageUrl,
-            rating: 5.0,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        
-        console.log("Item saved to Firebase!");
-        btn.innerHTML = "DONE! 🚀";
-        
-        setTimeout(() => {
-            document.getElementById('modal-overlay').classList.add('hidden');
-            loadMarketDisplay(type);
-            // Reset form
-            if(fileInput) fileInput.value = '';
-            const label = document.getElementById('file-label');
-            if(label) label.innerHTML = `<i class="fa-solid fa-camera-retro text-2xl mb-2"></i><br>Tap to Upload Photo`;
-        }, 500);
-        
-    } catch(err) {
-        console.error("Firebase save error:", err);
-        btn.innerHTML = "RETRY POST";
-        btn.disabled = false;
-        alert("Failed to save to database: " + err.message);
-    }
+    await db.collection('Marketplace').add({
+        name, price:Number(price), type, phone, negotiable, image:imageUrl,
+        rating:5.0,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    btn.innerText="DONE! 🚀";
+    setTimeout(()=>{
+        document.getElementById('modal-overlay').classList.add('hidden');
+        loadMarketDisplay(type);
+    },500);
 };
 
 // ============================
 // BROADCAST
 // ============================
-const broadcastBtn = document.getElementById('btn-broadcast');
-if(broadcastBtn) {
-    broadcastBtn.addEventListener('click', async()=>{
-        const msg = prompt("Enter broadcast message:");
-        if(!msg) return alert("Cannot be empty!");
+document.getElementById('btn-broadcast')?.addEventListener('click',async()=>{
+    const msg = prompt("Enter broadcast message:");
+    if(!msg) return alert("Cannot be empty!");
 
-        await db.collection('Broadcasts').add({
-            message:msg,
-            timestamp:firebase.firestore.FieldValue.serverTimestamp()
-        });
-        alert("Broadcast sent 🚀");
-        loadBroadcastMessage();
+    await db.collection('Broadcasts').add({
+        message:msg,
+        timestamp:firebase.firestore.FieldValue.serverTimestamp()
     });
-} else {
-    console.warn("btn-broadcast not found");
-}
+    alert("Broadcast sent 🚀");
+    loadBroadcastMessage();
+});
 
 async function loadBroadcastMessage() {
     const msgContainer = document.getElementById('broadcast-msg');
@@ -520,50 +452,35 @@ async function loadBroadcastMessage() {
 // MARKETPLACE DISPLAY
 // ============================
 window.loadMarketDisplay = async function(type='items') {
-    console.log("Loading marketplace:", type);
     const grid = document.getElementById('market-grid');
-    if (!grid) {
-        console.warn("market-grid element not found");
-        return;
-    }
+    if (!grid) return;
 
     grid.innerHTML = "<p class='text-center py-10 text-slate-400 animate-pulse'>Loading...</p>";
 
-    try {
-        const snap = await db.collection('Marketplace')
-            .where('type', '==', type)
-            .orderBy('timestamp', 'desc')
-            .get();
+    const snap = await db.collection('Marketplace')
+        .where('type', '==', type)
+        .orderBy('timestamp', 'desc')
+        .get();
 
-        if(snap.empty) {
-            grid.innerHTML = "<p class='text-center py-10 text-slate-400 italic'>No posts yet.</p>";
-        } else {
-            grid.innerHTML = "";
-            snap.forEach(doc => {
-                const data = doc.data();
-                grid.innerHTML += `
-                    <div class="glass-card p-4 border-l-4 border-emerald-500 animate-fade-in">
-                        <img src="${data.image}" class="w-full h-32 object-cover rounded-xl mb-2" onerror="this.src='https://ui-avatars.com/api/?name=Hub&background=10b981&color=fff'">
-                        <h4 class="font-bold text-sm text-slate-800">${escapeHtml(data.name)}</h4>
-                        <p class="text-xs text-slate-500 mt-1">₦${data.price} | ${data.negotiable}</p>
-                        <p class="text-[10px] italic text-slate-400 mt-1">Call: ${data.phone}</p>
-                    </div>
-                `;
-            });
-        }
+    grid.innerHTML = snap.empty ? "<p class='text-center py-10 text-slate-400 italic'>No posts yet.</p>" : "";
 
-        // Update market count
-        const countEl = document.getElementById('market-count');
-        if(countEl) countEl.innerText = snap.size;
-        
-        console.log("✅ Marketplace loaded, count:", snap.size);
-    } catch(e) {
-        console.error("Error loading marketplace:", e);
-        grid.innerHTML = "<p class='text-center text-red-500 py-10'>Error loading marketplace. Check console.</p>";
-    }
+    snap.forEach(doc => {
+        const data = doc.data();
+        grid.innerHTML += `
+            <div class="glass-card p-4 border-l-4 border-emerald-500 animate-fade-in">
+                <img src="${data.image}" class="w-full h-32 object-cover rounded-xl mb-2" onerror="this.src='https://ui-avatars.com/api/?name=Hub&background=10b981&color=fff'">
+                <h4 class="font-bold text-sm text-slate-800">${escapeHtml(data.name)}</h4>
+                <p class="text-xs text-slate-500 mt-1">₦${data.price} | ${data.negotiable}</p>
+                <p class="text-[10px] italic text-slate-400 mt-1">Call: ${data.phone}</p>
+            </div>
+        `;
+    });
+
+    const countEl = document.getElementById('market-count');
+    if(countEl) countEl.innerText = snap.size;
 };
 
-// Helper function to escape HTML
+// Helper function
 function escapeHtml(str) {
     if(!str) return '';
     return str.replace(/[&<>]/g, function(m) {
@@ -596,18 +513,11 @@ async function compressImage(file, quality=0.7, maxWidth=800) {
 
         img.onload = () => {
             const canvas = document.createElement('canvas');
-            let width = img.width;
-            let height = img.height;
-            
-            if (width > maxWidth) {
-                height = (height * maxWidth) / width;
-                width = maxWidth;
-            }
-            
-            canvas.width = width;
-            canvas.height = height;
+            const scale = Math.min(maxWidth / img.width, 1);
+            canvas.width = img.width * scale;
+            canvas.height = img.height * scale;
             const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, width, height);
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
             canvas.toBlob(blob => resolve(blob), 'image/jpeg', quality);
         };
         img.onerror = err => reject(err);
@@ -617,14 +527,9 @@ async function compressImage(file, quality=0.7, maxWidth=800) {
 // ============================
 // MODAL CLOSE
 // ============================
-const closeModal = document.getElementById('close-modal');
-if(closeModal) {
-    closeModal.addEventListener('click', () => {
-        document.getElementById('modal-overlay').classList.add('hidden');
-    });
-} else {
-    console.warn("close-modal not found");
-}
+document.getElementById('close-modal')?.addEventListener('click', () => {
+    document.getElementById('modal-overlay').classList.add('hidden');
+});
 
 // ============================
 // INITIAL LOADS
@@ -634,4 +539,4 @@ loadVerifiedGroups();
 loadMarketDisplay('items');
 loadBroadcastMessage();
 
-console.log("✅ App.js fully loaded");
+console.log("✅ App.js fully loaded with Cloudinary preset:", CLOUDINARY_UPLOAD_PRESET);
