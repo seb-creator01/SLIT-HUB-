@@ -61,7 +61,7 @@
                 <p class="text-slate-500 text-sm italic">Your campus, digitalized.</p>
             </div>
             
-            <div id="broadcast-card" class="hidden glass-card bg-emerald-600 text-white p-5 rounded-3xl shadow-xl shadow-emerald-100 mb-6 relative overflow-hidden border-none">
+            <div id="broadcast-card" class="glass-card bg-emerald-600 text-white p-5 rounded-3xl shadow-xl shadow-emerald-100 mb-6 relative overflow-hidden border-none">
                 <i class="fa-solid fa-bullhorn absolute -right-4 -bottom-4 text-7xl opacity-10"></i>
                 <p class="text-[10px] font-black uppercase tracking-widest opacity-80">Official Announcement</p>
                 <p id="broadcast-msg" class="font-bold text-sm mt-2 leading-relaxed italic">Loading announcement...</p>
@@ -163,9 +163,11 @@
         </button>
     </nav>
 
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     
-    <script type="module" src="app.js"></script>
+    <!-- Changed: Remove type="module" to make functions globally accessible -->
+    <script src="app.js"></script>
 </body>
 </html>
