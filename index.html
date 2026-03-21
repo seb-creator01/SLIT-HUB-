@@ -7,7 +7,6 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
     <style>
         .lvl-btn {
             padding: 8px 16px;
@@ -61,12 +60,12 @@
 <body class="bg-gray-50 text-slate-900 pb-24 font-sans select-none">
 
     <div id="splash-screen" class="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center transition-opacity duration-500">
-        <h1 class="font-black text-4xl text-emerald-600 logo-glow italic mb-4">SLIT-HUB</h1>
+        <h1 class="font-black text-4xl text-emerald-600 italic mb-4">SLIT-HUB</h1>
         <div class="w-12 h-12 border-4 border-emerald-100 border-t-emerald-600 rounded-full animate-spin"></div>
     </div>
 
     <header class="bg-white/80 backdrop-blur-md border-b sticky top-0 z-40 px-4 py-3 flex justify-between items-center shadow-sm">
-        <h1 class="font-black text-xl text-emerald-600 logo-glow italic">SLIT-HUB <span class="float-emoji">⚡</span></h1>
+        <h1 class="font-black text-xl text-emerald-600 italic">SLIT-HUB ⚡</h1>
         <div class="flex gap-4 items-center">
             <button id="admin-trigger" class="text-slate-400 hover:text-emerald-600 transition-all active:scale-90">
                 <i class="fa-solid fa-shield-halved text-lg"></i>
@@ -78,7 +77,7 @@
         
         <section id="tab-home" class="tab-content animate-fade-in">
             <div class="mb-6">
-                <h2 class="text-2xl font-bold">Hey Student! <span class="float-emoji">👋</span></h2>
+                <h2 class="text-2xl font-bold">Hey Student! 👋</h2>
                 <p class="text-slate-500 text-sm italic">Your campus, digitalized.</p>
             </div>
             
@@ -95,14 +94,14 @@
                 </div>
                 <div class="glass-card p-4">
                     <p class="text-[10px] font-black text-slate-400 uppercase">Market Active</p>
-                    <p id="market-count" class="font-bold text-slate-700 italic">Connecting...</p>
+                    <p id="market-count" class="font-bold text-slate-700 italic">Loading...</p>
                 </div>
             </div>
         </section>
 
         <section id="tab-academics" class="tab-content hidden animate-fade-in space-y-4">
             <div class="flex justify-between items-center">
-                <h2 class="text-xl font-bold italic">Academics <span class="float-emoji">📚</span></h2>
+                <h2 class="text-xl font-bold italic">Academics 📚</h2>
                 <div class="flex gap-2">
                     <button onclick="openAcademicModal()" class="bg-emerald-600 text-white text-[10px] font-black uppercase px-3 py-2 rounded-lg shadow-lg shadow-emerald-100">Post Hub</button>
                     <button id="btn-new-group" class="text-emerald-600 text-[10px] font-black uppercase bg-emerald-50 px-3 py-2 rounded-lg border border-emerald-100">+ Group</button>
@@ -125,13 +124,12 @@
             <div class="flex justify-between items-center">
                 <p class="text-[10px] font-black text-slate-400 uppercase">Study WhatsApp Groups</p>
             </div>
-            <div id="study-pills" class="flex gap-2 overflow-x-auto no-scrollbar py-1"></div>
             <div id="groups-list" class="grid gap-3"></div>
         </section>
 
         <section id="tab-marketplace" class="tab-content hidden animate-fade-in space-y-4">
             <div class="flex justify-between items-center">
-                <h2 class="text-xl font-bold italic">Marketplace <span class="float-emoji">🛍️</span></h2>
+                <h2 class="text-xl font-bold italic">Marketplace 🛍️</h2>
                 <button id="btn-post-ad" class="bg-emerald-600 btn-glow text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase">Post Ad</button>
             </div>
             <div class="flex bg-slate-200/50 p-1 rounded-2xl backdrop-blur-sm">
@@ -143,7 +141,7 @@
         </section>
 
         <section id="tab-admin" class="tab-content hidden animate-fade-in space-y-4">
-            <h2 class="text-xl font-bold text-red-600 italic">Admin Terminal <span class="float-emoji">🛡️</span></h2>
+            <h2 class="text-xl font-bold text-red-600 italic">Admin Terminal 🛡️</h2>
             <div class="bg-slate-900 text-emerald-400 p-5 rounded-3xl font-mono text-[10px] space-y-4 border-2 border-slate-800 shadow-2xl">
                 <div>
                     <p class="text-white mb-3 underline italic font-black">PENDING WHATSAPP GROUPS</p>
@@ -182,7 +180,7 @@
         </button>
     </nav>
 
-    <!-- Firebase SDKs - AUTH ADDED -->
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
