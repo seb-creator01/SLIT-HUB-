@@ -1,6 +1,8 @@
 import { DEPARTMENTS, EXECUTIVES, STUDY_CATEGORIES, UI_CONFIG } from './data.js';
 
-// 1. INITIALIZE FIREBASE
+// ============================
+// FIREBASE INIT
+// ============================
 const firebaseConfig = {
     apiKey: "AIzaSyAsS...", 
     authDomain: "slithub-17a41.firebaseapp.com",
@@ -10,13 +12,14 @@ const firebaseConfig = {
     appId: "1:1056588267605:web:0786..."
 };
 
-if (typeof firebase !== 'undefined') {
-    firebase.initializeApp(firebaseConfig);
-}
+if(typeof firebase !== 'undefined') firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// 2. BOOTUP SEQUENCE
+// ============================
+// BOOTUP
+// ============================
 window.addEventListener('DOMContentLoaded', () => {
+    // Hide splash
     setTimeout(() => {
         const splash = document.getElementById('splash-screen');
         if(splash) {
@@ -25,6 +28,7 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     }, 1500);
 
+    // Marketplace filter listeners
     document.querySelectorAll('.m-filter').forEach(btn => {
         btn.addEventListener('click', function() {
             const type = this.getAttribute('data-filter');
@@ -36,42 +40,44 @@ window.addEventListener('DOMContentLoaded', () => {
 
     renderAcademics();
     loadVerifiedGroups();
-    loadMarketDisplay('items'); 
+    loadMarketDisplay('items');
     loadAcademicMaterials();
+    loadBroadcastMessage();
 });
 
-// 3. TAB NAVIGATION
+// ============================
+// TAB NAVIGATION
+// ============================
 window.switchTab = function(tabId) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
     const target = document.getElementById(`tab-${tabId}`);
     if(target) target.classList.remove('hidden');
 
     document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.remove('text-emerald-600', 'active');
+        btn.classList.remove('text-emerald-600','active');
         btn.classList.add('text-slate-400');
     });
-    
     const activeBtn = document.querySelector(`.nav-btn[data-tab="${tabId}"]`);
-    if(activeBtn) {
-        activeBtn.classList.add('text-emerald-600', 'active');
+    if(activeBtn){
+        activeBtn.classList.add('text-emerald-600','active');
         activeBtn.classList.remove('text-slate-400');
     }
 };
 
-// 4. ADMIN TRIGGER
+// ============================
+// ADMIN TRIGGER
+// ============================
 document.getElementById('admin-trigger').onclick = () => {
     const pass = prompt("Enter Developer Secret 🛡️:");
     if(pass === "junior123") {
         window.switchTab('admin');
         loadAdminPanel();
-    } else {
-        alert("Access Denied ❌");
-    }
+    } else alert("Access Denied ❌");
 };
 
-// ==========================================
-// ACADEMIC HUB
-// ==========================================
+// ============================
+// ACADEMICS
+// ============================
 window.openAcademicModal = function() {
     const isRep = confirm("Are you a Course Rep? 🎓\nOnly Reps can post Schedules, Tests, and Exams.");
     if(!isRep) return;
@@ -82,11 +88,11 @@ window.openAcademicModal = function() {
     const modal = document.getElementById('modal-overlay');
     const content = document.getElementById('modal-content');
     modal.classList.remove('hidden');
-    
+
     content.innerHTML = `
         <h3 class="text-xl font-black mb-4 italic text-emerald-600">Post Academic Update 📖</h3>
         <div class="space-y-3">
-            <select id="acad-type" class="w-full p-4 bg-slate-50 rounded-2xl border-none font-bold">
+            <select id="acad-type" class="w-full p-4 bg-slate-50 rounded-2xl font-bold border-none">
                 <option value="lecture">📅 Lecture Schedule</option>
                 <option value="test">📝 Upcoming Test</option>
                 <option value="exam">🎓 Exam Update</option>
@@ -102,11 +108,10 @@ window.openAcademicModal = function() {
             </select>
 
             <input type="text" id="acad-title" placeholder="Course Code (e.g. GST 111)" class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none">
-            
-            <textarea id="acad-desc" placeholder="Details/Instructions..." class="w-full p-4 bg-slate-50 rounded-2xl border-none h-24 outline-none text-xs"></textarea>
+            <textarea id="acad-desc" placeholder="Details/Instructions..." class="w-full p-4 bg-slate-50 rounded-2xl border-none h-24 text-xs outline-none"></textarea>
 
             <div class="relative group">
-                <input type="file" id="acad-file" class="hidden" accept="image/*,application/pdf" onchange="document.getElementById('acad-file-label').innerText = 'File Selected! ✅'">
+                <input type="file" id="acad-file" class="hidden" accept="image/*,application/pdf" onchange="document.getElementById('acad-file-label').innerText='File Selected! ✅'">
                 <label for="acad-file" id="acad-file-label" class="block w-full p-6 border-2 border-dashed border-emerald-200 rounded-2xl text-center text-emerald-600 font-bold cursor-pointer">
                     Upload PDF or Picture
                 </label>
@@ -117,52 +122,40 @@ window.openAcademicModal = function() {
     `;
 };
 
-// Process Academic Post
 window.processAcademicPost = async function() {
     const btn = document.getElementById('acad-submit-btn');
-    const fileInput = document.getElementById('acad-file');
-    const file = fileInput.files[0];
+    const file = document.getElementById('acad-file').files[0];
     const type = document.getElementById('acad-type').value;
     const level = document.getElementById('acad-level').value;
-    const title = document.getElementById('acad-title').value.trim();
-    const desc = document.getElementById('acad-desc').value.trim();
+    const title = document.getElementById('acad-title').value;
+    const desc = document.getElementById('acad-desc').value;
 
-    if(!title || !desc) return alert("Please fill Title and Description!");
+    if(!title || !desc) return alert("Fill Title & Description!");
 
     btn.innerHTML = `<i class="fa-solid fa-bolt animate-pulse"></i> PREPARING...`;
     btn.disabled = true;
 
     let fileUrl = "";
-
-    if(file) {
-        try {
+    if(file){
+        try{
             let uploadBlob = file;
-
-            if(file.type.startsWith('image/')) {
-                uploadBlob = await compressImage(file, 0.5, 500);
-            }
-
-            btn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up animate-bounce"></i> SYNCING...`;
+            if(file.type.startsWith('image/')) uploadBlob = await compressImage(file,0.5,500);
 
             const formData = new FormData();
             formData.append('file', uploadBlob);
             formData.append('upload_preset', 'SLIT-HUB');
 
-            const CLOUD_NAME = "ddm87a9p2";
-            const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
-                method: 'POST',
-                body: formData
+            const res = await fetch("https://api.cloudinary.com/v1_1/ddm87a9p2/image/upload", {
+                method:'POST', body: formData
             });
-
             const data = await res.json();
-            if(!res.ok) throw new Error(data.error?.message || 'Cloudinary Upload Failed');
-
+            if(!res.ok) throw new Error(data.error?.message || "Cloudinary Failed");
             fileUrl = data.secure_url;
-        } catch(err) {
+        } catch(err){
             console.error(err);
-            btn.innerText = "RETRY PUBLISH";
             btn.disabled = false;
-            return alert(`File Upload Error: ${err.message}`);
+            btn.innerText = "RETRY PUBLISH";
+            return alert(`Upload Error: ${err.message}`);
         }
     }
 
@@ -175,26 +168,23 @@ window.processAcademicPost = async function() {
     setTimeout(() => {
         document.getElementById('modal-overlay').classList.add('hidden');
         loadAcademicMaterials();
-    }, 500);
+    },500);
 };
 
-// Load Academic Materials
-window.loadAcademicMaterials = async function(levelFilter = 'all') {
+window.loadAcademicMaterials = async function(levelFilter='all'){
     const container = document.getElementById('academic-list');
     if(!container) return;
+    container.innerHTML = "<p class='text-center p-10 animate-pulse text-xs text-slate-400'>Loading...</p>";
 
-    container.innerHTML = "<p class='text-center p-10 animate-pulse text-xs text-slate-400'>Loading Resources...</p>";
-    
-    let query = db.collection('Academics').orderBy('timestamp', 'desc');
-    if(levelFilter !== 'all') query = query.where('level', '==', levelFilter);
-    
+    let query = db.collection('Academics').orderBy('timestamp','desc');
+    if(levelFilter!=='all') query = query.where('level','==',levelFilter);
+
     const snap = await query.get();
-    container.innerHTML = snap.empty ? "<p class='text-center text-slate-300 py-10 italic'>No updates for this level.</p>" : "";
+    container.innerHTML = snap.empty ? "<p class='text-center text-slate-300 py-10 italic'>No updates.</p>": "";
 
-    snap.forEach(doc => {
+    snap.forEach(doc=>{
         const d = doc.data();
-        const icon = d.type === 'exam' ? '🎓' : d.type === 'test' ? '📝' : d.type === 'lecture' ? '📅' : '📚';
-        
+        const icon = d.type==='exam'?'🎓':d.type==='test'?'📝':d.type==='lecture'?'📅':'📚';
         container.innerHTML += `
             <div class="glass-card p-4 mb-3 border-l-4 border-emerald-500 animate-fade-in">
                 <div class="flex justify-between items-start mb-2">
@@ -203,58 +193,53 @@ window.loadAcademicMaterials = async function(levelFilter = 'all') {
                 </div>
                 <h4 class="font-bold text-sm text-slate-800">${d.title}</h4>
                 <p class="text-[11px] text-slate-500 mt-1">${d.desc}</p>
-                ${d.fileUrl ? `<a href="${d.fileUrl}" target="_blank" class="inline-block mt-3 text-emerald-600 font-black text-[9px] underline">VIEW ATTACHMENT <i class="fa-solid fa-up-right-from-square"></i></a>` : ''}
+                ${d.fileUrl?`<a href="${d.fileUrl}" target="_blank" class="inline-block mt-3 text-emerald-600 font-black text-[9px] underline">VIEW ATTACHMENT <i class="fa-solid fa-up-right-from-square"></i></a>`:""}
             </div>
         `;
     });
 };
 
-// Filter Academic Hub by Level
-window.filterByLevel = function(level) {
-    document.querySelectorAll('.lvl-btn').forEach(btn => btn.classList.remove('active-lvl'));
-    document.querySelector(`.lvl-btn[data-level="${level}"]`)?.classList.add('active-lvl');
-    loadAcademicMaterials(level);
-};
-
-// ==========================================
-// STUDY GROUP LOGIC
-// ==========================================
-window.openGroupModal = function() {
+// ============================
+// STUDY GROUPS
+// ============================
+window.openGroupModal = function(){
     const modal = document.getElementById('modal-overlay');
     const content = document.getElementById('modal-content');
     modal.classList.remove('hidden');
-    
+
     content.innerHTML = `
         <h3 class="text-xl font-black mb-4 italic text-emerald-600">New Study Group 📚</h3>
-        <input type="text" id="group-name" placeholder="Course Name (e.g. MMT 211)" class="w-full p-4 bg-slate-50 rounded-2xl mb-3 border-none outline-none">
+        <input type="text" id="group-name" placeholder="Course Name" class="w-full p-4 bg-slate-50 rounded-2xl mb-3 border-none outline-none">
         <input type="url" id="group-link" placeholder="WhatsApp Link" class="w-full p-4 bg-slate-50 rounded-2xl mb-4 border-none outline-none">
-        <button onclick="submitToFirebase()" class="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black btn-glow">SUBMIT FOR VERIFICATION</button>
+        <button onclick="submitToFirebase()" class="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black btn-glow">SUBMIT</button>
     `;
 };
 
-document.getElementById('btn-new-group')?.addEventListener('click', window.openGroupModal);
+const studyBtn = document.getElementById('btn-new-group');
+if(studyBtn) studyBtn.onclick = window.openGroupModal;
 
-window.submitToFirebase = async () => {
-    const name = document.getElementById('group-name').value.trim();
-    const link = document.getElementById('group-link').value.trim();
-    if(!name || !link) return alert("Please fill all fields!");
+window.submitToFirebase = async()=>{
+    const name = document.getElementById('group-name').value;
+    const link = document.getElementById('group-link').value;
+    if(!name||!link) return alert("Fill all fields!");
 
     await db.collection('StudyGroups').add({
-        name, link, status: 'pending', timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        name, link, status:'pending', timestamp: firebase.firestore.FieldValue.serverTimestamp()
     });
 
-    alert("Sent! Junior will verify this shortly. 🚀");
+    alert("Sent! Junior will verify 🚀");
     document.getElementById('modal-overlay').classList.add('hidden');
 };
 
-async function loadAdminPanel() {
+// Admin panel
+async function loadAdminPanel(){
     const list = document.getElementById('admin-verification-list');
-    const snap = await db.collection('StudyGroups').where('status', '==', 'pending').get();
-    list.innerHTML = snap.empty ? "<p class='text-slate-500 italic'>No pending groups.</p>" : "";
-    snap.forEach(doc => {
+    const snap = await db.collection('StudyGroups').where('status','==','pending').get();
+    list.innerHTML = snap.empty? "<p class='text-slate-500 italic'>No pending groups.</p>" : "";
+    snap.forEach(doc=>{
         const d = doc.data();
         list.innerHTML += `
-            <div class="border border-slate-700 p-4 rounded-2xl flex justify-between items-center bg-slate-800/50 mb-2">
+            <div class="border p-4 rounded-2xl flex justify-between items-center bg-slate-800/50 mb-2">
                 <span class="text-white font-bold">${d.name}</span>
                 <button onclick="verifyGroup('${doc.id}')" class="text-emerald-400 font-black underline">APPROVE</button>
             </div>
@@ -262,19 +247,19 @@ async function loadAdminPanel() {
     });
 }
 
-window.verifyGroup = async (id) => {
-    await db.collection('StudyGroups').doc(id).update({ status: 'verified' });
+window.verifyGroup = async (id)=>{
+    await db.collection('StudyGroups').doc(id).update({status:'verified'});
     alert("Group is now Live! ✅");
     loadAdminPanel();
     loadVerifiedGroups();
 };
 
-async function loadVerifiedGroups() {
+async function loadVerifiedGroups(){
     const list = document.getElementById('groups-list');
     if(!list) return;
-    const snap = await db.collection('StudyGroups').where('status', '==', 'verified').get();
+    const snap = await db.collection('StudyGroups').where('status','==','verified').get();
     list.innerHTML = "";
-    snap.forEach(doc => {
+    snap.forEach(doc=>{
         const d = doc.data();
         list.innerHTML += `
             <div class="glass-card p-4 flex justify-between items-center border-l-4 border-emerald-50">
@@ -285,20 +270,19 @@ async function loadVerifiedGroups() {
     });
 }
 
-// ==========================================
-// MARKETPLACE ENGINE
-// ==========================================
-window.openMarketModal = function() {
+// ============================
+// MARKETPLACE
+// ============================
+window.openMarketModal = function(){
     const modal = document.getElementById('modal-overlay');
     const content = document.getElementById('modal-content');
     modal.classList.remove('hidden');
-    
+
     content.innerHTML = `
-        <div class="max-h-[80vh] overflow-y-auto no-scrollbar pb-6">
+        <div class="max-h-[80vh] overflow-y-auto pb-6">
             <h3 class="text-xl font-black mb-4 italic text-emerald-600">Create a Post 🚀</h3>
             <div class="space-y-3">
                 <input type="text" id="item-name" placeholder="What are you listing?" class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none">
-                
                 <div class="flex gap-2">
                     <input type="number" id="item-price" placeholder="Price (₦)" class="flex-1 p-4 bg-slate-50 rounded-2xl border-none outline-none">
                     <select id="item-negotiable" class="p-4 bg-slate-50 rounded-2xl border-none font-bold text-xs">
@@ -306,18 +290,15 @@ window.openMarketModal = function() {
                         <option value="Negotiable">Negotiable</option>
                     </select>
                 </div>
-
-                <select id="item-type" class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none font-bold text-slate-500">
+                <select id="item-type" class="w-full p-4 bg-slate-50 rounded-2xl border-none font-bold text-slate-500">
                     <option value="items">Physical Item (Sale)</option>
                     <option value="services">Service (Gigs/Skill)</option>
                     <option value="requests">Request (I need...)</option>
                 </select>
-
                 <div class="flex items-center gap-2 bg-slate-50 p-1 rounded-2xl border border-slate-100">
                     <span class="pl-4 font-bold text-slate-400">+234</span>
                     <input type="number" id="seller-phone" placeholder="805 000 0000" class="w-full p-4 bg-transparent border-none outline-none">
                 </div>
-
                 <div class="relative group">
                     <input type="file" id="item-image" class="hidden" accept="image/*" onchange="document.getElementById('file-label').innerText = 'Photo Selected! ✅'">
                     <label for="item-image" id="file-label" class="block w-full p-6 border-2 border-dashed border-emerald-200 rounded-2xl text-center text-emerald-600 font-bold cursor-pointer bg-emerald-50/30">
@@ -330,170 +311,182 @@ window.openMarketModal = function() {
     `;
 };
 
-document.getElementById('btn-post-ad')?.addEventListener('click', window.openMarketModal);
+const postAdBtn = document.getElementById('btn-post-ad');
+if(postAdBtn) postAdBtn.onclick = window.openMarketModal;
 
-// Marketplace upload function
-window.processMarketPost = async function() {
+window.processMarketPost = async function(){
     const btn = document.getElementById('market-submit-btn');
     const fileInput = document.getElementById('item-image');
     const file = fileInput.files[0];
-    const name = document.getElementById('item-name').value.trim();
-    const price = document.getElementById('item-price').value.trim();
+    const name = document.getElementById('item-name').value;
+    const price = document.getElementById('item-price').value;
     const type = document.getElementById('item-type').value;
-    const phone = document.getElementById('seller-phone').value.trim();
+    const phone = document.getElementById('seller-phone').value;
     const negotiable = document.getElementById('item-negotiable').value;
 
-    if(!name || !price || !phone) return alert("Please fill all fields!");
+    if(!name||!price||!phone) return alert("Fill all fields!");
 
     btn.innerHTML = `<i class="fa-solid fa-bolt animate-pulse"></i> OPTIMIZING...`;
     btn.disabled = true;
 
     let imageUrl = "https://ui-avatars.com/api/?name=Hub&background=10b981&color=fff";
 
-    if(file) {
-        try {
-            const compressedBlob = await compressImage(file, 0.5, 500);
-            btn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up animate-bounce"></i> UPLOADING...`;
-
+    if(file){
+        try{
+            const compressedBlob = await compressImage(file,0.5,500);
             const formData = new FormData();
             formData.append('file', compressedBlob);
-            formData.append('upload_preset', 'SLIT-HUB');
+            formData.append('upload_preset','SLIT-HUB');
 
-            const CLOUD_NAME = "ddm87a9p2";
-            const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
-                method: 'POST',
-                body: formData
+            const res = await fetch("https://api.cloudinary.com/v1_1/ddm87a9p2/image/upload", {
+                method:'POST', body: formData
             });
-
-            const cloudData = await res.json();
-            if(!res.ok) throw new Error(cloudData.error?.message || 'Cloudinary upload failed');
-
-            imageUrl = cloudData.secure_url;
-            console.log("Cloudinary URL:", imageUrl);
-
-        } catch(err) {
-            console.error(err);
-            btn.innerText = "RETRY POST";
-            btn.disabled = false;
-            return alert(`Upload failed! ${err.message}`);
+            const data = await res.json();
+            if(!res.ok) throw new Error(data.error?.message || "Cloudinary failed");
+            imageUrl = data.secure_url;
+        } catch(err){
+            console.error("Upload Error:", err);
+            btn.innerText="RETRY POST";
+            btn.disabled=false;
+            return alert("Upload failed. Check network!");
         }
     }
 
-    // Save listing to Firestore
-    try {
-        await db.collection('Marketplace').add({
-            name,
-            price: Number(price),
-            type,
-            phone,
-            negotiable,
-            image: imageUrl,
-            rating: 5.0,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
+    await db.collection('Marketplace').add({
+        name, price:Number(price), type, phone, negotiable, image:imageUrl,
+        rating:5.0,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
 
-        btn.innerHTML = "DONE! 🚀";
-
-        setTimeout(() => {
-            document.getElementById('modal-overlay').classList.add('hidden');
-            loadMarketDisplay(type);
-        }, 500);
-
-    } catch(dbErr) {
-        console.error("Firestore Error:", dbErr);
-        btn.innerText = "RETRY POST";
-        btn.disabled = false;
-        alert("Failed to save listing. Check your connection!");
-    }
+    btn.innerText="DONE! 🚀";
+    setTimeout(()=>{
+        document.getElementById('modal-overlay').classList.add('hidden');
+        loadMarketDisplay(type);
+    },500);
 };
 
-// ==========================================
-// IMAGE COMPRESSION FUNCTION
-// ==========================================
-async function compressImage(file, quality = 0.5, maxWidth = 500) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onerror = () => reject(new Error("File read error"));
+// ============================
+// BROADCAST
+// ============================
+document.getElementById('btn-broadcast')?.addEventListener('click',async()=>{
+    const msg = prompt("Enter broadcast message:");
+    if(!msg) return alert("Cannot be empty!");
 
-        reader.onload = (event) => {
-            const img = new Image();
-            img.src = event.target.result;
-            img.onerror = () => reject(new Error("Image load failed"));
-
-            img.onload = () => {
-                const scale = Math.min(1, maxWidth / img.width);
-                const canvas = document.createElement('canvas');
-                canvas.width = img.width * scale;
-                canvas.height = img.height * scale;
-                const ctx = canvas.getContext('2d');
-                ctx.imageSmoothingEnabled = true;
-                ctx.imageSmoothingQuality = 'high';
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-                canvas.toBlob((blob) => {
-                    if (blob) resolve(blob);
-                    else reject(new Error('Image compression failed'));
-                }, 'image/jpeg', quality);
-            };
-        };
+    await db.collection('Broadcasts').add({
+        message:msg,
+        timestamp:firebase.firestore.FieldValue.serverTimestamp()
     });
+    alert("Broadcast sent 🚀");
+    loadBroadcastMessage();
+});
+async function loadBroadcastMessage() {
+    const msgContainer = document.getElementById('broadcast-msg');
+    if (!msgContainer) return;
+
+    const snap = await db.collection('Broadcasts')
+        .orderBy('timestamp', 'desc')
+        .limit(1)
+        .get();
+
+    if (snap.empty) {
+        msgContainer.innerText = "No announcements yet.";
+    } else {
+        snap.forEach(doc => {
+            const data = doc.data();
+            msgContainer.innerText = data.message;
+        });
+    }
 }
 
-// ==========================================
-// LOAD MARKET DISPLAY
-// ==========================================
-window.loadMarketDisplay = async function(filterType = 'items') {
+// ============================
+// MARKETPLACE DISPLAY
+// ============================
+window.loadMarketDisplay = async function(type='items') {
     const grid = document.getElementById('market-grid');
-    if(!grid) return;
-    grid.innerHTML = "<p class='text-slate-400 italic text-xs animate-pulse'>Fetching listings...</p>";
+    if (!grid) return;
+
+    grid.innerHTML = "<p class='text-center py-10 text-slate-400 animate-pulse'>Loading...</p>";
 
     const snap = await db.collection('Marketplace')
-                         .where('type', '==', filterType)
-                         .orderBy('timestamp', 'desc')
-                         .get();
+        .where('type', '==', type)
+        .orderBy('timestamp', 'desc')
+        .get();
 
-    grid.innerHTML = snap.empty ? `<p class='col-span-2 text-center text-slate-300 py-10 italic'>No ${filterType} yet.</p>` : "";
+    grid.innerHTML = snap.empty ? "<p class='text-center py-10 text-slate-400 italic'>No posts yet.</p>" : "";
 
     snap.forEach(doc => {
-        const d = doc.data();
-        const cleanPhone = d.phone.toString().startsWith('0') ? d.phone.toString().substring(1) : d.phone;
-
+        const data = doc.data();
         grid.innerHTML += `
-            <div class="glass-card overflow-hidden animate-fade-in group flex flex-col h-full border border-white shadow-sm">
-                <div class="relative">
-                    <img src="${d.image}" class="w-full h-32 object-cover" loading="lazy">
-                    <span class="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-[9px] font-black text-emerald-600 shadow-sm">₦${Number(d.price).toLocaleString()}</span>
-                    <div class="absolute top-2 left-2 bg-emerald-600 text-white text-[7px] font-black px-2 py-1 rounded-lg shadow-lg uppercase">${d.negotiable || 'Fixed'}</div>
-                </div>
-                <div class="p-3 flex-1 flex flex-col">
-                    <p class="font-bold text-xs truncate italic text-slate-800">${d.name}</p>
-                    <div class="grid grid-cols-2 gap-2 mt-3">
-                        <a href="https://wa.me/234${cleanPhone}?text=Hi, I saw your ${d.name} on SLIT-HUB" target="_blank" class="flex items-center justify-center bg-green-500 text-white p-2 rounded-xl active:scale-95 transition-all"><i class="fa-brands fa-whatsapp text-sm"></i></a>
-                        <a href="tel:+234${cleanPhone}" class="flex items-center justify-center bg-blue-500 text-white p-2 rounded-xl active:scale-95 transition-all"><i class="fa-solid fa-phone text-sm"></i></a>
-                    </div>
-                </div>
+            <div class="glass-card p-4 border-l-4 border-emerald-500 animate-fade-in">
+                <img src="${data.image}" class="w-full h-32 object-cover rounded-xl mb-2">
+                <h4 class="font-bold text-sm text-slate-800">${data.name}</h4>
+                <p class="text-xs text-slate-500 mt-1">₦${data.price} | ${data.negotiable}</p>
+                <p class="text-[10px] italic text-slate-400 mt-1">Call: ${data.phone}</p>
             </div>
         `;
     });
+
+    // Update market count
+    const countEl = document.getElementById('market-count');
+    if(countEl) countEl.innerText = snap.size;
 };
 
-// ==========================================
-// ACADEMICS & STUDY CATEGORIES
-// ==========================================
-function renderAcademics() {
-    const pContainer = document.getElementById('study-pills');
-    if(pContainer && STUDY_CATEGORIES) {
-        pContainer.innerHTML = "";
-        STUDY_CATEGORIES.forEach(cat => {
-            pContainer.innerHTML += `<button class="whitespace-nowrap px-4 py-2 bg-white border border-emerald-100 rounded-full text-[10px] font-bold text-slate-500 shadow-sm">${cat}</button>`;
-        });
-    }
+// ============================
+// LEVEL FILTERS FOR ACADEMICS
+// ============================
+window.filterByLevel = function(level='all') {
+    document.querySelectorAll('.lvl-btn').forEach(btn => btn.classList.remove('active-lvl'));
+    document.querySelector(`.lvl-btn[data-level="${level}"]`)?.classList.add('active-lvl');
+    loadAcademicMaterials(level);
+};
+
+// ============================
+// HELPER: COMPRESS IMAGE
+// ============================
+async function compressImage(file, quality=0.6, maxWidth=800) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        const reader = new FileReader();
+        reader.onload = e => img.src = e.target.result;
+        reader.onerror = err => reject(err);
+        reader.readAsDataURL(file);
+
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const scale = Math.min(maxWidth / img.width, 1);
+            canvas.width = img.width * scale;
+            canvas.height = img.height * scale;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            canvas.toBlob(blob => resolve(blob), 'image/jpeg', quality);
+        };
+        img.onerror = err => reject(err);
+    });
 }
 
-// ==========================================
-// CLOSE MODAL
-// ==========================================
-document.getElementById('close-modal').onclick = () => {
+// ============================
+// MODAL CLOSE
+// ============================
+document.getElementById('close-modal')?.addEventListener('click', () => {
     document.getElementById('modal-overlay').classList.add('hidden');
-};
+});
+
+// ============================
+// INITIAL LOADS
+// ============================
+loadAcademicMaterials();
+loadVerifiedGroups();
+loadMarketDisplay('items');
+loadBroadcastMessage();
+window.addEventListener('DOMContentLoaded', () => {
+    // Kill the Spinner
+    setTimeout(() => { ... }, 1500);
+
+    // BRIDGE: Setup Marketplace Filter Click Listeners
+    document.querySelectorAll('.m-filter').forEach(btn => { ... });
+
+    renderAcademics();
+    loadVerifiedGroups();
+    loadMarketDisplay('items'); 
+    loadAcademicMaterials(); // NEW: Sync Academic Feed on start
+});
