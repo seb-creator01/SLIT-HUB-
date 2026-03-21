@@ -12,43 +12,66 @@ const firebaseConfig = {
     appId: "1:1056588267605:web:0786..."
 };
 
-if(typeof firebase !== 'undefined') firebase.initializeApp(firebaseConfig);
+// Add error catching for Firebase
+try {
+    if(typeof firebase !== 'undefined') {
+        firebase.initializeApp(firebaseConfig);
+        console.log("✅ Firebase initialized");
+    } else {
+        console.error("❌ Firebase not loaded!");
+        alert("Firebase failed to load. Check your internet connection.");
+    }
+} catch(e) {
+    console.error("Firebase init error:", e);
+    alert("Firebase error: " + e.message);
+}
+
 const db = firebase.firestore();
 
 // ============================
 // BOOTUP
 // ============================
 window.addEventListener('DOMContentLoaded', () => {
-    // Hide splash
-    setTimeout(() => {
-        const splash = document.getElementById('splash-screen');
-        if(splash) {
-            splash.style.opacity = '0';
-            setTimeout(() => splash.classList.add('hidden'), 500);
-        }
-    }, 1500);
+    console.log("🚀 DOM Content Loaded - Starting app...");
+    
+    try {
+        // Hide splash
+        setTimeout(() => {
+            const splash = document.getElementById('splash-screen');
+            if(splash) {
+                splash.style.opacity = '0';
+                setTimeout(() => splash.classList.add('hidden'), 500);
+            }
+        }, 1500);
 
-    // Marketplace filter listeners
-    document.querySelectorAll('.m-filter').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const type = this.getAttribute('data-filter');
-            document.querySelectorAll('.m-filter').forEach(b => b.classList.remove('active', 'bg-white', 'text-emerald-600', 'shadow-sm'));
-            this.classList.add('active', 'bg-white', 'text-emerald-600', 'shadow-sm');
-            loadMarketDisplay(type);
+        // Marketplace filter listeners
+        document.querySelectorAll('.m-filter').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const type = this.getAttribute('data-filter');
+                document.querySelectorAll('.m-filter').forEach(b => b.classList.remove('active', 'bg-white', 'text-emerald-600', 'shadow-sm'));
+                this.classList.add('active', 'bg-white', 'text-emerald-600', 'shadow-sm');
+                loadMarketDisplay(type);
+            });
         });
-    });
 
-    renderAcademics();
-    loadVerifiedGroups();
-    loadMarketDisplay('items');
-    loadAcademicMaterials();
-    loadBroadcastMessage();
+        renderAcademics();
+        loadVerifiedGroups();
+        loadMarketDisplay('items');
+        loadAcademicMaterials();
+        loadBroadcastMessage();
+        
+        console.log("✅ All functions called successfully");
+    } catch(e) {
+        console.error("❌ DOMContentLoaded error:", e);
+        alert("Page load error: " + e.message);
+    }
 });
 
 // ============================
 // TAB NAVIGATION
 // ============================
 window.switchTab = function(tabId) {
+    console.log("Switching to tab:", tabId);
     document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
     const target = document.getElementById(`tab-${tabId}`);
     if(target) target.classList.remove('hidden');
@@ -67,13 +90,18 @@ window.switchTab = function(tabId) {
 // ============================
 // ADMIN TRIGGER
 // ============================
-document.getElementById('admin-trigger').onclick = () => {
-    const pass = prompt("Enter Developer Secret 🛡️:");
-    if(pass === "junior123") {
-        window.switchTab('admin');
-        loadAdminPanel();
-    } else alert("Access Denied ❌");
-};
+const adminTrigger = document.getElementById('admin-trigger');
+if(adminTrigger) {
+    adminTrigger.onclick = () => {
+        const pass = prompt("Enter Developer Secret 🛡️:");
+        if(pass === "junior123") {
+            window.switchTab('admin');
+            loadAdminPanel();
+        } else alert("Access Denied ❌");
+    };
+} else {
+    console.warn("⚠️ admin-trigger element not found");
+}
 
 // ============================
 // ACADEMICS
@@ -87,6 +115,10 @@ window.openAcademicModal = function() {
 
     const modal = document.getElementById('modal-overlay');
     const content = document.getElementById('modal-content');
+    if(!modal || !content) {
+        console.error("Modal elements not found");
+        return;
+    }
     modal.classList.remove('hidden');
 
     content.innerHTML = `
@@ -172,32 +204,49 @@ window.processAcademicPost = async function() {
 };
 
 window.loadAcademicMaterials = async function(levelFilter='all'){
+    console.log("Loading academic materials...");
     const container = document.getElementById('academic-list');
-    if(!container) return;
+    if(!container) {
+        console.warn("academic-list element not found");
+        return;
+    }
     container.innerHTML = "<p class='text-center p-10 animate-pulse text-xs text-slate-400'>Loading...</p>";
 
-    let query = db.collection('Academics').orderBy('timestamp','desc');
-    if(levelFilter!=='all') query = query.where('level','==',levelFilter);
+    try {
+        let query = db.collection('Academics').orderBy('timestamp','desc');
+        if(levelFilter!=='all') query = query.where('level','==',levelFilter);
 
-    const snap = await query.get();
-    container.innerHTML = snap.empty ? "<p class='text-center text-slate-300 py-10 italic'>No updates.</p>": "";
+        const snap = await query.get();
+        container.innerHTML = snap.empty ? "<p class='text-center text-slate-300 py-10 italic'>No updates.</p>": "";
 
-    snap.forEach(doc=>{
-        const d = doc.data();
-        const icon = d.type==='exam'?'🎓':d.type==='test'?'📝':d.type==='lecture'?'📅':'📚';
-        container.innerHTML += `
-            <div class="glass-card p-4 mb-3 border-l-4 border-emerald-500 animate-fade-in">
-                <div class="flex justify-between items-start mb-2">
-                    <span class="bg-emerald-100 text-emerald-700 text-[8px] font-black px-2 py-1 rounded-md uppercase">${d.level}L</span>
-                    <span class="text-lg">${icon}</span>
+        snap.forEach(doc=>{
+            const d = doc.data();
+            const icon = d.type==='exam'?'🎓':d.type==='test'?'📝':d.type==='lecture'?'📅':'📚';
+            container.innerHTML += `
+                <div class="glass-card p-4 mb-3 border-l-4 border-emerald-500 animate-fade-in">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="bg-emerald-100 text-emerald-700 text-[8px] font-black px-2 py-1 rounded-md uppercase">${d.level}L</span>
+                        <span class="text-lg">${icon}</span>
+                    </div>
+                    <h4 class="font-bold text-sm text-slate-800">${d.title}</h4>
+                    <p class="text-[11px] text-slate-500 mt-1">${d.desc}</p>
+                    ${d.fileUrl?`<a href="${d.fileUrl}" target="_blank" class="inline-block mt-3 text-emerald-600 font-black text-[9px] underline">VIEW ATTACHMENT <i class="fa-solid fa-up-right-from-square"></i></a>`:""}
                 </div>
-                <h4 class="font-bold text-sm text-slate-800">${d.title}</h4>
-                <p class="text-[11px] text-slate-500 mt-1">${d.desc}</p>
-                ${d.fileUrl?`<a href="${d.fileUrl}" target="_blank" class="inline-block mt-3 text-emerald-600 font-black text-[9px] underline">VIEW ATTACHMENT <i class="fa-solid fa-up-right-from-square"></i></a>`:""}
-            </div>
-        `;
-    });
+            `;
+        });
+        console.log("✅ Academics loaded, count:", snap.size);
+    } catch(e) {
+        console.error("Error loading academics:", e);
+        container.innerHTML = "<p class='text-center text-red-500 py-10'>Error loading data. Check console.</p>";
+    }
 };
+
+// ============================
+// RENDER ACADEMICS
+// ============================
+function renderAcademics() {
+    console.log("✅ Academics section rendered");
+}
 
 // ============================
 // STUDY GROUPS
@@ -205,6 +254,7 @@ window.loadAcademicMaterials = async function(levelFilter='all'){
 window.openGroupModal = function(){
     const modal = document.getElementById('modal-overlay');
     const content = document.getElementById('modal-content');
+    if(!modal || !content) return;
     modal.classList.remove('hidden');
 
     content.innerHTML = `
@@ -216,7 +266,11 @@ window.openGroupModal = function(){
 };
 
 const studyBtn = document.getElementById('btn-new-group');
-if(studyBtn) studyBtn.onclick = window.openGroupModal;
+if(studyBtn) {
+    studyBtn.onclick = window.openGroupModal;
+} else {
+    console.warn("btn-new-group not found");
+}
 
 window.submitToFirebase = async()=>{
     const name = document.getElementById('group-name').value;
@@ -234,6 +288,7 @@ window.submitToFirebase = async()=>{
 // Admin panel
 async function loadAdminPanel(){
     const list = document.getElementById('admin-verification-list');
+    if(!list) return;
     const snap = await db.collection('StudyGroups').where('status','==','pending').get();
     list.innerHTML = snap.empty? "<p class='text-slate-500 italic'>No pending groups.</p>" : "";
     snap.forEach(doc=>{
@@ -276,6 +331,7 @@ async function loadVerifiedGroups(){
 window.openMarketModal = function(){
     const modal = document.getElementById('modal-overlay');
     const content = document.getElementById('modal-content');
+    if(!modal || !content) return;
     modal.classList.remove('hidden');
 
     content.innerHTML = `
@@ -312,7 +368,11 @@ window.openMarketModal = function(){
 };
 
 const postAdBtn = document.getElementById('btn-post-ad');
-if(postAdBtn) postAdBtn.onclick = window.openMarketModal;
+if(postAdBtn) {
+    postAdBtn.onclick = window.openMarketModal;
+} else {
+    console.warn("btn-post-ad not found");
+}
 
 window.processMarketPost = async function(){
     const btn = document.getElementById('market-submit-btn');
@@ -368,17 +428,23 @@ window.processMarketPost = async function(){
 // ============================
 // BROADCAST
 // ============================
-document.getElementById('btn-broadcast')?.addEventListener('click',async()=>{
-    const msg = prompt("Enter broadcast message:");
-    if(!msg) return alert("Cannot be empty!");
+const broadcastBtn = document.getElementById('btn-broadcast');
+if(broadcastBtn) {
+    broadcastBtn.addEventListener('click', async()=>{
+        const msg = prompt("Enter broadcast message:");
+        if(!msg) return alert("Cannot be empty!");
 
-    await db.collection('Broadcasts').add({
-        message:msg,
-        timestamp:firebase.firestore.FieldValue.serverTimestamp()
+        await db.collection('Broadcasts').add({
+            message:msg,
+            timestamp:firebase.firestore.FieldValue.serverTimestamp()
+        });
+        alert("Broadcast sent 🚀");
+        loadBroadcastMessage();
     });
-    alert("Broadcast sent 🚀");
-    loadBroadcastMessage();
-});
+} else {
+    console.warn("btn-broadcast not found");
+}
+
 async function loadBroadcastMessage() {
     const msgContainer = document.getElementById('broadcast-msg');
     if (!msgContainer) return;
@@ -402,33 +468,44 @@ async function loadBroadcastMessage() {
 // MARKETPLACE DISPLAY
 // ============================
 window.loadMarketDisplay = async function(type='items') {
+    console.log("Loading marketplace:", type);
     const grid = document.getElementById('market-grid');
-    if (!grid) return;
+    if (!grid) {
+        console.warn("market-grid element not found");
+        return;
+    }
 
     grid.innerHTML = "<p class='text-center py-10 text-slate-400 animate-pulse'>Loading...</p>";
 
-    const snap = await db.collection('Marketplace')
-        .where('type', '==', type)
-        .orderBy('timestamp', 'desc')
-        .get();
+    try {
+        const snap = await db.collection('Marketplace')
+            .where('type', '==', type)
+            .orderBy('timestamp', 'desc')
+            .get();
 
-    grid.innerHTML = snap.empty ? "<p class='text-center py-10 text-slate-400 italic'>No posts yet.</p>" : "";
+        grid.innerHTML = snap.empty ? "<p class='text-center py-10 text-slate-400 italic'>No posts yet.</p>" : "";
 
-    snap.forEach(doc => {
-        const data = doc.data();
-        grid.innerHTML += `
-            <div class="glass-card p-4 border-l-4 border-emerald-500 animate-fade-in">
-                <img src="${data.image}" class="w-full h-32 object-cover rounded-xl mb-2">
-                <h4 class="font-bold text-sm text-slate-800">${data.name}</h4>
-                <p class="text-xs text-slate-500 mt-1">₦${data.price} | ${data.negotiable}</p>
-                <p class="text-[10px] italic text-slate-400 mt-1">Call: ${data.phone}</p>
-            </div>
-        `;
-    });
+        snap.forEach(doc => {
+            const data = doc.data();
+            grid.innerHTML += `
+                <div class="glass-card p-4 border-l-4 border-emerald-500 animate-fade-in">
+                    <img src="${data.image}" class="w-full h-32 object-cover rounded-xl mb-2">
+                    <h4 class="font-bold text-sm text-slate-800">${data.name}</h4>
+                    <p class="text-xs text-slate-500 mt-1">₦${data.price} | ${data.negotiable}</p>
+                    <p class="text-[10px] italic text-slate-400 mt-1">Call: ${data.phone}</p>
+                </div>
+            `;
+        });
 
-    // Update market count
-    const countEl = document.getElementById('market-count');
-    if(countEl) countEl.innerText = snap.size;
+        // Update market count
+        const countEl = document.getElementById('market-count');
+        if(countEl) countEl.innerText = snap.size;
+        
+        console.log("✅ Marketplace loaded, count:", snap.size);
+    } catch(e) {
+        console.error("Error loading marketplace:", e);
+        grid.innerHTML = "<p class='text-center text-red-500 py-10'>Error loading marketplace. Check console.</p>";
+    }
 };
 
 // ============================
@@ -467,9 +544,14 @@ async function compressImage(file, quality=0.6, maxWidth=800) {
 // ============================
 // MODAL CLOSE
 // ============================
-document.getElementById('close-modal')?.addEventListener('click', () => {
-    document.getElementById('modal-overlay').classList.add('hidden');
-});
+const closeModal = document.getElementById('close-modal');
+if(closeModal) {
+    closeModal.addEventListener('click', () => {
+        document.getElementById('modal-overlay').classList.add('hidden');
+    });
+} else {
+    console.warn("close-modal not found");
+}
 
 // ============================
 // INITIAL LOADS
@@ -478,20 +560,5 @@ loadAcademicMaterials();
 loadVerifiedGroups();
 loadMarketDisplay('items');
 loadBroadcastMessage();
-window.addEventListener('DOMContentLoaded', () => {
-    // Kill the Spinner
-    setTimeout(() => { 
-        // Original code had empty setTimeout
-    }, 1500);
 
-    // BRIDGE: Setup Marketplace Filter Click Listeners
-    document.querySelectorAll('.m-filter').forEach(btn => { 
-        // Original event listeners
-    });
-
-    renderAcademics();
-    loadVerifiedGroups();
-    loadMarketDisplay('items'); 
-    loadAcademicMaterials();
-    loadBroadcastMessage();
-});
+console.log("✅ App.js fully loaded");
