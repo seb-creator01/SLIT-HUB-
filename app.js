@@ -14,6 +14,37 @@ function saveMarketplace() { localStorage.setItem('marketplace', JSON.stringify(
 function saveGroups() { localStorage.setItem('groups', JSON.stringify(groupsData)); }
 
 // ============================
+// CLOUDINARY UPLOAD (WORKS FOR BOTH IMAGES AND PDFS)
+// ============================
+const CLOUDINARY_UPLOAD_PRESET = "sebastian_preset";
+
+async function uploadFile(file) {
+    const isPDF = file.type === 'application/pdf';
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    
+    // Use different endpoint for PDFs vs Images
+    const uploadUrl = isPDF 
+        ? "https://api.cloudinary.com/v1_1/dwsc9eumf/raw/upload"
+        : "https://api.cloudinary.com/v1_1/dwsc9eumf/image/upload";
+    
+    const res = await fetch(uploadUrl, {
+        method: 'POST',
+        body: formData
+    });
+    
+    const data = await res.json();
+    
+    if (!res.ok) {
+        throw new Error(data.error?.message || 'Upload failed');
+    }
+    
+    return data.secure_url;
+}
+
+// ============================
 // BOOTUP
 // ============================
 window.addEventListener('DOMContentLoaded', () => {
@@ -125,37 +156,27 @@ window.processAcademicPost = async function() {
         return;
     }
 
-    btn.innerHTML = `<i class="fa-solid fa-bolt animate-pulse"></i> PROCESSING...`;
+    btn.innerHTML = `<i class="fa-solid fa-bolt animate-pulse"></i> UPLOADING...`;
     btn.disabled = true;
 
-    let fileData = null;
-    let fileName = null;
-    let fileType = null;
+    let fileUrl = "";
     
     if(file){
         try {
-            fileName = file.name;
-            fileType = file.type;
-            const reader = new FileReader();
-            fileData = await new Promise((resolve, reject) => {
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = () => reject();
-                reader.readAsDataURL(file);
-            });
+            fileUrl = await uploadFile(file);
         } catch(err) {
-            alert("Failed to read file");
+            alert("Upload failed: " + err.message);
             btn.disabled = false;
-            btn.innerHTML = "RETRY";
+            btn.innerHTML = "RETRY PUBLISH";
             return;
         }
     }
 
     const newPost = {
         id: Date.now(),
-        type, level, title, desc,
-        fileData: fileData,
-        fileName: fileName,
-        fileType: fileType,
+        type, level, title, desc, fileUrl,
+        fileName: file ? file.name : null,
+        fileType: file ? file.type : null,
         timestamp: new Date().toISOString()
     };
     
@@ -186,18 +207,20 @@ window.loadAcademicMaterials = async function(levelFilter='all'){
     container.innerHTML = "";
     data.forEach(d => {
         const icon = d.type==='exam'?'🎓':d.type==='test'?'📝':d.type==='lecture'?'📅':'📚';
-        const isPDF = d.fileType === 'application/pdf';
+        const isPDF = d.fileType === 'application/pdf' || (d.fileUrl && d.fileUrl.includes('raw/upload'));
         
         let fileHtml = '';
-        if(d.fileData) {
+        if(d.fileUrl) {
             if(isPDF) {
+                // Both VIEW ONLINE and DOWNLOAD options for PDFs
                 fileHtml = `
-                    <div class="mt-3">
-                        <a href="${d.fileData}" download="${d.fileName || 'document.pdf'}" class="block text-center bg-emerald-600 text-white px-3 py-2 rounded-xl text-[10px] font-black">📥 DOWNLOAD PDF</a>
+                    <div class="flex gap-2 mt-3">
+                        <a href="${d.fileUrl}" target="_blank" class="flex-1 text-center bg-emerald-600 text-white px-3 py-2 rounded-xl text-[10px] font-black">📖 OPEN PDF</a>
+                        <a href="${d.fileUrl}" download="${d.fileName || 'document.pdf'}" class="flex-1 text-center bg-slate-600 text-white px-3 py-2 rounded-xl text-[10px] font-black">📥 DOWNLOAD</a>
                     </div>
                 `;
-            } else if(d.fileData.startsWith('data:image')) {
-                fileHtml = `<img src="${d.fileData}" class="mt-2 w-full h-32 object-cover rounded-xl">`;
+            } else {
+                fileHtml = `<a href="${d.fileUrl}" target="_blank" class="inline-block mt-3 text-emerald-600 font-black text-[9px] underline">🖼️ VIEW IMAGE <i class="fa-solid fa-up-right-from-square"></i></a>`;
             }
         }
         
@@ -218,7 +241,7 @@ window.loadAcademicMaterials = async function(levelFilter='all'){
 function renderAcademics() {}
 
 // ============================
-// STUDY GROUPS (Keep your existing code)
+// STUDY GROUPS
 // ============================
 window.openGroupModal = function(){
     const modal = document.getElementById('modal-overlay');
@@ -350,23 +373,18 @@ window.processMarketPost = async function(){
         return;
     }
 
-    btn.innerHTML = `<i class="fa-solid fa-bolt animate-pulse"></i> PROCESSING...`;
+    btn.innerHTML = `<i class="fa-solid fa-bolt animate-pulse"></i> UPLOADING...`;
     btn.disabled = true;
 
     let imageUrl = "https://ui-avatars.com/api/?name=Hub&background=10b981&color=fff";
 
     if(file){
         try {
-            const reader = new FileReader();
-            imageUrl = await new Promise((resolve, reject) => {
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = () => reject();
-                reader.readAsDataURL(file);
-            });
+            imageUrl = await uploadFile(file);
         } catch(err) {
-            alert("Upload failed");
+            alert("Upload failed: " + err.message);
             btn.disabled = false;
-            btn.innerHTML = "RETRY";
+            btn.innerHTML = "RETRY POST";
             return;
         }
     }
