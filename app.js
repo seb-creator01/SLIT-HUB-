@@ -14,44 +14,17 @@ function saveMarketplace() { localStorage.setItem('marketplace', JSON.stringify(
 function saveGroups() { localStorage.setItem('groups', JSON.stringify(groupsData)); }
 
 // ============================
-// CLOUDINARY UPLOAD (WORKS FOR IMAGES AND PDFS)
+// UPLOAD FUNCTION - STORES PDFs AS BASE64 (NO CLOUDINARY NEEDED)
 // ============================
-const CLOUDINARY_UPLOAD_PRESET = "sebastian_preset";
-
 async function uploadFile(file) {
-    const isPDF = file.type === 'application/pdf';
-    
-    if (isPDF) {
-        // PDFs to Cloudinary as raw file
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-        
-        const res = await fetch('https://api.cloudinary.com/v1_1/dwsc9eumf/raw/upload', {
-            method: 'POST',
-            body: formData
-        });
-        
-        const data = await res.json();
-        
-        if (!res.ok) throw new Error(data.error?.message || 'PDF upload failed');
-        return data.secure_url;
-    } else {
-        // Images to Cloudinary
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-        
-        const res = await fetch('https://api.cloudinary.com/v1_1/dwsc9eumf/image/upload', {
-            method: 'POST',
-            body: formData
-        });
-        
-        const data = await res.json();
-        
-        if (!res.ok) throw new Error(data.error?.message || 'Upload failed');
-        return data.secure_url;
-    }
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => {
+            resolve(reader.result);
+        };
+        reader.onerror = () => reject('Failed to read file');
+    });
 }
 
 // ============================
@@ -215,17 +188,16 @@ window.loadAcademicMaterials = async function(levelFilter='all'){
     container.innerHTML = "";
     data.forEach(d => {
         const icon = d.type==='exam'?'🎓':d.type==='test'?'📝':d.type==='lecture'?'📅':'📚';
-        const isPDF = d.fileUrl && (d.fileUrl.includes('.pdf') || d.fileUrl.includes('raw/upload'));
+        const isPDF = d.fileUrl && d.fileUrl.startsWith('data:application/pdf');
         
         let fileHtml = '';
         if(d.fileUrl) {
             if(isPDF) {
-                // Both VIEW ONLINE and DOWNLOAD options for PDFs
-                const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(d.fileUrl)}&embedded=true`;
+                // For PDFs: Both VIEW and DOWNLOAD options
                 fileHtml = `
                     <div class="flex gap-2 mt-3">
-                        <a href="${viewerUrl}" target="_blank" class="flex-1 text-center bg-emerald-600 text-white px-3 py-2 rounded-xl text-[10px] font-black">📖 VIEW ONLINE</a>
-                        <a href="${d.fileUrl}" download class="flex-1 text-center bg-slate-600 text-white px-3 py-2 rounded-xl text-[10px] font-black">📥 DOWNLOAD</a>
+                        <a href="${d.fileUrl}" target="_blank" class="flex-1 text-center bg-emerald-600 text-white px-3 py-2 rounded-xl text-[10px] font-black">📖 OPEN PDF</a>
+                        <a href="${d.fileUrl}" download="${d.title}.pdf" class="flex-1 text-center bg-slate-600 text-white px-3 py-2 rounded-xl text-[10px] font-black">📥 DOWNLOAD</a>
                     </div>
                 `;
             } else {
