@@ -1,32 +1,21 @@
 import { DEPARTMENTS, EXECUTIVES, STUDY_CATEGORIES, UI_CONFIG } from './data.js';
 
 // ============================
-// SIMPLE STORAGE USING LOCALSTORAGE (NO FIREBASE NEEDED)
+// SIMPLE STORAGE USING LOCALSTORAGE
 // ============================
 
-// Load data from localStorage or use default
 let academicsData = JSON.parse(localStorage.getItem('academics')) || [];
 let marketplaceData = JSON.parse(localStorage.getItem('marketplace')) || [];
 let groupsData = JSON.parse(localStorage.getItem('groups')) || [];
 let broadcastData = localStorage.getItem('broadcast') || "Welcome to SLIT-HUB! 🎓";
 
-// Save functions
-function saveAcademics() {
-    localStorage.setItem('academics', JSON.stringify(academicsData));
-}
-
-function saveMarketplace() {
-    localStorage.setItem('marketplace', JSON.stringify(marketplaceData));
-}
-
-function saveGroups() {
-    localStorage.setItem('groups', JSON.stringify(groupsData));
-}
+function saveAcademics() { localStorage.setItem('academics', JSON.stringify(academicsData)); }
+function saveMarketplace() { localStorage.setItem('marketplace', JSON.stringify(marketplaceData)); }
+function saveGroups() { localStorage.setItem('groups', JSON.stringify(groupsData)); }
 
 // ============================
-// CLOUDINARY UPLOAD (WORKING)
+// CLOUDINARY UPLOAD (WORKS FOR BOTH IMAGES AND PDFS)
 // ============================
-const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dwsc9eumf/image/upload";
 const CLOUDINARY_UPLOAD_PRESET = "sebastian_preset";
 
 async function uploadFile(file) {
@@ -34,10 +23,23 @@ async function uploadFile(file) {
     formData.append('file', file);
     formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
     
-    const res = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
+    // Use different endpoint for PDFs vs Images
+    const isPDF = file.type === 'application/pdf';
+    const uploadUrl = isPDF 
+        ? "https://api.cloudinary.com/v1_1/dwsc9eumf/raw/upload"
+        : "https://api.cloudinary.com/v1_1/dwsc9eumf/image/upload";
+    
+    const res = await fetch(uploadUrl, { 
+        method: 'POST', 
+        body: formData 
+    });
+    
     const data = await res.json();
     
-    if (!res.ok) throw new Error(data.error?.message);
+    if (!res.ok) {
+        throw new Error(data.error?.message || "Upload failed");
+    }
+    
     return data.secure_url;
 }
 
@@ -69,9 +71,6 @@ window.addEventListener('DOMContentLoaded', () => {
     loadBroadcastMessage();
 });
 
-// ============================
-// TAB NAVIGATION
-// ============================
 window.switchTab = function(tabId) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
     const target = document.getElementById(`tab-${tabId}`);
@@ -88,9 +87,6 @@ window.switchTab = function(tabId) {
     }
 };
 
-// ============================
-// ADMIN TRIGGER
-// ============================
 document.getElementById('admin-trigger').onclick = () => {
     const pass = prompt("Enter Developer Secret 🛡️:");
     if(pass === "junior123") {
@@ -175,7 +171,6 @@ window.processAcademicPost = async function() {
         }
     }
 
-    // Save to localStorage instead of Firebase
     const newPost = {
         id: Date.now(),
         type, level, title, desc, fileUrl,
@@ -209,10 +204,15 @@ window.loadAcademicMaterials = async function(levelFilter='all'){
     container.innerHTML = "";
     data.forEach(d => {
         const icon = d.type==='exam'?'🎓':d.type==='test'?'📝':d.type==='lecture'?'📅':'📚';
+        const isPDF = d.fileUrl && (d.fileUrl.includes('.pdf') || d.fileUrl.includes('raw/upload'));
         
         let fileHtml = '';
         if(d.fileUrl) {
-            fileHtml = `<a href="${d.fileUrl}" target="_blank" class="inline-block mt-3 text-emerald-600 font-black text-[9px] underline">📄 VIEW ATTACHMENT <i class="fa-solid fa-up-right-from-square"></i></a>`;
+            if(isPDF) {
+                fileHtml = `<a href="${d.fileUrl}" target="_blank" class="inline-block mt-3 text-emerald-600 font-black text-[9px] underline">📄 VIEW PDF <i class="fa-solid fa-up-right-from-square"></i></a>`;
+            } else {
+                fileHtml = `<a href="${d.fileUrl}" target="_blank" class="inline-block mt-3 text-emerald-600 font-black text-[9px] underline">🖼️ VIEW IMAGE <i class="fa-solid fa-up-right-from-square"></i></a>`;
+            }
         }
         
         container.innerHTML += `
@@ -380,7 +380,6 @@ window.processMarketPost = async function(){
         }
     }
 
-    // Save to localStorage
     const newItem = {
         id: Date.now(),
         name, price:Number(price), type, phone, negotiable, image:imageUrl,
@@ -459,25 +458,16 @@ function escapeHtml(str) {
     });
 }
 
-// ============================
-// LEVEL FILTERS
-// ============================
 window.filterByLevel = function(level='all') {
     document.querySelectorAll('.lvl-btn').forEach(btn => btn.classList.remove('active-lvl'));
     document.querySelector(`.lvl-btn[data-level="${level}"]`)?.classList.add('active-lvl');
     loadAcademicMaterials(level);
 };
 
-// ============================
-// MODAL CLOSE
-// ============================
 document.getElementById('close-modal')?.addEventListener('click', () => {
     document.getElementById('modal-overlay').classList.add('hidden');
 });
 
-// ============================
-// INITIAL LOADS
-// ============================
 loadAcademicMaterials();
 loadVerifiedGroups();
 loadMarketDisplay('items');
