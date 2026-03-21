@@ -20,17 +20,16 @@ if (typeof firebase !== 'undefined') {
 
 const db = firebase.firestore();
 
-// Cloudinary config
-const CLOUDINARY_CLOUD_NAME = "ddm87a9p2";
-const CLOUDINARY_UPLOAD_PRESET = "slit_hub";
-
-// CORS Proxy (bypasses CORS restrictions)
-const CORS_PROXY = "https://cors-anywhere.herokuapp.com/";
+// ============================
+// YOUR WORKING CLOUDINARY CONFIG
+// ============================
+const CLOUDINARY_CLOUD_NAME = "dwsc9eumf";
+const CLOUDINARY_UPLOAD_PRESET = "sebastian_preset";
 
 // ============================
-// UPLOAD FUNCTION - BYPASSES CORS
+// UPLOAD FUNCTION - USES YOUR WORKING CONFIG
 // ============================
-async function uploadToCloudinary(file) {
+async function uploadFile(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
@@ -40,20 +39,21 @@ async function uploadToCloudinary(file) {
             formData.append('file', reader.result);
             formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
             
-            // Detect file type
+            // Check if it's a PDF
             const isPDF = file.type === 'application/pdf';
-            const resourceType = isPDF ? 'raw' : 'image';
             
-            // Use proxy to bypass CORS
-            const uploadUrl = `${CORS_PROXY}https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`;
+            // Use different endpoint for PDFs vs Images
+            let uploadUrl;
+            if (isPDF) {
+                uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/raw/upload`;
+            } else {
+                uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+            }
             
             try {
                 const response = await fetch(uploadUrl, {
                     method: 'POST',
-                    body: formData,
-                    headers: {
-                        'Origin': window.location.origin
-                    }
+                    body: formData
                 });
                 
                 const data = await response.json();
@@ -64,23 +64,7 @@ async function uploadToCloudinary(file) {
                     reject(data.error?.message || 'Upload failed');
                 }
             } catch(err) {
-                // If proxy fails, try direct upload
-                console.log("Proxy failed, trying direct...");
-                try {
-                    const directUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`;
-                    const directResponse = await fetch(directUrl, {
-                        method: 'POST',
-                        body: formData
-                    });
-                    const directData = await directResponse.json();
-                    if (directResponse.ok) {
-                        resolve(directData.secure_url);
-                    } else {
-                        reject(directData.error?.message || 'Upload failed');
-                    }
-                } catch(directErr) {
-                    reject('Upload failed: ' + directErr.message);
-                }
+                reject('Upload error: ' + err.message);
             }
         };
         
@@ -213,7 +197,7 @@ window.processAcademicPost = async function() {
     
     if(file){
         try {
-            fileUrl = await uploadToCloudinary(file);
+            fileUrl = await uploadFile(file);
             alert("✅ Upload successful!");
         } catch(err) {
             alert("Upload failed: " + err);
@@ -266,7 +250,7 @@ window.loadAcademicMaterials = async function(levelFilter='all'){
                     if(isPDF) {
                         fileHtml = `<a href="${d.fileUrl}" target="_blank" class="inline-block mt-3 text-emerald-600 font-black text-[9px] underline">📄 VIEW PDF <i class="fa-solid fa-up-right-from-square"></i></a>`;
                     } else {
-                        fileHtml = `<a href="${d.fileUrl}" target="_blank" class="inline-block mt-3 text-emerald-600 font-black text-[9px] underline">🖼️ VIEW ATTACHMENT <i class="fa-solid fa-up-right-from-square"></i></a>`;
+                        fileHtml = `<a href="${d.fileUrl}" target="_blank" class="inline-block mt-3 text-emerald-600 font-black text-[9px] underline">🖼️ VIEW IMAGE <i class="fa-solid fa-up-right-from-square"></i></a>`;
                     }
                 }
                 
@@ -437,9 +421,13 @@ window.processMarketPost = async function(){
             formData.append('file', base64);
             formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
             
-            const uploadUrl = `${CORS_PROXY}https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+            const uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
             
-            const response = await fetch(uploadUrl, { method: 'POST', body: formData });
+            const response = await fetch(uploadUrl, {
+                method: 'POST',
+                body: formData
+            });
+            
             const data = await response.json();
             
             if(response.ok) {
