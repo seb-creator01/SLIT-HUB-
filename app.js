@@ -20,14 +20,12 @@ if (typeof firebase !== 'undefined') {
 
 const db = firebase.firestore();
 
-// ============================
 // YOUR WORKING CLOUDINARY CONFIG
-// ============================
 const CLOUDINARY_CLOUD_NAME = "dwsc9eumf";
 const CLOUDINARY_UPLOAD_PRESET = "sebastian_preset";
 
 // ============================
-// UPLOAD FUNCTION - USES YOUR WORKING CONFIG
+// UPLOAD FUNCTION WITH ERROR DISPLAY
 // ============================
 async function uploadFile(file) {
     return new Promise((resolve, reject) => {
@@ -39,16 +37,10 @@ async function uploadFile(file) {
             formData.append('file', reader.result);
             formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
             
-            // Check if it's a PDF
             const isPDF = file.type === 'application/pdf';
+            const resourceType = isPDF ? 'raw' : 'image';
             
-            // Use different endpoint for PDFs vs Images
-            let uploadUrl;
-            if (isPDF) {
-                uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/raw/upload`;
-            } else {
-                uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
-            }
+            const uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`;
             
             try {
                 const response = await fetch(uploadUrl, {
@@ -61,10 +53,11 @@ async function uploadFile(file) {
                 if (response.ok) {
                     resolve(data.secure_url);
                 } else {
-                    reject(data.error?.message || 'Upload failed');
+                    // Show the actual error from Cloudinary
+                    reject(`Cloudinary Error: ${data.error?.message || JSON.stringify(data)}`);
                 }
             } catch(err) {
-                reject('Upload error: ' + err.message);
+                reject(`Network Error: ${err.message}`);
             }
         };
         
@@ -243,15 +236,10 @@ window.loadAcademicMaterials = async function(levelFilter='all'){
             snap.forEach(doc=>{
                 const d = doc.data();
                 const icon = d.type==='exam'?'🎓':d.type==='test'?'📝':d.type==='lecture'?'📅':'📚';
-                const isPDF = d.fileUrl && (d.fileUrl.includes('.pdf') || d.fileUrl.includes('drive'));
                 
                 let fileHtml = '';
                 if(d.fileUrl) {
-                    if(isPDF) {
-                        fileHtml = `<a href="${d.fileUrl}" target="_blank" class="inline-block mt-3 text-emerald-600 font-black text-[9px] underline">📄 VIEW PDF <i class="fa-solid fa-up-right-from-square"></i></a>`;
-                    } else {
-                        fileHtml = `<a href="${d.fileUrl}" target="_blank" class="inline-block mt-3 text-emerald-600 font-black text-[9px] underline">🖼️ VIEW IMAGE <i class="fa-solid fa-up-right-from-square"></i></a>`;
-                    }
+                    fileHtml = `<a href="${d.fileUrl}" target="_blank" class="inline-block mt-3 text-emerald-600 font-black text-[9px] underline">📄 VIEW ATTACHMENT <i class="fa-solid fa-up-right-from-square"></i></a>`;
                 }
                 
                 container.innerHTML += `
@@ -433,7 +421,7 @@ window.processMarketPost = async function(){
             if(response.ok) {
                 imageUrl = data.secure_url;
             } else {
-                throw new Error(data.error?.message);
+                throw new Error(data.error?.message || 'Upload failed');
             }
         } catch(err) {
             alert("Upload failed: " + err.message);
