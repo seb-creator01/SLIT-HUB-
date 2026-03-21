@@ -20,14 +20,19 @@ if (typeof firebase !== 'undefined') {
 
 const db = firebase.firestore();
 
-// YOUR WORKING CLOUDINARY CONFIG
+// Test Firebase connection immediately
+db.collection('test').doc('connection').set({ time: new Date().toISOString() })
+    .then(() => console.log('✅ Firebase connected'))
+    .catch(err => alert('Firebase connection failed: ' + err.message));
+
+// YOUR CLOUDINARY CONFIG
 const CLOUDINARY_CLOUD_NAME = "dwsc9eumf";
 const CLOUDINARY_UPLOAD_PRESET = "sebastian_preset";
 
 // ============================
-// COMPRESS IMAGE BEFORE UPLOAD (CRITICAL FOR MOBILE)
+// COMPRESS IMAGE
 // ============================
-async function compressImage(file, maxWidth = 800, quality = 0.7) {
+async function compressImage(file, maxWidth = 800, quality = 0.6) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
@@ -60,16 +65,14 @@ async function compressImage(file, maxWidth = 800, quality = 0.7) {
 }
 
 // ============================
-// UPLOAD TO CLOUDINARY WITH TIMEOUT
+// UPLOAD TO CLOUDINARY
 // ============================
 async function uploadToCloudinary(file) {
     return new Promise(async (resolve, reject) => {
         try {
-            // Compress first (reduces size by 70-80%)
             let fileToUpload = file;
             if (file.type.startsWith('image/')) {
                 fileToUpload = await compressImage(file, 800, 0.6);
-                console.log("Compressed size:", (fileToUpload.size / 1024).toFixed(2), "KB");
             }
             
             const reader = new FileReader();
@@ -84,35 +87,19 @@ async function uploadToCloudinary(file) {
                 const resourceType = isPDF ? 'raw' : 'image';
                 const uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`;
                 
-                // Set timeout for upload (30 seconds)
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 30000);
+                const response = await fetch(uploadUrl, {
+                    method: 'POST',
+                    body: formData
+                });
                 
-                try {
-                    const response = await fetch(uploadUrl, {
-                        method: 'POST',
-                        body: formData,
-                        signal: controller.signal
-                    });
-                    
-                    clearTimeout(timeoutId);
-                    const data = await response.json();
-                    
-                    if (response.ok) {
-                        resolve(data.secure_url);
-                    } else {
-                        reject(data.error?.message || 'Upload failed');
-                    }
-                } catch (fetchError) {
-                    clearTimeout(timeoutId);
-                    if (fetchError.name === 'AbortError') {
-                        reject('Upload timeout - file too large or slow connection');
-                    } else {
-                        reject(fetchError.message);
-                    }
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resolve(data.secure_url);
+                } else {
+                    reject(data.error?.message || 'Upload failed');
                 }
             };
-            
             reader.onerror = () => reject('Failed to read file');
         } catch (error) {
             reject(error.message);
@@ -267,10 +254,25 @@ window.processAcademicPost = async function() {
     try {
         btn.innerHTML = `<i class="fa-solid fa-bolt animate-pulse"></i> SAVING...`;
         
-        await db.collection('Academics').add({
-            type, level, title, desc, fileUrl,
+        // Create the data object
+        const postData = {
+            type: type,
+            level: level,
+            title: title,
+            desc: desc,
+            fileUrl: fileUrl,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
+        };
+        
+        console.log("Saving to Firebase:", postData);
+        
+        // Add to Firestore with timeout
+        const savePromise = db.collection('Academics').add(postData);
+        const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Firebase timeout - check internet')), 15000)
+        );
+        
+        await Promise.race([savePromise, timeoutPromise]);
 
         btn.innerHTML = "SUCCESS! 🎉";
         setTimeout(() => {
@@ -278,7 +280,7 @@ window.processAcademicPost = async function() {
             loadAcademicMaterials();
         }, 500);
     } catch(err) {
-        alert("Database error: " + err.message);
+        alert("Save failed: " + err.message);
         btn.disabled = false;
         btn.innerHTML = "RETRY PUBLISH";
     }
@@ -302,15 +304,10 @@ window.loadAcademicMaterials = async function(levelFilter='all'){
             snap.forEach(doc=>{
                 const d = doc.data();
                 const icon = d.type==='exam'?'🎓':d.type==='test'?'📝':d.type==='lecture'?'📅':'📚';
-                const isPDF = d.fileUrl && d.fileUrl.includes('.pdf');
                 
                 let fileHtml = '';
                 if(d.fileUrl) {
-                    if(isPDF) {
-                        fileHtml = `<a href="${d.fileUrl}" target="_blank" class="inline-block mt-3 text-emerald-600 font-black text-[9px] underline">📄 VIEW PDF <i class="fa-solid fa-up-right-from-square"></i></a>`;
-                    } else {
-                        fileHtml = `<a href="${d.fileUrl}" target="_blank" class="inline-block mt-3 text-emerald-600 font-black text-[9px] underline">🖼️ VIEW IMAGE <i class="fa-solid fa-up-right-from-square"></i></a>`;
-                    }
+                    fileHtml = `<a href="${d.fileUrl}" target="_blank" class="inline-block mt-3 text-emerald-600 font-black text-[9px] underline">📄 VIEW ATTACHMENT <i class="fa-solid fa-up-right-from-square"></i></a>`;
                 }
                 
                 container.innerHTML += `
@@ -334,7 +331,7 @@ window.loadAcademicMaterials = async function(levelFilter='all'){
 function renderAcademics() {}
 
 // ============================
-// STUDY GROUPS
+// STUDY GROUPS (Keep your existing code)
 // ============================
 window.openGroupModal = function(){
     const modal = document.getElementById('modal-overlay');
@@ -494,16 +491,11 @@ window.processMarketPost = async function(){
             
             const uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
             
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 30000);
-            
             const response = await fetch(uploadUrl, {
                 method: 'POST',
-                body: formData,
-                signal: controller.signal
+                body: formData
             });
             
-            clearTimeout(timeoutId);
             const data = await response.json();
             
             if(response.ok) {
