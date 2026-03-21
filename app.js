@@ -14,33 +14,45 @@ function saveMarketplace() { localStorage.setItem('marketplace', JSON.stringify(
 function saveGroups() { localStorage.setItem('groups', JSON.stringify(groupsData)); }
 
 // ============================
-// CLOUDINARY UPLOAD (WORKS FOR BOTH IMAGES AND PDFS)
+// CLOUDINARY UPLOAD (WORKS FOR IMAGES)
 // ============================
 const CLOUDINARY_UPLOAD_PRESET = "sebastian_preset";
 
 async function uploadFile(file) {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-    
-    // Use different endpoint for PDFs vs Images
     const isPDF = file.type === 'application/pdf';
-    const uploadUrl = isPDF 
-        ? "https://api.cloudinary.com/v1_1/dwsc9eumf/raw/upload"
-        : "https://api.cloudinary.com/v1_1/dwsc9eumf/image/upload";
     
-    const res = await fetch(uploadUrl, { 
-        method: 'POST', 
-        body: formData 
-    });
-    
-    const data = await res.json();
-    
-    if (!res.ok) {
-        throw new Error(data.error?.message || "Upload failed");
+    if (isPDF) {
+        // For PDFs: Upload to Cloudinary as raw file
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+        
+        // Use raw upload endpoint for PDFs
+        const res = await fetch('https://api.cloudinary.com/v1_1/dwsc9eumf/raw/upload', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await res.json();
+        
+        if (!res.ok) throw new Error(data.error?.message || 'PDF upload failed');
+        return data.secure_url;
+    } else {
+        // Images to Cloudinary
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+        
+        const res = await fetch('https://api.cloudinary.com/v1_1/dwsc9eumf/image/upload', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await res.json();
+        
+        if (!res.ok) throw new Error(data.error?.message || 'Upload failed');
+        return data.secure_url;
     }
-    
-    return data.secure_url;
 }
 
 // ============================
@@ -209,7 +221,9 @@ window.loadAcademicMaterials = async function(levelFilter='all'){
         let fileHtml = '';
         if(d.fileUrl) {
             if(isPDF) {
-                fileHtml = `<a href="${d.fileUrl}" target="_blank" class="inline-block mt-3 text-emerald-600 font-black text-[9px] underline">📄 VIEW PDF <i class="fa-solid fa-up-right-from-square"></i></a>`;
+                // Use Google Drive viewer to open PDFs - this is the fix!
+                const viewerUrl = `https://drive.google.com/viewerng/viewer?url=${encodeURIComponent(d.fileUrl)}`;
+                fileHtml = `<a href="${viewerUrl}" target="_blank" class="inline-block mt-3 text-emerald-600 font-black text-[9px] underline">📄 OPEN PDF <i class="fa-solid fa-up-right-from-square"></i></a>`;
             } else {
                 fileHtml = `<a href="${d.fileUrl}" target="_blank" class="inline-block mt-3 text-emerald-600 font-black text-[9px] underline">🖼️ VIEW IMAGE <i class="fa-solid fa-up-right-from-square"></i></a>`;
             }
