@@ -1,6 +1,6 @@
 import { DEPARTMENTS, EXECUTIVES, STUDY_CATEGORIES, UI_CONFIG } from './data.js';
 
-// 1. INITIALIZE FIREBASE (Using your slithub-17a41 config)
+// 1. INITIALIZE FIREBASE
 const firebaseConfig = {
     apiKey: "AIzaSyAsS...", 
     authDomain: "slithub-17a41.firebaseapp.com",
@@ -10,7 +10,6 @@ const firebaseConfig = {
     appId: "1:1056588267605:web:0786..."
 };
 
-// Check if firebase is defined (compat mode)
 if (typeof firebase !== 'undefined') {
     firebase.initializeApp(firebaseConfig);
 }
@@ -18,7 +17,6 @@ const db = firebase.firestore();
 
 // 2. BOOTUP SEQUENCE
 window.addEventListener('DOMContentLoaded', () => {
-    // Kill the Spinner
     setTimeout(() => {
         const splash = document.getElementById('splash-screen');
         if(splash) {
@@ -27,13 +25,10 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     }, 1500);
 
-    // BRIDGE: Setup Marketplace Filter Click Listeners
     document.querySelectorAll('.m-filter').forEach(btn => {
         btn.addEventListener('click', function() {
             const type = this.getAttribute('data-filter');
-            // Remove active class from all
             document.querySelectorAll('.m-filter').forEach(b => b.classList.remove('active', 'bg-white', 'text-emerald-600', 'shadow-sm'));
-            // Add to this one
             this.classList.add('active', 'bg-white', 'text-emerald-600', 'shadow-sm');
             loadMarketDisplay(type);
         });
@@ -42,10 +37,10 @@ window.addEventListener('DOMContentLoaded', () => {
     renderAcademics();
     loadVerifiedGroups();
     loadMarketDisplay('items'); 
-    loadAcademicMaterials(); // NEW: Sync Academic Feed on start
+    loadAcademicMaterials();
 });
 
-// 3. TAB NAVIGATION (FIXED)
+// 3. TAB NAVIGATION
 window.switchTab = function(tabId) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
     const target = document.getElementById(`tab-${tabId}`);
@@ -63,7 +58,7 @@ window.switchTab = function(tabId) {
     }
 };
 
-// 4. ADMIN TRIGGER (FIXED)
+// 4. ADMIN TRIGGER
 document.getElementById('admin-trigger').onclick = () => {
     const pass = prompt("Enter Developer Secret 🛡️:");
     if(pass === "junior123") {
@@ -75,10 +70,8 @@ document.getElementById('admin-trigger').onclick = () => {
 };
 
 // ==========================================
-// ACADEMIC HUB (Lectures, Exams, Materials)
+// ACADEMIC HUB
 // ==========================================
-
-// 1. OPEN ACADEMIC MODAL (Role Protected)
 window.openAcademicModal = function() {
     const isRep = confirm("Are you a Course Rep? 🎓\nOnly Reps can post Schedules, Tests, and Exams.");
     if(!isRep) return;
@@ -124,14 +117,15 @@ window.openAcademicModal = function() {
     `;
 };
 
-// 2. PROCESS ACADEMIC POST (PRO PERFORMANCE)
+// Process Academic Post
 window.processAcademicPost = async function() {
     const btn = document.getElementById('acad-submit-btn');
-    const file = document.getElementById('acad-file').files[0];
+    const fileInput = document.getElementById('acad-file');
+    const file = fileInput.files[0];
     const type = document.getElementById('acad-type').value;
     const level = document.getElementById('acad-level').value;
-    const title = document.getElementById('acad-title').value;
-    const desc = document.getElementById('acad-desc').value;
+    const title = document.getElementById('acad-title').value.trim();
+    const desc = document.getElementById('acad-desc').value.trim();
 
     if(!title || !desc) return alert("Please fill Title and Description!");
 
@@ -139,33 +133,35 @@ window.processAcademicPost = async function() {
     btn.disabled = true;
 
     let fileUrl = "";
+
     if(file) {
         try {
             let uploadBlob = file;
-            if (file.type.startsWith('image/')) {
+
+            if(file.type.startsWith('image/')) {
                 uploadBlob = await compressImage(file, 0.5, 500);
             }
 
             btn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up animate-bounce"></i> SYNCING...`;
-            
+
             const formData = new FormData();
             formData.append('file', uploadBlob);
             formData.append('upload_preset', 'SLIT-HUB');
-            formData.append('cloud_name', 'ddm87a9p2'); // FIX
 
-            const res = await fetch("https://api.cloudinary.com/v1_1/ddm87a9p2/image/upload", {
+            const CLOUD_NAME = "ddm87a9p2";
+            const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
                 method: 'POST',
                 body: formData
             });
 
             const data = await res.json();
-            console.log(data);
-            if (!res.ok) throw new Error(data.error?.message || 'Cloudinary Failed');
+            if(!res.ok) throw new Error(data.error?.message || 'Cloudinary Upload Failed');
+
             fileUrl = data.secure_url;
-        } catch (err) { 
-            console.error(err); 
-            btn.disabled = false;
+        } catch(err) {
+            console.error(err);
             btn.innerText = "RETRY PUBLISH";
+            btn.disabled = false;
             return alert(`File Upload Error: ${err.message}`);
         }
     }
@@ -182,11 +178,11 @@ window.processAcademicPost = async function() {
     }, 500);
 };
 
-// 3. LOAD ACADEMIC UPDATES
+// Load Academic Materials
 window.loadAcademicMaterials = async function(levelFilter = 'all') {
     const container = document.getElementById('academic-list');
     if(!container) return;
-    
+
     container.innerHTML = "<p class='text-center p-10 animate-pulse text-xs text-slate-400'>Loading Resources...</p>";
     
     let query = db.collection('Academics').orderBy('timestamp', 'desc');
@@ -213,14 +209,10 @@ window.loadAcademicMaterials = async function(levelFilter = 'all') {
     });
 };
 
-// 4. FILTER ACADEMIC HUB BY LEVEL
+// Filter Academic Hub by Level
 window.filterByLevel = function(level) {
-    document.querySelectorAll('.lvl-btn').forEach(btn => {
-        btn.classList.remove('active-lvl');
-        if(btn.dataset.level === level) {
-            btn.classList.add('active-lvl');
-        }
-    });
+    document.querySelectorAll('.lvl-btn').forEach(btn => btn.classList.remove('active-lvl'));
+    document.querySelector(`.lvl-btn[data-level="${level}"]`)?.classList.add('active-lvl');
     loadAcademicMaterials(level);
 };
 
@@ -240,19 +232,17 @@ window.openGroupModal = function() {
     `;
 };
 
-const studyBtn = document.getElementById('btn-new-group');
-if(studyBtn) studyBtn.onclick = window.openGroupModal;
+document.getElementById('btn-new-group')?.addEventListener('click', window.openGroupModal);
 
 window.submitToFirebase = async () => {
-    const name = document.getElementById('group-name').value;
-    const link = document.getElementById('group-link').value;
+    const name = document.getElementById('group-name').value.trim();
+    const link = document.getElementById('group-link').value.trim();
     if(!name || !link) return alert("Please fill all fields!");
+
     await db.collection('StudyGroups').add({
-        name: name,
-        link: link,
-        status: 'pending',
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        name, link, status: 'pending', timestamp: firebase.firestore.FieldValue.serverTimestamp()
     });
+
     alert("Sent! Junior will verify this shortly. 🚀");
     document.getElementById('modal-overlay').classList.add('hidden');
 };
@@ -296,9 +286,8 @@ async function loadVerifiedGroups() {
 }
 
 // ==========================================
-// MARKETPLACE ENGINE (HIGH PERFORMANCE)
+// MARKETPLACE ENGINE
 // ==========================================
-
 window.openMarketModal = function() {
     const modal = document.getElementById('modal-overlay');
     const content = document.getElementById('modal-content');
@@ -341,17 +330,17 @@ window.openMarketModal = function() {
     `;
 };
 
-const postAdBtn = document.getElementById('btn-post-ad');
-if(postAdBtn) postAdBtn.onclick = window.openMarketModal;
+document.getElementById('btn-post-ad')?.addEventListener('click', window.openMarketModal);
 
+// Marketplace upload function
 window.processMarketPost = async function() {
     const btn = document.getElementById('market-submit-btn');
     const fileInput = document.getElementById('item-image');
     const file = fileInput.files[0];
-    const name = document.getElementById('item-name').value;
-    const price = document.getElementById('item-price').value;
+    const name = document.getElementById('item-name').value.trim();
+    const price = document.getElementById('item-price').value.trim();
     const type = document.getElementById('item-type').value;
-    const phone = document.getElementById('seller-phone').value;
+    const phone = document.getElementById('seller-phone').value.trim();
     const negotiable = document.getElementById('item-negotiable').value;
 
     if(!name || !price || !phone) return alert("Please fill all fields!");
@@ -359,66 +348,81 @@ window.processMarketPost = async function() {
     btn.innerHTML = `<i class="fa-solid fa-bolt animate-pulse"></i> OPTIMIZING...`;
     btn.disabled = true;
 
-    let imageUrl = "https://ui-avatars.com/api/?name=Hub&background=10b981&color=fff"; 
+    let imageUrl = "https://ui-avatars.com/api/?name=Hub&background=10b981&color=fff";
 
     if(file) {
         try {
             const compressedBlob = await compressImage(file, 0.5, 500);
-            btn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up animate-bounce"></i> SENDING...`;
+            btn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up animate-bounce"></i> UPLOADING...`;
 
             const formData = new FormData();
             formData.append('file', compressedBlob);
             formData.append('upload_preset', 'SLIT-HUB');
-            formData.append('cloud_name', 'ddm87a9p2'); // FIXED
 
-            const res = await fetch("https://api.cloudinary.com/v1_1/ddm87a9p2/image/upload", {
+            const CLOUD_NAME = "ddm87a9p2";
+            const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
                 method: 'POST',
                 body: formData
             });
 
             const cloudData = await res.json();
-            console.log(cloudData); // DEBUG
-            if (!res.ok) throw new Error(cloudData.error?.message || 'Cloudinary Failed');
+            if(!res.ok) throw new Error(cloudData.error?.message || 'Cloudinary upload failed');
 
             imageUrl = cloudData.secure_url;
-        } catch (err) {
-            console.error("Upload Error:", err);
+            console.log("Cloudinary URL:", imageUrl);
+
+        } catch(err) {
+            console.error(err);
             btn.innerText = "RETRY POST";
             btn.disabled = false;
-            return alert(`Upload failed. Check your network!`);
+            return alert(`Upload failed! ${err.message}`);
         }
     }
 
-    await db.collection('Marketplace').add({
-        name,
-        price: Number(price),
-        type,
-        phone,
-        negotiable,
-        image: imageUrl,
-        rating: 5.0,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    });
+    // Save listing to Firestore
+    try {
+        await db.collection('Marketplace').add({
+            name,
+            price: Number(price),
+            type,
+            phone,
+            negotiable,
+            image: imageUrl,
+            rating: 5.0,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
 
-    btn.innerHTML = "DONE! 🚀";
-    
-    setTimeout(() => {
-        document.getElementById('modal-overlay').classList.add('hidden');
-        loadMarketDisplay(type);
-    }, 500);
+        btn.innerHTML = "DONE! 🚀";
+
+        setTimeout(() => {
+            document.getElementById('modal-overlay').classList.add('hidden');
+            loadMarketDisplay(type);
+        }, 500);
+
+    } catch(dbErr) {
+        console.error("Firestore Error:", dbErr);
+        btn.innerText = "RETRY POST";
+        btn.disabled = false;
+        alert("Failed to save listing. Check your connection!");
+    }
 };
 
-// PROFESSIONAL IMAGE COMPRESSION
+// ==========================================
+// IMAGE COMPRESSION FUNCTION
+// ==========================================
 async function compressImage(file, quality = 0.5, maxWidth = 500) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
-        reader.onerror = reject;
+        reader.onerror = () => reject(new Error("File read error"));
+
         reader.onload = (event) => {
             const img = new Image();
             img.src = event.target.result;
+            img.onerror = () => reject(new Error("Image load failed"));
+
             img.onload = () => {
-                const scale = Math.min(1, maxWidth / img.width); // FIX: prevent upscaling
+                const scale = Math.min(1, maxWidth / img.width);
                 const canvas = document.createElement('canvas');
                 canvas.width = img.width * scale;
                 canvas.height = img.height * scale;
@@ -426,16 +430,19 @@ async function compressImage(file, quality = 0.5, maxWidth = 500) {
                 ctx.imageSmoothingEnabled = true;
                 ctx.imageSmoothingQuality = 'high';
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
                 canvas.toBlob((blob) => {
                     if (blob) resolve(blob);
-                    else reject(new Error('Compression Error'));
+                    else reject(new Error('Image compression failed'));
                 }, 'image/jpeg', quality);
             };
         };
     });
 }
 
-// LOAD MARKETPLACE DISPLAY
+// ==========================================
+// LOAD MARKET DISPLAY
+// ==========================================
 window.loadMarketDisplay = async function(filterType = 'items') {
     const grid = document.getElementById('market-grid');
     if(!grid) return;
@@ -445,6 +452,7 @@ window.loadMarketDisplay = async function(filterType = 'items') {
                          .where('type', '==', filterType)
                          .orderBy('timestamp', 'desc')
                          .get();
+
     grid.innerHTML = snap.empty ? `<p class='col-span-2 text-center text-slate-300 py-10 italic'>No ${filterType} yet.</p>` : "";
 
     snap.forEach(doc => {
@@ -470,18 +478,22 @@ window.loadMarketDisplay = async function(filterType = 'items') {
     });
 };
 
-// RENDER ACADEMIC PILL CATEGORIES
+// ==========================================
+// ACADEMICS & STUDY CATEGORIES
+// ==========================================
 function renderAcademics() {
     const pContainer = document.getElementById('study-pills');
     if(pContainer && STUDY_CATEGORIES) {
-        pContainer.innerHTML = ""; // Clear existing
+        pContainer.innerHTML = "";
         STUDY_CATEGORIES.forEach(cat => {
             pContainer.innerHTML += `<button class="whitespace-nowrap px-4 py-2 bg-white border border-emerald-100 rounded-full text-[10px] font-bold text-slate-500 shadow-sm">${cat}</button>`;
         });
     }
 }
 
+// ==========================================
 // CLOSE MODAL
+// ==========================================
 document.getElementById('close-modal').onclick = () => {
     document.getElementById('modal-overlay').classList.add('hidden');
 };
