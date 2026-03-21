@@ -14,20 +14,6 @@ function saveMarketplace() { localStorage.setItem('marketplace', JSON.stringify(
 function saveGroups() { localStorage.setItem('groups', JSON.stringify(groupsData)); }
 
 // ============================
-// UPLOAD FUNCTION - STORES PDFs AS BASE64 (NO CLOUDINARY NEEDED)
-// ============================
-async function uploadFile(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => {
-            resolve(reader.result);
-        };
-        reader.onerror = () => reject('Failed to read file');
-    });
-}
-
-// ============================
 // BOOTUP
 // ============================
 window.addEventListener('DOMContentLoaded', () => {
@@ -139,25 +125,37 @@ window.processAcademicPost = async function() {
         return;
     }
 
-    btn.innerHTML = `<i class="fa-solid fa-bolt animate-pulse"></i> UPLOADING...`;
+    btn.innerHTML = `<i class="fa-solid fa-bolt animate-pulse"></i> PROCESSING...`;
     btn.disabled = true;
 
-    let fileUrl = "";
+    let fileData = null;
+    let fileName = null;
+    let fileType = null;
     
     if(file){
         try {
-            fileUrl = await uploadFile(file);
+            fileName = file.name;
+            fileType = file.type;
+            const reader = new FileReader();
+            fileData = await new Promise((resolve, reject) => {
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject();
+                reader.readAsDataURL(file);
+            });
         } catch(err) {
-            alert("Upload failed: " + err.message);
+            alert("Failed to read file");
             btn.disabled = false;
-            btn.innerHTML = "RETRY PUBLISH";
+            btn.innerHTML = "RETRY";
             return;
         }
     }
 
     const newPost = {
         id: Date.now(),
-        type, level, title, desc, fileUrl,
+        type, level, title, desc,
+        fileData: fileData,
+        fileName: fileName,
+        fileType: fileType,
         timestamp: new Date().toISOString()
     };
     
@@ -188,20 +186,18 @@ window.loadAcademicMaterials = async function(levelFilter='all'){
     container.innerHTML = "";
     data.forEach(d => {
         const icon = d.type==='exam'?'🎓':d.type==='test'?'📝':d.type==='lecture'?'📅':'📚';
-        const isPDF = d.fileUrl && d.fileUrl.startsWith('data:application/pdf');
+        const isPDF = d.fileType === 'application/pdf';
         
         let fileHtml = '';
-        if(d.fileUrl) {
+        if(d.fileData) {
             if(isPDF) {
-                // For PDFs: Both VIEW and DOWNLOAD options
                 fileHtml = `
-                    <div class="flex gap-2 mt-3">
-                        <a href="${d.fileUrl}" target="_blank" class="flex-1 text-center bg-emerald-600 text-white px-3 py-2 rounded-xl text-[10px] font-black">📖 OPEN PDF</a>
-                        <a href="${d.fileUrl}" download="${d.title}.pdf" class="flex-1 text-center bg-slate-600 text-white px-3 py-2 rounded-xl text-[10px] font-black">📥 DOWNLOAD</a>
+                    <div class="mt-3">
+                        <a href="${d.fileData}" download="${d.fileName || 'document.pdf'}" class="block text-center bg-emerald-600 text-white px-3 py-2 rounded-xl text-[10px] font-black">📥 DOWNLOAD PDF</a>
                     </div>
                 `;
-            } else {
-                fileHtml = `<a href="${d.fileUrl}" target="_blank" class="inline-block mt-3 text-emerald-600 font-black text-[9px] underline">🖼️ VIEW IMAGE <i class="fa-solid fa-up-right-from-square"></i></a>`;
+            } else if(d.fileData.startsWith('data:image')) {
+                fileHtml = `<img src="${d.fileData}" class="mt-2 w-full h-32 object-cover rounded-xl">`;
             }
         }
         
@@ -222,7 +218,7 @@ window.loadAcademicMaterials = async function(levelFilter='all'){
 function renderAcademics() {}
 
 // ============================
-// STUDY GROUPS
+// STUDY GROUPS (Keep your existing code)
 // ============================
 window.openGroupModal = function(){
     const modal = document.getElementById('modal-overlay');
@@ -354,18 +350,23 @@ window.processMarketPost = async function(){
         return;
     }
 
-    btn.innerHTML = `<i class="fa-solid fa-bolt animate-pulse"></i> UPLOADING...`;
+    btn.innerHTML = `<i class="fa-solid fa-bolt animate-pulse"></i> PROCESSING...`;
     btn.disabled = true;
 
     let imageUrl = "https://ui-avatars.com/api/?name=Hub&background=10b981&color=fff";
 
     if(file){
         try {
-            imageUrl = await uploadFile(file);
+            const reader = new FileReader();
+            imageUrl = await new Promise((resolve, reject) => {
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject();
+                reader.readAsDataURL(file);
+            });
         } catch(err) {
-            alert("Upload failed: " + err.message);
+            alert("Upload failed");
             btn.disabled = false;
-            btn.innerHTML = "RETRY POST";
+            btn.innerHTML = "RETRY";
             return;
         }
     }
