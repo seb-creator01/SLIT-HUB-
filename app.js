@@ -25,43 +25,98 @@ const CLOUDINARY_CLOUD_NAME = "dwsc9eumf";
 const CLOUDINARY_UPLOAD_PRESET = "sebastian_preset";
 
 // ============================
-// UPLOAD FUNCTION WITH ERROR DISPLAY
+// COMPRESS IMAGE BEFORE UPLOAD (CRITICAL FOR MOBILE)
 // ============================
-async function uploadFile(file) {
+async function compressImage(file, maxWidth = 800, quality = 0.7) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
-        
-        reader.onload = async function() {
-            const formData = new FormData();
-            formData.append('file', reader.result);
-            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-            
-            const isPDF = file.type === 'application/pdf';
-            const resourceType = isPDF ? 'raw' : 'image';
-            
-            const uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`;
-            
-            try {
-                const response = await fetch(uploadUrl, {
-                    method: 'POST',
-                    body: formData
-                });
+        reader.onload = (e) => {
+            const img = new Image();
+            img.src = e.target.result;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
                 
-                const data = await response.json();
-                
-                if (response.ok) {
-                    resolve(data.secure_url);
-                } else {
-                    // Show the actual error from Cloudinary
-                    reject(`Cloudinary Error: ${data.error?.message || JSON.stringify(data)}`);
+                if (width > maxWidth) {
+                    height = (height * maxWidth) / width;
+                    width = maxWidth;
                 }
-            } catch(err) {
-                reject(`Network Error: ${err.message}`);
-            }
+                
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                canvas.toBlob((blob) => {
+                    resolve(blob);
+                }, 'image/jpeg', quality);
+            };
+            img.onerror = reject;
         };
-        
-        reader.onerror = () => reject('Failed to read file');
+        reader.onerror = reject;
+    });
+}
+
+// ============================
+// UPLOAD TO CLOUDINARY WITH TIMEOUT
+// ============================
+async function uploadToCloudinary(file) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            // Compress first (reduces size by 70-80%)
+            let fileToUpload = file;
+            if (file.type.startsWith('image/')) {
+                fileToUpload = await compressImage(file, 800, 0.6);
+                console.log("Compressed size:", (fileToUpload.size / 1024).toFixed(2), "KB");
+            }
+            
+            const reader = new FileReader();
+            reader.readAsDataURL(fileToUpload);
+            
+            reader.onload = async function() {
+                const formData = new FormData();
+                formData.append('file', reader.result);
+                formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+                
+                const isPDF = file.type === 'application/pdf';
+                const resourceType = isPDF ? 'raw' : 'image';
+                const uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`;
+                
+                // Set timeout for upload (30 seconds)
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 30000);
+                
+                try {
+                    const response = await fetch(uploadUrl, {
+                        method: 'POST',
+                        body: formData,
+                        signal: controller.signal
+                    });
+                    
+                    clearTimeout(timeoutId);
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        resolve(data.secure_url);
+                    } else {
+                        reject(data.error?.message || 'Upload failed');
+                    }
+                } catch (fetchError) {
+                    clearTimeout(timeoutId);
+                    if (fetchError.name === 'AbortError') {
+                        reject('Upload timeout - file too large or slow connection');
+                    } else {
+                        reject(fetchError.message);
+                    }
+                }
+            };
+            
+            reader.onerror = () => reject('Failed to read file');
+        } catch (error) {
+            reject(error.message);
+        }
     });
 }
 
@@ -159,7 +214,7 @@ window.openAcademicModal = function() {
             <textarea id="acad-desc" placeholder="Details/Instructions..." class="w-full p-4 bg-slate-50 rounded-2xl border-none h-24 text-xs outline-none"></textarea>
 
             <div class="relative group">
-                <input type="file" id="acad-file" class="hidden" accept="image/*,application/pdf" onchange="document.getElementById('acad-file-label').innerText='File Selected! ✅'">
+                <input type="file" id="acad-file" class="hidden" accept="image/*,application/pdf" onchange="handleAcademicFileSelect(this)">
                 <label for="acad-file" id="acad-file-label" class="block w-full p-6 border-2 border-dashed border-emerald-200 rounded-2xl text-center text-emerald-600 font-bold cursor-pointer">
                     Upload PDF or Picture
                 </label>
@@ -168,6 +223,15 @@ window.openAcademicModal = function() {
             <button onclick="processAcademicPost()" id="acad-submit-btn" class="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black btn-glow">PUBLISH TO HUB 🚀</button>
         </div>
     `;
+};
+
+window.handleAcademicFileSelect = function(input) {
+    const label = document.getElementById('acad-file-label');
+    if(input.files && input.files[0]) {
+        const file = input.files[0];
+        const sizeKB = (file.size / 1024).toFixed(1);
+        label.innerHTML = `✅ ${file.name.substring(0, 25)} (${sizeKB} KB)`;
+    }
 };
 
 window.processAcademicPost = async function() {
@@ -183,30 +247,32 @@ window.processAcademicPost = async function() {
         return;
     }
 
-    btn.innerHTML = `<i class="fa-solid fa-bolt animate-pulse"></i> UPLOADING...`;
+    btn.innerHTML = `<i class="fa-solid fa-bolt animate-pulse"></i> COMPRESSING...`;
     btn.disabled = true;
 
     let fileUrl = "";
     
     if(file){
         try {
-            fileUrl = await uploadFile(file);
-            alert("✅ Upload successful!");
+            btn.innerHTML = `<i class="fa-solid fa-bolt animate-pulse"></i> UPLOADING...`;
+            fileUrl = await uploadToCloudinary(file);
         } catch(err) {
             alert("Upload failed: " + err);
             btn.disabled = false;
-            btn.innerText = "RETRY PUBLISH";
+            btn.innerHTML = "RETRY PUBLISH";
             return;
         }
     }
 
     try {
+        btn.innerHTML = `<i class="fa-solid fa-bolt animate-pulse"></i> SAVING...`;
+        
         await db.collection('Academics').add({
             type, level, title, desc, fileUrl,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        btn.innerText = "SUCCESS! 🎉";
+        btn.innerHTML = "SUCCESS! 🎉";
         setTimeout(() => {
             document.getElementById('modal-overlay').classList.add('hidden');
             loadAcademicMaterials();
@@ -214,7 +280,7 @@ window.processAcademicPost = async function() {
     } catch(err) {
         alert("Database error: " + err.message);
         btn.disabled = false;
-        btn.innerText = "RETRY PUBLISH";
+        btn.innerHTML = "RETRY PUBLISH";
     }
 };
 
@@ -236,10 +302,15 @@ window.loadAcademicMaterials = async function(levelFilter='all'){
             snap.forEach(doc=>{
                 const d = doc.data();
                 const icon = d.type==='exam'?'🎓':d.type==='test'?'📝':d.type==='lecture'?'📅':'📚';
+                const isPDF = d.fileUrl && d.fileUrl.includes('.pdf');
                 
                 let fileHtml = '';
                 if(d.fileUrl) {
-                    fileHtml = `<a href="${d.fileUrl}" target="_blank" class="inline-block mt-3 text-emerald-600 font-black text-[9px] underline">📄 VIEW ATTACHMENT <i class="fa-solid fa-up-right-from-square"></i></a>`;
+                    if(isPDF) {
+                        fileHtml = `<a href="${d.fileUrl}" target="_blank" class="inline-block mt-3 text-emerald-600 font-black text-[9px] underline">📄 VIEW PDF <i class="fa-solid fa-up-right-from-square"></i></a>`;
+                    } else {
+                        fileHtml = `<a href="${d.fileUrl}" target="_blank" class="inline-block mt-3 text-emerald-600 font-black text-[9px] underline">🖼️ VIEW IMAGE <i class="fa-solid fa-up-right-from-square"></i></a>`;
+                    }
                 }
                 
                 container.innerHTML += `
@@ -362,7 +433,7 @@ window.openMarketModal = function(){
                     <input type="tel" id="seller-phone" placeholder="805 000 0000" class="w-full p-4 bg-transparent border-none outline-none">
                 </div>
                 <div class="relative group">
-                    <input type="file" id="item-image" class="hidden" accept="image/*" onchange="document.getElementById('file-label').innerText='Photo Selected! ✅'">
+                    <input type="file" id="item-image" class="hidden" accept="image/*" onchange="handleMarketFileSelect(this)">
                     <label for="item-image" id="file-label" class="block w-full p-6 border-2 border-dashed border-emerald-200 rounded-2xl text-center text-emerald-600 font-bold cursor-pointer bg-emerald-50/30">
                         <i class="fa-solid fa-camera-retro text-2xl mb-2"></i><br>Tap to Upload Photo
                     </label>
@@ -371,6 +442,15 @@ window.openMarketModal = function(){
             </div>
         </div>
     `;
+};
+
+window.handleMarketFileSelect = function(input) {
+    const label = document.getElementById('file-label');
+    if(input.files && input.files[0]) {
+        const file = input.files[0];
+        const sizeKB = (file.size / 1024).toFixed(1);
+        label.innerHTML = `<i class="fa-solid fa-check-circle text-2xl mb-2"></i><br>${file.name.substring(0, 20)} (${sizeKB} KB) ✅`;
+    }
 };
 
 const postAdBtn = document.getElementById('btn-post-ad');
@@ -391,15 +471,18 @@ window.processMarketPost = async function(){
         return;
     }
 
-    btn.innerHTML = `<i class="fa-solid fa-bolt animate-pulse"></i> UPLOADING...`;
+    btn.innerHTML = `<i class="fa-solid fa-bolt animate-pulse"></i> COMPRESSING...`;
     btn.disabled = true;
 
     let imageUrl = "https://ui-avatars.com/api/?name=Hub&background=10b981&color=fff";
 
     if(file){
         try {
+            btn.innerHTML = `<i class="fa-solid fa-bolt animate-pulse"></i> UPLOADING...`;
+            const compressedFile = await compressImage(file, 800, 0.6);
+            
             const reader = new FileReader();
-            reader.readAsDataURL(file);
+            reader.readAsDataURL(compressedFile);
             
             const base64 = await new Promise((resolve) => {
                 reader.onload = () => resolve(reader.result);
@@ -411,11 +494,16 @@ window.processMarketPost = async function(){
             
             const uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
             
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 30000);
+            
             const response = await fetch(uploadUrl, {
                 method: 'POST',
-                body: formData
+                body: formData,
+                signal: controller.signal
             });
             
+            clearTimeout(timeoutId);
             const data = await response.json();
             
             if(response.ok) {
@@ -426,21 +514,26 @@ window.processMarketPost = async function(){
         } catch(err) {
             alert("Upload failed: " + err.message);
             btn.disabled = false;
-            btn.innerText = "RETRY POST";
+            btn.innerHTML = "RETRY POST";
             return;
         }
     }
 
+    btn.innerHTML = `<i class="fa-solid fa-bolt animate-pulse"></i> SAVING...`;
+    
     await db.collection('Marketplace').add({
         name, price:Number(price), type, phone, negotiable, image:imageUrl,
         rating:5.0,
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
     });
 
-    btn.innerText = "DONE! 🚀";
+    btn.innerHTML = "DONE! 🚀";
     setTimeout(() => {
         document.getElementById('modal-overlay').classList.add('hidden');
         loadMarketDisplay(type);
+        if(fileInput) fileInput.value = '';
+        const label = document.getElementById('file-label');
+        if(label) label.innerHTML = `<i class="fa-solid fa-camera-retro text-2xl mb-2"></i><br>Tap to Upload Photo`;
     }, 500);
 };
 
