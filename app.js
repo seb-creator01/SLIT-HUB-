@@ -200,6 +200,15 @@ window.loadAcademicMaterials = async function(levelFilter='all'){
 };
 
 // ============================
+// RENDER ACADEMICS (ADDED)
+// ============================
+function renderAcademics() {
+    // This function is called during bootup - add any academics rendering logic here
+    // If you have specific academics rendering functionality, add it here
+    console.log("Academics section rendered");
+}
+
+// ============================
 // STUDY GROUPS
 // ============================
 window.openGroupModal = function(){
@@ -478,15 +487,3 @@ loadAcademicMaterials();
 loadVerifiedGroups();
 loadMarketDisplay('items');
 loadBroadcastMessage();
-window.addEventListener('DOMContentLoaded', () => {
-    // Kill the Spinner
-    setTimeout(() => { ... }, 1500);
-
-    // BRIDGE: Setup Marketplace Filter Click Listeners
-    document.querySelectorAll('.m-filter').forEach(btn => { ... });
-
-    renderAcademics();
-    loadVerifiedGroups();
-    loadMarketDisplay('items'); 
-    loadAcademicMaterials(); // NEW: Sync Academic Feed on start
-});
