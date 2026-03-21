@@ -12,25 +12,86 @@ const firebaseConfig = {
     appId: "1:1056588267605:web:0786..."
 };
 
-if(typeof firebase !== 'undefined') {
+if (typeof firebase !== 'undefined') {
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
     }
-    console.log("✅ Firebase initialized");
 }
 
 const db = firebase.firestore();
 
 // Cloudinary config
 const CLOUDINARY_CLOUD_NAME = "ddm87a9p2";
-const CLOUDINARY_UPLOAD_PRESET = "slit_hub"; // Your preset name
+const CLOUDINARY_UPLOAD_PRESET = "slit_hub";
+
+// CORS Proxy (bypasses CORS restrictions)
+const CORS_PROXY = "https://cors-anywhere.herokuapp.com/";
+
+// ============================
+// UPLOAD FUNCTION - BYPASSES CORS
+// ============================
+async function uploadToCloudinary(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        
+        reader.onload = async function() {
+            const formData = new FormData();
+            formData.append('file', reader.result);
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+            
+            // Detect file type
+            const isPDF = file.type === 'application/pdf';
+            const resourceType = isPDF ? 'raw' : 'image';
+            
+            // Use proxy to bypass CORS
+            const uploadUrl = `${CORS_PROXY}https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`;
+            
+            try {
+                const response = await fetch(uploadUrl, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Origin': window.location.origin
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resolve(data.secure_url);
+                } else {
+                    reject(data.error?.message || 'Upload failed');
+                }
+            } catch(err) {
+                // If proxy fails, try direct upload
+                console.log("Proxy failed, trying direct...");
+                try {
+                    const directUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`;
+                    const directResponse = await fetch(directUrl, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const directData = await directResponse.json();
+                    if (directResponse.ok) {
+                        resolve(directData.secure_url);
+                    } else {
+                        reject(directData.error?.message || 'Upload failed');
+                    }
+                } catch(directErr) {
+                    reject('Upload failed: ' + directErr.message);
+                }
+            }
+        };
+        
+        reader.onerror = () => reject('Failed to read file');
+    });
+}
 
 // ============================
 // BOOTUP
 // ============================
 window.addEventListener('DOMContentLoaded', () => {
-    console.log("🚀 Starting app...");
-    
     setTimeout(() => {
         const splash = document.getElementById('splash-screen');
         if(splash) {
@@ -53,8 +114,6 @@ window.addEventListener('DOMContentLoaded', () => {
     loadMarketDisplay('items');
     loadAcademicMaterials();
     loadBroadcastMessage();
-    
-    console.log("✅ App started");
 });
 
 // ============================
@@ -134,46 +193,6 @@ window.openAcademicModal = function() {
     `;
 };
 
-// UPLOAD FUNCTION - Works for Images AND PDFs
-async function uploadToCloudinary(file) {
-    return new Promise(async (resolve, reject) => {
-        try {
-            console.log("📤 Uploading file:", file.name, "Type:", file.type);
-            
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-            
-            // Check if it's a PDF
-            const isPDF = file.type === 'application/pdf';
-            
-            // Use different endpoint for PDFs vs Images
-            const uploadUrl = isPDF 
-                ? `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/raw/upload`
-                : `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
-            
-            console.log("📡 Uploading to:", uploadUrl);
-            
-            const response = await fetch(uploadUrl, {
-                method: 'POST',
-                body: formData
-            });
-            
-            const data = await response.json();
-            console.log("✅ Cloudinary response:", data);
-            
-            if (!response.ok) {
-                throw new Error(data.error?.message || "Upload failed");
-            }
-            
-            resolve(data.secure_url);
-        } catch (error) {
-            console.error("❌ Upload error:", error);
-            reject(error);
-        }
-    });
-}
-
 window.processAcademicPost = async function() {
     const btn = document.getElementById('acad-submit-btn');
     const file = document.getElementById('acad-file').files[0];
@@ -182,34 +201,44 @@ window.processAcademicPost = async function() {
     const title = document.getElementById('acad-title').value;
     const desc = document.getElementById('acad-desc').value;
 
-    if(!title || !desc) return alert("Fill Title & Description!");
+    if(!title || !desc) {
+        alert("Fill Title & Description!");
+        return;
+    }
 
     btn.innerHTML = `<i class="fa-solid fa-bolt animate-pulse"></i> UPLOADING...`;
     btn.disabled = true;
 
     let fileUrl = "";
+    
     if(file){
         try {
             fileUrl = await uploadToCloudinary(file);
-            console.log("🎉 Upload successful:", fileUrl);
+            alert("✅ Upload successful!");
         } catch(err) {
-            alert(`Upload failed: ${err.message}\n\nCheck that your Cloudinary preset "${CLOUDINARY_UPLOAD_PRESET}" exists and is set to Unsigned mode.`);
+            alert("Upload failed: " + err);
             btn.disabled = false;
             btn.innerText = "RETRY PUBLISH";
             return;
         }
     }
 
-    await db.collection('Academics').add({
-        type, level, title, desc, fileUrl,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    });
+    try {
+        await db.collection('Academics').add({
+            type, level, title, desc, fileUrl,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
 
-    btn.innerText = "SUCCESS! 🎉";
-    setTimeout(() => {
-        document.getElementById('modal-overlay').classList.add('hidden');
-        loadAcademicMaterials();
-    },500);
+        btn.innerText = "SUCCESS! 🎉";
+        setTimeout(() => {
+            document.getElementById('modal-overlay').classList.add('hidden');
+            loadAcademicMaterials();
+        }, 500);
+    } catch(err) {
+        alert("Database error: " + err.message);
+        btn.disabled = false;
+        btn.innerText = "RETRY PUBLISH";
+    }
 };
 
 window.loadAcademicMaterials = async function(levelFilter='all'){
@@ -217,36 +246,49 @@ window.loadAcademicMaterials = async function(levelFilter='all'){
     if(!container) return;
     container.innerHTML = "<p class='text-center p-10 animate-pulse text-xs text-slate-400'>Loading...</p>";
 
-    let query = db.collection('Academics').orderBy('timestamp','desc');
-    if(levelFilter!=='all') query = query.where('level','==',levelFilter);
+    try {
+        let query = db.collection('Academics').orderBy('timestamp','desc');
+        if(levelFilter!=='all') query = query.where('level','==',levelFilter);
 
-    const snap = await query.get();
-    container.innerHTML = snap.empty ? "<p class='text-center text-slate-300 py-10 italic'>No updates.</p>": "";
-
-    snap.forEach(doc=>{
-        const d = doc.data();
-        const icon = d.type==='exam'?'🎓':d.type==='test'?'📝':d.type==='lecture'?'📅':'📚';
-        const fileType = d.fileUrl ? (d.fileUrl.includes('.pdf') ? '📄 PDF' : '🖼️ Image') : '';
-        container.innerHTML += `
-            <div class="glass-card p-4 mb-3 border-l-4 border-emerald-500 animate-fade-in">
-                <div class="flex justify-between items-start mb-2">
-                    <span class="bg-emerald-100 text-emerald-700 text-[8px] font-black px-2 py-1 rounded-md uppercase">${d.level}L</span>
-                    <span class="text-lg">${icon}</span>
-                </div>
-                <h4 class="font-bold text-sm text-slate-800">${d.title}</h4>
-                <p class="text-[11px] text-slate-500 mt-1">${d.desc}</p>
-                ${d.fileUrl?`<a href="${d.fileUrl}" target="_blank" class="inline-block mt-3 text-emerald-600 font-black text-[9px] underline">VIEW ${fileType} <i class="fa-solid fa-up-right-from-square"></i></a>`:""}
-            </div>
-        `;
-    });
+        const snap = await query.get();
+        
+        if(snap.empty) {
+            container.innerHTML = "<p class='text-center text-slate-300 py-10 italic'>No updates.</p>";
+        } else {
+            container.innerHTML = "";
+            snap.forEach(doc=>{
+                const d = doc.data();
+                const icon = d.type==='exam'?'🎓':d.type==='test'?'📝':d.type==='lecture'?'📅':'📚';
+                const isPDF = d.fileUrl && (d.fileUrl.includes('.pdf') || d.fileUrl.includes('drive'));
+                
+                let fileHtml = '';
+                if(d.fileUrl) {
+                    if(isPDF) {
+                        fileHtml = `<a href="${d.fileUrl}" target="_blank" class="inline-block mt-3 text-emerald-600 font-black text-[9px] underline">📄 VIEW PDF <i class="fa-solid fa-up-right-from-square"></i></a>`;
+                    } else {
+                        fileHtml = `<a href="${d.fileUrl}" target="_blank" class="inline-block mt-3 text-emerald-600 font-black text-[9px] underline">🖼️ VIEW ATTACHMENT <i class="fa-solid fa-up-right-from-square"></i></a>`;
+                    }
+                }
+                
+                container.innerHTML += `
+                    <div class="glass-card p-4 mb-3 border-l-4 border-emerald-500 animate-fade-in">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="bg-emerald-100 text-emerald-700 text-[8px] font-black px-2 py-1 rounded-md uppercase">${d.level}L</span>
+                            <span class="text-lg">${icon}</span>
+                        </div>
+                        <h4 class="font-bold text-sm text-slate-800">${escapeHtml(d.title)}</h4>
+                        <p class="text-[11px] text-slate-500 mt-1">${escapeHtml(d.desc)}</p>
+                        ${fileHtml}
+                    </div>
+                `;
+            });
+        }
+    } catch(e) {
+        container.innerHTML = "<p class='text-center text-red-500 py-10'>Error loading data</p>";
+    }
 };
 
-// ============================
-// RENDER ACADEMICS
-// ============================
-function renderAcademics() {
-    console.log("✅ Academics section rendered");
-}
+function renderAcademics() {}
 
 // ============================
 // STUDY GROUPS
@@ -280,7 +322,6 @@ window.submitToFirebase = async()=>{
     document.getElementById('modal-overlay').classList.add('hidden');
 };
 
-// Admin panel
 async function loadAdminPanel(){
     const list = document.getElementById('admin-verification-list');
     const snap = await db.collection('StudyGroups').where('status','==','pending').get();
@@ -289,7 +330,7 @@ async function loadAdminPanel(){
         const d = doc.data();
         list.innerHTML += `
             <div class="border p-4 rounded-2xl flex justify-between items-center bg-slate-800/50 mb-2">
-                <span class="text-white font-bold">${d.name}</span>
+                <span class="text-white font-bold">${escapeHtml(d.name)}</span>
                 <button onclick="verifyGroup('${doc.id}')" class="text-emerald-400 font-black underline">APPROVE</button>
             </div>
         `;
@@ -312,7 +353,7 @@ async function loadVerifiedGroups(){
         const d = doc.data();
         list.innerHTML += `
             <div class="glass-card p-4 flex justify-between items-center border-l-4 border-emerald-50">
-                <p class="font-bold italic">${d.name}</p>
+                <p class="font-bold italic">${escapeHtml(d.name)}</p>
                 <a href="${d.link}" target="_blank" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-[10px] font-black italic">JOIN</a>
             </div>
         `;
@@ -349,7 +390,7 @@ window.openMarketModal = function(){
                     <input type="tel" id="seller-phone" placeholder="805 000 0000" class="w-full p-4 bg-transparent border-none outline-none">
                 </div>
                 <div class="relative group">
-                    <input type="file" id="item-image" class="hidden" accept="image/*" onchange="document.getElementById('file-label').innerText = 'Photo Selected! ✅'">
+                    <input type="file" id="item-image" class="hidden" accept="image/*" onchange="document.getElementById('file-label').innerText='Photo Selected! ✅'">
                     <label for="item-image" id="file-label" class="block w-full p-6 border-2 border-dashed border-emerald-200 rounded-2xl text-center text-emerald-600 font-bold cursor-pointer bg-emerald-50/30">
                         <i class="fa-solid fa-camera-retro text-2xl mb-2"></i><br>Tap to Upload Photo
                     </label>
@@ -373,31 +414,44 @@ window.processMarketPost = async function(){
     const phone = document.getElementById('seller-phone').value;
     const negotiable = document.getElementById('item-negotiable').value;
 
-    if(!name||!price||!phone) return alert("Fill all fields!");
+    if(!name || !price || !phone) {
+        alert("Fill all fields!");
+        return;
+    }
 
-    btn.innerHTML = `<i class="fa-solid fa-bolt animate-pulse"></i> OPTIMIZING...`;
+    btn.innerHTML = `<i class="fa-solid fa-bolt animate-pulse"></i> UPLOADING...`;
     btn.disabled = true;
 
     let imageUrl = "https://ui-avatars.com/api/?name=Hub&background=10b981&color=fff";
 
     if(file){
-        try{
-            const compressedBlob = await compressImage(file,0.7,800);
-            const formData = new FormData();
-            formData.append('file', compressedBlob);
-            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-
-            const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
-                method:'POST', body: formData
+        try {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            
+            const base64 = await new Promise((resolve) => {
+                reader.onload = () => resolve(reader.result);
             });
-            const data = await res.json();
-            if(!res.ok) throw new Error(data.error?.message || "Cloudinary failed");
-            imageUrl = data.secure_url;
-        } catch(err){
-            console.error("Upload Error:", err);
-            btn.innerText="RETRY POST";
-            btn.disabled=false;
-            return alert("Upload failed: " + err.message);
+            
+            const formData = new FormData();
+            formData.append('file', base64);
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+            
+            const uploadUrl = `${CORS_PROXY}https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+            
+            const response = await fetch(uploadUrl, { method: 'POST', body: formData });
+            const data = await response.json();
+            
+            if(response.ok) {
+                imageUrl = data.secure_url;
+            } else {
+                throw new Error(data.error?.message);
+            }
+        } catch(err) {
+            alert("Upload failed: " + err.message);
+            btn.disabled = false;
+            btn.innerText = "RETRY POST";
+            return;
         }
     }
 
@@ -407,17 +461,17 @@ window.processMarketPost = async function(){
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
     });
 
-    btn.innerText="DONE! 🚀";
-    setTimeout(()=>{
+    btn.innerText = "DONE! 🚀";
+    setTimeout(() => {
         document.getElementById('modal-overlay').classList.add('hidden');
         loadMarketDisplay(type);
-    },500);
+    }, 500);
 };
 
 // ============================
 // BROADCAST
 // ============================
-document.getElementById('btn-broadcast')?.addEventListener('click',async()=>{
+document.getElementById('btn-broadcast')?.addEventListener('click', async()=>{
     const msg = prompt("Enter broadcast message:");
     if(!msg) return alert("Cannot be empty!");
 
@@ -462,25 +516,27 @@ window.loadMarketDisplay = async function(type='items') {
         .orderBy('timestamp', 'desc')
         .get();
 
-    grid.innerHTML = snap.empty ? "<p class='text-center py-10 text-slate-400 italic'>No posts yet.</p>" : "";
-
-    snap.forEach(doc => {
-        const data = doc.data();
-        grid.innerHTML += `
-            <div class="glass-card p-4 border-l-4 border-emerald-500 animate-fade-in">
-                <img src="${data.image}" class="w-full h-32 object-cover rounded-xl mb-2" onerror="this.src='https://ui-avatars.com/api/?name=Hub&background=10b981&color=fff'">
-                <h4 class="font-bold text-sm text-slate-800">${escapeHtml(data.name)}</h4>
-                <p class="text-xs text-slate-500 mt-1">₦${data.price} | ${data.negotiable}</p>
-                <p class="text-[10px] italic text-slate-400 mt-1">Call: ${data.phone}</p>
-            </div>
-        `;
-    });
+    if(snap.empty) {
+        grid.innerHTML = "<p class='text-center py-10 text-slate-400 italic'>No posts yet.</p>";
+    } else {
+        grid.innerHTML = "";
+        snap.forEach(doc => {
+            const data = doc.data();
+            grid.innerHTML += `
+                <div class="glass-card p-4 border-l-4 border-emerald-500 animate-fade-in">
+                    <img src="${data.image}" class="w-full h-32 object-cover rounded-xl mb-2" onerror="this.src='https://ui-avatars.com/api/?name=Hub&background=10b981&color=fff'">
+                    <h4 class="font-bold text-sm text-slate-800">${escapeHtml(data.name)}</h4>
+                    <p class="text-xs text-slate-500 mt-1">₦${data.price} | ${data.negotiable}</p>
+                    <p class="text-[10px] italic text-slate-400 mt-1">Call: ${data.phone}</p>
+                </div>
+            `;
+        });
+    }
 
     const countEl = document.getElementById('market-count');
     if(countEl) countEl.innerText = snap.size;
 };
 
-// Helper function
 function escapeHtml(str) {
     if(!str) return '';
     return str.replace(/[&<>]/g, function(m) {
@@ -492,37 +548,13 @@ function escapeHtml(str) {
 }
 
 // ============================
-// LEVEL FILTERS FOR ACADEMICS
+// LEVEL FILTERS
 // ============================
 window.filterByLevel = function(level='all') {
     document.querySelectorAll('.lvl-btn').forEach(btn => btn.classList.remove('active-lvl'));
     document.querySelector(`.lvl-btn[data-level="${level}"]`)?.classList.add('active-lvl');
     loadAcademicMaterials(level);
 };
-
-// ============================
-// HELPER: COMPRESS IMAGE
-// ============================
-async function compressImage(file, quality=0.7, maxWidth=800) {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        const reader = new FileReader();
-        reader.onload = e => img.src = e.target.result;
-        reader.onerror = err => reject(err);
-        reader.readAsDataURL(file);
-
-        img.onload = () => {
-            const canvas = document.createElement('canvas');
-            const scale = Math.min(maxWidth / img.width, 1);
-            canvas.width = img.width * scale;
-            canvas.height = img.height * scale;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            canvas.toBlob(blob => resolve(blob), 'image/jpeg', quality);
-        };
-        img.onerror = err => reject(err);
-    });
-}
 
 // ============================
 // MODAL CLOSE
@@ -538,5 +570,3 @@ loadAcademicMaterials();
 loadVerifiedGroups();
 loadMarketDisplay('items');
 loadBroadcastMessage();
-
-console.log("✅ App.js fully loaded with Cloudinary preset:", CLOUDINARY_UPLOAD_PRESET);
