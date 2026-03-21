@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Level Filter Styles */
         .lvl-btn {
             padding: 8px 16px;
             background: white;
@@ -29,11 +28,33 @@
             box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
         }
 
-        /* Added for Marketplace Filter Visibility */
         .m-filter.active {
             background: white;
             color: #10b981;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .glass-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .btn-glow {
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
         }
     </style>
 </head>
@@ -97,8 +118,7 @@
                 <button onclick="filterByLevel('500')" data-level="500" class="lvl-btn">500L</button>
             </div>
 
-            <div id="academic-list" class="space-y-3 min-h-[100px]">
-                </div>
+            <div id="academic-list" class="space-y-3 min-h-[100px]"></div>
 
             <hr class="border-slate-100">
 
@@ -138,8 +158,7 @@
 
     <div id="modal-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] hidden flex items-end sm:items-center justify-center p-4">
         <div class="bg-white w-full max-w-md rounded-t-[32px] sm:rounded-[32px] p-6 animate-fade-in shadow-2xl">
-            <div id="modal-content">
-                </div>
+            <div id="modal-content"></div>
             <button id="close-modal" class="w-full mt-4 text-slate-400 text-xs font-bold py-2 uppercase">Close</button>
         </div>
     </div>
@@ -163,12 +182,14 @@
         </button>
     </nav>
 
-    <!-- Firebase SDKs -->
+    <!-- Firebase SDKs - AUTH ADDED -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     
-    <!-- CRITICAL FIX: Load data.js first, then app.js as module -->
+    <!-- data.js first -->
     <script src="data.js"></script>
+    <!-- app.js as module -->
     <script type="module" src="app.js"></script>
 </body>
 </html>
