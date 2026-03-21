@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Firebase</title>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <h1>Firebase Test</h1>
+    <button onclick="testSave()">Test Save</button>
+    <p id="result"></p>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAsS...",
+            authDomain: "slithub-17a41.firebaseapp.com",
+            projectId: "slithub-17a41",
+            storageBucket: "slithub-17a41.appspot.com",
+            messagingSenderId: "1056588267605",
+            appId: "1:1056588267605:web:0786..."
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        async function testSave() {
+            document.getElementById('result').innerText = "Saving...";
+            try {
+                await db.collection('test').add({
+                    message: "Hello",
+                    time: new Date().toISOString()
+                });
+                document.getElementById('result').innerText = "✅ SUCCESS! Firebase is working!";
+                document.getElementById('result').style.color = "green";
+            } catch(err) {
+                document.getElementById('result').innerText = "❌ ERROR: " + err.message;
+                document.getElementById('result').style.color = "red";
+            }
+        }
+    </script>
+</body>
+</html>
