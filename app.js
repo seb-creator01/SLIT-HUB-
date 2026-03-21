@@ -1,50 +1,43 @@
 import { DEPARTMENTS, EXECUTIVES, STUDY_CATEGORIES, UI_CONFIG } from './data.js';
 
 // ============================
-// FIREBASE CONFIG
+// SIMPLE STORAGE USING LOCALSTORAGE (NO FIREBASE NEEDED)
 // ============================
-const firebaseConfig = {
-    apiKey: "AIzaSyAsS...", 
-    authDomain: "slithub-17a41.firebaseapp.com",
-    projectId: "slithub-17a41",
-    storageBucket: "slithub-17a41.appspot.com",
-    messagingSenderId: "1056588267605",
-    appId: "1:1056588267605:web:0786..."
-};
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const auth = firebase.auth();
+// Load data from localStorage or use default
+let academicsData = JSON.parse(localStorage.getItem('academics')) || [];
+let marketplaceData = JSON.parse(localStorage.getItem('marketplace')) || [];
+let groupsData = JSON.parse(localStorage.getItem('groups')) || [];
+let broadcastData = localStorage.getItem('broadcast') || "Welcome to SLIT-HUB! 🎓";
 
-// Anonymous login - allows writes without login page
-auth.signInAnonymously().catch(err => console.log("Auth error:", err));
+// Save functions
+function saveAcademics() {
+    localStorage.setItem('academics', JSON.stringify(academicsData));
+}
+
+function saveMarketplace() {
+    localStorage.setItem('marketplace', JSON.stringify(marketplaceData));
+}
+
+function saveGroups() {
+    localStorage.setItem('groups', JSON.stringify(groupsData));
+}
 
 // ============================
-// CLOUDINARY CONFIG (WORKING FROM YOUR OTHER PROJECT)
+// CLOUDINARY UPLOAD (WORKING)
 // ============================
 const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dwsc9eumf/image/upload";
 const CLOUDINARY_UPLOAD_PRESET = "sebastian_preset";
 
-// ============================
-// UPLOAD FUNCTION (EXACTLY LIKE YOUR WORKING PROJECT)
-// ============================
 async function uploadFile(file) {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
     
-    const res = await fetch(CLOUDINARY_URL, { 
-        method: 'POST', 
-        body: formData 
-    });
-    
+    const res = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
     const data = await res.json();
     
-    if (!res.ok) {
-        throw new Error(data.error?.message || "Upload failed");
-    }
-    
+    if (!res.ok) throw new Error(data.error?.message);
     return data.secure_url;
 }
 
@@ -182,70 +175,58 @@ window.processAcademicPost = async function() {
         }
     }
 
-    try {
-        btn.innerHTML = `<i class="fa-solid fa-bolt animate-pulse"></i> SAVING...`;
-        
-        await db.collection('Academics').add({
-            type, level, title, desc, fileUrl,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
+    // Save to localStorage instead of Firebase
+    const newPost = {
+        id: Date.now(),
+        type, level, title, desc, fileUrl,
+        timestamp: new Date().toISOString()
+    };
+    
+    academicsData.unshift(newPost);
+    saveAcademics();
 
-        btn.innerHTML = "SUCCESS! 🎉";
-        setTimeout(() => {
-            document.getElementById('modal-overlay').classList.add('hidden');
-            loadAcademicMaterials();
-        }, 500);
-    } catch(err) {
-        alert("Database error: " + err.message);
-        btn.disabled = false;
-        btn.innerHTML = "RETRY PUBLISH";
-    }
+    btn.innerHTML = "SUCCESS! 🎉";
+    setTimeout(() => {
+        document.getElementById('modal-overlay').classList.add('hidden');
+        loadAcademicMaterials();
+    }, 500);
 };
 
 window.loadAcademicMaterials = async function(levelFilter='all'){
     const container = document.getElementById('academic-list');
     if(!container) return;
-    container.innerHTML = "<p class='text-center p-10 animate-pulse text-xs text-slate-400'>Loading...</p>";
-
-    try {
-        let query = db.collection('Academics').orderBy('timestamp','desc');
-        if(levelFilter!=='all') query = query.where('level','==',levelFilter);
-
-        const snap = await query.get();
-        
-        if(snap.empty) {
-            container.innerHTML = "<p class='text-center text-slate-300 py-10 italic'>No updates.</p>";
-        } else {
-            container.innerHTML = "";
-            snap.forEach(doc=>{
-                const d = doc.data();
-                const icon = d.type==='exam'?'🎓':d.type==='test'?'📝':d.type==='lecture'?'📅':'📚';
-                
-                let fileHtml = '';
-                if(d.fileUrl) {
-                    if(d.fileUrl.includes('.pdf')) {
-                        fileHtml = `<a href="${d.fileUrl}" target="_blank" class="inline-block mt-3 text-emerald-600 font-black text-[9px] underline">📄 VIEW PDF <i class="fa-solid fa-up-right-from-square"></i></a>`;
-                    } else {
-                        fileHtml = `<a href="${d.fileUrl}" target="_blank" class="inline-block mt-3 text-emerald-600 font-black text-[9px] underline">🖼️ VIEW IMAGE <i class="fa-solid fa-up-right-from-square"></i></a>`;
-                    }
-                }
-                
-                container.innerHTML += `
-                    <div class="glass-card p-4 mb-3 border-l-4 border-emerald-500 animate-fade-in">
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="bg-emerald-100 text-emerald-700 text-[8px] font-black px-2 py-1 rounded-md uppercase">${d.level}L</span>
-                            <span class="text-lg">${icon}</span>
-                        </div>
-                        <h4 class="font-bold text-sm text-slate-800">${escapeHtml(d.title)}</h4>
-                        <p class="text-[11px] text-slate-500 mt-1">${escapeHtml(d.desc)}</p>
-                        ${fileHtml}
-                    </div>
-                `;
-            });
-        }
-    } catch(e) {
-        container.innerHTML = "<p class='text-center text-red-500 py-10'>Error loading data</p>";
+    
+    let data = academicsData;
+    if(levelFilter !== 'all') {
+        data = academicsData.filter(item => item.level === levelFilter);
     }
+    
+    if(data.length === 0) {
+        container.innerHTML = "<p class='text-center text-slate-300 py-10 italic'>No updates.</p>";
+        return;
+    }
+    
+    container.innerHTML = "";
+    data.forEach(d => {
+        const icon = d.type==='exam'?'🎓':d.type==='test'?'📝':d.type==='lecture'?'📅':'📚';
+        
+        let fileHtml = '';
+        if(d.fileUrl) {
+            fileHtml = `<a href="${d.fileUrl}" target="_blank" class="inline-block mt-3 text-emerald-600 font-black text-[9px] underline">📄 VIEW ATTACHMENT <i class="fa-solid fa-up-right-from-square"></i></a>`;
+        }
+        
+        container.innerHTML += `
+            <div class="glass-card p-4 mb-3 border-l-4 border-emerald-500 animate-fade-in">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="bg-emerald-100 text-emerald-700 text-[8px] font-black px-2 py-1 rounded-md uppercase">${d.level}L</span>
+                    <span class="text-lg">${icon}</span>
+                </div>
+                <h4 class="font-bold text-sm text-slate-800">${escapeHtml(d.title)}</h4>
+                <p class="text-[11px] text-slate-500 mt-1">${escapeHtml(d.desc)}</p>
+                ${fileHtml}
+            </div>
+        `;
+    });
 };
 
 function renderAcademics() {}
@@ -274,9 +255,11 @@ window.submitToFirebase = async()=>{
     const link = document.getElementById('group-link').value;
     if(!name||!link) return alert("Fill all fields!");
 
-    await db.collection('StudyGroups').add({
-        name, link, status:'pending', timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    groupsData.push({
+        id: Date.now(),
+        name, link, status:'pending'
     });
+    saveGroups();
 
     alert("Sent! Junior will verify 🚀");
     document.getElementById('modal-overlay').classList.add('hidden');
@@ -284,21 +267,24 @@ window.submitToFirebase = async()=>{
 
 async function loadAdminPanel(){
     const list = document.getElementById('admin-verification-list');
-    const snap = await db.collection('StudyGroups').where('status','==','pending').get();
-    list.innerHTML = snap.empty? "<p class='text-slate-500 italic'>No pending groups.</p>" : "";
-    snap.forEach(doc=>{
-        const d = doc.data();
+    const pending = groupsData.filter(g => g.status === 'pending');
+    list.innerHTML = pending.length === 0 ? "<p class='text-slate-500 italic'>No pending groups.</p>" : "";
+    pending.forEach(g => {
         list.innerHTML += `
             <div class="border p-4 rounded-2xl flex justify-between items-center bg-slate-800/50 mb-2">
-                <span class="text-white font-bold">${escapeHtml(d.name)}</span>
-                <button onclick="verifyGroup('${doc.id}')" class="text-emerald-400 font-black underline">APPROVE</button>
+                <span class="text-white font-bold">${escapeHtml(g.name)}</span>
+                <button onclick="verifyGroup('${g.id}')" class="text-emerald-400 font-black underline">APPROVE</button>
             </div>
         `;
     });
 }
 
 window.verifyGroup = async (id)=>{
-    await db.collection('StudyGroups').doc(id).update({status:'verified'});
+    const group = groupsData.find(g => g.id == id);
+    if(group) {
+        group.status = 'verified';
+        saveGroups();
+    }
     alert("Group is now Live! ✅");
     loadAdminPanel();
     loadVerifiedGroups();
@@ -307,14 +293,13 @@ window.verifyGroup = async (id)=>{
 async function loadVerifiedGroups(){
     const list = document.getElementById('groups-list');
     if(!list) return;
-    const snap = await db.collection('StudyGroups').where('status','==','verified').get();
+    const verified = groupsData.filter(g => g.status === 'verified');
     list.innerHTML = "";
-    snap.forEach(doc=>{
-        const d = doc.data();
+    verified.forEach(g => {
         list.innerHTML += `
             <div class="glass-card p-4 flex justify-between items-center border-l-4 border-emerald-50">
-                <p class="font-bold italic">${escapeHtml(d.name)}</p>
-                <a href="${d.link}" target="_blank" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-[10px] font-black italic">JOIN</a>
+                <p class="font-bold italic">${escapeHtml(g.name)}</p>
+                <a href="${g.link}" target="_blank" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-[10px] font-black italic">JOIN</a>
             </div>
         `;
     });
@@ -395,13 +380,16 @@ window.processMarketPost = async function(){
         }
     }
 
-    btn.innerHTML = `<i class="fa-solid fa-bolt animate-pulse"></i> SAVING...`;
-    
-    await db.collection('Marketplace').add({
+    // Save to localStorage
+    const newItem = {
+        id: Date.now(),
         name, price:Number(price), type, phone, negotiable, image:imageUrl,
         rating:5.0,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    });
+        timestamp: new Date().toISOString()
+    };
+    
+    marketplaceData.unshift(newItem);
+    saveMarketplace();
 
     btn.innerHTML = "DONE! 🚀";
     setTimeout(() => {
@@ -420,10 +408,8 @@ document.getElementById('btn-broadcast')?.addEventListener('click', async()=>{
     const msg = prompt("Enter broadcast message:");
     if(!msg) return alert("Cannot be empty!");
 
-    await db.collection('Broadcasts').add({
-        message:msg,
-        timestamp:firebase.firestore.FieldValue.serverTimestamp()
-    });
+    broadcastData = msg;
+    localStorage.setItem('broadcast', msg);
     alert("Broadcast sent 🚀");
     loadBroadcastMessage();
 });
@@ -431,20 +417,7 @@ document.getElementById('btn-broadcast')?.addEventListener('click', async()=>{
 async function loadBroadcastMessage() {
     const msgContainer = document.getElementById('broadcast-msg');
     if (!msgContainer) return;
-
-    const snap = await db.collection('Broadcasts')
-        .orderBy('timestamp', 'desc')
-        .limit(1)
-        .get();
-
-    if (snap.empty) {
-        msgContainer.innerText = "No announcements yet.";
-    } else {
-        snap.forEach(doc => {
-            const data = doc.data();
-            msgContainer.innerText = data.message;
-        });
-    }
+    msgContainer.innerText = broadcastData;
 }
 
 // ============================
@@ -454,19 +427,13 @@ window.loadMarketDisplay = async function(type='items') {
     const grid = document.getElementById('market-grid');
     if (!grid) return;
 
-    grid.innerHTML = "<p class='text-center py-10 text-slate-400 animate-pulse'>Loading...</p>";
-
-    const snap = await db.collection('Marketplace')
-        .where('type', '==', type)
-        .orderBy('timestamp', 'desc')
-        .get();
-
-    if(snap.empty) {
+    const filtered = marketplaceData.filter(item => item.type === type);
+    
+    if(filtered.length === 0) {
         grid.innerHTML = "<p class='text-center py-10 text-slate-400 italic'>No posts yet.</p>";
     } else {
         grid.innerHTML = "";
-        snap.forEach(doc => {
-            const data = doc.data();
+        filtered.forEach(data => {
             grid.innerHTML += `
                 <div class="glass-card p-4 border-l-4 border-emerald-500 animate-fade-in">
                     <img src="${data.image}" class="w-full h-32 object-cover rounded-xl mb-2" onerror="this.src='https://ui-avatars.com/api/?name=Hub&background=10b981&color=fff'">
@@ -479,7 +446,7 @@ window.loadMarketDisplay = async function(type='items') {
     }
 
     const countEl = document.getElementById('market-count');
-    if(countEl) countEl.innerText = snap.size;
+    if(countEl) countEl.innerText = filtered.length;
 };
 
 function escapeHtml(str) {
