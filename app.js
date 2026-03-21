@@ -56,7 +56,6 @@ window.switchTab = function(tabId) {
         btn.classList.add('text-slate-400');
     });
     
-    // Select based on the data-tab attribute used in your HTML
     const activeBtn = document.querySelector(`.nav-btn[data-tab="${tabId}"]`);
     if(activeBtn) {
         activeBtn.classList.add('text-emerald-600', 'active');
@@ -152,13 +151,16 @@ window.processAcademicPost = async function() {
             const formData = new FormData();
             formData.append('file', uploadBlob);
             formData.append('upload_preset', 'SLIT-HUB');
-            
+            formData.append('cloud_name', 'ddm87a9p2'); // FIX
+
             const res = await fetch("https://api.cloudinary.com/v1_1/ddm87a9p2/image/upload", {
                 method: 'POST',
                 body: formData
             });
+
             const data = await res.json();
-            if (!res.ok) throw new Error(data.error.message || 'Cloudinary Failed');
+            console.log(data);
+            if (!res.ok) throw new Error(data.error?.message || 'Cloudinary Failed');
             fileUrl = data.secure_url;
         } catch (err) { 
             console.error(err); 
@@ -211,7 +213,7 @@ window.loadAcademicMaterials = async function(levelFilter = 'all') {
     });
 };
 
-// 4. NEW: FILTER ACADEMIC HUB BY LEVEL
+// 4. FILTER ACADEMIC HUB BY LEVEL
 window.filterByLevel = function(level) {
     document.querySelectorAll('.lvl-btn').forEach(btn => {
         btn.classList.remove('active-lvl');
@@ -366,15 +368,17 @@ window.processMarketPost = async function() {
 
             const formData = new FormData();
             formData.append('file', compressedBlob);
-            formData.append('upload_preset', 'SLIT-HUB'); 
-            
+            formData.append('upload_preset', 'SLIT-HUB');
+            formData.append('cloud_name', 'ddm87a9p2'); // FIXED
+
             const res = await fetch("https://api.cloudinary.com/v1_1/ddm87a9p2/image/upload", {
                 method: 'POST',
                 body: formData
             });
 
             const cloudData = await res.json();
-            if (!res.ok) throw new Error(cloudData.error.message || 'Cloudinary Failed');
+            console.log(cloudData); // DEBUG
+            if (!res.ok) throw new Error(cloudData.error?.message || 'Cloudinary Failed');
 
             imageUrl = cloudData.secure_url;
         } catch (err) {
@@ -386,8 +390,14 @@ window.processMarketPost = async function() {
     }
 
     await db.collection('Marketplace').add({
-        name, price: Number(price), type, phone, negotiable,
-        image: imageUrl, rating: 5.0, timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        name,
+        price: Number(price),
+        type,
+        phone,
+        negotiable,
+        image: imageUrl,
+        rating: 5.0,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
     });
 
     btn.innerHTML = "DONE! 🚀";
@@ -408,9 +418,9 @@ async function compressImage(file, quality = 0.5, maxWidth = 500) {
             const img = new Image();
             img.src = event.target.result;
             img.onload = () => {
+                const scale = Math.min(1, maxWidth / img.width); // FIX: prevent upscaling
                 const canvas = document.createElement('canvas');
-                const scale = maxWidth / img.width;
-                canvas.width = maxWidth;
+                canvas.width = img.width * scale;
                 canvas.height = img.height * scale;
                 const ctx = canvas.getContext('2d');
                 ctx.imageSmoothingEnabled = true;
@@ -425,12 +435,16 @@ async function compressImage(file, quality = 0.5, maxWidth = 500) {
     });
 }
 
+// LOAD MARKETPLACE DISPLAY
 window.loadMarketDisplay = async function(filterType = 'items') {
     const grid = document.getElementById('market-grid');
     if(!grid) return;
     grid.innerHTML = "<p class='text-slate-400 italic text-xs animate-pulse'>Fetching listings...</p>";
 
-    const snap = await db.collection('Marketplace').where('type', '==', filterType).orderBy('timestamp', 'desc').get();
+    const snap = await db.collection('Marketplace')
+                         .where('type', '==', filterType)
+                         .orderBy('timestamp', 'desc')
+                         .get();
     grid.innerHTML = snap.empty ? `<p class='col-span-2 text-center text-slate-300 py-10 italic'>No ${filterType} yet.</p>` : "";
 
     snap.forEach(doc => {
@@ -456,6 +470,7 @@ window.loadMarketDisplay = async function(filterType = 'items') {
     });
 };
 
+// RENDER ACADEMIC PILL CATEGORIES
 function renderAcademics() {
     const pContainer = document.getElementById('study-pills');
     if(pContainer && STUDY_CATEGORIES) {
@@ -466,6 +481,7 @@ function renderAcademics() {
     }
 }
 
+// CLOSE MODAL
 document.getElementById('close-modal').onclick = () => {
     document.getElementById('modal-overlay').classList.add('hidden');
 };
