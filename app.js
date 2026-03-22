@@ -338,7 +338,7 @@ async function loadVerifiedGroups(){
 }
 
 // ============================
-// MARKETPLACE
+// MARKETPLACE - FIXED LOADING
 // ============================
 window.openMarketModal = function(){
     const modal = document.getElementById('modal-overlay');
@@ -438,6 +438,45 @@ window.processMarketPost = async function(){
 };
 
 // ============================
+// MARKETPLACE DISPLAY - FIXED (removed orderBy to avoid index issues)
+// ============================
+window.loadMarketDisplay = async function(type='items') {
+    const grid = document.getElementById('market-grid');
+    if (!grid) return;
+
+    grid.innerHTML = "<p class='text-center py-10 text-slate-400 animate-pulse'>Loading...</p>";
+
+    try {
+        const snap = await db.collection('Marketplace')
+            .where('type', '==', type)
+            .get();
+        
+        if(snap.empty) {
+            grid.innerHTML = "<p class='text-center py-10 text-slate-400 italic'>No posts yet. Be the first to post!</p>";
+        } else {
+            grid.innerHTML = "";
+            snap.forEach(doc => {
+                const data = doc.data();
+                grid.innerHTML += `
+                    <div class="glass-card p-4 border-l-4 border-emerald-500 animate-fade-in">
+                        <img src="${data.image}" class="w-full h-32 object-cover rounded-xl mb-2" onerror="this.src='https://ui-avatars.com/api/?name=Hub&background=10b981&color=fff'">
+                        <h4 class="font-bold text-sm text-slate-800">${escapeHtml(data.name)}</h4>
+                        <p class="text-xs text-slate-500 mt-1">₦${data.price} | ${data.negotiable}</p>
+                        <p class="text-[10px] italic text-slate-400 mt-1">Call: ${data.phone}</p>
+                    </div>
+                `;
+            });
+        }
+
+        const countEl = document.getElementById('market-count');
+        if(countEl) countEl.innerText = snap.size;
+    } catch(e) {
+        console.error("Marketplace load error:", e);
+        grid.innerHTML = "<p class='text-center text-red-500 py-10'>Error loading data. Please refresh.</p>";
+    }
+};
+
+// ============================
 // BROADCAST
 // ============================
 document.getElementById('btn-broadcast')?.addEventListener('click', async()=>{
@@ -469,46 +508,6 @@ async function loadBroadcastMessage() {
         });
     }
 }
-
-// ============================
-// MARKETPLACE DISPLAY
-// ============================
-window.loadMarketDisplay = async function(type='items') {
-    const grid = document.getElementById('market-grid');
-    if (!grid) return;
-
-    grid.innerHTML = "<p class='text-center py-10 text-slate-400 animate-pulse'>Loading...</p>";
-
-    try {
-        const snap = await db.collection('Marketplace')
-            .where('type', '==', type)
-            .orderBy('timestamp', 'desc')
-            .get();
-
-        if(snap.empty) {
-            grid.innerHTML = "<p class='text-center py-10 text-slate-400 italic'>No posts yet.</p>";
-        } else {
-            grid.innerHTML = "";
-            snap.forEach(doc => {
-                const data = doc.data();
-                grid.innerHTML += `
-                    <div class="glass-card p-4 border-l-4 border-emerald-500 animate-fade-in">
-                        <img src="${data.image}" class="w-full h-32 object-cover rounded-xl mb-2" onerror="this.src='https://ui-avatars.com/api/?name=Hub&background=10b981&color=fff'">
-                        <h4 class="font-bold text-sm text-slate-800">${escapeHtml(data.name)}</h4>
-                        <p class="text-xs text-slate-500 mt-1">₦${data.price} | ${data.negotiable}</p>
-                        <p class="text-[10px] italic text-slate-400 mt-1">Call: ${data.phone}</p>
-                    </div>
-                `;
-            });
-        }
-
-        const countEl = document.getElementById('market-count');
-        if(countEl) countEl.innerText = snap.size;
-    } catch(e) {
-        console.error(e);
-        grid.innerHTML = "<p class='text-center text-red-500 py-10'>Error loading data</p>";
-    }
-};
 
 function escapeHtml(str) {
     if(!str) return '';
