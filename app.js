@@ -1,22 +1,26 @@
 import { DEPARTMENTS, EXECUTIVES, STUDY_CATEGORIES, UI_CONFIG } from './data.js';
 
 // ============================
-// FIREBASE CONFIG
+// FIREBASE CONFIG - CORRECT PROJECT
 // ============================
 const firebaseConfig = {
-    apiKey: "AIzaSyAsS...", 
-    authDomain: "slithub-17a41.firebaseapp.com",
-    projectId: "slithub-17a41",
-    storageBucket: "slithub-17a41.appspot.com",
-    messagingSenderId: "1056588267605",
-    appId: "1:1056588267605:web:0786..."
+    apiKey: "AIzaSyCpsDTN-NTkTFmbwg3T6vv9H4eE_YXQdZA",
+    authDomain: "slit-hub.firebaseapp.com",
+    projectId: "slit-hub",
+    storageBucket: "slit-hub.firebasestorage.app",
+    messagingSenderId: "347194010969",
+    appId: "1:347194010969:web:a45af2e8d1627ac2593048",
+    measurementId: "G-CLFWJSG5H1"
 };
 
-if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+// Initialize Firebase
+if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
-
 const db = firebase.firestore();
+
+// Anonymous login to allow writes
+firebase.auth().signInAnonymously().catch(err => console.log("Auth error:", err));
 
 // ============================
 // CLOUDINARY UPLOAD
@@ -24,33 +28,28 @@ const db = firebase.firestore();
 const CLOUDINARY_UPLOAD_PRESET = "sebastian_preset";
 
 async function uploadFile(file) {
-    try {
-        const isPDF = file.type === 'application/pdf';
-        
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-        
-        const uploadUrl = isPDF 
-            ? "https://api.cloudinary.com/v1_1/dwsc9eumf/raw/upload"
-            : "https://api.cloudinary.com/v1_1/dwsc9eumf/image/upload";
-        
-        const response = await fetch(uploadUrl, {
-            method: 'POST',
-            body: formData
-        });
-        
-        const data = await response.json();
-        
-        if (!response.ok) {
-            throw new Error(data.error?.message || 'Upload failed');
-        }
-        
-        return data.secure_url;
-    } catch (error) {
-        console.error("Upload error:", error);
-        throw error;
+    const isPDF = file.type === 'application/pdf';
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    
+    const uploadUrl = isPDF 
+        ? "https://api.cloudinary.com/v1_1/dwsc9eumf/raw/upload"
+        : "https://api.cloudinary.com/v1_1/dwsc9eumf/image/upload";
+    
+    const response = await fetch(uploadUrl, {
+        method: 'POST',
+        body: formData
+    });
+    
+    const data = await response.json();
+    
+    if (!response.ok) {
+        throw new Error(data.error?.message || 'Upload failed');
     }
+    
+    return data.secure_url;
 }
 
 // ============================
@@ -173,7 +172,6 @@ window.processAcademicPost = async function() {
     if(file){
         try {
             fileUrl = await uploadFile(file);
-            console.log("Upload successful:", fileUrl);
         } catch(err) {
             alert("Upload failed: " + err.message);
             btn.disabled = false;
