@@ -1,7 +1,7 @@
 import { DEPARTMENTS, EXECUTIVES, STUDY_CATEGORIES, UI_CONFIG } from './data.js';
 
 // ============================
-// FIREBASE CONFIG - EVERYONE SEES SAME DATA
+// FIREBASE CONFIG
 // ============================
 const firebaseConfig = {
     apiKey: "AIzaSyAsS...", 
@@ -12,41 +12,45 @@ const firebaseConfig = {
     appId: "1:1056588267605:web:0786..."
 };
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const auth = firebase.auth();
+if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
 
-// Anonymous login - allows everyone to read/write
-auth.signInAnonymously().catch(err => console.log("Auth error:", err));
+const db = firebase.firestore();
 
 // ============================
-// CLOUDINARY UPLOAD (WORKS FOR IMAGES AND PDFS)
+// CLOUDINARY UPLOAD
 // ============================
 const CLOUDINARY_UPLOAD_PRESET = "sebastian_preset";
 
 async function uploadFile(file) {
-    const isPDF = file.type === 'application/pdf';
-    
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-    
-    const uploadUrl = isPDF 
-        ? "https://api.cloudinary.com/v1_1/dwsc9eumf/raw/upload"
-        : "https://api.cloudinary.com/v1_1/dwsc9eumf/image/upload";
-    
-    const res = await fetch(uploadUrl, {
-        method: 'POST',
-        body: formData
-    });
-    
-    const data = await res.json();
-    
-    if (!res.ok) {
-        throw new Error(data.error?.message || 'Upload failed');
+    try {
+        const isPDF = file.type === 'application/pdf';
+        
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+        
+        const uploadUrl = isPDF 
+            ? "https://api.cloudinary.com/v1_1/dwsc9eumf/raw/upload"
+            : "https://api.cloudinary.com/v1_1/dwsc9eumf/image/upload";
+        
+        const response = await fetch(uploadUrl, {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.error?.message || 'Upload failed');
+        }
+        
+        return data.secure_url;
+    } catch (error) {
+        console.error("Upload error:", error);
+        throw error;
     }
-    
-    return data.secure_url;
 }
 
 // ============================
@@ -102,7 +106,7 @@ document.getElementById('admin-trigger').onclick = () => {
 };
 
 // ============================
-// ACADEMICS - SHARED DATABASE
+// ACADEMICS
 // ============================
 window.openAcademicModal = function() {
     const isRep = confirm("Are you a Course Rep? 🎓\nOnly Reps can post Schedules, Tests, and Exams.");
@@ -137,9 +141,9 @@ window.openAcademicModal = function() {
             <textarea id="acad-desc" placeholder="Details/Instructions..." class="w-full p-4 bg-slate-50 rounded-2xl border-none h-24 text-xs outline-none"></textarea>
 
             <div class="relative group">
-                <input type="file" id="acad-file" class="hidden" accept="image/*,application/pdf" onchange="document.getElementById('acad-file-label').innerText='File Selected! ✅'">
+                <input type="file" id="acad-file" class="hidden" accept="image/*,application/pdf" onchange="document.getElementById('acad-file-label').innerHTML='<i class=\'fa-solid fa-check-circle\'></i> File Selected! ✅'">
                 <label for="acad-file" id="acad-file-label" class="block w-full p-6 border-2 border-dashed border-emerald-200 rounded-2xl text-center text-emerald-600 font-bold cursor-pointer">
-                    Upload PDF or Picture
+                    <i class="fa-solid fa-cloud-upload-alt text-2xl mb-2"></i><br>Click to Upload
                 </label>
             </div>
 
@@ -161,14 +165,15 @@ window.processAcademicPost = async function() {
         return;
     }
 
-    btn.innerHTML = `<i class="fa-solid fa-bolt animate-pulse"></i> UPLOADING...`;
     btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> UPLOADING...`;
 
     let fileUrl = "";
     
     if(file){
         try {
             fileUrl = await uploadFile(file);
+            console.log("Upload successful:", fileUrl);
         } catch(err) {
             alert("Upload failed: " + err.message);
             btn.disabled = false;
@@ -178,20 +183,29 @@ window.processAcademicPost = async function() {
     }
 
     try {
-        await db.collection('Academics').add({
-            type, level, title, desc, fileUrl,
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> SAVING...`;
+        
+        const postData = {
+            type: type,
+            level: level,
+            title: title,
+            desc: desc,
+            fileUrl: fileUrl,
             fileName: file ? file.name : null,
             fileType: file ? file.type : null,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-        btn.innerHTML = "SUCCESS! 🎉";
+            timestamp: new Date().toISOString()
+        };
+        
+        await db.collection('Academics').add(postData);
+        
+        btn.innerHTML = "✅ SUCCESS!";
         setTimeout(() => {
             document.getElementById('modal-overlay').classList.add('hidden');
             loadAcademicMaterials();
-        }, 500);
+            btn.disabled = false;
+        }, 1000);
     } catch(err) {
-        alert("Database error: " + err.message);
+        alert("Save failed: " + err.message);
         btn.disabled = false;
         btn.innerHTML = "RETRY PUBLISH";
     }
@@ -216,7 +230,7 @@ window.loadAcademicMaterials = async function(levelFilter='all'){
             container.innerHTML = "";
             snap.forEach(doc => {
                 const d = doc.data();
-                const icon = d.type==='exam'?'🎓':d.type==='test'?'📝':d.type==='lecture'?'📅':'📚';
+                const icon = d.type === 'exam' ? '🎓' : d.type === 'test' ? '📝' : d.type === 'lecture' ? '📅' : '📚';
                 const isPDF = d.fileType === 'application/pdf' || (d.fileUrl && d.fileUrl.includes('raw/upload'));
                 
                 let fileHtml = '';
@@ -229,7 +243,7 @@ window.loadAcademicMaterials = async function(levelFilter='all'){
                             </div>
                         `;
                     } else {
-                        fileHtml = `<a href="${d.fileUrl}" target="_blank" class="inline-block mt-3 text-emerald-600 font-black text-[9px] underline">🖼️ VIEW IMAGE <i class="fa-solid fa-up-right-from-square"></i></a>`;
+                        fileHtml = `<img src="${d.fileUrl}" class="mt-2 w-full h-32 object-cover rounded-xl">`;
                     }
                 }
                 
@@ -247,7 +261,7 @@ window.loadAcademicMaterials = async function(levelFilter='all'){
             });
         }
     } catch(e) {
-        console.error(e);
+        console.error("Load error:", e);
         container.innerHTML = "<p class='text-center text-red-500 py-10'>Error loading data</p>";
     }
 };
@@ -255,7 +269,7 @@ window.loadAcademicMaterials = async function(levelFilter='all'){
 function renderAcademics() {}
 
 // ============================
-// STUDY GROUPS - SHARED DATABASE
+// STUDY GROUPS
 // ============================
 window.openGroupModal = function(){
     const modal = document.getElementById('modal-overlay');
@@ -280,7 +294,7 @@ window.submitGroup = async()=>{
 
     await db.collection('StudyGroups').add({
         name, link, status:'pending',
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        timestamp: new Date().toISOString()
     });
 
     alert("Sent! Junior will verify 🚀");
@@ -326,7 +340,7 @@ async function loadVerifiedGroups(){
 }
 
 // ============================
-// MARKETPLACE - SHARED DATABASE
+// MARKETPLACE
 // ============================
 window.openMarketModal = function(){
     const modal = document.getElementById('modal-overlay');
@@ -355,7 +369,7 @@ window.openMarketModal = function(){
                     <input type="tel" id="seller-phone" placeholder="805 000 0000" class="w-full p-4 bg-transparent border-none outline-none">
                 </div>
                 <div class="relative group">
-                    <input type="file" id="item-image" class="hidden" accept="image/*" onchange="document.getElementById('file-label').innerText='Photo Selected! ✅'">
+                    <input type="file" id="item-image" class="hidden" accept="image/*" onchange="document.getElementById('file-label').innerHTML='<i class=\'fa-solid fa-check-circle\'></i> Photo Selected! ✅'">
                     <label for="item-image" id="file-label" class="block w-full p-6 border-2 border-dashed border-emerald-200 rounded-2xl text-center text-emerald-600 font-bold cursor-pointer bg-emerald-50/30">
                         <i class="fa-solid fa-camera-retro text-2xl mb-2"></i><br>Tap to Upload Photo
                     </label>
@@ -384,8 +398,8 @@ window.processMarketPost = async function(){
         return;
     }
 
-    btn.innerHTML = `<i class="fa-solid fa-bolt animate-pulse"></i> UPLOADING...`;
     btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> UPLOADING...`;
 
     let imageUrl = "https://ui-avatars.com/api/?name=Hub&background=10b981&color=fff";
 
@@ -400,20 +414,29 @@ window.processMarketPost = async function(){
         }
     }
 
-    await db.collection('Marketplace').add({
-        name, price: Number(price), type, phone, negotiable, image: imageUrl,
-        rating: 5.0,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    });
+    try {
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> SAVING...`;
+        
+        await db.collection('Marketplace').add({
+            name, price: Number(price), type, phone, negotiable, image: imageUrl,
+            rating: 5.0,
+            timestamp: new Date().toISOString()
+        });
 
-    btn.innerHTML = "DONE! 🚀";
-    setTimeout(() => {
-        document.getElementById('modal-overlay').classList.add('hidden');
-        loadMarketDisplay(type);
-        if(fileInput) fileInput.value = '';
-        const label = document.getElementById('file-label');
-        if(label) label.innerHTML = `<i class="fa-solid fa-camera-retro text-2xl mb-2"></i><br>Tap to Upload Photo`;
-    }, 500);
+        btn.innerHTML = "✅ DONE!";
+        setTimeout(() => {
+            document.getElementById('modal-overlay').classList.add('hidden');
+            loadMarketDisplay(type);
+            if(fileInput) fileInput.value = '';
+            const label = document.getElementById('file-label');
+            if(label) label.innerHTML = `<i class="fa-solid fa-camera-retro text-2xl mb-2"></i><br>Tap to Upload Photo`;
+            btn.disabled = false;
+        }, 1000);
+    } catch(err) {
+        alert("Save failed: " + err.message);
+        btn.disabled = false;
+        btn.innerHTML = "RETRY POST";
+    }
 };
 
 // ============================
@@ -425,7 +448,7 @@ document.getElementById('btn-broadcast')?.addEventListener('click', async()=>{
 
     await db.collection('Broadcasts').add({
         message: msg,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        timestamp: new Date().toISOString()
     });
     alert("Broadcast sent 🚀");
     loadBroadcastMessage();
@@ -484,6 +507,7 @@ window.loadMarketDisplay = async function(type='items') {
         const countEl = document.getElementById('market-count');
         if(countEl) countEl.innerText = snap.size;
     } catch(e) {
+        console.error(e);
         grid.innerHTML = "<p class='text-center text-red-500 py-10'>Error loading data</p>";
     }
 };
