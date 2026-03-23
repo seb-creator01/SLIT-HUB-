@@ -1,7 +1,7 @@
 import { DEPARTMENTS, EXECUTIVES, STUDY_CATEGORIES, UI_CONFIG } from './data.js';
 
 // ============================
-// FIREBASE CONFIG - CORRECT PROJECT
+// FIREBASE CONFIG
 // ============================
 const firebaseConfig = {
     apiKey: "AIzaSyCpsDTN-NTkTFmbwg3T6vv9H4eE_YXQdZA",
@@ -18,9 +18,7 @@ if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 const db = firebase.firestore();
-
-// Anonymous login to allow writes
-firebase.auth().signInAnonymously().catch(err => console.log("Auth error:", err));
+const auth = firebase.auth();
 
 // ============================
 // CLOUDINARY UPLOAD
@@ -53,19 +51,14 @@ async function uploadFile(file) {
 }
 
 // ============================
-// USER ID MANAGEMENT (ANONYMOUS UID)
+// GLOBAL VARIABLES
 // ============================
-function getUserId() {
-    let userId = localStorage.getItem('anonymous_uid');
-    if (!userId) {
-        userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        localStorage.setItem('anonymous_uid', userId);
-    }
-    return userId;
-}
+let currentUser = null;
+let currentUserData = null;
+let allMarketplaceProducts = [];
 
 // ============================
-// BOOTUP
+// BOOTUP - Wait for auth
 // ============================
 window.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
@@ -90,21 +83,71 @@ window.addEventListener('DOMContentLoaded', () => {
     loadMarketDisplay('items');
     loadAcademicMaterials();
     loadBroadcastMessage();
-    
-    // Check if user has any posts to show dashboard button
-    checkUserPosts();
+});
+
+// ============================
+// AUTH STATE LISTENER
+// ============================
+auth.onAuthStateChanged(async (user) => {
+    if (user) {
+        if (!user.emailVerified) {
+            await auth.signOut();
+            return;
+        }
+        currentUser = user;
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        if (userDoc.exists) {
+            currentUserData = userDoc.data();
+        } else {
+            currentUserData = {
+                name: user.displayName || user.email.split('@')[0],
+                email: user.email,
+                phone: '',
+                department: '',
+                avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || user.email)}&background=10b981&color=fff`,
+                createdAt: new Date().toISOString(),
+                isAdmin: user.email === 'precioussebastian70@gmail.com',
+                isVerified: false,
+                isBanned: false
+            };
+            await db.collection('users').doc(user.uid).set(currentUserData);
+        }
+        
+        // Update UI
+        document.getElementById('user-name').innerText = currentUserData.name;
+        document.getElementById('user-avatar').src = currentUserData.avatar;
+        
+        if (currentUserData.isAdmin) {
+            document.getElementById('admin-trigger').style.display = 'block';
+        }
+        
+        // Load departments for filter
+        loadDepartmentsForFilter();
+        
+        // Load all data
+        loadMarketDisplay('items');
+        loadAcademicMaterials();
+        loadVerifiedGroups();
+        loadBroadcastMessage();
+        
+        // Check user posts for dashboard button
+        checkUserPosts();
+    }
 });
 
 // Check if user has any posts
 async function checkUserPosts() {
-    const userId = getUserId();
-    const snap = await db.collection('Marketplace').where('anonymousId', '==', userId).limit(1).get();
+    if (!currentUser) return;
+    const snap = await db.collection('Marketplace').where('userId', '==', currentUser.uid).limit(1).get();
     const dashboardBtn = document.getElementById('dashboard-btn');
     if (dashboardBtn) {
         dashboardBtn.style.display = snap.size > 0 ? 'block' : 'none';
     }
 }
 
+// ============================
+// TAB NAVIGATION
+// ============================
 window.switchTab = function(tabId) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
     const target = document.getElementById(`tab-${tabId}`);
@@ -119,45 +162,46 @@ window.switchTab = function(tabId) {
         activeBtn.classList.add('text-emerald-600','active');
         activeBtn.classList.remove('text-slate-400');
     }
+    
+    // Load admin data if admin tab opened and user is admin
+    if (tabId === 'admin' && currentUserData && currentUserData.isAdmin) {
+        loadAdminStats();
+        loadAllUsers();
+        loadDepartmentsList();
+        loadAdminPanel();
+    }
 };
 
+// ============================
+// ADMIN TRIGGER (for existing admin panel)
+// ============================
 document.getElementById('admin-trigger').onclick = () => {
-    const pass = prompt("Enter Developer Secret 🛡️:");
-    if(pass === "junior123") {
+    if (currentUserData && currentUserData.isAdmin) {
         window.switchTab('admin');
-        loadAdminPanel();
-    } else alert("Access Denied ❌");
+    } else {
+        alert("Access Denied ❌");
+    }
 };
 
 // ============================
 // DASHBOARD FUNCTIONS
 // ============================
 window.openDashboard = async function() {
-    const userId = getUserId();
+    if (!currentUser) return;
+    
     const dashboardModal = document.getElementById('dashboard-modal');
     const dashboardContent = document.getElementById('dashboard-content');
     
     dashboardModal.style.display = 'flex';
     
-    // Check if user is upgraded
-    const userAccount = await db.collection('UserAccounts').where('anonymousId', '==', userId).get();
-    const isUpgraded = !userAccount.empty;
-    
-    let posts = [];
-    if (isUpgraded) {
-        const accountData = userAccount.docs[0].data();
-        const postsSnap = await db.collection('Marketplace').where('accountId', '==', accountData.accountId).get();
-        posts = postsSnap.docs;
-    } else {
-        const postsSnap = await db.collection('Marketplace').where('anonymousId', '==', userId).get();
-        posts = postsSnap.docs;
-    }
+    const postsSnap = await db.collection('Marketplace').where('userId', '==', currentUser.uid).get();
+    const posts = postsSnap.docs;
     
     if (posts.length === 0) {
         dashboardContent.innerHTML = `
             <h3 class="text-xl font-bold mb-4">My Dashboard</h3>
             <p class="text-slate-500 text-center py-8">You haven't posted anything yet.</p>
-            <button onclick="closeDashboard()" class="w-full bg-emerald-600 text-white py-3 rounded-xl mt-4 font-bold">Close</button>
+            <button onclick="closeDashboardModal()" class="w-full bg-emerald-600 text-white py-3 rounded-xl mt-4 font-bold">Close</button>
         `;
         return;
     }
@@ -185,15 +229,10 @@ window.openDashboard = async function() {
         `;
     });
     
-    postsHtml += `
-        <button onclick="openUpgradeModal()" class="w-full bg-emerald-600 text-white py-3 rounded-xl mt-4 font-bold">☁️ Upgrade to Cloud</button>
-        <button onclick="closeDashboard()" class="w-full mt-2 text-slate-500 py-2">Close</button>
-    `;
-    
-    dashboardContent.innerHTML = postsHtml;
+    dashboardContent.innerHTML = postsHtml + '<button onclick="closeDashboardModal()" class="w-full mt-4 bg-slate-200 py-2 rounded-xl font-bold">Close</button>';
 };
 
-window.closeDashboard = function() {
+window.closeDashboardModal = function() {
     document.getElementById('dashboard-modal').style.display = 'none';
 };
 
@@ -263,31 +302,6 @@ window.deleteProduct = async function(productId) {
 };
 
 // ============================
-// UPGRADE FUNCTIONS
-// ============================
-window.openUpgradeModal = function() {
-    document.getElementById('upgrade-modal').style.display = 'flex';
-};
-
-window.closeUpgradeModal = function() {
-    document.getElementById('upgrade-modal').style.display = 'none';
-};
-
-window.upgradeWithEmail = function() {
-    const email = prompt('Enter your email address:');
-    if (!email) return;
-    
-    // Send magic link (simplified - in production use Firebase Auth)
-    alert(`Magic link sent to ${email}. Check your email to complete upgrade.`);
-    closeUpgradeModal();
-};
-
-window.upgradeWithGoogle = function() {
-    alert('Google sign-in will be available soon. For now, use email upgrade.');
-    closeUpgradeModal();
-};
-
-// ============================
 // RATING FUNCTIONS
 // ============================
 let currentRatingProductId = null;
@@ -315,20 +329,15 @@ window.submitRating = async function() {
     }
     
     const productRef = db.collection('Marketplace').doc(currentRatingProductId);
-    const product = await productRef.get();
-    const data = product.data();
-    
-    // Check if this phone number has purchased (simplified - in production would check orders)
-    // For now, allow any rating with phone verification
     
     await db.collection('Ratings').add({
         productId: currentRatingProductId,
         rating: parseInt(rating.value),
         phone: phone,
+        userId: currentUser ? currentUser.uid : null,
         timestamp: new Date().toISOString()
     });
     
-    // Update average rating
     const ratingsSnap = await db.collection('Ratings').where('productId', '==', currentRatingProductId).get();
     let total = 0;
     ratingsSnap.forEach(r => total += r.data().rating);
@@ -356,7 +365,7 @@ window.closeCommentModal = function() {
 };
 
 window.submitComment = async function() {
-    const name = document.getElementById('comment-name').value || 'Anonymous';
+    const name = document.getElementById('comment-name').value || currentUserData?.name || 'Anonymous';
     const comment = document.getElementById('comment-text').value;
     
     if (!comment) {
@@ -368,6 +377,7 @@ window.submitComment = async function() {
         productId: currentCommentProductId,
         name: name,
         comment: comment,
+        userId: currentUser ? currentUser.uid : null,
         timestamp: new Date().toISOString()
     });
     
@@ -379,8 +389,6 @@ window.submitComment = async function() {
 // ============================
 // SEARCH & FILTER FUNCTIONS
 // ============================
-let allMarketplaceProducts = [];
-
 window.filterMarketplace = function() {
     const searchTerm = document.getElementById('search-input')?.value.toLowerCase() || '';
     const category = document.getElementById('filter-category')?.value || 'all';
@@ -423,7 +431,10 @@ function renderMarketplaceGrid(products) {
     products.forEach(product => {
         const isSold = product.isSold || false;
         const avgRating = product.avgRating || 0;
-        const ratingCount = product.ratingCount || 0;
+        const userPhone = currentUserData?.phone || product.phone;
+        const formattedPhone = userPhone ? userPhone.replace(/\D/g, '') : '';
+        const countryCode = '234';
+        const fullPhone = formattedPhone.startsWith('0') ? countryCode + formattedPhone.substring(1) : countryCode + formattedPhone;
         
         grid.innerHTML += `
             <div class="glass-card p-4 border-l-4 border-emerald-500 animate-fade-in relative">
@@ -440,11 +451,11 @@ function renderMarketplaceGrid(products) {
                 </div>
                 <p class="text-[10px] italic text-slate-400 mt-1">Call: ${product.phone}</p>
                 <div class="flex gap-2 mt-2">
-                    <a href="https://wa.me/${product.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hello! I'm interested in: ${product.name} - ₦${product.price}`)}" target="_blank" class="flex-1 text-center bg-green-600 text-white py-1 rounded-lg text-[10px] font-bold">📱 WhatsApp</a>
+                    <a href="https://wa.me/${fullPhone}?text=${encodeURIComponent(`Hello! I'm interested in: ${product.name} - ₦${product.price}`)}" target="_blank" class="flex-1 text-center bg-green-600 text-white py-1 rounded-lg text-[10px] font-bold">📱 WhatsApp</a>
                     <button onclick="openCommentModal('${product.id}')" class="flex-1 text-center bg-blue-500 text-white py-1 rounded-lg text-[10px] font-bold">💬 Comment</button>
                     <button onclick="openRatingModal('${product.id}')" class="flex-1 text-center bg-yellow-500 text-white py-1 rounded-lg text-[10px] font-bold">⭐ Rate</button>
                 </div>
-                ${product.comments ? `<div class="mt-2 text-[9px] text-slate-500 border-t pt-1">💬 ${product.commentCount || 0} comments</div>` : ''}
+                ${product.commentCount ? `<div class="mt-2 text-[9px] text-slate-500 border-t pt-1">💬 ${product.commentCount} comments</div>` : ''}
             </div>
         `;
     });
@@ -538,6 +549,7 @@ window.processAcademicPost = async function() {
             fileName: file ? file.name : null,
             fileType: file ? file.type : null,
             repName: prompt("Enter your name (as Course Rep):") || "Course Rep",
+            userId: currentUser ? currentUser.uid : null,
             timestamp: new Date().toISOString()
         };
         
@@ -556,7 +568,7 @@ window.processAcademicPost = async function() {
     }
 };
 
-window.loadAcademicMaterials = async function(levelFilter='all'){
+window.loadAcademicMaterials = async function(levelFilter='all', deptFilter='all'){
     const container = document.getElementById('academic-list');
     if(!container) return;
     container.innerHTML = "<p class='text-center p-10 animate-pulse text-xs text-slate-400'>Loading...</p>";
@@ -592,10 +604,7 @@ window.loadAcademicMaterials = async function(levelFilter='all'){
                     }
                 }
                 
-                // Add delete button for the rep who posted
-                const repName = d.repName || '';
-                const currentRepName = localStorage.getItem('current_rep_name');
-                const deleteButton = (currentRepName === repName && repName) ? 
+                const deleteButton = (currentUser && d.userId === currentUser.uid) ? 
                     `<button onclick="deleteAcademicPost('${doc.id}')" class="mt-2 text-red-500 text-[10px] font-bold underline">Delete Post</button>` : '';
                 
                 container.innerHTML += `
@@ -606,7 +615,7 @@ window.loadAcademicMaterials = async function(levelFilter='all'){
                         </div>
                         <h4 class="font-bold text-sm text-slate-800">${escapeHtml(d.title)}</h4>
                         <p class="text-[11px] text-slate-500 mt-1">${escapeHtml(d.desc)}</p>
-                        <p class="text-[9px] text-slate-400 italic">Posted by: ${escapeHtml(repName)}</p>
+                        <p class="text-[9px] text-slate-400 italic">Posted by: ${escapeHtml(d.repName)}</p>
                         ${fileHtml}
                         ${deleteButton}
                     </div>
@@ -655,6 +664,7 @@ window.submitGroup = async()=>{
 
     await db.collection('StudyGroups').add({
         name, link, status:'pending',
+        userId: currentUser ? currentUser.uid : null,
         timestamp: new Date().toISOString()
     });
 
@@ -701,7 +711,7 @@ async function loadVerifiedGroups(){
 }
 
 // ============================
-// MARKETPLACE - UPDATED WITH NEW FIELDS
+// MARKETPLACE - CREATE POST
 // ============================
 window.openMarketModal = function(){
     const modal = document.getElementById('modal-overlay');
@@ -740,9 +750,9 @@ window.openMarketModal = function(){
                 </select>
                 <div class="flex items-center gap-2 bg-slate-50 p-1 rounded-2xl border border-slate-100">
                     <span class="pl-4 font-bold text-slate-400">+234</span>
-                    <input type="tel" id="seller-phone" placeholder="805 000 0000" class="w-full p-4 bg-transparent border-none outline-none">
+                    <input type="tel" id="seller-phone" placeholder="805 000 0000" class="w-full p-4 bg-transparent border-none outline-none" value="${currentUserData?.phone || ''}">
                 </div>
-                <input type="text" id="seller-name" placeholder="Your name (optional)" class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none">
+                <input type="text" id="seller-name" placeholder="Your name" class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none" value="${currentUserData?.name || ''}">
                 <div class="relative group">
                     <input type="file" id="item-image" class="hidden" accept="image/*" onchange="previewImage(this)">
                     <label for="item-image" id="file-label" class="block w-full p-6 border-2 border-dashed border-emerald-200 rounded-2xl text-center text-emerald-600 font-bold cursor-pointer bg-emerald-50/30">
@@ -813,8 +823,6 @@ window.processMarketPost = async function(){
     try {
         btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> SAVING...`;
         
-        const userId = getUserId();
-        
         await db.collection('Marketplace').add({
             name, 
             price: Number(price), 
@@ -825,12 +833,12 @@ window.processMarketPost = async function(){
             image: imageUrl,
             condition: condition,
             category: category,
-            sellerName: sellerName || 'Anonymous',
-            anonymousId: userId,
+            sellerName: sellerName || currentUserData?.name || 'Anonymous',
+            userId: currentUser ? currentUser.uid : null,
+            userEmail: currentUser ? currentUser.email : null,
             isSold: false,
-            isVerified: false,
+            isVerified: currentUserData?.isVerified || false,
             views: 0,
-            rating: 5.0,
             avgRating: 0,
             ratingCount: 0,
             commentCount: 0,
@@ -856,7 +864,7 @@ window.processMarketPost = async function(){
 };
 
 // ============================
-// MARKETPLACE DISPLAY - UPDATED
+// MARKETPLACE DISPLAY
 // ============================
 window.loadMarketDisplay = async function(type='items') {
     const grid = document.getElementById('market-grid');
@@ -894,6 +902,10 @@ window.loadMarketDisplay = async function(type='items') {
 // BROADCAST
 // ============================
 document.getElementById('btn-broadcast')?.addEventListener('click', async()=>{
+    if (!currentUserData?.isAdmin) {
+        alert("Only admin can broadcast");
+        return;
+    }
     const msg = prompt("Enter broadcast message:");
     if(!msg) return alert("Cannot be empty!");
 
@@ -923,6 +935,156 @@ async function loadBroadcastMessage() {
     }
 }
 
+// ============================
+// ADMIN FUNCTIONS
+// ============================
+async function loadAdminStats() {
+    const usersSnap = await db.collection('users').get();
+    const postsSnap = await db.collection('Marketplace').get();
+    const reportsSnap = await db.collection('Reports').get();
+    const commentsSnap = await db.collection('Comments').get();
+    
+    document.getElementById('admin-stats').innerHTML = `
+        <div class="stat-card"><h4>${usersSnap.size}</h4><p>Total Users</p></div>
+        <div class="stat-card"><h4>${postsSnap.size}</h4><p>Total Posts</p></div>
+        <div class="stat-card"><h4>${reportsSnap.size}</h4><p>Reports</p></div>
+        <div class="stat-card"><h4>${commentsSnap.size}</h4><p>Comments</p></div>
+    `;
+}
+
+async function loadAllUsers() {
+    const usersSnap = await db.collection('users').get();
+    let html = '<table class="user-table"><thead><tr><th>Name</th><th>Email</th><th>Dept</th><th>Posts</th><th>Actions</th></tr></thead><tbody>';
+    for (const doc of usersSnap.docs) {
+        const user = doc.data();
+        const postsSnap = await db.collection('Marketplace').where('userId', '==', doc.id).get();
+        html += `
+            <tr>
+                <td>${escapeHtml(user.name)}</td>
+                <td>${escapeHtml(user.email)}</td>
+                <td>${escapeHtml(user.department || '-')}</td>
+                <td>${postsSnap.size}</td>
+                <td>
+                    ${!user.isBanned ? `<button class="admin-btn admin-btn-ban" onclick="banUser('${doc.id}')">Ban</button>` : `<button class="admin-btn admin-btn-unban" onclick="unbanUser('${doc.id}')">Unban</button>`}
+                    ${!user.isVerified ? `<button class="admin-btn admin-btn-verify" onclick="verifySeller('${doc.id}')">Verify</button>` : `<button class="admin-btn" onclick="unverifySeller('${doc.id}')">Unverify</button>`}
+                    <button class="admin-btn admin-btn-delete" onclick="deleteUser('${doc.id}')">Delete</button>
+                </td>
+            </tr>
+        `;
+    }
+    html += '</tbody></table>';
+    document.getElementById('admin-user-list').innerHTML = html;
+}
+
+window.searchUsers = function() {
+    const searchTerm = document.getElementById('admin-search-users').value.toLowerCase();
+    const rows = document.querySelectorAll('#admin-user-list table tbody tr');
+    rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(searchTerm) ? '' : 'none';
+    });
+};
+
+window.banUser = async function(userId) {
+    await db.collection('users').doc(userId).update({ isBanned: true });
+    loadAllUsers();
+    loadAdminStats();
+};
+
+window.unbanUser = async function(userId) {
+    await db.collection('users').doc(userId).update({ isBanned: false });
+    loadAllUsers();
+    loadAdminStats();
+};
+
+window.verifySeller = async function(userId) {
+    await db.collection('users').doc(userId).update({ isVerified: true });
+    // Also update all user's posts
+    const posts = await db.collection('Marketplace').where('userId', '==', userId).get();
+    posts.forEach(doc => doc.ref.update({ isVerified: true }));
+    loadAllUsers();
+    loadMarketDisplay('items');
+};
+
+window.unverifySeller = async function(userId) {
+    await db.collection('users').doc(userId).update({ isVerified: false });
+    const posts = await db.collection('Marketplace').where('userId', '==', userId).get();
+    posts.forEach(doc => doc.ref.update({ isVerified: false }));
+    loadAllUsers();
+    loadMarketDisplay('items');
+};
+
+window.deleteUser = async function(userId) {
+    if (confirm('Delete this user? All their posts will be deleted too.')) {
+        const posts = await db.collection('Marketplace').where('userId', '==', userId).get();
+        posts.forEach(doc => doc.ref.delete());
+        const academics = await db.collection('Academics').where('userId', '==', userId).get();
+        academics.forEach(doc => doc.ref.delete());
+        await db.collection('users').doc(userId).delete();
+        loadAllUsers();
+        loadAdminStats();
+        loadMarketDisplay('items');
+        loadAcademicMaterials();
+    }
+};
+
+// Department Management
+async function loadDepartmentsForFilter() {
+    const deptSnapshot = await db.collection('departments').orderBy('name').get();
+    const filterContainer = document.getElementById('academic-dept-filter');
+    if (filterContainer) {
+        let html = '<button class="active" onclick="filterAcademicByDept(\'all\')">All Depts</button>';
+        deptSnapshot.forEach(doc => {
+            const dept = doc.data();
+            html += `<button onclick="filterAcademicByDept('${dept.name}')">${dept.name}</button>`;
+        });
+        filterContainer.innerHTML = html;
+    }
+}
+
+window.filterAcademicByDept = function(dept) {
+    document.querySelectorAll('#academic-dept-filter button').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    event.target.classList.add('active');
+    loadAcademicMaterials('all', dept);
+};
+
+async function loadDepartmentsList() {
+    const deptSnapshot = await db.collection('departments').orderBy('name').get();
+    let html = '';
+    deptSnapshot.forEach(doc => {
+        const dept = doc.data();
+        html += `
+            <div class="dept-item">
+                <span>${escapeHtml(dept.name)}</span>
+                <button onclick="deleteDepartment('${doc.id}')" class="text-red-500 text-xs">Delete</button>
+            </div>
+        `;
+    });
+    document.getElementById('departments-list').innerHTML = html || '<p class="text-slate-400">No departments added yet</p>';
+}
+
+window.addDepartment = async function() {
+    const name = document.getElementById('new-dept-name').value.trim();
+    if (!name) return alert('Enter department name');
+    await db.collection('departments').add({ name: name });
+    document.getElementById('new-dept-name').value = '';
+    loadDepartmentsList();
+    loadDepartmentsForFilter();
+};
+
+window.deleteDepartment = async function(id) {
+    if (confirm('Delete this department?')) {
+        await db.collection('departments').doc(id).delete();
+        loadDepartmentsList();
+        loadDepartmentsForFilter();
+    }
+};
+
+// ============================
+// UTILITIES
+// ============================
 function escapeHtml(str) {
     if(!str) return '';
     return str.replace(/[&<>]/g, function(m) {
@@ -939,24 +1101,16 @@ window.filterByLevel = function(level='all') {
     loadAcademicMaterials(level);
 };
 
+// Modal close events
 document.getElementById('close-modal')?.addEventListener('click', () => {
     document.getElementById('modal-overlay').classList.add('hidden');
+});
+
+document.getElementById('close-dashboard')?.addEventListener('click', () => {
+    document.getElementById('dashboard-modal').style.display = 'none';
 });
 
 // Dashboard button event
 document.getElementById('dashboard-btn')?.addEventListener('click', () => {
     openDashboard();
 });
-
-// Close dashboard modal
-document.getElementById('close-dashboard')?.addEventListener('click', () => {
-    closeDashboard();
-});
-
-// ============================
-// INITIAL LOADS
-// ============================
-loadAcademicMaterials();
-loadVerifiedGroups();
-loadMarketDisplay('items');
-loadBroadcastMessage();
