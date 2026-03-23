@@ -55,6 +55,112 @@
         .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
+        
+        /* Rating Stars */
+        .star-rating {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+            gap: 5px;
+        }
+        .star-rating input {
+            display: none;
+        }
+        .star-rating label {
+            font-size: 25px;
+            color: #ddd;
+            cursor: pointer;
+        }
+        .star-rating input:checked ~ label,
+        .star-rating label:hover,
+        .star-rating label:hover ~ label {
+            color: #f5b301;
+        }
+        
+        /* Verified Badge */
+        .verified-badge {
+            display: inline-flex;
+            align-items: center;
+            background: #1DA1F2;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 20px;
+            margin-left: 6px;
+        }
+        .verified-badge i {
+            font-size: 10px;
+            margin-right: 3px;
+        }
+        
+        /* Sold Badge */
+        .sold-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ef4444;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 20px;
+            z-index: 10;
+        }
+        
+        /* Dashboard Button */
+        #dashboard-btn {
+            background: #10b981;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: bold;
+            display: none;
+        }
+        
+        /* Image Preview */
+        .image-preview {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        .image-preview img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 2px solid #10b981;
+        }
+        
+        /* Search Bar */
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .search-bar input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 30px;
+            font-size: 12px;
+        }
+        .filter-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        .filter-group select {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            font-size: 11px;
+            background: white;
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-slate-900 pb-24 font-sans select-none">
@@ -67,6 +173,10 @@
     <header class="bg-white/80 backdrop-blur-md border-b sticky top-0 z-40 px-4 py-3 flex justify-between items-center shadow-sm">
         <h1 class="font-black text-xl text-emerald-600 italic">SLIT-HUB ⚡</h1>
         <div class="flex gap-4 items-center">
+            <!-- NEW: Dashboard Button -->
+            <button id="dashboard-btn" class="transition-all active:scale-90">
+                <i class="fa-solid fa-chart-line text-lg"></i> Dashboard
+            </button>
             <button id="admin-trigger" class="text-slate-400 hover:text-emerald-600 transition-all active:scale-90">
                 <i class="fa-solid fa-shield-halved text-lg"></i>
             </button>
@@ -132,6 +242,35 @@
                 <h2 class="text-xl font-bold italic">Marketplace 🛍️</h2>
                 <button id="btn-post-ad" class="bg-emerald-600 btn-glow text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase">Post Ad</button>
             </div>
+            
+            <!-- NEW: Search and Filters -->
+            <div class="search-bar">
+                <input type="text" id="search-input" placeholder="🔍 Search products..." onkeyup="filterMarketplace()">
+            </div>
+            <div class="filter-group">
+                <select id="filter-category" onchange="filterMarketplace()">
+                    <option value="all">All Categories</option>
+                    <option value="Electronics">📱 Electronics</option>
+                    <option value="Books">📚 Books</option>
+                    <option value="Fashion">👗 Fashion</option>
+                    <option value="Food">🍔 Food</option>
+                    <option value="Accommodation">🏠 Accommodation</option>
+                </select>
+                <select id="filter-condition" onchange="filterMarketplace()">
+                    <option value="all">All Conditions</option>
+                    <option value="New">✨ New</option>
+                    <option value="Like New">👍 Like New</option>
+                    <option value="Used">🔄 Used</option>
+                </select>
+                <select id="filter-price" onchange="filterMarketplace()">
+                    <option value="all">All Prices</option>
+                    <option value="0-5000">Under ₦5,000</option>
+                    <option value="5000-20000">₦5,000 - ₦20,000</option>
+                    <option value="20000-50000">₦20,000 - ₦50,000</option>
+                    <option value="50000+">Above ₦50,000</option>
+                </select>
+            </div>
+            
             <div class="flex bg-slate-200/50 p-1 rounded-2xl backdrop-blur-sm">
                 <button onclick="loadMarketDisplay('items')" data-filter="items" class="m-filter active flex-1 py-2 text-[10px] font-black rounded-xl">ITEMS</button>
                 <button onclick="loadMarketDisplay('services')" data-filter="services" class="m-filter flex-1 py-2 text-[10px] font-black rounded-xl">SERVICES</button>
@@ -158,6 +297,53 @@
         <div class="bg-white w-full max-w-md rounded-t-[32px] sm:rounded-[32px] p-6 animate-fade-in shadow-2xl">
             <div id="modal-content"></div>
             <button id="close-modal" class="w-full mt-4 text-slate-400 text-xs font-bold py-2 uppercase">Close</button>
+        </div>
+    </div>
+
+    <!-- NEW: Dashboard Modal -->
+    <div id="dashboard-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[70] hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-[32px] p-6 max-h-[80vh] overflow-y-auto">
+            <div id="dashboard-content"></div>
+            <button id="close-dashboard" class="w-full mt-4 bg-slate-200 py-3 rounded-xl font-bold">Close</button>
+        </div>
+    </div>
+
+    <!-- NEW: Rating Modal -->
+    <div id="rating-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[70] hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-[32px] p-6">
+            <h3 class="text-xl font-bold mb-4">Rate Product ⭐</h3>
+            <div class="star-rating" id="star-rating">
+                <input type="radio" name="rating" value="5" id="star5"><label for="star5">★</label>
+                <input type="radio" name="rating" value="4" id="star4"><label for="star4">★</label>
+                <input type="radio" name="rating" value="3" id="star3"><label for="star3">★</label>
+                <input type="radio" name="rating" value="2" id="star2"><label for="star2">★</label>
+                <input type="radio" name="rating" value="1" id="star1"><label for="star1">★</label>
+            </div>
+            <input type="text" id="rating-phone" placeholder="Your phone number (for verification)" class="w-full p-3 border rounded-xl mt-4">
+            <button onclick="submitRating()" class="w-full bg-emerald-600 text-white py-3 rounded-xl mt-4 font-bold">Submit Rating</button>
+            <button onclick="closeRatingModal()" class="w-full mt-2 text-slate-500 py-2">Cancel</button>
+        </div>
+    </div>
+
+    <!-- NEW: Comment Modal -->
+    <div id="comment-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[70] hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-[32px] p-6">
+            <h3 class="text-xl font-bold mb-4">💬 Add Comment</h3>
+            <input type="text" id="comment-name" placeholder="Your name" class="w-full p-3 border rounded-xl mb-3">
+            <textarea id="comment-text" placeholder="Write your comment..." rows="3" class="w-full p-3 border rounded-xl"></textarea>
+            <button onclick="submitComment()" class="w-full bg-emerald-600 text-white py-3 rounded-xl mt-4 font-bold">Post Comment</button>
+            <button onclick="closeCommentModal()" class="w-full mt-2 text-slate-500 py-2">Cancel</button>
+        </div>
+    </div>
+
+    <!-- NEW: Upgrade Modal -->
+    <div id="upgrade-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[70] hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-[32px] p-6">
+            <h3 class="text-xl font-bold mb-4">☁️ Upgrade to Cloud</h3>
+            <p class="text-sm text-slate-600 mb-4">Save your posts to access from any device</p>
+            <button onclick="upgradeWithEmail()" class="w-full bg-emerald-600 text-white py-3 rounded-xl mb-3 font-bold">📧 Upgrade with Email</button>
+            <button onclick="upgradeWithGoogle()" class="w-full bg-blue-600 text-white py-3 rounded-xl mb-3 font-bold">🔐 Sign in with Google</button>
+            <button onclick="closeUpgradeModal()" class="w-full mt-2 text-slate-500 py-2">Maybe Later</button>
         </div>
     </div>
 
