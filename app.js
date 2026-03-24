@@ -86,18 +86,95 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // ============================
+// NEW: LOGIN & REGISTRATION LOGIC
+// ============================
+window.handleSignup = async function(e) {
+    e.preventDefault();
+    const email = document.getElementById('reg-email').value;
+    const pass = document.getElementById('reg-password').value;
+    const name = document.getElementById('reg-name').value;
+    const rulesAccepted = document.getElementById('accept-rules').checked;
+
+    if(!rulesAccepted) return alert("You must accept the Campus Rules to join! 📜");
+
+    try {
+        const cred = await auth.createUserWithEmailAndPassword(email, pass);
+        await cred.user.sendEmailVerification();
+        
+        await db.collection('users').doc(cred.user.uid).set({
+            name: name,
+            email: email,
+            phone: '',
+            department: '',
+            avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=10b981&color=fff`,
+            createdAt: new Date().toISOString(),
+            isAdmin: email === 'precioussebastian70@gmail.com',
+            isVerified: false,
+            isBanned: false,
+            rulesAccepted: true
+        });
+
+        alert("Verification email sent! Check your inbox 📧");
+        auth.signOut();
+        location.reload();
+    } catch(err) {
+        alert(err.message);
+    }
+};
+
+window.handleLogin = async function(e) {
+    e.preventDefault();
+    const email = document.getElementById('login-email').value;
+    const pass = document.getElementById('login-password').value;
+
+    try {
+        const cred = await auth.signInWithEmailAndPassword(email, pass);
+        if(!cred.user.emailVerified) {
+            alert("Please verify your email first! 📧");
+            auth.signOut();
+            return;
+        }
+        
+        // Check for ban
+        const userDoc = await db.collection('users').doc(cred.user.uid).get();
+        if(userDoc.exists && userDoc.data().isBanned) {
+            alert("This account has been banned for violating campus rules. 🚫");
+            auth.signOut();
+            return;
+        }
+        
+        location.reload();
+    } catch(err) {
+        alert(err.message);
+    }
+};
+
+// ============================
 // AUTH STATE LISTENER
 // ============================
 auth.onAuthStateChanged(async (user) => {
+    const authSection = document.getElementById('auth-section');
+    const mainApp = document.getElementById('main-app');
+
     if (user) {
         if (!user.emailVerified) {
-            await auth.signOut();
+            if(authSection) authSection.classList.remove('hidden');
+            if(mainApp) mainApp.classList.add('hidden');
             return;
         }
+        
         currentUser = user;
         const userDoc = await db.collection('users').doc(user.uid).get();
+        
         if (userDoc.exists) {
             currentUserData = userDoc.data();
+            
+            // Redirect if banned
+            if(currentUserData.isBanned) {
+                alert("Account Banned 🚫");
+                auth.signOut();
+                return;
+            }
         } else {
             currentUserData = {
                 name: user.displayName || user.email.split('@')[0],
@@ -113,25 +190,30 @@ auth.onAuthStateChanged(async (user) => {
             await db.collection('users').doc(user.uid).set(currentUserData);
         }
         
+        // Show App / Hide Auth
+        if(authSection) authSection.classList.add('hidden');
+        if(mainApp) mainApp.classList.remove('hidden');
+
         // Update UI
-        document.getElementById('user-name').innerText = currentUserData.name;
-        document.getElementById('user-avatar').src = currentUserData.avatar;
+        const nameEl = document.getElementById('user-name');
+        const avatarEl = document.getElementById('user-avatar');
+        if(nameEl) nameEl.innerText = currentUserData.name;
+        if(avatarEl) avatarEl.src = currentUserData.avatar;
         
-        if (currentUserData.isAdmin) {
-            document.getElementById('admin-trigger').style.display = 'block';
+        const adminTrigger = document.getElementById('admin-trigger');
+        if (currentUserData.isAdmin && adminTrigger) {
+            adminTrigger.style.display = 'block';
         }
         
-        // Load departments for filter
         loadDepartmentsForFilter();
-        
-        // Load all data
         loadMarketDisplay('items');
         loadAcademicMaterials();
         loadVerifiedGroups();
         loadBroadcastMessage();
-        
-        // Check user posts for dashboard button
         checkUserPosts();
+    } else {
+        if(authSection) authSection.classList.remove('hidden');
+        if(mainApp) mainApp.classList.add('hidden');
     }
 });
 
@@ -175,13 +257,16 @@ window.switchTab = function(tabId) {
 // ============================
 // ADMIN TRIGGER (for existing admin panel)
 // ============================
-document.getElementById('admin-trigger').onclick = () => {
-    if (currentUserData && currentUserData.isAdmin) {
-        window.switchTab('admin');
-    } else {
-        alert("Access Denied ❌");
-    }
-};
+const adminTriggerBtn = document.getElementById('admin-trigger');
+if(adminTriggerBtn) {
+    adminTriggerBtn.onclick = () => {
+        if (currentUserData && currentUserData.isAdmin) {
+            window.switchTab('admin');
+        } else {
+            alert("Access Denied ❌");
+        }
+    };
+}
 
 // ============================
 // DASHBOARD FUNCTIONS
@@ -769,6 +854,7 @@ window.openMarketModal = function(){
 // Image preview function
 window.previewImage = function(input) {
     const preview = document.getElementById('image-preview');
+    if(!preview) return;
     preview.innerHTML = '';
     if (input.files && input.files[0]) {
         const reader = new FileReader();
@@ -852,7 +938,8 @@ window.processMarketPost = async function(){
             if(fileInput) fileInput.value = '';
             const label = document.getElementById('file-label');
             if(label) label.innerHTML = `<i class="fa-solid fa-camera-retro text-2xl mb-2"></i><br>Tap to Upload Photo`;
-            document.getElementById('image-preview').innerHTML = '';
+            const preview = document.getElementById('image-preview');
+            if(preview) preview.innerHTML = '';
             btn.disabled = false;
             checkUserPosts();
         }, 1000);
@@ -944,12 +1031,15 @@ async function loadAdminStats() {
     const reportsSnap = await db.collection('Reports').get();
     const commentsSnap = await db.collection('Comments').get();
     
-    document.getElementById('admin-stats').innerHTML = `
-        <div class="stat-card"><h4>${usersSnap.size}</h4><p>Total Users</p></div>
-        <div class="stat-card"><h4>${postsSnap.size}</h4><p>Total Posts</p></div>
-        <div class="stat-card"><h4>${reportsSnap.size}</h4><p>Reports</p></div>
-        <div class="stat-card"><h4>${commentsSnap.size}</h4><p>Comments</p></div>
-    `;
+    const statsEl = document.getElementById('admin-stats');
+    if(statsEl) {
+        statsEl.innerHTML = `
+            <div class="stat-card"><h4>${usersSnap.size}</h4><p>Total Users</p></div>
+            <div class="stat-card"><h4>${postsSnap.size}</h4><p>Total Posts</p></div>
+            <div class="stat-card"><h4>${reportsSnap.size}</h4><p>Reports</p></div>
+            <div class="stat-card"><h4>${commentsSnap.size}</h4><p>Comments</p></div>
+        `;
+    }
 }
 
 async function loadAllUsers() {
@@ -973,7 +1063,8 @@ async function loadAllUsers() {
         `;
     }
     html += '</tbody></table>';
-    document.getElementById('admin-user-list').innerHTML = html;
+    const userListEl = document.getElementById('admin-user-list');
+    if(userListEl) userListEl.innerHTML = html;
 }
 
 window.searchUsers = function() {
@@ -1046,7 +1137,7 @@ window.filterAcademicByDept = function(dept) {
     document.querySelectorAll('#academic-dept-filter button').forEach(btn => {
         btn.classList.remove('active');
     });
-    event.target.classList.add('active');
+    if(event) event.target.classList.add('active');
     loadAcademicMaterials('all', dept);
 };
 
@@ -1062,7 +1153,8 @@ async function loadDepartmentsList() {
             </div>
         `;
     });
-    document.getElementById('departments-list').innerHTML = html || '<p class="text-slate-400">No departments added yet</p>';
+    const listEl = document.getElementById('departments-list');
+    if(listEl) listEl.innerHTML = html || '<p class="text-slate-400">No departments added yet</p>';
 }
 
 window.addDepartment = async function() {
@@ -1114,3 +1206,8 @@ document.getElementById('close-dashboard')?.addEventListener('click', () => {
 document.getElementById('dashboard-btn')?.addEventListener('click', () => {
     openDashboard();
 });
+
+// Add logout trigger
+window.logout = function() {
+    auth.signOut().then(() => location.reload());
+};
