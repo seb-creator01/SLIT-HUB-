@@ -58,7 +58,7 @@ let currentUserData = null;
 let allMarketplaceProducts = [];
 
 // ============================
-// BOOTUP - Wait for auth
+// BOOTUP
 // ============================
 window.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
@@ -68,133 +68,469 @@ window.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => splash.classList.add('hidden'), 500);
         }
     }, 1500);
-
-    document.querySelectorAll('.m-filter').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const type = this.getAttribute('data-filter');
-            document.querySelectorAll('.m-filter').forEach(b => b.classList.remove('active', 'bg-white', 'text-emerald-600', 'shadow-sm'));
-            this.classList.add('active', 'bg-white', 'text-emerald-600', 'shadow-sm');
-            loadMarketDisplay(type);
-        });
-    });
-
-    renderAcademics();
-    loadVerifiedGroups();
-    loadMarketDisplay('items');
-    loadAcademicMaterials();
-    loadBroadcastMessage();
 });
 
 // ============================
-// AUTH STATE LISTENER - FIXED NO REFRESH LOOP
+// ACADEMICS FUNCTIONS
 // ============================
-auth.onAuthStateChanged(async (user) => {
-    if (user) {
-        if (!user.emailVerified) {
-            await auth.signOut();
+window.openAcademicModal = function() {
+    const isRep = confirm("Are you a Course Rep? 🎓\nOnly Reps can post Schedules, Tests, and Exams.");
+    if(!isRep) return;
+
+    const repKey = prompt("Enter Course Rep Secret Key:");
+    if(repKey !== "REP2026") return alert("Unauthorized Key! ❌");
+
+    const modal = document.getElementById('modal-overlay');
+    const content = document.getElementById('modal-content-inner');
+    modal.style.display = 'flex';
+
+    content.innerHTML = `
+        <h3 class="text-xl font-black mb-4 italic text-emerald-600">Post Academic Update 📖</h3>
+        <div class="space-y-3">
+            <select id="acad-type" class="w-full p-4 bg-slate-50 rounded-2xl font-bold border-none">
+                <option value="lecture">📅 Lecture Schedule</option>
+                <option value="test">📝 Upcoming Test</option>
+                <option value="exam">🎓 Exam Update</option>
+                <option value="material">📚 Material/Past Question</option>
+            </select>
+
+            <select id="acad-level" class="w-full p-4 bg-slate-50 rounded-2xl border-none font-bold">
+                <option value="100">100 Level</option>
+                <option value="200">200 Level</option>
+                <option value="300">300 Level</option>
+                <option value="400">400 Level</option>
+                <option value="500">500 Level</option>
+            </select>
+
+            <input type="text" id="acad-title" placeholder="Course Code (e.g. GST 111)" class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none">
+            <textarea id="acad-desc" placeholder="Details/Instructions..." class="w-full p-4 bg-slate-50 rounded-2xl border-none h-24 text-xs outline-none"></textarea>
+
+            <div class="relative group">
+                <input type="file" id="acad-file" class="hidden" accept="image/*,application/pdf" onchange="document.getElementById('acad-file-label').innerHTML='<i class=\'fa-solid fa-check-circle\'></i> File Selected! ✅'">
+                <label for="acad-file" id="acad-file-label" class="block w-full p-6 border-2 border-dashed border-emerald-200 rounded-2xl text-center text-emerald-600 font-bold cursor-pointer">
+                    <i class="fa-solid fa-cloud-upload-alt text-2xl mb-2"></i><br>Click to Upload
+                </label>
+            </div>
+
+            <button onclick="processAcademicPost()" id="acad-submit-btn" class="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black btn-glow">PUBLISH TO HUB 🚀</button>
+        </div>
+    `;
+};
+
+window.processAcademicPost = async function() {
+    const btn = document.getElementById('acad-submit-btn');
+    const file = document.getElementById('acad-file').files[0];
+    const type = document.getElementById('acad-type').value;
+    const level = document.getElementById('acad-level').value;
+    const title = document.getElementById('acad-title').value;
+    const desc = document.getElementById('acad-desc').value;
+
+    if(!title || !desc) {
+        alert("Fill Title & Description!");
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> UPLOADING...`;
+
+    let fileUrl = "";
+    
+    if(file){
+        try {
+            fileUrl = await uploadFile(file);
+        } catch(err) {
+            alert("Upload failed: " + err.message);
+            btn.disabled = false;
+            btn.innerHTML = "RETRY PUBLISH";
             return;
         }
-        currentUser = user;
-        const userDoc = await db.collection('users').doc(user.uid).get();
-        if (userDoc.exists) {
-            currentUserData = userDoc.data();
-        } else {
-            currentUserData = {
-                name: user.displayName || user.email.split('@')[0],
-                email: user.email,
-                phone: '',
-                department: '',
-                avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || user.email)}&background=10b981&color=fff`,
-                createdAt: new Date().toISOString(),
-                isAdmin: user.email === 'precioussebastian70@gmail.com',
-                isVerified: false,
-                isBanned: false
-            };
-            await db.collection('users').doc(user.uid).set(currentUserData);
-        }
-        
-        // Update UI
-        document.getElementById('user-name').innerText = currentUserData.name;
-        document.getElementById('user-avatar').src = currentUserData.avatar;
-        
-        // Show admin elements if admin
-        const isAdmin = currentUserData.isAdmin;
-        document.getElementById('admin-trigger').style.display = isAdmin ? 'block' : 'none';
-        const adminNavBtn = document.getElementById('admin-nav-btn');
-        if (adminNavBtn) adminNavBtn.style.display = isAdmin ? 'flex' : 'none';
-        
-        // Dashboard button always visible
-        const dashboardBtn = document.getElementById('dashboard-btn');
-        if (dashboardBtn) dashboardBtn.style.display = 'block';
-        
-        // Hide login, show main app
-        document.getElementById('login-container').style.display = 'none';
-        document.getElementById('main-app').style.display = 'block';
-        
-        // Load departments for filter
-        loadDepartmentsForFilter();
-        
-        // Load all data
-        loadMarketDisplay('items');
-        loadAcademicMaterials();
-        loadVerifiedGroups();
-        loadBroadcastMessage();
-        
-        // Check user posts for dashboard content
-        checkUserPosts();
-    } else {
-        // Not logged in - stay on login page, NO REFRESH
-        // Only show login, hide main app
-        document.getElementById('login-container').style.display = 'flex';
-        document.getElementById('main-app').style.display = 'none';
-        console.log("User not logged in");
     }
-});
 
-// Check if user has any posts
-async function checkUserPosts() {
-    if (!currentUser) return;
-    const snap = await db.collection('Marketplace').where('userId', '==', currentUser.uid).limit(1).get();
-    // Dashboard button is already visible
+    try {
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> SAVING...`;
+        
+        const postData = {
+            type: type,
+            level: level,
+            title: title,
+            desc: desc,
+            fileUrl: fileUrl,
+            fileName: file ? file.name : null,
+            fileType: file ? file.type : null,
+            repName: prompt("Enter your name (as Course Rep):") || "Course Rep",
+            userId: currentUser ? currentUser.uid : null,
+            timestamp: new Date().toISOString()
+        };
+        
+        await db.collection('Academics').add(postData);
+        
+        btn.innerHTML = "✅ SUCCESS!";
+        setTimeout(() => {
+            document.getElementById('modal-overlay').style.display = 'none';
+            loadAcademicMaterials();
+            btn.disabled = false;
+        }, 1000);
+    } catch(err) {
+        alert("Save failed: " + err.message);
+        btn.disabled = false;
+        btn.innerHTML = "RETRY PUBLISH";
+    }
+};
+
+window.loadAcademicMaterials = async function(levelFilter='all', deptFilter='all'){
+    const container = document.getElementById('academic-list');
+    if(!container) return;
+    container.innerHTML = "<div class='text-center py-10'><i class='fa-solid fa-spinner fa-spin text-emerald-600 text-2xl'></i><p class='mt-2 text-xs text-slate-400'>Loading academic materials...</p></div>";
+
+    try {
+        let query = db.collection('Academics').orderBy('timestamp', 'desc');
+        if(levelFilter !== 'all') {
+            query = query.where('level', '==', levelFilter);
+        }
+
+        const snap = await query.get();
+        
+        if(snap.empty) {
+            container.innerHTML = "<p class='text-center text-slate-300 py-10 italic'>No updates.</p>";
+        } else {
+            container.innerHTML = "";
+            snap.forEach(doc => {
+                const d = doc.data();
+                const icon = d.type === 'exam' ? '🎓' : d.type === 'test' ? '📝' : d.type === 'lecture' ? '📅' : '📚';
+                const isPDF = d.fileType === 'application/pdf' || (d.fileUrl && d.fileUrl.includes('raw/upload'));
+                
+                let fileHtml = '';
+                if(d.fileUrl) {
+                    if(isPDF) {
+                        fileHtml = `
+                            <div class="flex gap-2 mt-3">
+                                <a href="${d.fileUrl}" target="_blank" class="flex-1 text-center bg-emerald-600 text-white px-3 py-2 rounded-xl text-[10px] font-black">📖 OPEN PDF</a>
+                                <a href="${d.fileUrl}" download="${d.fileName || 'document.pdf'}" class="flex-1 text-center bg-slate-600 text-white px-3 py-2 rounded-xl text-[10px] font-black">📥 DOWNLOAD</a>
+                            </div>
+                        `;
+                    } else {
+                        fileHtml = `<img src="${d.fileUrl}" class="mt-2 w-full h-32 object-cover rounded-xl">`;
+                    }
+                }
+                
+                const deleteButton = (currentUser && d.userId === currentUser.uid) ? 
+                    `<button onclick="deleteAcademicPost('${doc.id}')" class="mt-2 text-red-500 text-[10px] font-bold underline">Delete Post</button>` : '';
+                
+                container.innerHTML += `
+                    <div class="glass-card p-4 mb-3 border-l-4 border-emerald-500 animate-fade-in">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="bg-emerald-100 text-emerald-700 text-[8px] font-black px-2 py-1 rounded-md uppercase">${d.level}L</span>
+                            <span class="text-lg">${icon}</span>
+                        </div>
+                        <h4 class="font-bold text-sm text-slate-800">${escapeHtml(d.title)}</h4>
+                        <p class="text-[11px] text-slate-500 mt-1">${escapeHtml(d.desc)}</p>
+                        <p class="text-[9px] text-slate-400 italic">Posted by: ${escapeHtml(d.repName)}</p>
+                        ${fileHtml}
+                        ${deleteButton}
+                    </div>
+                `;
+            });
+        }
+    } catch(e) {
+        console.error("Load error:", e);
+        container.innerHTML = "<p class='text-center text-red-500 py-10'>Error loading data</p>";
+    }
+};
+
+window.deleteAcademicPost = async function(postId) {
+    if (confirm('Are you sure you want to delete this academic post?')) {
+        await db.collection('Academics').doc(postId).delete();
+        alert('Post deleted!');
+        loadAcademicMaterials();
+    }
+};
+
+// ============================
+// STUDY GROUPS FUNCTIONS
+// ============================
+window.openGroupModal = function(){
+    const modal = document.getElementById('modal-overlay');
+    const content = document.getElementById('modal-content-inner');
+    modal.style.display = 'flex';
+
+    content.innerHTML = `
+        <h3 class="text-xl font-black mb-4 italic text-emerald-600">New Study Group 📚</h3>
+        <input type="text" id="group-name" placeholder="Course Name" class="w-full p-4 bg-slate-50 rounded-2xl mb-3 border-none outline-none">
+        <input type="url" id="group-link" placeholder="WhatsApp Link" class="w-full p-4 bg-slate-50 rounded-2xl mb-4 border-none outline-none">
+        <button onclick="submitGroup()" id="group-submit-btn" class="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black btn-glow">SUBMIT</button>
+    `;
+};
+
+window.submitGroup = async()=>{
+    const btn = document.getElementById('group-submit-btn');
+    const name = document.getElementById('group-name').value;
+    const link = document.getElementById('group-link').value;
+    
+    if(!name||!link) return alert("Fill all fields!");
+
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> SUBMITTING...`;
+
+    await db.collection('StudyGroups').add({
+        name, link, status:'pending',
+        userId: currentUser ? currentUser.uid : null,
+        timestamp: new Date().toISOString()
+    });
+
+    btn.innerHTML = "✅ SENT!";
+    setTimeout(() => {
+        document.getElementById('modal-overlay').style.display = 'none';
+        alert("Sent! Junior will verify 🚀");
+        btn.disabled = false;
+    }, 1000);
+};
+
+async function loadVerifiedGroups(){
+    const list = document.getElementById('groups-list');
+    if(!list) return;
+    list.innerHTML = "<div class='text-center py-4'><i class='fa-solid fa-spinner fa-spin text-emerald-600'></i><p class='text-xs mt-1'>Loading groups...</p></div>";
+    
+    const snap = await db.collection('StudyGroups').where('status','==','verified').get();
+    list.innerHTML = "";
+    if(snap.empty) {
+        list.innerHTML = "<p class='text-center text-slate-400 py-4 italic'>No study groups yet.</p>";
+    } else {
+        snap.forEach(doc => {
+            const d = doc.data();
+            list.innerHTML += `
+                <div class="glass-card p-4 flex justify-between items-center border-l-4 border-emerald-50">
+                    <p class="font-bold italic">${escapeHtml(d.name)}</p>
+                    <a href="${d.link}" target="_blank" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-[10px] font-black italic">JOIN</a>
+                </div>
+            `;
+        });
+    }
 }
 
 // ============================
-// TAB NAVIGATION
+// MARKETPLACE FUNCTIONS
 // ============================
-window.switchTab = function(tabId) {
-    document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
-    const target = document.getElementById(`tab-${tabId}`);
-    if(target) target.classList.remove('hidden');
+window.openMarketModal = function(){
+    const modal = document.getElementById('modal-overlay');
+    const content = document.getElementById('modal-content-inner');
+    modal.style.display = 'flex';
 
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.remove('text-emerald-600','active');
-        btn.classList.add('text-slate-400');
-    });
-    const activeBtn = document.querySelector(`.nav-btn[data-tab="${tabId}"]`);
-    if(activeBtn){
-        activeBtn.classList.add('text-emerald-600','active');
-        activeBtn.classList.remove('text-slate-400');
+    content.innerHTML = `
+        <div class="max-h-[80vh] overflow-y-auto pb-6">
+            <h3 class="text-xl font-black mb-4 italic text-emerald-600">Create a Post 🚀</h3>
+            <div class="space-y-3">
+                <input type="text" id="item-name" placeholder="Product Name" class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none">
+                <textarea id="item-desc" placeholder="Description" rows="3" class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none"></textarea>
+                <div class="flex gap-2">
+                    <input type="number" id="item-price" placeholder="Price (₦)" class="flex-1 p-4 bg-slate-50 rounded-2xl border-none outline-none">
+                    <select id="item-negotiable" class="p-4 bg-slate-50 rounded-2xl border-none font-bold text-xs">
+                        <option value="Fixed">Fixed</option>
+                        <option value="Negotiable">Negotiable</option>
+                    </select>
+                </div>
+                <select id="item-condition" class="w-full p-4 bg-slate-50 rounded-2xl border-none font-bold">
+                    <option value="New">✨ New</option>
+                    <option value="Like New">👍 Like New</option>
+                    <option value="Used">🔄 Used</option>
+                </select>
+                <select id="item-category" class="w-full p-4 bg-slate-50 rounded-2xl border-none font-bold">
+                    <option value="Electronics">📱 Electronics</option>
+                    <option value="Books">📚 Books</option>
+                    <option value="Fashion">👗 Fashion</option>
+                    <option value="Food">🍔 Food</option>
+                    <option value="Accommodation">🏠 Accommodation</option>
+                </select>
+                <select id="item-type" class="w-full p-4 bg-slate-50 rounded-2xl border-none font-bold text-slate-500">
+                    <option value="items">Physical Item (Sale)</option>
+                    <option value="services">Service (Gigs/Skill)</option>
+                    <option value="requests">Request (I need...)</option>
+                </select>
+                <div class="flex items-center gap-2 bg-slate-50 p-1 rounded-2xl border border-slate-100">
+                    <span class="pl-4 font-bold text-slate-400">+234</span>
+                    <input type="tel" id="seller-phone" placeholder="805 000 0000" class="w-full p-4 bg-transparent border-none outline-none" value="${currentUserData?.phone || ''}">
+                </div>
+                <input type="text" id="seller-name" placeholder="Your name" class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none" value="${currentUserData?.name || ''}">
+                <div class="relative group">
+                    <input type="file" id="item-image" class="hidden" accept="image/*" onchange="previewImage(this)">
+                    <label for="item-image" id="file-label" class="block w-full p-6 border-2 border-dashed border-emerald-200 rounded-2xl text-center text-emerald-600 font-bold cursor-pointer bg-emerald-50/30">
+                        <i class="fa-solid fa-camera-retro text-2xl mb-2"></i><br>Tap to Upload Photo
+                    </label>
+                    <div id="image-preview" class="image-preview mt-2"></div>
+                </div>
+                <button onclick="processMarketPost()" id="market-submit-btn" class="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black btn-glow">POST TO HUB ✨</button>
+            </div>
+        </div>
+    `;
+};
+
+window.previewImage = function(input) {
+    const preview = document.getElementById('image-preview');
+    preview.innerHTML = '';
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            preview.appendChild(img);
+        };
+        reader.readAsDataURL(input.files[0]);
+        document.getElementById('file-label').innerHTML = '<i class="fa-solid fa-check-circle text-2xl mb-2"></i><br>Photo Selected! ✅';
+    }
+};
+
+window.processMarketPost = async function(){
+    const btn = document.getElementById('market-submit-btn');
+    const fileInput = document.getElementById('item-image');
+    const file = fileInput.files[0];
+    const name = document.getElementById('item-name').value;
+    const price = document.getElementById('item-price').value;
+    const description = document.getElementById('item-desc').value;
+    const type = document.getElementById('item-type').value;
+    const phone = document.getElementById('seller-phone').value;
+    const negotiable = document.getElementById('item-negotiable').value;
+    const condition = document.getElementById('item-condition').value;
+    const category = document.getElementById('item-category').value;
+    const sellerName = document.getElementById('seller-name').value;
+
+    if(!name || !price || !phone) {
+        alert("Fill all fields!");
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> UPLOADING...`;
+
+    let imageUrl = "https://ui-avatars.com/api/?name=Hub&background=10b981&color=fff";
+
+    if(file){
+        try {
+            imageUrl = await uploadFile(file);
+        } catch(err) {
+            alert("Upload failed: " + err.message);
+            btn.disabled = false;
+            btn.innerHTML = "RETRY POST";
+            return;
+        }
+    }
+
+    try {
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> SAVING...`;
+        
+        await db.collection('Marketplace').add({
+            name, 
+            price: Number(price), 
+            description: description || '',
+            type, 
+            phone, 
+            negotiable, 
+            image: imageUrl,
+            condition: condition,
+            category: category,
+            sellerName: sellerName || currentUserData?.name || 'Anonymous',
+            userId: currentUser ? currentUser.uid : null,
+            userEmail: currentUser ? currentUser.email : null,
+            isSold: false,
+            isVerified: currentUserData?.isVerified || false,
+            views: 0,
+            avgRating: 0,
+            ratingCount: 0,
+            commentCount: 0,
+            timestamp: new Date().toISOString()
+        });
+
+        btn.innerHTML = "✅ DONE!";
+        setTimeout(() => {
+            document.getElementById('modal-overlay').style.display = 'none';
+            loadMarketDisplay(type);
+            if(fileInput) fileInput.value = '';
+            const label = document.getElementById('file-label');
+            if(label) label.innerHTML = `<i class="fa-solid fa-camera-retro text-2xl mb-2"></i><br>Tap to Upload Photo`;
+            document.getElementById('image-preview').innerHTML = '';
+            btn.disabled = false;
+        }, 1000);
+    } catch(err) {
+        alert("Save failed: " + err.message);
+        btn.disabled = false;
+        btn.innerHTML = "RETRY POST";
+    }
+};
+
+// ============================
+// MARKETPLACE DISPLAY
+// ============================
+window.loadMarketDisplay = async function(type='items') {
+    const grid = document.getElementById('market-grid');
+    if (!grid) return;
+
+    grid.innerHTML = "<div class='text-center py-10'><i class='fa-solid fa-spinner fa-spin text-emerald-600 text-2xl'></i><p class='mt-2 text-xs text-slate-400'>Loading products...</p></div>";
+
+    try {
+        const snap = await db.collection('Marketplace')
+            .where('type', '==', type)
+            .get();
+        
+        allMarketplaceProducts = [];
+        snap.forEach(doc => {
+            allMarketplaceProducts.push({ id: doc.id, ...doc.data() });
+        });
+        
+        for (let product of allMarketplaceProducts) {
+            const commentsSnap = await db.collection('Comments').where('productId', '==', product.id).get();
+            product.commentCount = commentsSnap.size;
+        }
+        
+        renderMarketplaceGrid(allMarketplaceProducts);
+        
+        const countEl = document.getElementById('market-count');
+        if(countEl) countEl.innerText = allMarketplaceProducts.length;
+    } catch(e) {
+        console.error("Marketplace load error:", e);
+        grid.innerHTML = "<p class='text-center text-red-500 py-10'>Error loading data. Please refresh.</p>";
+    }
+};
+
+function renderMarketplaceGrid(products) {
+    const grid = document.getElementById('market-grid');
+    if (!grid) return;
+    
+    if (products.length === 0) {
+        grid.innerHTML = "<p class='text-center py-10 text-slate-400 italic'>No products found.</p>";
+        return;
     }
     
-    // Load admin data if admin tab opened and user is admin
-    if (tabId === 'admin' && currentUserData && currentUserData.isAdmin) {
-        loadAdminStats();
-        loadAllUsers();
-        loadDepartmentsList();
-        loadAdminPanel();
-    }
-};
-
-// ============================
-// ADMIN TRIGGER
-// ============================
-document.getElementById('admin-trigger').onclick = () => {
-    if (currentUserData && currentUserData.isAdmin) {
-        window.switchTab('admin');
-    } else {
-        alert("Access Denied ❌");
-    }
-};
+    grid.innerHTML = "";
+    products.forEach(product => {
+        const isSold = product.isSold || false;
+        const avgRating = product.avgRating || 0;
+        const userPhone = currentUserData?.phone || product.phone;
+        const formattedPhone = userPhone ? userPhone.replace(/\D/g, '') : '';
+        const countryCode = '234';
+        const fullPhone = formattedPhone.startsWith('0') ? countryCode + formattedPhone.substring(1) : countryCode + formattedPhone;
+        
+        grid.innerHTML += `
+            <div class="glass-card p-4 border-l-4 border-emerald-500 animate-fade-in relative">
+                ${isSold ? '<div class="sold-badge">SOLD</div>' : ''}
+                <img src="${product.image}" class="w-full h-32 object-cover rounded-xl mb-2" onerror="this.src='https://ui-avatars.com/api/?name=Hub&background=10b981&color=fff'">
+                <div class="flex items-center gap-1 mb-1">
+                    ${product.isVerified ? '<span class="verified-badge"><i class="fa-solid fa-circle-check"></i> Verified</span>' : ''}
+                </div>
+                <h4 class="font-bold text-sm text-slate-800">${escapeHtml(product.name)}</h4>
+                <p class="text-xs text-slate-500 mt-1">₦${product.price} | ${product.condition || 'N/A'}</p>
+                <p class="text-[10px] text-slate-400">${product.category || 'Uncategorized'}</p>
+                <div class="flex items-center gap-1 mt-1">
+                    ${avgRating > 0 ? `<span class="text-yellow-500 text-xs">★ ${avgRating.toFixed(1)}</span>` : '<span class="text-xs text-slate-400">No ratings</span>'}
+                </div>
+                <p class="text-[10px] italic text-slate-400 mt-1">Call: ${product.phone}</p>
+                <div class="flex gap-2 mt-2">
+                    <a href="https://wa.me/${fullPhone}?text=${encodeURIComponent(`Hello! I'm interested in: ${product.name} - ₦${product.price}`)}" target="_blank" class="flex-1 text-center bg-green-600 text-white py-1 rounded-lg text-[10px] font-bold">📱 WhatsApp</a>
+                    <button onclick="openCommentModal('${product.id}')" class="flex-1 text-center bg-blue-500 text-white py-1 rounded-lg text-[10px] font-bold">💬 Comment</button>
+                    <button onclick="openRatingModal('${product.id}')" class="flex-1 text-center bg-yellow-500 text-white py-1 rounded-lg text-[10px] font-bold">⭐ Rate</button>
+                </div>
+                ${product.commentCount ? `<div class="mt-2 text-[9px] text-slate-500 border-t pt-1">💬 ${product.commentCount} comments</div>` : ''}
+            </div>
+        `;
+    });
+}
 
 // ============================
 // DASHBOARD FUNCTIONS
@@ -206,8 +542,6 @@ window.openDashboard = async function() {
     const dashboardContent = document.getElementById('dashboard-content');
     
     dashboardModal.style.display = 'flex';
-    
-    // Show loading spinner
     dashboardContent.innerHTML = '<div class="text-center py-8"><i class="fa-solid fa-spinner fa-spin text-2xl text-emerald-600"></i><p class="mt-2">Loading your posts...</p></div>';
     
     const postsSnap = await db.collection('Marketplace').where('userId', '==', currentUser.uid).get();
@@ -257,8 +591,8 @@ window.editProduct = async function(productId) {
     const data = doc.data();
     
     const modal = document.getElementById('modal-overlay');
-    const content = document.getElementById('modal-content');
-    modal.classList.remove('hidden');
+    const content = document.getElementById('modal-content-inner');
+    modal.style.display = 'flex';
     
     content.innerHTML = `
         <h3 class="text-xl font-black mb-4 italic text-emerald-600">Edit Product ✏️</h3>
@@ -295,7 +629,7 @@ window.saveEdit = async function(productId) {
         updatedAt: new Date().toISOString()
     });
     
-    document.getElementById('modal-overlay').classList.add('hidden');
+    document.getElementById('modal-overlay').style.display = 'none';
     alert('Product updated!');
     openDashboard();
     loadMarketDisplay('items');
@@ -434,487 +768,8 @@ window.filterMarketplace = function() {
     renderMarketplaceGrid(filtered);
 };
 
-function renderMarketplaceGrid(products) {
-    const grid = document.getElementById('market-grid');
-    if (!grid) return;
-    
-    if (products.length === 0) {
-        grid.innerHTML = "<p class='text-center py-10 text-slate-400 italic'>No products found.</p>";
-        return;
-    }
-    
-    grid.innerHTML = "";
-    products.forEach(product => {
-        const isSold = product.isSold || false;
-        const avgRating = product.avgRating || 0;
-        const userPhone = currentUserData?.phone || product.phone;
-        const formattedPhone = userPhone ? userPhone.replace(/\D/g, '') : '';
-        const countryCode = '234';
-        const fullPhone = formattedPhone.startsWith('0') ? countryCode + formattedPhone.substring(1) : countryCode + formattedPhone;
-        
-        grid.innerHTML += `
-            <div class="glass-card p-4 border-l-4 border-emerald-500 animate-fade-in relative">
-                ${isSold ? '<div class="sold-badge">SOLD</div>' : ''}
-                <img src="${product.image}" class="w-full h-32 object-cover rounded-xl mb-2" onerror="this.src='https://ui-avatars.com/api/?name=Hub&background=10b981&color=fff'">
-                <div class="flex items-center gap-1 mb-1">
-                    ${product.isVerified ? '<span class="verified-badge"><i class="fa-solid fa-circle-check"></i> Verified</span>' : ''}
-                </div>
-                <h4 class="font-bold text-sm text-slate-800">${escapeHtml(product.name)}</h4>
-                <p class="text-xs text-slate-500 mt-1">₦${product.price} | ${product.condition || 'N/A'}</p>
-                <p class="text-[10px] text-slate-400">${product.category || 'Uncategorized'}</p>
-                <div class="flex items-center gap-1 mt-1">
-                    ${avgRating > 0 ? `<span class="text-yellow-500 text-xs">★ ${avgRating.toFixed(1)}</span>` : '<span class="text-xs text-slate-400">No ratings</span>'}
-                </div>
-                <p class="text-[10px] italic text-slate-400 mt-1">Call: ${product.phone}</p>
-                <div class="flex gap-2 mt-2">
-                    <a href="https://wa.me/${fullPhone}?text=${encodeURIComponent(`Hello! I'm interested in: ${product.name} - ₦${product.price}`)}" target="_blank" class="flex-1 text-center bg-green-600 text-white py-1 rounded-lg text-[10px] font-bold">📱 WhatsApp</a>
-                    <button onclick="openCommentModal('${product.id}')" class="flex-1 text-center bg-blue-500 text-white py-1 rounded-lg text-[10px] font-bold">💬 Comment</button>
-                    <button onclick="openRatingModal('${product.id}')" class="flex-1 text-center bg-yellow-500 text-white py-1 rounded-lg text-[10px] font-bold">⭐ Rate</button>
-                </div>
-                ${product.commentCount ? `<div class="mt-2 text-[9px] text-slate-500 border-t pt-1">💬 ${product.commentCount} comments</div>` : ''}
-            </div>
-        `;
-    });
-}
-
 // ============================
-// ACADEMICS
-// ============================
-window.openAcademicModal = function() {
-    const isRep = confirm("Are you a Course Rep? 🎓\nOnly Reps can post Schedules, Tests, and Exams.");
-    if(!isRep) return;
-
-    const repKey = prompt("Enter Course Rep Secret Key:");
-    if(repKey !== "REP2026") return alert("Unauthorized Key! ❌");
-
-    const modal = document.getElementById('modal-overlay');
-    const content = document.getElementById('modal-content');
-    modal.classList.remove('hidden');
-
-    content.innerHTML = `
-        <h3 class="text-xl font-black mb-4 italic text-emerald-600">Post Academic Update 📖</h3>
-        <div class="space-y-3">
-            <select id="acad-type" class="w-full p-4 bg-slate-50 rounded-2xl font-bold border-none">
-                <option value="lecture">📅 Lecture Schedule</option>
-                <option value="test">📝 Upcoming Test</option>
-                <option value="exam">🎓 Exam Update</option>
-                <option value="material">📚 Material/Past Question</option>
-            </select>
-
-            <select id="acad-level" class="w-full p-4 bg-slate-50 rounded-2xl border-none font-bold">
-                <option value="100">100 Level</option>
-                <option value="200">200 Level</option>
-                <option value="300">300 Level</option>
-                <option value="400">400 Level</option>
-                <option value="500">500 Level</option>
-            </select>
-
-            <input type="text" id="acad-title" placeholder="Course Code (e.g. GST 111)" class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none">
-            <textarea id="acad-desc" placeholder="Details/Instructions..." class="w-full p-4 bg-slate-50 rounded-2xl border-none h-24 text-xs outline-none"></textarea>
-
-            <div class="relative group">
-                <input type="file" id="acad-file" class="hidden" accept="image/*,application/pdf" onchange="document.getElementById('acad-file-label').innerHTML='<i class=\'fa-solid fa-check-circle\'></i> File Selected! ✅'">
-                <label for="acad-file" id="acad-file-label" class="block w-full p-6 border-2 border-dashed border-emerald-200 rounded-2xl text-center text-emerald-600 font-bold cursor-pointer">
-                    <i class="fa-solid fa-cloud-upload-alt text-2xl mb-2"></i><br>Click to Upload
-                </label>
-            </div>
-
-            <button onclick="processAcademicPost()" id="acad-submit-btn" class="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black btn-glow">PUBLISH TO HUB 🚀</button>
-        </div>
-    `;
-};
-
-window.processAcademicPost = async function() {
-    const btn = document.getElementById('acad-submit-btn');
-    const file = document.getElementById('acad-file').files[0];
-    const type = document.getElementById('acad-type').value;
-    const level = document.getElementById('acad-level').value;
-    const title = document.getElementById('acad-title').value;
-    const desc = document.getElementById('acad-desc').value;
-
-    if(!title || !desc) {
-        alert("Fill Title & Description!");
-        return;
-    }
-
-    btn.disabled = true;
-    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> UPLOADING...`;
-
-    let fileUrl = "";
-    
-    if(file){
-        try {
-            fileUrl = await uploadFile(file);
-        } catch(err) {
-            alert("Upload failed: " + err.message);
-            btn.disabled = false;
-            btn.innerHTML = "RETRY PUBLISH";
-            return;
-        }
-    }
-
-    try {
-        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> SAVING...`;
-        
-        const postData = {
-            type: type,
-            level: level,
-            title: title,
-            desc: desc,
-            fileUrl: fileUrl,
-            fileName: file ? file.name : null,
-            fileType: file ? file.type : null,
-            repName: prompt("Enter your name (as Course Rep):") || "Course Rep",
-            userId: currentUser ? currentUser.uid : null,
-            timestamp: new Date().toISOString()
-        };
-        
-        await db.collection('Academics').add(postData);
-        
-        btn.innerHTML = "✅ SUCCESS!";
-        setTimeout(() => {
-            document.getElementById('modal-overlay').classList.add('hidden');
-            loadAcademicMaterials();
-            btn.disabled = false;
-        }, 1000);
-    } catch(err) {
-        alert("Save failed: " + err.message);
-        btn.disabled = false;
-        btn.innerHTML = "RETRY PUBLISH";
-    }
-};
-
-window.loadAcademicMaterials = async function(levelFilter='all', deptFilter='all'){
-    const container = document.getElementById('academic-list');
-    if(!container) return;
-    container.innerHTML = "<p class='text-center p-10 animate-pulse text-xs text-slate-400'>Loading...</p>";
-
-    try {
-        let query = db.collection('Academics').orderBy('timestamp', 'desc');
-        if(levelFilter !== 'all') {
-            query = query.where('level', '==', levelFilter);
-        }
-
-        const snap = await query.get();
-        
-        if(snap.empty) {
-            container.innerHTML = "<p class='text-center text-slate-300 py-10 italic'>No updates.</p>";
-        } else {
-            container.innerHTML = "";
-            snap.forEach(doc => {
-                const d = doc.data();
-                const icon = d.type === 'exam' ? '🎓' : d.type === 'test' ? '📝' : d.type === 'lecture' ? '📅' : '📚';
-                const isPDF = d.fileType === 'application/pdf' || (d.fileUrl && d.fileUrl.includes('raw/upload'));
-                
-                let fileHtml = '';
-                if(d.fileUrl) {
-                    if(isPDF) {
-                        fileHtml = `
-                            <div class="flex gap-2 mt-3">
-                                <a href="${d.fileUrl}" target="_blank" class="flex-1 text-center bg-emerald-600 text-white px-3 py-2 rounded-xl text-[10px] font-black">📖 OPEN PDF</a>
-                                <a href="${d.fileUrl}" download="${d.fileName || 'document.pdf'}" class="flex-1 text-center bg-slate-600 text-white px-3 py-2 rounded-xl text-[10px] font-black">📥 DOWNLOAD</a>
-                            </div>
-                        `;
-                    } else {
-                        fileHtml = `<img src="${d.fileUrl}" class="mt-2 w-full h-32 object-cover rounded-xl">`;
-                    }
-                }
-                
-                const deleteButton = (currentUser && d.userId === currentUser.uid) ? 
-                    `<button onclick="deleteAcademicPost('${doc.id}')" class="mt-2 text-red-500 text-[10px] font-bold underline">Delete Post</button>` : '';
-                
-                container.innerHTML += `
-                    <div class="glass-card p-4 mb-3 border-l-4 border-emerald-500 animate-fade-in">
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="bg-emerald-100 text-emerald-700 text-[8px] font-black px-2 py-1 rounded-md uppercase">${d.level}L</span>
-                            <span class="text-lg">${icon}</span>
-                        </div>
-                        <h4 class="font-bold text-sm text-slate-800">${escapeHtml(d.title)}</h4>
-                        <p class="text-[11px] text-slate-500 mt-1">${escapeHtml(d.desc)}</p>
-                        <p class="text-[9px] text-slate-400 italic">Posted by: ${escapeHtml(d.repName)}</p>
-                        ${fileHtml}
-                        ${deleteButton}
-                    </div>
-                `;
-            });
-        }
-    } catch(e) {
-        console.error("Load error:", e);
-        container.innerHTML = "<p class='text-center text-red-500 py-10'>Error loading data</p>";
-    }
-};
-
-window.deleteAcademicPost = async function(postId) {
-    if (confirm('Are you sure you want to delete this academic post?')) {
-        await db.collection('Academics').doc(postId).delete();
-        alert('Post deleted!');
-        loadAcademicMaterials();
-    }
-};
-
-function renderAcademics() {}
-
-// ============================
-// STUDY GROUPS
-// ============================
-window.openGroupModal = function(){
-    const modal = document.getElementById('modal-overlay');
-    const content = document.getElementById('modal-content');
-    modal.classList.remove('hidden');
-
-    content.innerHTML = `
-        <h3 class="text-xl font-black mb-4 italic text-emerald-600">New Study Group 📚</h3>
-        <input type="text" id="group-name" placeholder="Course Name" class="w-full p-4 bg-slate-50 rounded-2xl mb-3 border-none outline-none">
-        <input type="url" id="group-link" placeholder="WhatsApp Link" class="w-full p-4 bg-slate-50 rounded-2xl mb-4 border-none outline-none">
-        <button onclick="submitGroup()" class="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black btn-glow">SUBMIT</button>
-    `;
-};
-
-const studyBtn = document.getElementById('btn-new-group');
-if(studyBtn) studyBtn.onclick = window.openGroupModal;
-
-window.submitGroup = async()=>{
-    const name = document.getElementById('group-name').value;
-    const link = document.getElementById('group-link').value;
-    if(!name||!link) return alert("Fill all fields!");
-
-    await db.collection('StudyGroups').add({
-        name, link, status:'pending',
-        userId: currentUser ? currentUser.uid : null,
-        timestamp: new Date().toISOString()
-    });
-
-    alert("Sent! Junior will verify 🚀");
-    document.getElementById('modal-overlay').classList.add('hidden');
-};
-
-async function loadAdminPanel(){
-    const list = document.getElementById('admin-verification-list');
-    const snap = await db.collection('StudyGroups').where('status','==','pending').get();
-    list.innerHTML = snap.empty ? "<p class='text-slate-500 italic'>No pending groups.</p>" : "";
-    snap.forEach(doc => {
-        const d = doc.data();
-        list.innerHTML += `
-            <div class="border p-4 rounded-2xl flex justify-between items-center bg-slate-800/50 mb-2">
-                <span class="text-white font-bold">${escapeHtml(d.name)}</span>
-                <button onclick="verifyGroup('${doc.id}')" class="text-emerald-400 font-black underline">APPROVE</button>
-            </div>
-        `;
-    });
-}
-
-window.verifyGroup = async (id)=>{
-    await db.collection('StudyGroups').doc(id).update({status:'verified'});
-    alert("Group is now Live! ✅");
-    loadAdminPanel();
-    loadVerifiedGroups();
-};
-
-async function loadVerifiedGroups(){
-    const list = document.getElementById('groups-list');
-    if(!list) return;
-    const snap = await db.collection('StudyGroups').where('status','==','verified').get();
-    list.innerHTML = "";
-    snap.forEach(doc => {
-        const d = doc.data();
-        list.innerHTML += `
-            <div class="glass-card p-4 flex justify-between items-center border-l-4 border-emerald-50">
-                <p class="font-bold italic">${escapeHtml(d.name)}</p>
-                <a href="${d.link}" target="_blank" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-[10px] font-black italic">JOIN</a>
-            </div>
-        `;
-    });
-}
-
-// ============================
-// MARKETPLACE - CREATE POST
-// ============================
-window.openMarketModal = function(){
-    const modal = document.getElementById('modal-overlay');
-    const content = document.getElementById('modal-content');
-    modal.classList.remove('hidden');
-
-    content.innerHTML = `
-        <div class="max-h-[80vh] overflow-y-auto pb-6">
-            <h3 class="text-xl font-black mb-4 italic text-emerald-600">Create a Post 🚀</h3>
-            <div class="space-y-3">
-                <input type="text" id="item-name" placeholder="Product Name" class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none">
-                <textarea id="item-desc" placeholder="Description" rows="3" class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none"></textarea>
-                <div class="flex gap-2">
-                    <input type="number" id="item-price" placeholder="Price (₦)" class="flex-1 p-4 bg-slate-50 rounded-2xl border-none outline-none">
-                    <select id="item-negotiable" class="p-4 bg-slate-50 rounded-2xl border-none font-bold text-xs">
-                        <option value="Fixed">Fixed</option>
-                        <option value="Negotiable">Negotiable</option>
-                    </select>
-                </div>
-                <select id="item-condition" class="w-full p-4 bg-slate-50 rounded-2xl border-none font-bold">
-                    <option value="New">✨ New</option>
-                    <option value="Like New">👍 Like New</option>
-                    <option value="Used">🔄 Used</option>
-                </select>
-                <select id="item-category" class="w-full p-4 bg-slate-50 rounded-2xl border-none font-bold">
-                    <option value="Electronics">📱 Electronics</option>
-                    <option value="Books">📚 Books</option>
-                    <option value="Fashion">👗 Fashion</option>
-                    <option value="Food">🍔 Food</option>
-                    <option value="Accommodation">🏠 Accommodation</option>
-                </select>
-                <select id="item-type" class="w-full p-4 bg-slate-50 rounded-2xl border-none font-bold text-slate-500">
-                    <option value="items">Physical Item (Sale)</option>
-                    <option value="services">Service (Gigs/Skill)</option>
-                    <option value="requests">Request (I need...)</option>
-                </select>
-                <div class="flex items-center gap-2 bg-slate-50 p-1 rounded-2xl border border-slate-100">
-                    <span class="pl-4 font-bold text-slate-400">+234</span>
-                    <input type="tel" id="seller-phone" placeholder="805 000 0000" class="w-full p-4 bg-transparent border-none outline-none" value="${currentUserData?.phone || ''}">
-                </div>
-                <input type="text" id="seller-name" placeholder="Your name" class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none" value="${currentUserData?.name || ''}">
-                <div class="relative group">
-                    <input type="file" id="item-image" class="hidden" accept="image/*" onchange="previewImage(this)">
-                    <label for="item-image" id="file-label" class="block w-full p-6 border-2 border-dashed border-emerald-200 rounded-2xl text-center text-emerald-600 font-bold cursor-pointer bg-emerald-50/30">
-                        <i class="fa-solid fa-camera-retro text-2xl mb-2"></i><br>Tap to Upload Photo
-                    </label>
-                    <div id="image-preview" class="image-preview mt-2"></div>
-                </div>
-                <button onclick="processMarketPost()" id="market-submit-btn" class="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black btn-glow">POST TO HUB ✨</button>
-            </div>
-        </div>
-    `;
-};
-
-// Image preview function
-window.previewImage = function(input) {
-    const preview = document.getElementById('image-preview');
-    preview.innerHTML = '';
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const img = document.createElement('img');
-            img.src = e.target.result;
-            preview.appendChild(img);
-        };
-        reader.readAsDataURL(input.files[0]);
-        document.getElementById('file-label').innerHTML = '<i class="fa-solid fa-check-circle text-2xl mb-2"></i><br>Photo Selected! ✅';
-    }
-};
-
-const postAdBtn = document.getElementById('btn-post-ad');
-if(postAdBtn) postAdBtn.onclick = window.openMarketModal;
-
-window.processMarketPost = async function(){
-    const btn = document.getElementById('market-submit-btn');
-    const fileInput = document.getElementById('item-image');
-    const file = fileInput.files[0];
-    const name = document.getElementById('item-name').value;
-    const price = document.getElementById('item-price').value;
-    const description = document.getElementById('item-desc').value;
-    const type = document.getElementById('item-type').value;
-    const phone = document.getElementById('seller-phone').value;
-    const negotiable = document.getElementById('item-negotiable').value;
-    const condition = document.getElementById('item-condition').value;
-    const category = document.getElementById('item-category').value;
-    const sellerName = document.getElementById('seller-name').value;
-
-    if(!name || !price || !phone) {
-        alert("Fill all fields!");
-        return;
-    }
-
-    btn.disabled = true;
-    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> UPLOADING...`;
-
-    let imageUrl = "https://ui-avatars.com/api/?name=Hub&background=10b981&color=fff";
-
-    if(file){
-        try {
-            imageUrl = await uploadFile(file);
-        } catch(err) {
-            alert("Upload failed: " + err.message);
-            btn.disabled = false;
-            btn.innerHTML = "RETRY POST";
-            return;
-        }
-    }
-
-    try {
-        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> SAVING...`;
-        
-        await db.collection('Marketplace').add({
-            name, 
-            price: Number(price), 
-            description: description || '',
-            type, 
-            phone, 
-            negotiable, 
-            image: imageUrl,
-            condition: condition,
-            category: category,
-            sellerName: sellerName || currentUserData?.name || 'Anonymous',
-            userId: currentUser ? currentUser.uid : null,
-            userEmail: currentUser ? currentUser.email : null,
-            isSold: false,
-            isVerified: currentUserData?.isVerified || false,
-            views: 0,
-            avgRating: 0,
-            ratingCount: 0,
-            commentCount: 0,
-            timestamp: new Date().toISOString()
-        });
-
-        btn.innerHTML = "✅ DONE!";
-        setTimeout(() => {
-            document.getElementById('modal-overlay').classList.add('hidden');
-            loadMarketDisplay(type);
-            if(fileInput) fileInput.value = '';
-            const label = document.getElementById('file-label');
-            if(label) label.innerHTML = `<i class="fa-solid fa-camera-retro text-2xl mb-2"></i><br>Tap to Upload Photo`;
-            document.getElementById('image-preview').innerHTML = '';
-            btn.disabled = false;
-        }, 1000);
-    } catch(err) {
-        alert("Save failed: " + err.message);
-        btn.disabled = false;
-        btn.innerHTML = "RETRY POST";
-    }
-};
-
-// ============================
-// MARKETPLACE DISPLAY
-// ============================
-window.loadMarketDisplay = async function(type='items') {
-    const grid = document.getElementById('market-grid');
-    if (!grid) return;
-
-    grid.innerHTML = "<p class='text-center py-10 text-slate-400 animate-pulse'>Loading...</p>";
-
-    try {
-        const snap = await db.collection('Marketplace')
-            .where('type', '==', type)
-            .get();
-        
-        allMarketplaceProducts = [];
-        snap.forEach(doc => {
-            allMarketplaceProducts.push({ id: doc.id, ...doc.data() });
-        });
-        
-        // Load comments count for each product
-        for (let product of allMarketplaceProducts) {
-            const commentsSnap = await db.collection('Comments').where('productId', '==', product.id).get();
-            product.commentCount = commentsSnap.size;
-        }
-        
-        renderMarketplaceGrid(allMarketplaceProducts);
-        
-        const countEl = document.getElementById('market-count');
-        if(countEl) countEl.innerText = allMarketplaceProducts.length;
-    } catch(e) {
-        console.error("Marketplace load error:", e);
-        grid.innerHTML = "<p class='text-center text-red-500 py-10'>Error loading data. Please refresh.</p>";
-    }
-};
-
-// ============================
-// BROADCAST
+// BROADCAST FUNCTIONS
 // ============================
 document.getElementById('btn-broadcast')?.addEventListener('click', async()=>{
     if (!currentUserData?.isAdmin) {
@@ -969,7 +824,7 @@ async function loadAdminStats() {
 
 async function loadAllUsers() {
     const usersSnap = await db.collection('users').get();
-    let html = '<table class="user-table"><thead> <th>Name</th><th>Email</th><th>Dept</th><th>Posts</th><th>Actions</th> </thead><tbody>';
+    let html = '<table class="user-table"><thead><tr><th>Name</th><th>Email</th><th>Dept</th><th>Posts</th><th>Actions</th></tr></thead><tbody>';
     for (const doc of usersSnap.docs) {
         const user = doc.data();
         const postsSnap = await db.collection('Marketplace').where('userId', '==', doc.id).get();
@@ -1096,6 +951,29 @@ window.deleteDepartment = async function(id) {
     }
 };
 
+// Admin Panel
+async function loadAdminPanel() {
+    const list = document.getElementById('admin-verification-list');
+    const snap = await db.collection('StudyGroups').where('status','==','pending').get();
+    list.innerHTML = snap.empty ? "<p class='text-slate-500 italic'>No pending groups.</p>" : "";
+    snap.forEach(doc => {
+        const d = doc.data();
+        list.innerHTML += `
+            <div class="border p-4 rounded-2xl flex justify-between items-center bg-slate-800/50 mb-2">
+                <span class="text-white font-bold">${escapeHtml(d.name)}</span>
+                <button onclick="verifyGroup('${doc.id}')" class="text-emerald-400 font-black underline">APPROVE</button>
+            </div>
+        `;
+    });
+}
+
+window.verifyGroup = async (id)=>{
+    await db.collection('StudyGroups').doc(id).update({status:'verified'});
+    alert("Group is now Live! ✅");
+    loadAdminPanel();
+    loadVerifiedGroups();
+};
+
 // ============================
 // UTILITIES
 // ============================
@@ -1115,16 +993,61 @@ window.filterByLevel = function(level='all') {
     loadAcademicMaterials(level);
 };
 
-// Modal close events
-document.getElementById('close-modal')?.addEventListener('click', () => {
-    document.getElementById('modal-overlay').classList.add('hidden');
-});
+window.closeModal = function() {
+    document.getElementById('modal-overlay').style.display = 'none';
+};
 
-document.getElementById('close-dashboard')?.addEventListener('click', () => {
-    document.getElementById('dashboard-modal').style.display = 'none';
-});
-
-// Dashboard button event
-document.getElementById('dashboard-btn')?.addEventListener('click', () => {
-    openDashboard();
+// ============================
+// AUTH STATE LISTENER
+// ============================
+auth.onAuthStateChanged(async (user) => {
+    if (user) {
+        if (!user.emailVerified) {
+            await auth.signOut();
+            return;
+        }
+        currentUser = user;
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        if (userDoc.exists) {
+            currentUserData = userDoc.data();
+        } else {
+            currentUserData = {
+                name: user.displayName || user.email.split('@')[0],
+                email: user.email,
+                phone: '',
+                department: '',
+                avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || user.email)}&background=10b981&color=fff`,
+                createdAt: new Date().toISOString(),
+                isAdmin: user.email === 'precioussebastian70@gmail.com',
+                isVerified: false,
+                isBanned: false
+            };
+            await db.collection('users').doc(user.uid).set(currentUserData);
+        }
+        
+        document.getElementById('user-name').innerText = currentUserData.name;
+        document.getElementById('user-avatar').src = currentUserData.avatar;
+        
+        const isAdmin = currentUserData.isAdmin;
+        document.getElementById('admin-trigger').style.display = isAdmin ? 'block' : 'none';
+        document.getElementById('admin-nav-btn').style.display = isAdmin ? 'flex' : 'none';
+        document.getElementById('dashboard-nav-btn').style.display = 'flex';
+        document.getElementById('profile-nav-btn').style.display = 'flex';
+        
+        document.getElementById('login-container').style.display = 'none';
+        document.getElementById('main-app').style.display = 'block';
+        
+        loadDepartmentsForFilter();
+        loadMarketDisplay('items');
+        loadAcademicMaterials();
+        loadVerifiedGroups();
+        loadBroadcastMessage();
+        
+        // Setup button event listeners
+        document.getElementById('btn-post-ad')?.addEventListener('click', openMarketModal);
+        document.getElementById('btn-new-group')?.addEventListener('click', openGroupModal);
+    } else {
+        document.getElementById('login-container').style.display = 'flex';
+        document.getElementById('main-app').style.display = 'none';
+    }
 });
