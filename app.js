@@ -86,14 +86,14 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // ============================
-// NEW: LOGIN & REGISTRATION LOGIC
+// LOGIN & REGISTRATION LOGIC
 // ============================
 window.handleSignup = async function(e) {
-    e.preventDefault();
+    if(e) e.preventDefault();
     const email = document.getElementById('reg-email').value;
     const pass = document.getElementById('reg-password').value;
     const name = document.getElementById('reg-name').value;
-    const rulesAccepted = document.getElementById('accept-rules').checked;
+    const rulesAccepted = document.getElementById('accept-rules')?.checked;
 
     if(!rulesAccepted) return alert("You must accept the Campus Rules to join! 📜");
 
@@ -123,7 +123,7 @@ window.handleSignup = async function(e) {
 };
 
 window.handleLogin = async function(e) {
-    e.preventDefault();
+    if(e) e.preventDefault();
     const email = document.getElementById('login-email').value;
     const pass = document.getElementById('login-password').value;
 
@@ -135,7 +135,6 @@ window.handleLogin = async function(e) {
             return;
         }
         
-        // Check for ban
         const userDoc = await db.collection('users').doc(cred.user.uid).get();
         if(userDoc.exists && userDoc.data().isBanned) {
             alert("This account has been banned for violating campus rules. 🚫");
@@ -169,7 +168,6 @@ auth.onAuthStateChanged(async (user) => {
         if (userDoc.exists) {
             currentUserData = userDoc.data();
             
-            // Redirect if banned
             if(currentUserData.isBanned) {
                 alert("Account Banned 🚫");
                 auth.signOut();
@@ -194,14 +192,14 @@ auth.onAuthStateChanged(async (user) => {
         if(authSection) authSection.classList.add('hidden');
         if(mainApp) mainApp.classList.remove('hidden');
 
-        // Update UI
+        // FIXED: Added safe checks for UI elements
         const nameEl = document.getElementById('user-name');
         const avatarEl = document.getElementById('user-avatar');
-        if(nameEl) nameEl.innerText = currentUserData.name;
-        if(avatarEl) avatarEl.src = currentUserData.avatar;
+        if(nameEl && currentUserData) nameEl.innerText = currentUserData.name;
+        if(avatarEl && currentUserData) avatarEl.src = currentUserData.avatar;
         
         const adminTrigger = document.getElementById('admin-trigger');
-        if (currentUserData.isAdmin && adminTrigger) {
+        if (currentUserData && currentUserData.isAdmin && adminTrigger) {
             adminTrigger.style.display = 'block';
         }
         
@@ -245,7 +243,6 @@ window.switchTab = function(tabId) {
         activeBtn.classList.remove('text-slate-400');
     }
     
-    // Load admin data if admin tab opened and user is admin
     if (tabId === 'admin' && currentUserData && currentUserData.isAdmin) {
         loadAdminStats();
         loadAllUsers();
@@ -255,7 +252,7 @@ window.switchTab = function(tabId) {
 };
 
 // ============================
-// ADMIN TRIGGER (for existing admin panel)
+// ADMIN TRIGGER
 // ============================
 const adminTriggerBtn = document.getElementById('admin-trigger');
 if(adminTriggerBtn) {
@@ -276,7 +273,8 @@ window.openDashboard = async function() {
     
     const dashboardModal = document.getElementById('dashboard-modal');
     const dashboardContent = document.getElementById('dashboard-content');
-    
+    if(!dashboardModal || !dashboardContent) return;
+
     dashboardModal.style.display = 'flex';
     
     const postsSnap = await db.collection('Marketplace').where('userId', '==', currentUser.uid).get();
@@ -318,7 +316,8 @@ window.openDashboard = async function() {
 };
 
 window.closeDashboardModal = function() {
-    document.getElementById('dashboard-modal').style.display = 'none';
+    const el = document.getElementById('dashboard-modal');
+    if(el) el.style.display = 'none';
 };
 
 window.editProduct = async function(productId) {
@@ -327,6 +326,7 @@ window.editProduct = async function(productId) {
     
     const modal = document.getElementById('modal-overlay');
     const content = document.getElementById('modal-content');
+    if(!modal || !content) return;
     modal.classList.remove('hidden');
     
     content.innerHTML = `
@@ -393,11 +393,13 @@ let currentRatingProductId = null;
 
 window.openRatingModal = function(productId) {
     currentRatingProductId = productId;
-    document.getElementById('rating-modal').style.display = 'flex';
+    const el = document.getElementById('rating-modal');
+    if(el) el.style.display = 'flex';
 };
 
 window.closeRatingModal = function() {
-    document.getElementById('rating-modal').style.display = 'none';
+    const el = document.getElementById('rating-modal');
+    if(el) el.style.display = 'none';
 };
 
 window.submitRating = async function() {
@@ -442,11 +444,13 @@ let currentCommentProductId = null;
 
 window.openCommentModal = function(productId) {
     currentCommentProductId = productId;
-    document.getElementById('comment-modal').style.display = 'flex';
+    const el = document.getElementById('comment-modal');
+    if(el) el.style.display = 'flex';
 };
 
 window.closeCommentModal = function() {
-    document.getElementById('comment-modal').style.display = 'none';
+    const el = document.getElementById('comment-modal');
+    if(el) el.style.display = 'none';
 };
 
 window.submitComment = async function() {
@@ -558,6 +562,7 @@ window.openAcademicModal = function() {
 
     const modal = document.getElementById('modal-overlay');
     const content = document.getElementById('modal-content');
+    if(!modal || !content) return;
     modal.classList.remove('hidden');
 
     content.innerHTML = `
@@ -729,6 +734,7 @@ function renderAcademics() {}
 window.openGroupModal = function(){
     const modal = document.getElementById('modal-overlay');
     const content = document.getElementById('modal-content');
+    if(!modal || !content) return;
     modal.classList.remove('hidden');
 
     content.innerHTML = `
@@ -759,6 +765,7 @@ window.submitGroup = async()=>{
 
 async function loadAdminPanel(){
     const list = document.getElementById('admin-verification-list');
+    if(!list) return;
     const snap = await db.collection('StudyGroups').where('status','==','pending').get();
     list.innerHTML = snap.empty ? "<p class='text-slate-500 italic'>No pending groups.</p>" : "";
     snap.forEach(doc => {
@@ -801,6 +808,7 @@ async function loadVerifiedGroups(){
 window.openMarketModal = function(){
     const modal = document.getElementById('modal-overlay');
     const content = document.getElementById('modal-content');
+    if(!modal || !content) return;
     modal.classList.remove('hidden');
 
     content.innerHTML = `
@@ -864,7 +872,8 @@ window.previewImage = function(input) {
             preview.appendChild(img);
         };
         reader.readAsDataURL(input.files[0]);
-        document.getElementById('file-label').innerHTML = '<i class="fa-solid fa-check-circle text-2xl mb-2"></i><br>Photo Selected! ✅';
+        const label = document.getElementById('file-label');
+        if(label) label.innerHTML = '<i class="fa-solid fa-check-circle text-2xl mb-2"></i><br>Photo Selected! ✅';
     }
 };
 
@@ -874,7 +883,7 @@ if(postAdBtn) postAdBtn.onclick = window.openMarketModal;
 window.processMarketPost = async function(){
     const btn = document.getElementById('market-submit-btn');
     const fileInput = document.getElementById('item-image');
-    const file = fileInput.files[0];
+    const file = fileInput ? fileInput.files[0] : null;
     const name = document.getElementById('item-name').value;
     const price = document.getElementById('item-price').value;
     const description = document.getElementById('item-desc').value;
@@ -969,7 +978,6 @@ window.loadMarketDisplay = async function(type='items') {
             allMarketplaceProducts.push({ id: doc.id, ...doc.data() });
         });
         
-        // Load comments count for each product
         for (let product of allMarketplaceProducts) {
             const commentsSnap = await db.collection('Comments').where('productId', '==', product.id).get();
             product.commentCount = commentsSnap.size;
@@ -1031,9 +1039,9 @@ async function loadAdminStats() {
     const reportsSnap = await db.collection('Reports').get();
     const commentsSnap = await db.collection('Comments').get();
     
-    const statsEl = document.getElementById('admin-stats');
-    if(statsEl) {
-        statsEl.innerHTML = `
+    const statsContainer = document.getElementById('admin-stats');
+    if(statsContainer) {
+        statsContainer.innerHTML = `
             <div class="stat-card"><h4>${usersSnap.size}</h4><p>Total Users</p></div>
             <div class="stat-card"><h4>${postsSnap.size}</h4><p>Total Posts</p></div>
             <div class="stat-card"><h4>${reportsSnap.size}</h4><p>Reports</p></div>
@@ -1063,12 +1071,12 @@ async function loadAllUsers() {
         `;
     }
     html += '</tbody></table>';
-    const userListEl = document.getElementById('admin-user-list');
-    if(userListEl) userListEl.innerHTML = html;
+    const list = document.getElementById('admin-user-list');
+    if(list) list.innerHTML = html;
 }
 
 window.searchUsers = function() {
-    const searchTerm = document.getElementById('admin-search-users').value.toLowerCase();
+    const searchTerm = document.getElementById('admin-search-users')?.value.toLowerCase();
     const rows = document.querySelectorAll('#admin-user-list table tbody tr');
     rows.forEach(row => {
         const text = row.innerText.toLowerCase();
@@ -1090,7 +1098,6 @@ window.unbanUser = async function(userId) {
 
 window.verifySeller = async function(userId) {
     await db.collection('users').doc(userId).update({ isVerified: true });
-    // Also update all user's posts
     const posts = await db.collection('Marketplace').where('userId', '==', userId).get();
     posts.forEach(doc => doc.ref.update({ isVerified: true }));
     loadAllUsers();
@@ -1153,15 +1160,16 @@ async function loadDepartmentsList() {
             </div>
         `;
     });
-    const listEl = document.getElementById('departments-list');
-    if(listEl) listEl.innerHTML = html || '<p class="text-slate-400">No departments added yet</p>';
+    const list = document.getElementById('departments-list');
+    if(list) list.innerHTML = html || '<p class="text-slate-400">No departments added yet</p>';
 }
 
 window.addDepartment = async function() {
-    const name = document.getElementById('new-dept-name').value.trim();
+    const name = document.getElementById('new-dept-name')?.value.trim();
     if (!name) return alert('Enter department name');
     await db.collection('departments').add({ name: name });
-    document.getElementById('new-dept-name').value = '';
+    const input = document.getElementById('new-dept-name');
+    if(input) input.value = '';
     loadDepartmentsList();
     loadDepartmentsForFilter();
 };
@@ -1193,6 +1201,11 @@ window.filterByLevel = function(level='all') {
     loadAcademicMaterials(level);
 };
 
+// Logout trigger
+window.logout = function() {
+    auth.signOut().then(() => location.reload());
+};
+
 // Modal close events
 document.getElementById('close-modal')?.addEventListener('click', () => {
     document.getElementById('modal-overlay').classList.add('hidden');
@@ -1206,8 +1219,3 @@ document.getElementById('close-dashboard')?.addEventListener('click', () => {
 document.getElementById('dashboard-btn')?.addEventListener('click', () => {
     openDashboard();
 });
-
-// Add logout trigger
-window.logout = function() {
-    auth.signOut().then(() => location.reload());
-};
