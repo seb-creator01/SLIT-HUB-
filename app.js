@@ -1,4 +1,4 @@
-import { DEPARTMENTS, EXECUTIVES, STUDY_CATEGORIES, UI_CONFIG } from './data.js';
+Import { DEPARTMENTS, EXECUTIVES, STUDY_CATEGORIES, UI_CONFIG } from './data.js';
 
 // ============================
 // FIREBASE CONFIG
@@ -86,93 +86,18 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // ============================
-// LOGIN & REGISTRATION LOGIC
-// ============================
-window.handleSignup = async function(e) {
-    if(e) e.preventDefault();
-    const email = document.getElementById('reg-email').value;
-    const pass = document.getElementById('reg-password').value;
-    const name = document.getElementById('reg-name').value;
-    const rulesAccepted = document.getElementById('accept-rules')?.checked;
-
-    if(!rulesAccepted) return alert("You must accept the Campus Rules to join! 📜");
-
-    try {
-        const cred = await auth.createUserWithEmailAndPassword(email, pass);
-        await cred.user.sendEmailVerification();
-        
-        await db.collection('users').doc(cred.user.uid).set({
-            name: name,
-            email: email,
-            phone: '',
-            department: '',
-            avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=10b981&color=fff`,
-            createdAt: new Date().toISOString(),
-            isAdmin: email === 'precioussebastian70@gmail.com',
-            isVerified: false,
-            isBanned: false,
-            rulesAccepted: true
-        });
-
-        alert("Verification email sent! Check your inbox 📧");
-        auth.signOut();
-        location.reload();
-    } catch(err) {
-        alert(err.message);
-    }
-};
-
-window.handleLogin = async function(e) {
-    if(e) e.preventDefault();
-    const email = document.getElementById('login-email').value;
-    const pass = document.getElementById('login-password').value;
-
-    try {
-        const cred = await auth.signInWithEmailAndPassword(email, pass);
-        if(!cred.user.emailVerified) {
-            alert("Please verify your email first! 📧");
-            auth.signOut();
-            return;
-        }
-        
-        const userDoc = await db.collection('users').doc(cred.user.uid).get();
-        if(userDoc.exists && userDoc.data().isBanned) {
-            alert("This account has been banned for violating campus rules. 🚫");
-            auth.signOut();
-            return;
-        }
-        
-        location.reload();
-    } catch(err) {
-        alert(err.message);
-    }
-};
-
-// ============================
 // AUTH STATE LISTENER
 // ============================
 auth.onAuthStateChanged(async (user) => {
-    const authSection = document.getElementById('auth-section');
-    const mainApp = document.getElementById('main-app');
-
     if (user) {
         if (!user.emailVerified) {
-            if(authSection) authSection.classList.remove('hidden');
-            if(mainApp) mainApp.classList.add('hidden');
+            await auth.signOut();
             return;
         }
-        
         currentUser = user;
         const userDoc = await db.collection('users').doc(user.uid).get();
-        
         if (userDoc.exists) {
             currentUserData = userDoc.data();
-            
-            if(currentUserData.isBanned) {
-                alert("Account Banned 🚫");
-                auth.signOut();
-                return;
-            }
         } else {
             currentUserData = {
                 name: user.displayName || user.email.split('@')[0],
@@ -188,30 +113,25 @@ auth.onAuthStateChanged(async (user) => {
             await db.collection('users').doc(user.uid).set(currentUserData);
         }
         
-        // Show App / Hide Auth
-        if(authSection) authSection.classList.add('hidden');
-        if(mainApp) mainApp.classList.remove('hidden');
-
-        // FIXED: Added safe checks for UI elements
-        const nameEl = document.getElementById('user-name');
-        const avatarEl = document.getElementById('user-avatar');
-        if(nameEl && currentUserData) nameEl.innerText = currentUserData.name;
-        if(avatarEl && currentUserData) avatarEl.src = currentUserData.avatar;
+        // Update UI
+        document.getElementById('user-name').innerText = currentUserData.name;
+        document.getElementById('user-avatar').src = currentUserData.avatar;
         
-        const adminTrigger = document.getElementById('admin-trigger');
-        if (currentUserData && currentUserData.isAdmin && adminTrigger) {
-            adminTrigger.style.display = 'block';
+        if (currentUserData.isAdmin) {
+            document.getElementById('admin-trigger').style.display = 'block';
         }
         
+        // Load departments for filter
         loadDepartmentsForFilter();
+        
+        // Load all data
         loadMarketDisplay('items');
         loadAcademicMaterials();
         loadVerifiedGroups();
         loadBroadcastMessage();
+        
+        // Check user posts for dashboard button
         checkUserPosts();
-    } else {
-        if(authSection) authSection.classList.remove('hidden');
-        if(mainApp) mainApp.classList.add('hidden');
     }
 });
 
@@ -243,6 +163,7 @@ window.switchTab = function(tabId) {
         activeBtn.classList.remove('text-slate-400');
     }
     
+    // Load admin data if admin tab opened and user is admin
     if (tabId === 'admin' && currentUserData && currentUserData.isAdmin) {
         loadAdminStats();
         loadAllUsers();
@@ -252,18 +173,15 @@ window.switchTab = function(tabId) {
 };
 
 // ============================
-// ADMIN TRIGGER
+// ADMIN TRIGGER (for existing admin panel)
 // ============================
-const adminTriggerBtn = document.getElementById('admin-trigger');
-if(adminTriggerBtn) {
-    adminTriggerBtn.onclick = () => {
-        if (currentUserData && currentUserData.isAdmin) {
-            window.switchTab('admin');
-        } else {
-            alert("Access Denied ❌");
-        }
-    };
-}
+document.getElementById('admin-trigger').onclick = () => {
+    if (currentUserData && currentUserData.isAdmin) {
+        window.switchTab('admin');
+    } else {
+        alert("Access Denied ❌");
+    }
+};
 
 // ============================
 // DASHBOARD FUNCTIONS
@@ -273,8 +191,7 @@ window.openDashboard = async function() {
     
     const dashboardModal = document.getElementById('dashboard-modal');
     const dashboardContent = document.getElementById('dashboard-content');
-    if(!dashboardModal || !dashboardContent) return;
-
+    
     dashboardModal.style.display = 'flex';
     
     const postsSnap = await db.collection('Marketplace').where('userId', '==', currentUser.uid).get();
@@ -316,8 +233,7 @@ window.openDashboard = async function() {
 };
 
 window.closeDashboardModal = function() {
-    const el = document.getElementById('dashboard-modal');
-    if(el) el.style.display = 'none';
+    document.getElementById('dashboard-modal').style.display = 'none';
 };
 
 window.editProduct = async function(productId) {
@@ -326,7 +242,6 @@ window.editProduct = async function(productId) {
     
     const modal = document.getElementById('modal-overlay');
     const content = document.getElementById('modal-content');
-    if(!modal || !content) return;
     modal.classList.remove('hidden');
     
     content.innerHTML = `
@@ -393,13 +308,11 @@ let currentRatingProductId = null;
 
 window.openRatingModal = function(productId) {
     currentRatingProductId = productId;
-    const el = document.getElementById('rating-modal');
-    if(el) el.style.display = 'flex';
+    document.getElementById('rating-modal').style.display = 'flex';
 };
 
 window.closeRatingModal = function() {
-    const el = document.getElementById('rating-modal');
-    if(el) el.style.display = 'none';
+    document.getElementById('rating-modal').style.display = 'none';
 };
 
 window.submitRating = async function() {
@@ -444,13 +357,11 @@ let currentCommentProductId = null;
 
 window.openCommentModal = function(productId) {
     currentCommentProductId = productId;
-    const el = document.getElementById('comment-modal');
-    if(el) el.style.display = 'flex';
+    document.getElementById('comment-modal').style.display = 'flex';
 };
 
 window.closeCommentModal = function() {
-    const el = document.getElementById('comment-modal');
-    if(el) el.style.display = 'none';
+    document.getElementById('comment-modal').style.display = 'none';
 };
 
 window.submitComment = async function() {
@@ -562,7 +473,6 @@ window.openAcademicModal = function() {
 
     const modal = document.getElementById('modal-overlay');
     const content = document.getElementById('modal-content');
-    if(!modal || !content) return;
     modal.classList.remove('hidden');
 
     content.innerHTML = `
@@ -734,7 +644,6 @@ function renderAcademics() {}
 window.openGroupModal = function(){
     const modal = document.getElementById('modal-overlay');
     const content = document.getElementById('modal-content');
-    if(!modal || !content) return;
     modal.classList.remove('hidden');
 
     content.innerHTML = `
@@ -765,7 +674,6 @@ window.submitGroup = async()=>{
 
 async function loadAdminPanel(){
     const list = document.getElementById('admin-verification-list');
-    if(!list) return;
     const snap = await db.collection('StudyGroups').where('status','==','pending').get();
     list.innerHTML = snap.empty ? "<p class='text-slate-500 italic'>No pending groups.</p>" : "";
     snap.forEach(doc => {
@@ -808,7 +716,6 @@ async function loadVerifiedGroups(){
 window.openMarketModal = function(){
     const modal = document.getElementById('modal-overlay');
     const content = document.getElementById('modal-content');
-    if(!modal || !content) return;
     modal.classList.remove('hidden');
 
     content.innerHTML = `
@@ -862,7 +769,6 @@ window.openMarketModal = function(){
 // Image preview function
 window.previewImage = function(input) {
     const preview = document.getElementById('image-preview');
-    if(!preview) return;
     preview.innerHTML = '';
     if (input.files && input.files[0]) {
         const reader = new FileReader();
@@ -872,8 +778,7 @@ window.previewImage = function(input) {
             preview.appendChild(img);
         };
         reader.readAsDataURL(input.files[0]);
-        const label = document.getElementById('file-label');
-        if(label) label.innerHTML = '<i class="fa-solid fa-check-circle text-2xl mb-2"></i><br>Photo Selected! ✅';
+        document.getElementById('file-label').innerHTML = '<i class="fa-solid fa-check-circle text-2xl mb-2"></i><br>Photo Selected! ✅';
     }
 };
 
@@ -883,7 +788,7 @@ if(postAdBtn) postAdBtn.onclick = window.openMarketModal;
 window.processMarketPost = async function(){
     const btn = document.getElementById('market-submit-btn');
     const fileInput = document.getElementById('item-image');
-    const file = fileInput ? fileInput.files[0] : null;
+    const file = fileInput.files[0];
     const name = document.getElementById('item-name').value;
     const price = document.getElementById('item-price').value;
     const description = document.getElementById('item-desc').value;
@@ -947,8 +852,7 @@ window.processMarketPost = async function(){
             if(fileInput) fileInput.value = '';
             const label = document.getElementById('file-label');
             if(label) label.innerHTML = `<i class="fa-solid fa-camera-retro text-2xl mb-2"></i><br>Tap to Upload Photo`;
-            const preview = document.getElementById('image-preview');
-            if(preview) preview.innerHTML = '';
+            document.getElementById('image-preview').innerHTML = '';
             btn.disabled = false;
             checkUserPosts();
         }, 1000);
@@ -978,6 +882,7 @@ window.loadMarketDisplay = async function(type='items') {
             allMarketplaceProducts.push({ id: doc.id, ...doc.data() });
         });
         
+        // Load comments count for each product
         for (let product of allMarketplaceProducts) {
             const commentsSnap = await db.collection('Comments').where('productId', '==', product.id).get();
             product.commentCount = commentsSnap.size;
@@ -1039,15 +944,12 @@ async function loadAdminStats() {
     const reportsSnap = await db.collection('Reports').get();
     const commentsSnap = await db.collection('Comments').get();
     
-    const statsContainer = document.getElementById('admin-stats');
-    if(statsContainer) {
-        statsContainer.innerHTML = `
-            <div class="stat-card"><h4>${usersSnap.size}</h4><p>Total Users</p></div>
-            <div class="stat-card"><h4>${postsSnap.size}</h4><p>Total Posts</p></div>
-            <div class="stat-card"><h4>${reportsSnap.size}</h4><p>Reports</p></div>
-            <div class="stat-card"><h4>${commentsSnap.size}</h4><p>Comments</p></div>
-        `;
-    }
+    document.getElementById('admin-stats').innerHTML = `
+        <div class="stat-card"><h4>${usersSnap.size}</h4><p>Total Users</p></div>
+        <div class="stat-card"><h4>${postsSnap.size}</h4><p>Total Posts</p></div>
+        <div class="stat-card"><h4>${reportsSnap.size}</h4><p>Reports</p></div>
+        <div class="stat-card"><h4>${commentsSnap.size}</h4><p>Comments</p></div>
+    `;
 }
 
 async function loadAllUsers() {
@@ -1071,12 +973,11 @@ async function loadAllUsers() {
         `;
     }
     html += '</tbody></table>';
-    const list = document.getElementById('admin-user-list');
-    if(list) list.innerHTML = html;
+    document.getElementById('admin-user-list').innerHTML = html;
 }
 
 window.searchUsers = function() {
-    const searchTerm = document.getElementById('admin-search-users')?.value.toLowerCase();
+    const searchTerm = document.getElementById('admin-search-users').value.toLowerCase();
     const rows = document.querySelectorAll('#admin-user-list table tbody tr');
     rows.forEach(row => {
         const text = row.innerText.toLowerCase();
@@ -1098,6 +999,7 @@ window.unbanUser = async function(userId) {
 
 window.verifySeller = async function(userId) {
     await db.collection('users').doc(userId).update({ isVerified: true });
+    // Also update all user's posts
     const posts = await db.collection('Marketplace').where('userId', '==', userId).get();
     posts.forEach(doc => doc.ref.update({ isVerified: true }));
     loadAllUsers();
@@ -1144,7 +1046,7 @@ window.filterAcademicByDept = function(dept) {
     document.querySelectorAll('#academic-dept-filter button').forEach(btn => {
         btn.classList.remove('active');
     });
-    if(event) event.target.classList.add('active');
+    event.target.classList.add('active');
     loadAcademicMaterials('all', dept);
 };
 
@@ -1160,16 +1062,14 @@ async function loadDepartmentsList() {
             </div>
         `;
     });
-    const list = document.getElementById('departments-list');
-    if(list) list.innerHTML = html || '<p class="text-slate-400">No departments added yet</p>';
+    document.getElementById('departments-list').innerHTML = html || '<p class="text-slate-400">No departments added yet</p>';
 }
 
 window.addDepartment = async function() {
-    const name = document.getElementById('new-dept-name')?.value.trim();
+    const name = document.getElementById('new-dept-name').value.trim();
     if (!name) return alert('Enter department name');
     await db.collection('departments').add({ name: name });
-    const input = document.getElementById('new-dept-name');
-    if(input) input.value = '';
+    document.getElementById('new-dept-name').value = '';
     loadDepartmentsList();
     loadDepartmentsForFilter();
 };
@@ -1201,11 +1101,6 @@ window.filterByLevel = function(level='all') {
     loadAcademicMaterials(level);
 };
 
-// Logout trigger
-window.logout = function() {
-    auth.signOut().then(() => location.reload());
-};
-
 // Modal close events
 document.getElementById('close-modal')?.addEventListener('click', () => {
     document.getElementById('modal-overlay').classList.add('hidden');
@@ -1219,3 +1114,5 @@ document.getElementById('close-dashboard')?.addEventListener('click', () => {
 document.getElementById('dashboard-btn')?.addEventListener('click', () => {
     openDashboard();
 });
+
+Add the updated code to my code, dont remove any of my code dont change anything or code just add only the update and send me the full code without removing anything from my code
