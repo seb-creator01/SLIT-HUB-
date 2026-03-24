@@ -1,4 +1,4 @@
-Import { DEPARTMENTS, EXECUTIVES, STUDY_CATEGORIES, UI_CONFIG } from './data.js';
+import { DEPARTMENTS, EXECUTIVES, STUDY_CATEGORIES, UI_CONFIG } from './data.js';
 
 // ============================
 // FIREBASE CONFIG
@@ -117,9 +117,15 @@ auth.onAuthStateChanged(async (user) => {
         document.getElementById('user-name').innerText = currentUserData.name;
         document.getElementById('user-avatar').src = currentUserData.avatar;
         
-        if (currentUserData.isAdmin) {
-            document.getElementById('admin-trigger').style.display = 'block';
-        }
+        // Show/hide admin elements
+        const isAdmin = currentUserData.isAdmin;
+        document.getElementById('admin-trigger').style.display = isAdmin ? 'block' : 'none';
+        const adminNavBtn = document.getElementById('admin-nav-btn');
+        if (adminNavBtn) adminNavBtn.style.display = isAdmin ? 'flex' : 'none';
+        
+        // Dashboard button always visible for logged-in users
+        const dashboardBtn = document.getElementById('dashboard-btn');
+        if (dashboardBtn) dashboardBtn.style.display = 'block';
         
         // Load departments for filter
         loadDepartmentsForFilter();
@@ -130,8 +136,11 @@ auth.onAuthStateChanged(async (user) => {
         loadVerifiedGroups();
         loadBroadcastMessage();
         
-        // Check user posts for dashboard button
+        // Check user posts for dashboard content
         checkUserPosts();
+    } else {
+        // Not logged in - redirect to login page or show login modal
+        window.location.href = 'index.html';
     }
 });
 
@@ -139,10 +148,7 @@ auth.onAuthStateChanged(async (user) => {
 async function checkUserPosts() {
     if (!currentUser) return;
     const snap = await db.collection('Marketplace').where('userId', '==', currentUser.uid).limit(1).get();
-    const dashboardBtn = document.getElementById('dashboard-btn');
-    if (dashboardBtn) {
-        dashboardBtn.style.display = snap.size > 0 ? 'block' : 'none';
-    }
+    // Dashboard button is already visible, just for internal use
 }
 
 // ============================
@@ -193,6 +199,9 @@ window.openDashboard = async function() {
     const dashboardContent = document.getElementById('dashboard-content');
     
     dashboardModal.style.display = 'flex';
+    
+    // Show loading spinner
+    dashboardContent.innerHTML = '<div class="text-center py-8"><i class="fa-solid fa-spinner fa-spin text-2xl text-emerald-600"></i><p class="mt-2">Loading your posts...</p></div>';
     
     const postsSnap = await db.collection('Marketplace').where('userId', '==', currentUser.uid).get();
     const posts = postsSnap.docs;
@@ -441,7 +450,7 @@ function renderMarketplaceGrid(products) {
                 ${isSold ? '<div class="sold-badge">SOLD</div>' : ''}
                 <img src="${product.image}" class="w-full h-32 object-cover rounded-xl mb-2" onerror="this.src='https://ui-avatars.com/api/?name=Hub&background=10b981&color=fff'">
                 <div class="flex items-center gap-1 mb-1">
-                    ${product.isVerified ? '<span class="verified-badge"><i class="fa-solid fa-check-circle"></i> Verified</span>' : ''}
+                    ${product.isVerified ? '<span class="verified-badge"><i class="fa-solid fa-circle-check"></i> Verified</span>' : ''}
                 </div>
                 <h4 class="font-bold text-sm text-slate-800">${escapeHtml(product.name)}</h4>
                 <p class="text-xs text-slate-500 mt-1">₦${product.price} | ${product.condition || 'N/A'}</p>
@@ -854,7 +863,6 @@ window.processMarketPost = async function(){
             if(label) label.innerHTML = `<i class="fa-solid fa-camera-retro text-2xl mb-2"></i><br>Tap to Upload Photo`;
             document.getElementById('image-preview').innerHTML = '';
             btn.disabled = false;
-            checkUserPosts();
         }, 1000);
     } catch(err) {
         alert("Save failed: " + err.message);
@@ -999,7 +1007,6 @@ window.unbanUser = async function(userId) {
 
 window.verifySeller = async function(userId) {
     await db.collection('users').doc(userId).update({ isVerified: true });
-    // Also update all user's posts
     const posts = await db.collection('Marketplace').where('userId', '==', userId).get();
     posts.forEach(doc => doc.ref.update({ isVerified: true }));
     loadAllUsers();
