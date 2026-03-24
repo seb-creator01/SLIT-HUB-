@@ -1114,5 +1114,3 @@ document.getElementById('close-dashboard')?.addEventListener('click', () => {
 document.getElementById('dashboard-btn')?.addEventListener('click', () => {
     openDashboard();
 });
-
-Add the updated code to my code, dont remove any of my code dont change anything or code just add only the update and send me the full code without removing anything from my code
