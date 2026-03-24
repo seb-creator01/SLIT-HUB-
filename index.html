@@ -740,7 +740,12 @@
                 </div>
                 <div class="input-group">
                     <label>Password</label>
-                    <input type="password" id="login-password" placeholder="Enter your password">
+                    <div style="position: relative;">
+                        <input type="password" id="login-password" placeholder="Enter your password">
+                        <button type="button" onclick="togglePassword('login-password')" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer;">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
                 <button onclick="handleLogin()" class="btn-primary">Login to SLIT-HUB</button>
                 <div class="divider"><span>or</span></div>
@@ -764,7 +769,12 @@
                 </div>
                 <div class="input-group">
                     <label>Password</label>
-                    <input type="password" id="signup-password" placeholder="Min. 6 characters">
+                    <div style="position: relative;">
+                        <input type="password" id="signup-password" placeholder="Min. 6 characters">
+                        <button type="button" onclick="togglePassword('signup-password')" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer;">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="input-group">
                     <label>Phone Number</label>
@@ -1078,7 +1088,8 @@
             <i class="fa-solid fa-shop text-lg"></i>
             <span class="text-[9px] font-black uppercase">Trade</span>
         </button>
-        <button onclick="switchTab('admin')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" data-tab="admin">
+        <!-- Admin Nav Button - Hidden by default, only shown when user is admin -->
+        <button id="admin-nav-btn" onclick="switchTab('admin')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" data-tab="admin" style="display: none;">
             <i class="fa-solid fa-user-ninja text-lg"></i>
             <span class="text-[9px] font-black uppercase">Admin</span>
         </button>
@@ -1096,6 +1107,19 @@
     <script type="module" src="app.js"></script>
     
     <script>
+        // Password visibility toggle
+        window.togglePassword = function(inputId) {
+            const input = document.getElementById(inputId);
+            const button = input.nextElementSibling;
+            if (input.type === 'password') {
+                input.type = 'text';
+                button.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
+            } else {
+                input.type = 'password';
+                button.innerHTML = '<i class="fa-solid fa-eye"></i>';
+            }
+        };
+        
         // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyCpsDTN-NTkTFmbwg3T6vv9H4eE_YXQdZA",
@@ -1291,10 +1315,15 @@
             document.getElementById('user-name').innerText = currentUserData.name;
             document.getElementById('user-avatar').src = currentUserData.avatar;
             
-            // Show admin trigger if admin
-            if (currentUserData.isAdmin) {
-                document.getElementById('admin-trigger').style.display = 'block';
-            }
+            // Show admin trigger and admin nav button if admin
+            const isAdmin = currentUserData.isAdmin;
+            document.getElementById('admin-trigger').style.display = isAdmin ? 'block' : 'none';
+            const adminNavBtn = document.getElementById('admin-nav-btn');
+            if (adminNavBtn) adminNavBtn.style.display = isAdmin ? 'flex' : 'none';
+            
+            // Dashboard button always visible for logged-in users
+            const dashboardBtn = document.getElementById('dashboard-btn');
+            if (dashboardBtn) dashboardBtn.style.display = 'block';
             
             // Hide login, show main app
             document.getElementById('login-container').style.display = 'none';
@@ -1351,15 +1380,15 @@
         
         async function loadAllUsers() {
             const usersSnap = await db.collection('users').get();
-            let html = '<table class="user-table"><thead><tr><th>Name</th><th>Email</th><th>Dept</th><th>Posts</th><th>Actions</th></tr></thead><tbody>';
+            let html = '<table class="user-table"><thead><tr><th>Name</th><th>Email</th><th>Dept</th><th>Posts</th><th>Actions</th> </thead><tbody>';
             for (const doc of usersSnap.docs) {
                 const user = doc.data();
                 const postsSnap = await db.collection('Marketplace').where('userId', '==', doc.id).get();
                 html += `
                     <tr>
-                        <td>${user.name}</td>
-                        <td>${user.email}</td>
-                        <td>${user.department || '-'}</td>
+                        <td>${escapeHtml(user.name)}</td>
+                        <td>${escapeHtml(user.email)}</td>
+                        <td>${escapeHtml(user.department || '-')}</td>
                         <td>${postsSnap.size}</td>
                         <td>
                             ${!user.isBanned ? `<button class="admin-btn admin-btn-ban" onclick="banUser('${doc.id}')">Ban</button>` : `<button class="admin-btn admin-btn-unban" onclick="unbanUser('${doc.id}')">Unban</button>`}
@@ -1385,21 +1414,25 @@
         window.banUser = async function(userId) {
             await db.collection('users').doc(userId).update({ isBanned: true });
             loadAllUsers();
+            loadAdminStats();
         };
         
         window.unbanUser = async function(userId) {
             await db.collection('users').doc(userId).update({ isBanned: false });
             loadAllUsers();
+            loadAdminStats();
         };
         
         window.verifySeller = async function(userId) {
             await db.collection('users').doc(userId).update({ isVerified: true });
             loadAllUsers();
+            loadAdminStats();
         };
         
         window.unverifySeller = async function(userId) {
             await db.collection('users').doc(userId).update({ isVerified: false });
             loadAllUsers();
+            loadAdminStats();
         };
         
         window.deleteUser = async function(userId) {
@@ -1420,7 +1453,7 @@
                 const dept = doc.data();
                 html += `
                     <div class="dept-item">
-                        <span>${dept.name}</span>
+                        <span>${escapeHtml(dept.name)}</span>
                         <button onclick="deleteDepartment('${doc.id}')" class="text-red-500 text-xs">Delete</button>
                     </div>
                 `;
@@ -1580,6 +1613,17 @@
         window.openNotificationModal = function() {
             document.getElementById('notification-modal').style.display = 'flex';
         };
+        
+        // Escape HTML
+        function escapeHtml(str) {
+            if(!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if(m === '&') return '&amp;';
+                if(m === '<') return '&lt;';
+                if(m === '>') return '&gt;';
+                return m;
+            });
+        }
         
         // Check if already logged in
         auth.onAuthStateChanged(async (user) => {
