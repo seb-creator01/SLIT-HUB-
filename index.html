@@ -511,20 +511,25 @@
             background: white;
         }
         
-        /* User Info - Simplified for header */
-        .user-name {
-            font-size: 14px;
-            font-weight: bold;
-            color: #10b981;
-            margin-right: 10px;
+        /* Header User Info */
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
         .user-avatar {
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             object-fit: cover;
             border: 2px solid #10b981;
+        }
+        
+        .user-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #10b981;
         }
         
         #dark-mode-toggle, #admin-trigger {
@@ -562,7 +567,7 @@
         }
         
         /* Modal */
-        #modal-overlay, #dashboard-modal, #rating-modal, #comment-modal, #profile-modal, #notification-modal {
+        #modal-overlay, #dashboard-modal, #rating-modal, #comment-modal, #notification-modal {
             position: fixed;
             top: 0;
             left: 0;
@@ -696,11 +701,197 @@
             border-color: #4b5563;
         }
         
-        /* Header User Info */
-        .header-user {
+        /* Full Page Profile */
+        #profile-page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: white;
+            z-index: 500;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        body.dark-mode #profile-page {
+            background: #1f2937;
+        }
+        
+        .profile-header {
+            background: linear-gradient(135deg, #10b981, #059669);
+            padding: 30px 20px 50px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .profile-back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        
+        .profile-avatar-large {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 12px;
+        }
+        
+        .profile-change-photo {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            padding: 6px 16px;
+            border-radius: 30px;
+            color: white;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        
+        .profile-section {
+            padding: 20px;
+            margin-top: -20px;
+            background: white;
+            border-radius: 30px 30px 0 0;
+        }
+        
+        body.dark-mode .profile-section {
+            background: #1f2937;
+        }
+        
+        .profile-field {
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        body.dark-mode .profile-field {
+            border-color: #4b5563;
+        }
+        
+        .profile-field-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+        
+        body.dark-mode .profile-field-label {
+            color: #9ca3af;
+        }
+        
+        .profile-field-value {
+            font-size: 16px;
+            font-weight: 500;
+            color: #111827;
+        }
+        
+        body.dark-mode .profile-field-value {
+            color: #f3f4f6;
+        }
+        
+        .profile-field-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 15px;
+            background: #f9fafb;
+        }
+        
+        body.dark-mode .profile-field-input {
+            background: #374151;
+            border-color: #4b5563;
+            color: #f3f4f6;
+        }
+        
+        .profile-edit-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 40px;
+            font-weight: bold;
+            width: 100%;
+            margin-bottom: 12px;
+            cursor: pointer;
+        }
+        
+        .profile-logout-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 40px;
+            font-weight: bold;
+            width: 100%;
+            margin-bottom: 12px;
+            cursor: pointer;
+        }
+        
+        .profile-delete-btn {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 40px;
+            font-weight: bold;
+            width: 100%;
+            margin-bottom: 12px;
+            cursor: pointer;
+        }
+        
+        .profile-save-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 40px;
+            font-weight: bold;
+            width: 100%;
+            margin-bottom: 12px;
+            cursor: pointer;
+            display: none;
+        }
+        
+        .profile-cancel-btn {
+            background: #6b7280;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 40px;
+            font-weight: bold;
+            width: 100%;
+            cursor: pointer;
+            display: none;
+        }
+        
+        .profile-info-text {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        body.dark-mode .profile-info-text {
+            color: #9ca3af;
         }
     </style>
 </head>
@@ -795,19 +986,15 @@
         <header class="bg-white/80 backdrop-blur-md border-b sticky top-0 z-40 px-4 py-3 flex justify-between items-center shadow-sm">
             <h1 class="font-black text-xl text-emerald-600 italic">SLIT-HUB ⚡</h1>
             <div class="flex gap-3 items-center">
-                <!-- User Avatar and Name -->
                 <div class="header-user">
                     <img id="user-avatar" class="user-avatar" src="" alt="avatar">
                     <span id="user-name" class="user-name"></span>
                 </div>
-                <!-- Dark Mode Toggle -->
                 <button id="dark-mode-toggle" onclick="toggleDarkMode()" class="text-white px-3 py-1 rounded-full text-xs font-bold">🌙 Dark</button>
-                <!-- Notification Bell -->
                 <div class="notification-badge" onclick="openNotificationModal()">
                     <i class="fa-solid fa-bell text-slate-500 text-lg"></i>
                     <span id="notification-count" class="badge" style="display: none;">0</span>
                 </div>
-                <!-- Admin Trigger (hidden for regular users) -->
                 <button id="admin-trigger" class="text-white px-3 py-1 rounded-full text-xs font-bold" style="display: none;">
                     <i class="fa-solid fa-shield-halved"></i> Admin
                 </button>
@@ -943,6 +1130,78 @@
         </main>
     </div>
 
+    <!-- Full Page Profile -->
+    <div id="profile-page">
+        <div class="profile-header">
+            <button class="profile-back-btn" onclick="closeProfilePage()">
+                <i class="fa-solid fa-arrow-left"></i>
+            </button>
+            <img id="profile-page-avatar" class="profile-avatar-large" src="" alt="avatar">
+            <div>
+                <button class="profile-change-photo" onclick="uploadProfilePicture()">
+                    <i class="fa-solid fa-camera"></i> Change Photo
+                </button>
+                <input type="file" id="profile-picture-input" accept="image/*" style="display: none;" onchange="updateProfilePicture()">
+            </div>
+        </div>
+        
+        <div class="profile-section">
+            <div id="profile-view-mode">
+                <div class="profile-field">
+                    <div class="profile-field-label">Full Name</div>
+                    <div class="profile-field-value" id="profile-view-name">Loading...</div>
+                </div>
+                <div class="profile-field">
+                    <div class="profile-field-label">Phone Number</div>
+                    <div class="profile-field-value" id="profile-view-phone">Loading...</div>
+                </div>
+                <div class="profile-field">
+                    <div class="profile-field-label">Department</div>
+                    <div class="profile-field-value" id="profile-view-dept">Loading...</div>
+                </div>
+                <div class="profile-field">
+                    <div class="profile-field-label">Member Since</div>
+                    <div class="profile-field-value" id="profile-view-since">Loading...</div>
+                </div>
+                <button class="profile-edit-btn" onclick="enableProfileEdit()">
+                    <i class="fa-solid fa-pen"></i> Edit Profile
+                </button>
+            </div>
+            
+            <div id="profile-edit-mode" style="display: none;">
+                <div class="profile-field">
+                    <div class="profile-field-label">Full Name</div>
+                    <input type="text" id="profile-edit-name" class="profile-field-input">
+                </div>
+                <div class="profile-field">
+                    <div class="profile-field-label">Phone Number</div>
+                    <input type="tel" id="profile-edit-phone" class="profile-field-input" maxlength="10">
+                </div>
+                <div class="profile-field">
+                    <div class="profile-field-label">Department</div>
+                    <input type="text" id="profile-edit-dept" class="profile-field-input">
+                </div>
+                <button class="profile-save-btn" onclick="saveProfileFromPage()">
+                    <i class="fa-solid fa-check"></i> Save Changes
+                </button>
+                <button class="profile-cancel-btn" onclick="cancelProfileEdit()">
+                    Cancel
+                </button>
+            </div>
+            
+            <button class="profile-logout-btn" onclick="handleLogout()">
+                <i class="fa-solid fa-sign-out-alt"></i> Logout
+            </button>
+            <button class="profile-delete-btn" onclick="deleteAccount()">
+                <i class="fa-solid fa-trash-alt"></i> Delete Account
+            </button>
+            
+            <div class="profile-info-text">
+                <i class="fa-regular fa-circle-question"></i> Need help? Contact support
+            </div>
+        </div>
+    </div>
+
     <!-- Modals -->
     <div id="modal-overlay">
         <div class="modal-content">
@@ -981,35 +1240,6 @@
             <textarea id="comment-text" placeholder="Write your comment..." rows="3" class="w-full p-3 border rounded-xl"></textarea>
             <button onclick="submitComment()" class="w-full bg-emerald-600 text-white py-3 rounded-xl mt-4 font-bold">Post Comment</button>
             <button onclick="closeCommentModal()" class="w-full mt-2 text-slate-500 py-2">Cancel</button>
-        </div>
-    </div>
-
-    <div id="profile-modal">
-        <div class="modal-content">
-            <h3 class="text-xl font-bold mb-4">My Profile</h3>
-            <div class="text-center mb-4">
-                <img id="profile-avatar" src="" class="w-24 h-24 rounded-full mx-auto object-cover border-4 border-emerald-500">
-                <button onclick="uploadProfilePicture()" class="mt-2 text-emerald-600 text-sm">Change Photo</button>
-                <input type="file" id="profile-picture-input" accept="image/*" style="display: none;" onchange="updateProfilePicture()">
-            </div>
-            <div class="input-group">
-                <label>Full Name</label>
-                <input type="text" id="profile-name" class="w-full p-3 border rounded-xl">
-            </div>
-            <div class="input-group">
-                <label>Phone Number</label>
-                <input type="tel" id="profile-phone" class="w-full p-3 border rounded-xl" maxlength="10">
-                <p class="text-xs text-slate-400 mt-1">10 digits only (e.g., 8051234567)</p>
-            </div>
-            <div class="input-group">
-                <label>Department</label>
-                <input type="text" id="profile-department" class="w-full p-3 border rounded-xl">
-            </div>
-            <p class="text-xs text-slate-500 mb-3">Member since: <span id="member-since"></span></p>
-            <button onclick="saveProfile()" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold mb-2">Save Changes</button>
-            <button onclick="deleteAccount()" class="w-full bg-red-500 text-white py-3 rounded-xl font-bold mb-2">Delete Account</button>
-            <button onclick="handleLogout()" class="w-full bg-slate-600 text-white py-3 rounded-xl font-bold">Logout</button>
-            <button onclick="closeProfileModal()" class="w-full mt-2 text-slate-500 py-2">Cancel</button>
         </div>
     </div>
 
@@ -1054,7 +1284,7 @@
         </div>
     </div>
 
-    <!-- Bottom Navigation with Dashboard and Profile -->
+    <!-- Bottom Navigation -->
     <nav class="fixed bottom-0 inset-x-0 bg-white/90 backdrop-blur-xl border-t flex justify-around items-center py-3 px-2 z-50 rounded-t-[24px] shadow-[0_-10px_20px_rgba(0,0,0,0.02)]">
         <button onclick="switchTab('home')" class="nav-btn active flex flex-col items-center gap-1 text-emerald-600" data-tab="home">
             <i class="fa-solid fa-house-chimney text-lg"></i>
@@ -1072,11 +1302,10 @@
             <i class="fa-solid fa-chart-line text-lg"></i>
             <span class="text-[9px] font-black uppercase">Dashboard</span>
         </button>
-        <button id="profile-nav-btn" onclick="openProfileModal()" class="nav-btn flex flex-col items-center gap-1 text-slate-400" data-tab="profile">
+        <button id="profile-nav-btn" onclick="openProfilePage()" class="nav-btn flex flex-col items-center gap-1 text-slate-400" data-tab="profile">
             <i class="fa-solid fa-user-circle text-lg"></i>
             <span class="text-[9px] font-black uppercase">Profile</span>
         </button>
-        <!-- Admin Nav Button (hidden for regular users) -->
         <button id="admin-nav-btn" onclick="switchTab('admin')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" data-tab="admin" style="display: none;">
             <i class="fa-solid fa-user-ninja text-lg"></i>
             <span class="text-[9px] font-black uppercase">Admin</span>
@@ -1298,13 +1527,23 @@
             // Update UI
             document.getElementById('user-name').innerText = currentUserData.name;
             document.getElementById('user-avatar').src = currentUserData.avatar;
-            document.getElementById('profile-avatar').src = currentUserData.avatar;
+            document.getElementById('profile-page-avatar').src = currentUserData.avatar;
+            
+            // Update profile view
+            document.getElementById('profile-view-name').innerText = currentUserData.name;
+            document.getElementById('profile-view-phone').innerText = currentUserData.phone || 'Not set';
+            document.getElementById('profile-view-dept').innerText = currentUserData.department || 'Not specified';
+            document.getElementById('profile-view-since').innerText = new Date(currentUserData.createdAt).toLocaleDateString();
+            
+            // Edit mode fields
+            document.getElementById('profile-edit-name').value = currentUserData.name;
+            document.getElementById('profile-edit-phone').value = currentUserData.phone || '';
+            document.getElementById('profile-edit-dept').value = currentUserData.department || '';
             
             const isAdmin = currentUserData.isAdmin;
             document.getElementById('admin-trigger').style.display = isAdmin ? 'block' : 'none';
             document.getElementById('admin-nav-btn').style.display = isAdmin ? 'flex' : 'none';
             
-            // Show bottom navigation buttons
             document.getElementById('dashboard-nav-btn').style.display = 'flex';
             document.getElementById('profile-nav-btn').style.display = 'flex';
             
@@ -1318,6 +1557,116 @@
             if (typeof loadVerifiedGroups === 'function') loadVerifiedGroups();
             if (typeof loadBroadcastMessage === 'function') loadBroadcastMessage();
         }
+        
+        // Profile Page Functions
+        window.openProfilePage = function() {
+            document.getElementById('profile-page').style.display = 'block';
+            document.getElementById('main-app').style.display = 'none';
+        };
+        
+        window.closeProfilePage = function() {
+            document.getElementById('profile-page').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+        };
+        
+        window.enableProfileEdit = function() {
+            document.getElementById('profile-view-mode').style.display = 'none';
+            document.getElementById('profile-edit-mode').style.display = 'block';
+        };
+        
+        window.cancelProfileEdit = function() {
+            document.getElementById('profile-view-mode').style.display = 'block';
+            document.getElementById('profile-edit-mode').style.display = 'none';
+            // Reset fields
+            document.getElementById('profile-edit-name').value = currentUserData.name;
+            document.getElementById('profile-edit-phone').value = currentUserData.phone || '';
+            document.getElementById('profile-edit-dept').value = currentUserData.department || '';
+        };
+        
+        window.saveProfileFromPage = async function() {
+            const name = document.getElementById('profile-edit-name').value;
+            const phone = document.getElementById('profile-edit-phone').value;
+            const department = document.getElementById('profile-edit-dept').value;
+            
+            let formattedPhone = phone.replace(/\D/g, '');
+            if (formattedPhone.startsWith('0')) {
+                formattedPhone = formattedPhone.substring(1);
+            }
+            
+            await db.collection('users').doc(currentUser.uid).update({
+                name: name,
+                phone: formattedPhone,
+                department: department
+            });
+            
+            currentUserData.name = name;
+            currentUserData.phone = formattedPhone;
+            currentUserData.department = department;
+            
+            document.getElementById('user-name').innerText = name;
+            document.getElementById('profile-view-name').innerText = name;
+            document.getElementById('profile-view-phone').innerText = formattedPhone || 'Not set';
+            document.getElementById('profile-view-dept').innerText = department || 'Not specified';
+            
+            alert('Profile updated!');
+            cancelProfileEdit();
+        };
+        
+        window.uploadProfilePicture = function() {
+            document.getElementById('profile-picture-input').click();
+        };
+        
+        window.updateProfilePicture = async function() {
+            const file = document.getElementById('profile-picture-input').files[0];
+            if (!file) return;
+            
+            const storageRef = storage.ref().child(`profile_pics/${currentUser.uid}`);
+            await storageRef.put(file);
+            const url = await storageRef.getDownloadURL();
+            
+            await db.collection('users').doc(currentUser.uid).update({ avatar: url });
+            currentUserData.avatar = url;
+            document.getElementById('user-avatar').src = url;
+            document.getElementById('profile-page-avatar').src = url;
+            
+            alert('Profile picture updated!');
+        };
+        
+        window.deleteAccount = async function() {
+            if (confirm('Are you sure you want to delete your account? This cannot be undone.')) {
+                const posts = await db.collection('Marketplace').where('userId', '==', currentUser.uid).get();
+                posts.forEach(doc => doc.ref.delete());
+                
+                await db.collection('users').doc(currentUser.uid).delete();
+                await currentUser.delete();
+                
+                alert('Account deleted');
+                handleLogout();
+            }
+        };
+        
+        // Logout
+        window.handleLogout = async () => {
+            await auth.signOut();
+            document.getElementById('login-container').style.display = 'flex';
+            document.getElementById('main-app').style.display = 'none';
+            document.getElementById('profile-page').style.display = 'none';
+            currentUser = null;
+            currentUserData = null;
+        };
+        
+        // Forgot Password
+        window.forgotPassword = async () => {
+            const email = prompt('Enter your email address:');
+            if (email) {
+                try {
+                    await auth.sendPasswordResetEmail(email);
+                    alert('Password reset email sent! Check your inbox.');
+                } catch (error) {
+                    alert(error.message);
+                }
+            }
+        };
         
         // Load departments for academic filter
         async function loadDepartmentsForFilter() {
@@ -1408,7 +1757,7 @@
             const posts = await db.collection('Marketplace').where('userId', '==', userId).get();
             posts.forEach(doc => doc.ref.update({ isVerified: true }));
             loadAllUsers();
-            loadMarketDisplay('items');
+            if (typeof loadMarketDisplay === 'function') loadMarketDisplay('items');
         };
         
         window.unverifySeller = async function(userId) {
@@ -1416,7 +1765,7 @@
             const posts = await db.collection('Marketplace').where('userId', '==', userId).get();
             posts.forEach(doc => doc.ref.update({ isVerified: false }));
             loadAllUsers();
-            loadMarketDisplay('items');
+            if (typeof loadMarketDisplay === 'function') loadMarketDisplay('items');
         };
         
         window.deleteUser = async function(userId) {
@@ -1463,101 +1812,6 @@
                 await db.collection('departments').doc(id).delete();
                 loadDepartmentsList();
                 loadDepartmentsForFilter();
-            }
-        };
-        
-        // Logout
-        window.handleLogout = async () => {
-            await auth.signOut();
-            document.getElementById('login-container').style.display = 'flex';
-            document.getElementById('main-app').style.display = 'none';
-            currentUser = null;
-            currentUserData = null;
-        };
-        
-        // Forgot Password
-        window.forgotPassword = async () => {
-            const email = prompt('Enter your email address:');
-            if (email) {
-                try {
-                    await auth.sendPasswordResetEmail(email);
-                    alert('Password reset email sent! Check your inbox.');
-                } catch (error) {
-                    alert(error.message);
-                }
-            }
-        };
-        
-        // Profile Modal
-        window.openProfileModal = function() {
-            if (!currentUserData) return;
-            document.getElementById('profile-name').value = currentUserData.name;
-            document.getElementById('profile-phone').value = currentUserData.phone || '';
-            document.getElementById('profile-department').value = currentUserData.department || '';
-            document.getElementById('profile-avatar').src = currentUserData.avatar;
-            document.getElementById('member-since').innerText = new Date(currentUserData.createdAt).toLocaleDateString();
-            document.getElementById('profile-modal').style.display = 'flex';
-        };
-        
-        window.closeProfileModal = function() {
-            document.getElementById('profile-modal').style.display = 'none';
-        };
-        
-        window.saveProfile = async function() {
-            const name = document.getElementById('profile-name').value;
-            const phone = document.getElementById('profile-phone').value;
-            const department = document.getElementById('profile-department').value;
-            
-            let formattedPhone = phone.replace(/\D/g, '');
-            if (formattedPhone.startsWith('0')) {
-                formattedPhone = formattedPhone.substring(1);
-            }
-            
-            await db.collection('users').doc(currentUser.uid).update({
-                name: name,
-                phone: formattedPhone,
-                department: department
-            });
-            
-            currentUserData.name = name;
-            currentUserData.phone = formattedPhone;
-            currentUserData.department = department;
-            document.getElementById('user-name').innerText = name;
-            
-            alert('Profile updated!');
-            closeProfileModal();
-        };
-        
-        window.uploadProfilePicture = function() {
-            document.getElementById('profile-picture-input').click();
-        };
-        
-        window.updateProfilePicture = async function() {
-            const file = document.getElementById('profile-picture-input').files[0];
-            if (!file) return;
-            
-            const storageRef = storage.ref().child(`profile_pics/${currentUser.uid}`);
-            await storageRef.put(file);
-            const url = await storageRef.getDownloadURL();
-            
-            await db.collection('users').doc(currentUser.uid).update({ avatar: url });
-            currentUserData.avatar = url;
-            document.getElementById('user-avatar').src = url;
-            document.getElementById('profile-avatar').src = url;
-            
-            alert('Profile picture updated!');
-        };
-        
-        window.deleteAccount = async function() {
-            if (confirm('Are you sure you want to delete your account? This cannot be undone.')) {
-                const posts = await db.collection('Marketplace').where('userId', '==', currentUser.uid).get();
-                posts.forEach(doc => doc.ref.delete());
-                
-                await db.collection('users').doc(currentUser.uid).delete();
-                await currentUser.delete();
-                
-                alert('Account deleted');
-                handleLogout();
             }
         };
         
@@ -1611,6 +1865,120 @@
                 return m;
             });
         }
+        
+        // Dashboard button
+        window.openDashboard = function() {
+            const dashboardModal = document.getElementById('dashboard-modal');
+            const dashboardContent = document.getElementById('dashboard-content');
+            dashboardModal.style.display = 'flex';
+            dashboardContent.innerHTML = '<div class="text-center py-8"><i class="fa-solid fa-spinner fa-spin text-2xl text-emerald-600"></i><p class="mt-2">Loading your posts...</p></div>';
+            loadUserPosts();
+        };
+        
+        async function loadUserPosts() {
+            if (!currentUser) return;
+            const postsSnap = await db.collection('Marketplace').where('userId', '==', currentUser.uid).get();
+            const posts = postsSnap.docs;
+            const dashboardContent = document.getElementById('dashboard-content');
+            
+            if (posts.length === 0) {
+                dashboardContent.innerHTML = `
+                    <h3 class="text-xl font-bold mb-4">My Dashboard</h3>
+                    <p class="text-slate-500 text-center py-8">You haven't posted anything yet.</p>
+                    <button onclick="closeDashboardModal()" class="w-full bg-emerald-600 text-white py-3 rounded-xl mt-4 font-bold">Close</button>
+                `;
+                return;
+            }
+            
+            let postsHtml = '<h3 class="text-xl font-bold mb-4">My Listings</h3>';
+            posts.forEach(doc => {
+                const p = doc.data();
+                postsHtml += `
+                    <div class="border rounded-xl p-3 mb-3">
+                        <div class="flex gap-3">
+                            <img src="${p.image}" class="w-16 h-16 object-cover rounded-lg">
+                            <div class="flex-1">
+                                <h4 class="font-bold text-sm">${escapeHtml(p.name)}</h4>
+                                <p class="text-xs text-emerald-600 font-bold">₦${p.price}</p>
+                                <p class="text-[10px] text-slate-500">${p.condition || 'No condition'} | ${p.category || 'Uncategorized'}</p>
+                                ${p.isSold ? '<span class="text-xs text-red-500 font-bold">SOLD</span>' : ''}
+                            </div>
+                        </div>
+                        <div class="flex gap-2 mt-3">
+                            <button onclick="editProduct('${doc.id}')" class="flex-1 bg-blue-500 text-white py-1 rounded-lg text-xs">Edit</button>
+                            <button onclick="markAsSold('${doc.id}')" class="flex-1 bg-orange-500 text-white py-1 rounded-lg text-xs">Mark Sold</button>
+                            <button onclick="deleteProduct('${doc.id}')" class="flex-1 bg-red-500 text-white py-1 rounded-lg text-xs">Delete</button>
+                        </div>
+                    </div>
+                `;
+            });
+            dashboardContent.innerHTML = postsHtml + '<button onclick="closeDashboardModal()" class="w-full mt-4 bg-slate-200 py-2 rounded-xl font-bold">Close</button>';
+        }
+        
+        window.editProduct = async function(productId) {
+            const doc = await db.collection('Marketplace').doc(productId).get();
+            const data = doc.data();
+            const modal = document.getElementById('modal-overlay');
+            const content = document.getElementById('modal-content');
+            modal.classList.remove('hidden');
+            content.innerHTML = `
+                <h3 class="text-xl font-black mb-4 italic text-emerald-600">Edit Product ✏️</h3>
+                <div class="space-y-3">
+                    <input type="text" id="edit-name" value="${escapeHtml(data.name)}" placeholder="Product name" class="w-full p-3 bg-slate-50 rounded-xl">
+                    <input type="number" id="edit-price" value="${data.price}" placeholder="Price" class="w-full p-3 bg-slate-50 rounded-xl">
+                    <textarea id="edit-desc" placeholder="Description" rows="3" class="w-full p-3 bg-slate-50 rounded-xl">${escapeHtml(data.description || '')}</textarea>
+                    <select id="edit-condition" class="w-full p-3 bg-slate-50 rounded-xl">
+                        <option value="New" ${data.condition === 'New' ? 'selected' : ''}>New</option>
+                        <option value="Like New" ${data.condition === 'Like New' ? 'selected' : ''}>Like New</option>
+                        <option value="Used" ${data.condition === 'Used' ? 'selected' : ''}>Used</option>
+                    </select>
+                    <select id="edit-category" class="w-full p-3 bg-slate-50 rounded-xl">
+                        <option value="Electronics" ${data.category === 'Electronics' ? 'selected' : ''}>Electronics</option>
+                        <option value="Books" ${data.category === 'Books' ? 'selected' : ''}>Books</option>
+                        <option value="Fashion" ${data.category === 'Fashion' ? 'selected' : ''}>Fashion</option>
+                        <option value="Food" ${data.category === 'Food' ? 'selected' : ''}>Food</option>
+                        <option value="Accommodation" ${data.category === 'Accommodation' ? 'selected' : ''}>Accommodation</option>
+                    </select>
+                    <button onclick="saveEdit('${productId}')" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-black">SAVE CHANGES</button>
+                </div>
+            `;
+        };
+        
+        window.saveEdit = async function(productId) {
+            const name = document.getElementById('edit-name').value;
+            const price = document.getElementById('edit-price').value;
+            const description = document.getElementById('edit-desc').value;
+            const condition = document.getElementById('edit-condition').value;
+            const category = document.getElementById('edit-category').value;
+            await db.collection('Marketplace').doc(productId).update({
+                name, price: Number(price), description, condition, category,
+                updatedAt: new Date().toISOString()
+            });
+            document.getElementById('modal-overlay').classList.add('hidden');
+            alert('Product updated!');
+            loadUserPosts();
+            if (typeof loadMarketDisplay === 'function') loadMarketDisplay('items');
+        };
+        
+        window.markAsSold = async function(productId) {
+            await db.collection('Marketplace').doc(productId).update({ isSold: true });
+            alert('Marked as sold!');
+            loadUserPosts();
+            if (typeof loadMarketDisplay === 'function') loadMarketDisplay('items');
+        };
+        
+        window.deleteProduct = async function(productId) {
+            if (confirm('Are you sure you want to delete this product?')) {
+                await db.collection('Marketplace').doc(productId).delete();
+                alert('Product deleted!');
+                loadUserPosts();
+                if (typeof loadMarketDisplay === 'function') loadMarketDisplay('items');
+            }
+        };
+        
+        // Rating and Comment functions (placeholder)
+        window.submitRating = function() { alert('Rating submitted!'); closeRatingModal(); };
+        window.submitComment = function() { alert('Comment posted!'); closeCommentModal(); };
         
         // Check if already logged in
         auth.onAuthStateChanged(async (user) => {
