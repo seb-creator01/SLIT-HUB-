@@ -8,7 +8,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* All existing styles remain the same */
         * {
             margin: 0;
             padding: 0;
@@ -467,17 +466,6 @@
             z-index: 10;
         }
         
-        /* Dashboard Button */
-        #dashboard-btn {
-            background: #10b981;
-            color: white;
-            padding: 8px 12px;
-            border-radius: 30px;
-            font-size: 12px;
-            font-weight: bold;
-            display: none;
-        }
-        
         /* Image Preview */
         .image-preview {
             display: flex;
@@ -523,30 +511,24 @@
             background: white;
         }
         
-        /* User Info */
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: #f0fdf4;
-            padding: 8px 16px;
-            border-radius: 40px;
+        /* User Info - Simplified for header */
+        .user-name {
+            font-size: 14px;
+            font-weight: bold;
+            color: #10b981;
             margin-right: 10px;
         }
         
-        body.dark-mode .user-info {
-            background: #374151;
-        }
-        
-        .user-info img {
+        .user-avatar {
             width: 32px;
             height: 32px;
             border-radius: 50%;
             object-fit: cover;
+            border: 2px solid #10b981;
         }
         
-        #logout-btn, #dark-mode-toggle {
-            background: #ef4444;
+        #dark-mode-toggle, #admin-trigger {
+            background: #10b981;
             color: white;
             padding: 6px 12px;
             border-radius: 20px;
@@ -556,8 +538,8 @@
             cursor: pointer;
         }
         
-        #dark-mode-toggle {
-            background: #10b981;
+        #admin-trigger {
+            background: #ef4444;
         }
         
         /* Notification Badge */
@@ -580,7 +562,7 @@
         }
         
         /* Modal */
-        #modal-overlay, #dashboard-modal, #rating-modal, #comment-modal, #upgrade-modal, #profile-modal, #notification-modal {
+        #modal-overlay, #dashboard-modal, #rating-modal, #comment-modal, #profile-modal, #notification-modal {
             position: fixed;
             top: 0;
             left: 0;
@@ -713,6 +695,13 @@
         body.dark-mode .dept-item {
             border-color: #4b5563;
         }
+        
+        /* Header User Info */
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
     </style>
 </head>
 <body>
@@ -757,7 +746,7 @@
                 </div>
             </div>
             
-            <!-- Signup Form - Updated -->
+            <!-- Signup Form -->
             <div id="signup-form" style="display: none;">
                 <div class="input-group">
                     <label>Full Name</label>
@@ -805,7 +794,12 @@
     <div id="main-app">
         <header class="bg-white/80 backdrop-blur-md border-b sticky top-0 z-40 px-4 py-3 flex justify-between items-center shadow-sm">
             <h1 class="font-black text-xl text-emerald-600 italic">SLIT-HUB ⚡</h1>
-            <div class="flex gap-4 items-center">
+            <div class="flex gap-3 items-center">
+                <!-- User Avatar and Name -->
+                <div class="header-user">
+                    <img id="user-avatar" class="user-avatar" src="" alt="avatar">
+                    <span id="user-name" class="user-name"></span>
+                </div>
                 <!-- Dark Mode Toggle -->
                 <button id="dark-mode-toggle" onclick="toggleDarkMode()" class="text-white px-3 py-1 rounded-full text-xs font-bold">🌙 Dark</button>
                 <!-- Notification Bell -->
@@ -813,28 +807,14 @@
                     <i class="fa-solid fa-bell text-slate-500 text-lg"></i>
                     <span id="notification-count" class="badge" style="display: none;">0</span>
                 </div>
-                <!-- Profile Button -->
-                <button onclick="openProfileModal()" class="text-slate-500 hover:text-emerald-600 transition-all">
-                    <i class="fa-solid fa-user-circle text-xl"></i>
-                </button>
-                <!-- Dashboard Button -->
-                <button id="dashboard-btn" onclick="openDashboard()" class="transition-all active:scale-90">
-                    <i class="fa-solid fa-chart-line text-lg"></i> Dashboard
-                </button>
-                <!-- User Info -->
-                <div id="user-info" class="user-info">
-                    <img id="user-avatar" src="" alt="avatar">
-                    <span id="user-name" class="text-sm font-bold text-emerald-700"></span>
-                    <button id="logout-btn" onclick="handleLogout()">Logout</button>
-                </div>
                 <!-- Admin Trigger (hidden for regular users) -->
-                <button id="admin-trigger" class="text-slate-400 hover:text-emerald-600 transition-all active:scale-90" style="display: none;">
-                    <i class="fa-solid fa-shield-halved text-lg"></i>
+                <button id="admin-trigger" class="text-white px-3 py-1 rounded-full text-xs font-bold" style="display: none;">
+                    <i class="fa-solid fa-shield-halved"></i> Admin
                 </button>
             </div>
         </header>
 
-        <main id="app-viewport" class="max-w-md mx-auto p-4 space-y-6">
+        <main id="app-viewport" class="max-w-md mx-auto p-4 space-y-6 pb-24">
             
             <section id="tab-home" class="tab-content animate-fade-in">
                 <div class="mb-6">
@@ -869,7 +849,6 @@
                     </div>
                 </div>
 
-                <!-- Department Filter for Academics -->
                 <div class="dept-filter" id="academic-dept-filter">
                     <button class="active" onclick="filterAcademicByDept('all')">All Depts</button>
                 </div>
@@ -938,7 +917,6 @@
                 <h2 class="text-xl font-bold text-red-600 italic">Admin Terminal 🛡️</h2>
                 <div id="admin-stats" class="admin-stats"></div>
                 
-                <!-- Department Management -->
                 <div class="bg-slate-800 p-4 rounded-2xl">
                     <h3 class="text-white font-bold mb-3">Manage Departments</h3>
                     <div class="flex gap-2 mb-3">
@@ -965,7 +943,7 @@
         </main>
     </div>
 
-    <!-- Modals (same as before) -->
+    <!-- Modals -->
     <div id="modal-overlay">
         <div class="modal-content">
             <div id="modal-content-inner"></div>
@@ -1029,7 +1007,8 @@
             </div>
             <p class="text-xs text-slate-500 mb-3">Member since: <span id="member-since"></span></p>
             <button onclick="saveProfile()" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold mb-2">Save Changes</button>
-            <button onclick="deleteAccount()" class="w-full bg-red-500 text-white py-3 rounded-xl font-bold">Delete Account</button>
+            <button onclick="deleteAccount()" class="w-full bg-red-500 text-white py-3 rounded-xl font-bold mb-2">Delete Account</button>
+            <button onclick="handleLogout()" class="w-full bg-slate-600 text-white py-3 rounded-xl font-bold">Logout</button>
             <button onclick="closeProfileModal()" class="w-full mt-2 text-slate-500 py-2">Cancel</button>
         </div>
     </div>
@@ -1075,7 +1054,8 @@
         </div>
     </div>
 
-    <nav class="fixed bottom-0 inset-x-0 bg-white/90 backdrop-blur-xl border-t flex justify-around items-center py-4 px-2 z-50 rounded-t-[24px] shadow-[0_-10px_20px_rgba(0,0,0,0.02)]">
+    <!-- Bottom Navigation with Dashboard and Profile -->
+    <nav class="fixed bottom-0 inset-x-0 bg-white/90 backdrop-blur-xl border-t flex justify-around items-center py-3 px-2 z-50 rounded-t-[24px] shadow-[0_-10px_20px_rgba(0,0,0,0.02)]">
         <button onclick="switchTab('home')" class="nav-btn active flex flex-col items-center gap-1 text-emerald-600" data-tab="home">
             <i class="fa-solid fa-house-chimney text-lg"></i>
             <span class="text-[9px] font-black uppercase">Home</span>
@@ -1088,7 +1068,15 @@
             <i class="fa-solid fa-shop text-lg"></i>
             <span class="text-[9px] font-black uppercase">Trade</span>
         </button>
-        <!-- Admin Nav Button - Hidden by default, only shown when user is admin -->
+        <button id="dashboard-nav-btn" onclick="openDashboard()" class="nav-btn flex flex-col items-center gap-1 text-slate-400" data-tab="dashboard">
+            <i class="fa-solid fa-chart-line text-lg"></i>
+            <span class="text-[9px] font-black uppercase">Dashboard</span>
+        </button>
+        <button id="profile-nav-btn" onclick="openProfileModal()" class="nav-btn flex flex-col items-center gap-1 text-slate-400" data-tab="profile">
+            <i class="fa-solid fa-user-circle text-lg"></i>
+            <span class="text-[9px] font-black uppercase">Profile</span>
+        </button>
+        <!-- Admin Nav Button (hidden for regular users) -->
         <button id="admin-nav-btn" onclick="switchTab('admin')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" data-tab="admin" style="display: none;">
             <i class="fa-solid fa-user-ninja text-lg"></i>
             <span class="text-[9px] font-black uppercase">Admin</span>
@@ -1101,9 +1089,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
     
-    <!-- data.js first -->
     <script src="data.js"></script>
-    <!-- app.js as module -->
     <script type="module" src="app.js"></script>
     
     <script>
@@ -1155,7 +1141,6 @@
                 activeBtn.classList.remove('text-slate-400');
             }
             
-            // Load admin data if admin tab opened and user is admin
             if (tabId === 'admin' && currentUserData && currentUserData.isAdmin) {
                 loadAdminStats();
                 loadAllUsers();
@@ -1247,7 +1232,6 @@
                 return;
             }
             
-            // Format phone number
             let formattedPhone = phone.replace(/\D/g, '');
             if (formattedPhone.startsWith('0')) {
                 formattedPhone = formattedPhone.substring(1);
@@ -1314,25 +1298,21 @@
             // Update UI
             document.getElementById('user-name').innerText = currentUserData.name;
             document.getElementById('user-avatar').src = currentUserData.avatar;
+            document.getElementById('profile-avatar').src = currentUserData.avatar;
             
-            // Show admin trigger and admin nav button if admin
             const isAdmin = currentUserData.isAdmin;
             document.getElementById('admin-trigger').style.display = isAdmin ? 'block' : 'none';
-            const adminNavBtn = document.getElementById('admin-nav-btn');
-            if (adminNavBtn) adminNavBtn.style.display = isAdmin ? 'flex' : 'none';
+            document.getElementById('admin-nav-btn').style.display = isAdmin ? 'flex' : 'none';
             
-            // Dashboard button always visible for logged-in users
-            const dashboardBtn = document.getElementById('dashboard-btn');
-            if (dashboardBtn) dashboardBtn.style.display = 'block';
+            // Show bottom navigation buttons
+            document.getElementById('dashboard-nav-btn').style.display = 'flex';
+            document.getElementById('profile-nav-btn').style.display = 'flex';
             
-            // Hide login, show main app
             document.getElementById('login-container').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
             
-            // Load departments for filter
             loadDepartmentsForFilter();
             
-            // Load all app data
             if (typeof loadMarketDisplay === 'function') loadMarketDisplay('items');
             if (typeof loadAcademicMaterials === 'function') loadAcademicMaterials();
             if (typeof loadVerifiedGroups === 'function') loadVerifiedGroups();
@@ -1380,7 +1360,7 @@
         
         async function loadAllUsers() {
             const usersSnap = await db.collection('users').get();
-            let html = '<table class="user-table"><thead><tr><th>Name</th><th>Email</th><th>Dept</th><th>Posts</th><th>Actions</th> </thead><tbody>';
+            let html = '<table class="user-table"><thead> <th>Name</th><th>Email</th><th>Dept</th><th>Posts</th><th>Actions</th> </thead><tbody>';
             for (const doc of usersSnap.docs) {
                 const user = doc.data();
                 const postsSnap = await db.collection('Marketplace').where('userId', '==', doc.id).get();
@@ -1425,23 +1405,31 @@
         
         window.verifySeller = async function(userId) {
             await db.collection('users').doc(userId).update({ isVerified: true });
+            const posts = await db.collection('Marketplace').where('userId', '==', userId).get();
+            posts.forEach(doc => doc.ref.update({ isVerified: true }));
             loadAllUsers();
-            loadAdminStats();
+            loadMarketDisplay('items');
         };
         
         window.unverifySeller = async function(userId) {
             await db.collection('users').doc(userId).update({ isVerified: false });
+            const posts = await db.collection('Marketplace').where('userId', '==', userId).get();
+            posts.forEach(doc => doc.ref.update({ isVerified: false }));
             loadAllUsers();
-            loadAdminStats();
+            loadMarketDisplay('items');
         };
         
         window.deleteUser = async function(userId) {
             if (confirm('Delete this user? All their posts will be deleted too.')) {
                 const posts = await db.collection('Marketplace').where('userId', '==', userId).get();
                 posts.forEach(doc => doc.ref.delete());
+                const academics = await db.collection('Academics').where('userId', '==', userId).get();
+                academics.forEach(doc => doc.ref.delete());
                 await db.collection('users').doc(userId).delete();
                 loadAllUsers();
                 loadAdminStats();
+                if (typeof loadMarketDisplay === 'function') loadMarketDisplay('items');
+                if (typeof loadAcademicMaterials === 'function') loadAcademicMaterials();
             }
         };
         
@@ -1614,7 +1602,6 @@
             document.getElementById('notification-modal').style.display = 'flex';
         };
         
-        // Escape HTML
         function escapeHtml(str) {
             if(!str) return '';
             return str.replace(/[&<>]/g, function(m) {
