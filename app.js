@@ -86,7 +86,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // ============================
-// AUTH STATE LISTENER
+// AUTH STATE LISTENER - FIXED NO REFRESH LOOP
 // ============================
 auth.onAuthStateChanged(async (user) => {
     if (user) {
@@ -117,15 +117,19 @@ auth.onAuthStateChanged(async (user) => {
         document.getElementById('user-name').innerText = currentUserData.name;
         document.getElementById('user-avatar').src = currentUserData.avatar;
         
-        // Show/hide admin elements
+        // Show admin elements if admin
         const isAdmin = currentUserData.isAdmin;
         document.getElementById('admin-trigger').style.display = isAdmin ? 'block' : 'none';
         const adminNavBtn = document.getElementById('admin-nav-btn');
         if (adminNavBtn) adminNavBtn.style.display = isAdmin ? 'flex' : 'none';
         
-        // Dashboard button always visible for logged-in users
+        // Dashboard button always visible
         const dashboardBtn = document.getElementById('dashboard-btn');
         if (dashboardBtn) dashboardBtn.style.display = 'block';
+        
+        // Hide login, show main app
+        document.getElementById('login-container').style.display = 'none';
+        document.getElementById('main-app').style.display = 'block';
         
         // Load departments for filter
         loadDepartmentsForFilter();
@@ -139,8 +143,11 @@ auth.onAuthStateChanged(async (user) => {
         // Check user posts for dashboard content
         checkUserPosts();
     } else {
-        // Not logged in - redirect to login page or show login modal
-        window.location.href = 'index.html';
+        // Not logged in - stay on login page, NO REFRESH
+        // Only show login, hide main app
+        document.getElementById('login-container').style.display = 'flex';
+        document.getElementById('main-app').style.display = 'none';
+        console.log("User not logged in");
     }
 });
 
@@ -148,7 +155,7 @@ auth.onAuthStateChanged(async (user) => {
 async function checkUserPosts() {
     if (!currentUser) return;
     const snap = await db.collection('Marketplace').where('userId', '==', currentUser.uid).limit(1).get();
-    // Dashboard button is already visible, just for internal use
+    // Dashboard button is already visible
 }
 
 // ============================
@@ -179,7 +186,7 @@ window.switchTab = function(tabId) {
 };
 
 // ============================
-// ADMIN TRIGGER (for existing admin panel)
+// ADMIN TRIGGER
 // ============================
 document.getElementById('admin-trigger').onclick = () => {
     if (currentUserData && currentUserData.isAdmin) {
@@ -962,7 +969,7 @@ async function loadAdminStats() {
 
 async function loadAllUsers() {
     const usersSnap = await db.collection('users').get();
-    let html = '<table class="user-table"><thead><tr><th>Name</th><th>Email</th><th>Dept</th><th>Posts</th><th>Actions</th></tr></thead><tbody>';
+    let html = '<table class="user-table"><thead> <th>Name</th><th>Email</th><th>Dept</th><th>Posts</th><th>Actions</th> </thead><tbody>';
     for (const doc of usersSnap.docs) {
         const user = doc.data();
         const postsSnap = await db.collection('Marketplace').where('userId', '==', doc.id).get();
