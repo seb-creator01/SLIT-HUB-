@@ -72,6 +72,186 @@ window.showToast = function(message, isError = false) {
 };
 
 // ============================
+// LOGIN FUNCTION
+// ============================
+window.handleLogin = async function() {
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    const loginBtn = document.getElementById('login-btn');
+    const errorDiv = document.getElementById('login-error');
+    
+    if (!email || !password) {
+        errorDiv.textContent = 'Please fill in all fields';
+        errorDiv.style.display = 'block';
+        setTimeout(() => errorDiv.style.display = 'none', 3000);
+        return;
+    }
+    
+    // Show loading spinner
+    const originalText = loginBtn.innerHTML;
+    loginBtn.innerHTML = '<span class="spinner"></span> Logging in...';
+    loginBtn.disabled = true;
+    
+    try {
+        const result = await auth.signInWithEmailAndPassword(email, password);
+        if (!result.user.emailVerified) {
+            await auth.signOut();
+            errorDiv.textContent = 'Please verify your email first. Check your inbox.';
+            errorDiv.style.display = 'block';
+            loginBtn.innerHTML = originalText;
+            loginBtn.disabled = false;
+            setTimeout(() => errorDiv.style.display = 'none', 3000);
+            return;
+        }
+        // User will be handled by onAuthStateChanged
+    } catch (error) {
+        errorDiv.textContent = error.message;
+        errorDiv.style.display = 'block';
+        loginBtn.innerHTML = originalText;
+        loginBtn.disabled = false;
+        setTimeout(() => errorDiv.style.display = 'none', 3000);
+    }
+};
+
+// ============================
+// SIGNUP FUNCTION
+// ============================
+window.handleSignup = async function() {
+    const name = document.getElementById('signup-name').value;
+    const email = document.getElementById('signup-email').value;
+    const password = document.getElementById('signup-password').value;
+    let phone = document.getElementById('signup-phone').value;
+    const department = document.getElementById('signup-department').value;
+    const termsChecked = document.getElementById('terms-checkbox').checked;
+    const signupBtn = document.getElementById('signup-btn');
+    const errorDiv = document.getElementById('login-error');
+    const successDiv = document.getElementById('login-success');
+    
+    if (!name || !email || !password) {
+        errorDiv.textContent = 'Please fill in all required fields';
+        errorDiv.style.display = 'block';
+        setTimeout(() => errorDiv.style.display = 'none', 3000);
+        return;
+    }
+    
+    if (!termsChecked) {
+        errorDiv.textContent = 'You must agree to the Terms & Conditions';
+        errorDiv.style.display = 'block';
+        setTimeout(() => errorDiv.style.display = 'none', 3000);
+        return;
+    }
+    
+    if (password.length < 6) {
+        errorDiv.textContent = 'Password must be at least 6 characters';
+        errorDiv.style.display = 'block';
+        setTimeout(() => errorDiv.style.display = 'none', 3000);
+        return;
+    }
+    
+    // Validate phone (10 digits)
+    let formattedPhone = phone.replace(/\D/g, '');
+    if (formattedPhone.startsWith('0')) {
+        formattedPhone = formattedPhone.substring(1);
+    }
+    if (formattedPhone.length !== 10 && formattedPhone.length > 0) {
+        errorDiv.textContent = 'Phone number must be 10 digits (e.g., 8012345678)';
+        errorDiv.style.display = 'block';
+        setTimeout(() => errorDiv.style.display = 'none', 3000);
+        return;
+    }
+    
+    // Show loading spinner
+    const originalText = signupBtn.innerHTML;
+    signupBtn.innerHTML = '<span class="spinner"></span> Creating account...';
+    signupBtn.disabled = true;
+    
+    try {
+        const result = await auth.createUserWithEmailAndPassword(email, password);
+        await result.user.sendEmailVerification();
+        
+        await db.collection('users').doc(result.user.uid).set({
+            name: name,
+            email: email,
+            phone: formattedPhone,
+            department: department || 'Not specified',
+            course: '',
+            bio: '',
+            interests: [],
+            clubs: [],
+            year: '300',
+            avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=10b981&color=fff`,
+            createdAt: new Date().toISOString(),
+            isAdmin: email === 'precioussebastian70@gmail.com',
+            isVerified: false,
+            isBanned: false
+        });
+        
+        successDiv.textContent = 'Account created! Please verify your email before logging in.';
+        successDiv.style.display = 'block';
+        await auth.signOut();
+        
+        // Clear form
+        document.getElementById('signup-name').value = '';
+        document.getElementById('signup-email').value = '';
+        document.getElementById('signup-password').value = '';
+        document.getElementById('signup-phone').value = '';
+        document.getElementById('signup-department').value = '';
+        document.getElementById('terms-checkbox').checked = false;
+        
+        signupBtn.innerHTML = originalText;
+        signupBtn.disabled = false;
+        
+        // Switch to login tab after 2 seconds
+        setTimeout(() => {
+            document.getElementById('login-tab').click();
+            successDiv.style.display = 'none';
+            document.getElementById('login-email').value = email;
+        }, 2000);
+        
+    } catch (error) {
+        errorDiv.textContent = error.message;
+        errorDiv.style.display = 'block';
+        signupBtn.innerHTML = originalText;
+        signupBtn.disabled = false;
+        setTimeout(() => errorDiv.style.display = 'none', 3000);
+    }
+};
+
+// ============================
+// GOOGLE LOGIN
+// ============================
+window.handleGoogleLogin = async function() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    const errorDiv = document.getElementById('login-error');
+    
+    try {
+        const result = await auth.signInWithPopup(provider);
+        // User will be handled by onAuthStateChanged
+    } catch (error) {
+        errorDiv.textContent = error.message;
+        errorDiv.style.display = 'block';
+        setTimeout(() => errorDiv.style.display = 'none', 3000);
+    }
+};
+
+// ============================
+// LOGOUT FUNCTION
+// ============================
+window.handleLogout = async function() {
+    try {
+        await auth.signOut();
+        document.getElementById('login-container').style.display = 'flex';
+        document.getElementById('main-app').style.display = 'none';
+        document.getElementById('profile-page').style.display = 'none';
+        currentUser = null;
+        currentUserData = null;
+        showToast('Logged out successfully');
+    } catch (error) {
+        showToast('Error logging out: ' + error.message, true);
+    }
+};
+
+// ============================
 // EDIT PROFILE FUNCTIONS
 // ============================
 
@@ -111,13 +291,13 @@ window.saveProfile = async function() {
         // Get interests and clubs from the DOM
         const interests = [];
         document.querySelectorAll('#interests-container .tag').forEach(tag => {
-            const text = tag.childNodes[0].textContent.trim();
+            const text = tag.childNodes[0]?.textContent.trim();
             if (text) interests.push(text);
         });
         
         const clubs = [];
         document.querySelectorAll('#clubs-container .tag').forEach(tag => {
-            const text = tag.childNodes[0].textContent.trim();
+            const text = tag.childNodes[0]?.textContent.trim();
             if (text) clubs.push(text);
         });
         
@@ -355,19 +535,25 @@ function loadProfileIntoForm() {
     const firstName = nameParts[0] || '';
     const lastName = nameParts.slice(1).join(' ') || '';
     
-    document.getElementById('profile-first-name').value = firstName;
-    document.getElementById('profile-last-name').value = lastName;
-    document.getElementById('profile-email').value = currentUserData.email || '';
-    document.getElementById('profile-phone').value = currentUserData.phone || '';
-    document.getElementById('profile-year').value = currentUserData.year || '300';
-    document.getElementById('profile-department').value = currentUserData.department || '';
-    document.getElementById('profile-course').value = currentUserData.course || '';
-    document.getElementById('profile-bio').value = currentUserData.bio || '';
-    
-    // Update bio character counter
-    const bioLength = (currentUserData.bio || '').length;
+    const firstNameInput = document.getElementById('profile-first-name');
+    const lastNameInput = document.getElementById('profile-last-name');
+    const emailInput = document.getElementById('profile-email');
+    const phoneInput = document.getElementById('profile-phone');
+    const yearSelect = document.getElementById('profile-year');
+    const deptInput = document.getElementById('profile-department');
+    const courseInput = document.getElementById('profile-course');
+    const bioTextarea = document.getElementById('profile-bio');
     const charCountSpan = document.getElementById('bio-char-count');
-    if (charCountSpan) charCountSpan.innerText = bioLength;
+    
+    if (firstNameInput) firstNameInput.value = firstName;
+    if (lastNameInput) lastNameInput.value = lastName;
+    if (emailInput) emailInput.value = currentUserData.email || '';
+    if (phoneInput) phoneInput.value = currentUserData.phone || '';
+    if (yearSelect) yearSelect.value = currentUserData.year || '300';
+    if (deptInput) deptInput.value = currentUserData.department || '';
+    if (courseInput) courseInput.value = currentUserData.course || '';
+    if (bioTextarea) bioTextarea.value = currentUserData.bio || '';
+    if (charCountSpan) charCountSpan.innerText = (currentUserData.bio || '').length;
     
     // Load interests
     const interests = currentUserData.interests || [];
@@ -1185,7 +1371,7 @@ async function loadAdminStats() {
 
 async function loadAllUsers() {
     const usersSnap = await db.collection('users').get();
-    let html = '<table class="user-table"><thead><tr><th>Name</th><th>Email</th><th>Dept</th><th>Posts</th><th>Actions</th> </thead><tbody>';
+    let html = '<table class="user-table"><thead> <th>Name</th><th>Email</th><th>Dept</th><th>Posts</th><th>Actions</th> </thead><tbody>';
     for (const doc of usersSnap.docs) {
         const user = doc.data();
         const postsSnap = await db.collection('Marketplace').where('userId', '==', doc.id).get();
@@ -1276,7 +1462,7 @@ window.filterAcademicByDept = function(dept) {
     document.querySelectorAll('#academic-dept-filter button').forEach(btn => {
         btn.classList.remove('active');
     });
-    event.target.classList.add('active');
+    if (event && event.target) event.target.classList.add('active');
     loadAcademicMaterials('all', dept);
 };
 
@@ -1392,20 +1578,29 @@ auth.onAuthStateChanged(async (user) => {
         }
         
         // Update header
-        document.getElementById('user-name').innerText = currentUserData.name;
-        document.getElementById('user-avatar').src = currentUserData.avatar;
+        const userNameSpan = document.getElementById('user-name');
+        const userAvatarImg = document.getElementById('user-avatar');
+        if (userNameSpan) userNameSpan.innerText = currentUserData.name;
+        if (userAvatarImg) userAvatarImg.src = currentUserData.avatar;
         
         // Load profile data into edit form
         loadProfileIntoForm();
         
         const isAdmin = currentUserData.isAdmin;
-        document.getElementById('admin-trigger').style.display = isAdmin ? 'block' : 'none';
-        document.getElementById('admin-nav-btn').style.display = isAdmin ? 'flex' : 'none';
-        document.getElementById('dashboard-nav-btn').style.display = 'flex';
-        document.getElementById('profile-nav-btn').style.display = 'flex';
+        const adminTrigger = document.getElementById('admin-trigger');
+        const adminNavBtn = document.getElementById('admin-nav-btn');
+        const dashboardNavBtn = document.getElementById('dashboard-nav-btn');
+        const profileNavBtn = document.getElementById('profile-nav-btn');
         
-        document.getElementById('login-container').style.display = 'none';
-        document.getElementById('main-app').style.display = 'block';
+        if (adminTrigger) adminTrigger.style.display = isAdmin ? 'block' : 'none';
+        if (adminNavBtn) adminNavBtn.style.display = isAdmin ? 'flex' : 'none';
+        if (dashboardNavBtn) dashboardNavBtn.style.display = 'flex';
+        if (profileNavBtn) profileNavBtn.style.display = 'flex';
+        
+        const loginContainer = document.getElementById('login-container');
+        const mainApp = document.getElementById('main-app');
+        if (loginContainer) loginContainer.style.display = 'none';
+        if (mainApp) mainApp.style.display = 'block';
         
         loadDepartmentsForFilter();
         loadMarketDisplay('items');
@@ -1414,10 +1609,14 @@ auth.onAuthStateChanged(async (user) => {
         loadBroadcastMessage();
         
         // Setup button event listeners
-        document.getElementById('btn-post-ad')?.addEventListener('click', openMarketModal);
-        document.getElementById('btn-new-group')?.addEventListener('click', openGroupModal);
+        const postAdBtn = document.getElementById('btn-post-ad');
+        const newGroupBtn = document.getElementById('btn-new-group');
+        if (postAdBtn) postAdBtn.addEventListener('click', openMarketModal);
+        if (newGroupBtn) newGroupBtn.addEventListener('click', openGroupModal);
     } else {
-        document.getElementById('login-container').style.display = 'flex';
-        document.getElementById('main-app').style.display = 'none';
+        const loginContainer = document.getElementById('login-container');
+        const mainApp = document.getElementById('main-app');
+        if (loginContainer) loginContainer.style.display = 'flex';
+        if (mainApp) mainApp.style.display = 'none';
     }
 });
