@@ -273,6 +273,12 @@
             box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
         }
         
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
         .btn-google {
             width: 100%;
             padding: 12px;
@@ -701,7 +707,7 @@
             border-color: #4b5563;
         }
         
-        /* Full Page Profile */
+        /* Full Page Profile - NEW DESIGN */
         #profile-page {
             position: fixed;
             top: 0;
@@ -718,180 +724,436 @@
             background: #1f2937;
         }
         
-        .profile-header {
-            background: linear-gradient(135deg, #10b981, #059669);
-            padding: 30px 20px 50px;
-            text-align: center;
+        /* Cover Photo */
+        .profile-cover {
+            height: 140px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             position: relative;
+            background-size: cover;
+            background-position: center;
         }
         
-        .profile-back-btn {
+        .cover-edit-btn {
             position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(255,255,255,0.2);
+            bottom: 12px;
+            right: 16px;
+            background: rgba(255,255,255,0.9);
             border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 18px;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 600;
             cursor: pointer;
+            color: #374151;
+        }
+        
+        /* Profile Picture */
+        .profile-avatar-wrapper {
+            text-align: center;
+            margin-top: -50px;
+            position: relative;
+            z-index: 2;
         }
         
         .profile-avatar-large {
             width: 100px;
             height: 100px;
             border-radius: 50%;
-            object-fit: cover;
             border: 4px solid white;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            margin-bottom: 12px;
-        }
-        
-        .profile-change-photo {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            padding: 6px 16px;
-            border-radius: 30px;
+            object-fit: cover;
+            background: linear-gradient(135deg, #10b981, #059669);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            font-size: 40px;
             color: white;
-            font-size: 12px;
-            font-weight: 500;
             cursor: pointer;
         }
         
-        .profile-section {
-            padding: 20px;
-            margin-top: -20px;
-            background: white;
-            border-radius: 30px 30px 0 0;
+        .change-photo-text {
+            font-size: 11px;
+            color: #10b981;
+            margin-top: 8px;
+            display: inline-block;
+            cursor: pointer;
+            font-weight: 500;
         }
         
-        body.dark-mode .profile-section {
+        /* Profile Sections */
+        .profile-section-card {
+            background: white;
+            border-radius: 24px;
+            margin: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        body.dark-mode .profile-section-card {
             background: #1f2937;
         }
         
-        .profile-field {
-            margin-bottom: 20px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        
-        body.dark-mode .profile-field {
-            border-color: #4b5563;
-        }
-        
-        .profile-field-label {
-            font-size: 12px;
-            font-weight: 600;
-            color: #6b7280;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 6px;
-        }
-        
-        body.dark-mode .profile-field-label {
-            color: #9ca3af;
-        }
-        
-        .profile-field-value {
+        .profile-section-title {
             font-size: 16px;
-            font-weight: 500;
-            color: #111827;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-left: 3px solid #10b981;
+            padding-left: 12px;
         }
         
-        body.dark-mode .profile-field-value {
+        body.dark-mode .profile-section-title {
             color: #f3f4f6;
         }
         
-        .profile-field-input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            font-size: 15px;
-            background: #f9fafb;
+        .form-group {
+            margin-bottom: 16px;
         }
         
-        body.dark-mode .profile-field-input {
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: #6b7280;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        body.dark-mode .form-group label {
+            color: #9ca3af;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 16px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.2s;
+            background: #fefefe;
+        }
+        
+        body.dark-mode .form-group input, 
+        body.dark-mode .form-group select, 
+        body.dark-mode .form-group textarea {
             background: #374151;
             border-color: #4b5563;
             color: #f3f4f6;
         }
         
-        .profile-edit-btn {
-            background: #10b981;
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+        
+        .readonly-field {
+            background: #f3f4f6 !important;
+            color: #9ca3af !important;
+            cursor: not-allowed;
+        }
+        
+        .helper-text {
+            font-size: 10px;
+            color: #9ca3af;
+            margin-top: 4px;
+        }
+        
+        /* Phone Input with Country Code */
+        .phone-input-group {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .country-code-badge {
+            background: #f3f4f6;
+            padding: 12px 16px;
+            border-radius: 16px;
+            font-weight: 600;
+            border: 1.5px solid #e5e7eb;
+            white-space: nowrap;
+        }
+        
+        body.dark-mode .country-code-badge {
+            background: #374151;
+            border-color: #4b5563;
+            color: #f3f4f6;
+        }
+        
+        .phone-input-group input {
+            flex: 1;
+        }
+        
+        /* Tags Container */
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .tag {
+            background: #f3f4f6;
+            padding: 6px 12px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #1f2937;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        body.dark-mode .tag {
+            background: #374151;
+            color: #f3f4f6;
+        }
+        
+        .tag-remove {
+            cursor: pointer;
+            color: #9ca3af;
+            font-size: 12px;
+        }
+        
+        .tag-remove:hover {
+            color: #ef4444;
+        }
+        
+        .add-tag-input {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .add-tag-input input {
+            flex: 1;
+            padding: 10px 12px;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 30px;
+            font-size: 13px;
+        }
+        
+        .add-tag-btn {
+            background: #f3f4f6;
+            border: 1.5px solid #e5e7eb;
+            padding: 0 16px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        body.dark-mode .add-tag-btn {
+            background: #374151;
+            border-color: #4b5563;
+            color: #f3f4f6;
+        }
+        
+        /* Character Counter */
+        .char-counter {
+            text-align: right;
+            font-size: 10px;
+            color: #9ca3af;
+            margin-top: 4px;
+        }
+        
+        /* Password Field */
+        .password-field {
+            position: relative;
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #9ca3af;
+        }
+        
+        /* Action Buttons */
+        .profile-action-buttons {
+            display: flex;
+            gap: 12px;
+            margin: 20px 16px;
+        }
+        
+        .btn-save {
+            flex: 1;
+            background: linear-gradient(135deg, #10b981, #059669);
             color: white;
             border: none;
             padding: 14px;
             border-radius: 40px;
-            font-weight: bold;
-            width: 100%;
-            margin-bottom: 12px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-save:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .btn-cancel {
+            flex: 1;
+            background: white;
+            border: 1.5px solid #e5e7eb;
+            padding: 14px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 14px;
             cursor: pointer;
         }
         
-        .profile-logout-btn {
+        body.dark-mode .btn-cancel {
+            background: #1f2937;
+            border-color: #4b5563;
+            color: #f3f4f6;
+        }
+        
+        /* Danger Buttons */
+        .profile-danger-buttons {
+            display: flex;
+            gap: 12px;
+            margin: 0 16px 20px;
+        }
+        
+        .btn-logout {
+            flex: 1;
             background: #ef4444;
-            color: white;
-            border: none;
-            padding: 14px;
-            border-radius: 40px;
-            font-weight: bold;
-            width: 100%;
-            margin-bottom: 12px;
-            cursor: pointer;
-        }
-        
-        .profile-delete-btn {
-            background: #dc2626;
-            color: white;
-            border: none;
-            padding: 14px;
-            border-radius: 40px;
-            font-weight: bold;
-            width: 100%;
-            margin-bottom: 12px;
-            cursor: pointer;
-        }
-        
-        .profile-save-btn {
-            background: #10b981;
-            color: white;
-            border: none;
-            padding: 14px;
-            border-radius: 40px;
-            font-weight: bold;
-            width: 100%;
-            margin-bottom: 12px;
-            cursor: pointer;
-            display: none;
-        }
-        
-        .profile-cancel-btn {
-            background: #6b7280;
             color: white;
             border: none;
             padding: 12px;
             border-radius: 40px;
-            font-weight: bold;
-            width: 100%;
-            cursor: pointer;
-            display: none;
-        }
-        
-        .profile-info-text {
+            font-weight: 600;
             font-size: 13px;
-            color: #6b7280;
-            margin-top: 20px;
-            text-align: center;
+            cursor: pointer;
         }
         
-        body.dark-mode .profile-info-text {
-            color: #9ca3af;
+        .btn-delete {
+            flex: 1;
+            background: white;
+            border: 1.5px solid #ef4444;
+            color: #ef4444;
+            padding: 12px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        
+        body.dark-mode .btn-delete {
+            background: #1f2937;
+        }
+        
+        /* Spinner Animation */
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.6s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .btn-loading {
+            opacity: 0.7;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        
+        /* Toast Notification */
+        #toast-message {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #10b981;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            white-space: nowrap;
+        }
+        
+        body.dark-mode #toast-message {
+            background: #059669;
+        }
+        
+        /* Content Loading Spinner */
+        .content-spinner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+        
+        .content-spinner .spinner-large {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e5e7eb;
+            border-radius: 50%;
+            border-top-color: #10b981;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        /* Responsive */
+        @media (max-width: 640px) {
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .profile-action-buttons {
+                flex-direction: column;
+            }
+            
+            .profile-danger-buttons {
+                flex-direction: column;
+            }
+            
+            .phone-input-group {
+                flex-direction: column;
+            }
+            
+            .country-code-badge {
+                text-align: center;
+            }
+            
+            #toast-message {
+                white-space: normal;
+                text-align: center;
+                max-width: 90%;
+            }
         }
     </style>
 </head>
@@ -927,7 +1189,7 @@
                         </button>
                     </div>
                 </div>
-                <button onclick="handleLogin()" class="btn-primary">Login to SLIT-HUB</button>
+                <button id="login-btn" onclick="handleLogin()" class="btn-primary">Login to SLIT-HUB</button>
                 <div class="divider"><span>or</span></div>
                 <button onclick="handleGoogleLogin()" class="btn-google">
                     <i class="fa-brands fa-google"></i> Continue with Google
@@ -958,8 +1220,11 @@
                 </div>
                 <div class="input-group">
                     <label>Phone Number</label>
-                    <input type="tel" id="signup-phone" placeholder="8051234567" maxlength="10">
-                    <p class="text-xs text-slate-400 mt-1">Enter 10 digits (e.g., 8051234567)</p>
+                    <div class="phone-input-group">
+                        <div class="country-code-badge">🇳🇬 +234</div>
+                        <input type="tel" id="signup-phone" placeholder="8012345678" maxlength="10">
+                    </div>
+                    <div class="helper-text">Enter 10 digits (e.g., 8012345678)</div>
                 </div>
                 <div class="input-group">
                     <label>Department</label>
@@ -972,7 +1237,7 @@
                         <a href="#" onclick="showPrivacyModal(); return false;">Privacy Policy</a>
                     </label>
                 </div>
-                <button onclick="handleSignup()" class="btn-primary">Create Account</button>
+                <button id="signup-btn" onclick="handleSignup()" class="btn-primary">Create Account</button>
                 <div class="divider"><span>or</span></div>
                 <button onclick="handleGoogleLogin()" class="btn-google">
                     <i class="fa-brands fa-google"></i> Sign up with Google
@@ -1049,14 +1314,24 @@
                     <button onclick="filterByLevel('500')" data-level="500" class="lvl-btn">500L</button>
                 </div>
 
-                <div id="academic-list" class="space-y-3 min-h-[100px]"></div>
+                <div id="academic-list" class="space-y-3 min-h-[100px]">
+                    <div class="content-spinner">
+                        <div class="spinner-large"></div>
+                        <p class="text-sm text-slate-500 mt-3">Loading materials...</p>
+                    </div>
+                </div>
 
                 <hr class="border-slate-100">
 
                 <div class="flex justify-between items-center">
                     <p class="text-[10px] font-black text-slate-400 uppercase">Study WhatsApp Groups</p>
                 </div>
-                <div id="groups-list" class="grid gap-3"></div>
+                <div id="groups-list" class="grid gap-3">
+                    <div class="content-spinner">
+                        <div class="spinner-large"></div>
+                        <p class="text-sm text-slate-500 mt-3">Loading groups...</p>
+                    </div>
+                </div>
             </section>
 
             <section id="tab-marketplace" class="tab-content hidden animate-fade-in space-y-4">
@@ -1097,7 +1372,12 @@
                     <button onclick="loadMarketDisplay('services')" data-filter="services" class="m-filter flex-1 py-2 text-[10px] font-black rounded-xl">SERVICES</button>
                     <button onclick="loadMarketDisplay('requests')" data-filter="requests" class="m-filter flex-1 py-2 text-[10px] font-black rounded-xl">REQUESTS</button>
                 </div>
-                <div id="market-grid" class="grid grid-cols-2 gap-3 pb-10"></div>
+                <div id="market-grid" class="grid grid-cols-2 gap-3 pb-10">
+                    <div class="content-spinner col-span-2">
+                        <div class="spinner-large"></div>
+                        <p class="text-sm text-slate-500 mt-3">Loading marketplace...</p>
+                    </div>
+                </div>
             </section>
 
             <section id="tab-admin" class="tab-content hidden animate-fade-in space-y-4">
@@ -1130,75 +1410,184 @@
         </main>
     </div>
 
-    <!-- Full Page Profile -->
+    <!-- Full Page Profile - NEW DESIGN -->
     <div id="profile-page">
-        <div class="profile-header">
-            <button class="profile-back-btn" onclick="closeProfilePage()">
-                <i class="fa-solid fa-arrow-left"></i>
+        <!-- Cover Photo -->
+        <div class="profile-cover" id="profile-cover">
+            <button class="cover-edit-btn" onclick="document.getElementById('cover-input').click()">
+                <i class="fa-solid fa-camera"></i> Change Cover
             </button>
-            <img id="profile-page-avatar" class="profile-avatar-large" src="" alt="avatar">
+        </div>
+        <input type="file" id="cover-input" accept="image/*" style="display: none;">
+        
+        <!-- Profile Picture -->
+        <div class="profile-avatar-wrapper">
+            <div class="profile-avatar-large" id="profile-page-avatar" onclick="document.getElementById('profile-pic-input').click()">
+                <i class="fa-solid fa-user-graduate"></i>
+            </div>
             <div>
-                <button class="profile-change-photo" onclick="uploadProfilePicture()">
+                <span class="change-photo-text" onclick="document.getElementById('profile-pic-input').click()">
                     <i class="fa-solid fa-camera"></i> Change Photo
-                </button>
-                <input type="file" id="profile-picture-input" accept="image/*" style="display: none;" onchange="updateProfilePicture()">
+                </span>
+            </div>
+        </div>
+        <input type="file" id="profile-pic-input" accept="image/*" style="display: none;">
+        
+        <!-- Basic Information Section -->
+        <div class="profile-section-card">
+            <div class="profile-section-title">
+                <i class="fa-solid fa-user text-emerald-500"></i> Basic Information
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>First Name</label>
+                    <input type="text" id="profile-first-name" placeholder="First name">
+                </div>
+                <div class="form-group">
+                    <label>Last Name</label>
+                    <input type="text" id="profile-last-name" placeholder="Last name">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" id="profile-email" class="readonly-field" readonly>
+                <div class="helper-text">🔒 Email cannot be changed</div>
+            </div>
+            
+            <div class="form-group">
+                <label>Phone Number</label>
+                <div class="phone-input-group">
+                    <div class="country-code-badge">🇳🇬 +234</div>
+                    <input type="tel" id="profile-phone" placeholder="8012345678" maxlength="10">
+                </div>
+                <div class="helper-text">Enter 10 digits after +234 (e.g., 8012345678)</div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Year / Level</label>
+                    <select id="profile-year">
+                        <option value="100">100 Level (Freshman)</option>
+                        <option value="200">200 Level (Sophomore)</option>
+                        <option value="300">300 Level (Junior)</option>
+                        <option value="400">400 Level (Senior)</option>
+                        <option value="500">500 Level (Final Year)</option>
+                        <option value="postgrad">Postgraduate</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Department</label>
+                    <input type="text" id="profile-department" placeholder="e.g., Computer Science">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Course of Study (Optional)</label>
+                <input type="text" id="profile-course" placeholder="e.g., Software Engineering">
+                <div class="helper-text">Your specific program or major</div>
             </div>
         </div>
         
-        <div class="profile-section">
-            <div id="profile-view-mode">
-                <div class="profile-field">
-                    <div class="profile-field-label">Full Name</div>
-                    <div class="profile-field-value" id="profile-view-name">Loading...</div>
-                </div>
-                <div class="profile-field">
-                    <div class="profile-field-label">Phone Number</div>
-                    <div class="profile-field-value" id="profile-view-phone">Loading...</div>
-                </div>
-                <div class="profile-field">
-                    <div class="profile-field-label">Department</div>
-                    <div class="profile-field-value" id="profile-view-dept">Loading...</div>
-                </div>
-                <div class="profile-field">
-                    <div class="profile-field-label">Member Since</div>
-                    <div class="profile-field-value" id="profile-view-since">Loading...</div>
-                </div>
-                <button class="profile-edit-btn" onclick="enableProfileEdit()">
-                    <i class="fa-solid fa-pen"></i> Edit Profile
-                </button>
+        <!-- About Me Section -->
+        <div class="profile-section-card">
+            <div class="profile-section-title">
+                <i class="fa-regular fa-message text-emerald-500"></i> About Me
             </div>
             
-            <div id="profile-edit-mode" style="display: none;">
-                <div class="profile-field">
-                    <div class="profile-field-label">Full Name</div>
-                    <input type="text" id="profile-edit-name" class="profile-field-input">
-                </div>
-                <div class="profile-field">
-                    <div class="profile-field-label">Phone Number</div>
-                    <input type="tel" id="profile-edit-phone" class="profile-field-input" maxlength="10">
-                </div>
-                <div class="profile-field">
-                    <div class="profile-field-label">Department</div>
-                    <input type="text" id="profile-edit-dept" class="profile-field-input">
-                </div>
-                <button class="profile-save-btn" onclick="saveProfileFromPage()">
-                    <i class="fa-solid fa-check"></i> Save Changes
-                </button>
-                <button class="profile-cancel-btn" onclick="cancelProfileEdit()">
-                    Cancel
-                </button>
+            <div class="form-group">
+                <label>Bio</label>
+                <textarea id="profile-bio" rows="3" placeholder="Tell other students about yourself..." maxlength="150"></textarea>
+                <div class="char-counter"><span id="bio-char-count">0</span> / 150 characters</div>
+            </div>
+        </div>
+        
+        <!-- Interests Section -->
+        <div class="profile-section-card">
+            <div class="profile-section-title">
+                <i class="fa-regular fa-heart text-emerald-500"></i> Interests & Hobbies
             </div>
             
-            <button class="profile-logout-btn" onclick="handleLogout()">
+            <div id="interests-container" class="tags-container"></div>
+            <div class="add-tag-input">
+                <input type="text" id="new-interest" placeholder="Add an interest...">
+                <button class="add-tag-btn" onclick="addInterest()">Add</button>
+            </div>
+            <div class="helper-text">Add your interests to connect with like-minded students</div>
+        </div>
+        
+        <!-- Clubs Section -->
+        <div class="profile-section-card">
+            <div class="profile-section-title">
+                <i class="fa-solid fa-users text-emerald-500"></i> Clubs & Organizations
+            </div>
+            
+            <div id="clubs-container" class="tags-container"></div>
+            <div class="add-tag-input">
+                <input type="text" id="new-club" placeholder="Add a club or organization...">
+                <button class="add-tag-btn" onclick="addClub()">Add</button>
+            </div>
+        </div>
+        
+        <!-- Change Password Section -->
+        <div class="profile-section-card">
+            <div class="profile-section-title">
+                <i class="fa-solid fa-lock text-emerald-500"></i> Change Password
+            </div>
+            
+            <div class="form-group">
+                <label>Current Password</label>
+                <div class="password-field">
+                    <input type="password" id="current-password" placeholder="Enter current password">
+                    <button class="password-toggle" onclick="togglePasswordField('current-password')">
+                        <i class="fa-regular fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>New Password</label>
+                <div class="password-field">
+                    <input type="password" id="new-password" placeholder="Enter new password (min. 6 characters)">
+                    <button class="password-toggle" onclick="togglePasswordField('new-password')">
+                        <i class="fa-regular fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Confirm New Password</label>
+                <div class="password-field">
+                    <input type="password" id="confirm-password" placeholder="Confirm new password">
+                    <button class="password-toggle" onclick="togglePasswordField('confirm-password')">
+                        <i class="fa-regular fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <button id="update-password-btn" class="add-tag-btn" style="width: 100%; padding: 12px; margin-top: 8px;" onclick="updatePassword()">
+                Update Password
+            </button>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="profile-action-buttons">
+            <button id="save-profile-btn" class="btn-save" onclick="saveProfile()">
+                <span class="btn-text">Save All Changes</span>
+                <span class="btn-spinner" style="display: none;"><div class="spinner"></div></span>
+            </button>
+            <button class="btn-cancel" onclick="closeProfilePage()">Cancel</button>
+        </div>
+        
+        <!-- Danger Buttons -->
+        <div class="profile-danger-buttons">
+            <button class="btn-logout" onclick="handleLogout()">
                 <i class="fa-solid fa-sign-out-alt"></i> Logout
             </button>
-            <button class="profile-delete-btn" onclick="deleteAccount()">
-                <i class="fa-solid fa-trash-alt"></i> Delete Account
+            <button class="btn-delete" onclick="deleteAccount()">
+                <i class="fa-regular fa-trash-can"></i> Delete Account
             </button>
-            
-            <div class="profile-info-text">
-                <i class="fa-regular fa-circle-question"></i> Need help? Contact support
-            </div>
         </div>
     </div>
 
@@ -1284,6 +1673,9 @@
         </div>
     </div>
 
+    <!-- Toast Notification -->
+    <div id="toast-message"></div>
+
     <!-- Bottom Navigation -->
     <nav class="fixed bottom-0 inset-x-0 bg-white/90 backdrop-blur-xl border-t flex justify-around items-center py-3 px-2 z-50 rounded-t-[24px] shadow-[0_-10px_20px_rgba(0,0,0,0.02)]">
         <button onclick="switchTab('home')" class="nav-btn active flex flex-col items-center gap-1 text-emerald-600" data-tab="home">
@@ -1316,7 +1708,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
     
     <script src="data.js"></script>
     <script type="module" src="app.js"></script>
@@ -1335,46 +1726,27 @@
             }
         };
         
-        // Firebase Config
-        const firebaseConfig = {
-            apiKey: "AIzaSyCpsDTN-NTkTFmbwg3T6vv9H4eE_YXQdZA",
-            authDomain: "slit-hub.firebaseapp.com",
-            projectId: "slit-hub",
-            storageBucket: "slit-hub.firebasestorage.app",
-            messagingSenderId: "347194010969",
-            appId: "1:347194010969:web:a45af2e8d1627ac2593048",
-            measurementId: "G-CLFWJSG5H1"
+        window.togglePasswordField = function(inputId) {
+            const input = document.getElementById(inputId);
+            const button = event.currentTarget;
+            if (input.type === 'password') {
+                input.type = 'text';
+                button.innerHTML = '<i class="fa-regular fa-eye-slash"></i>';
+            } else {
+                input.type = 'password';
+                button.innerHTML = '<i class="fa-regular fa-eye"></i>';
+            }
         };
         
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-        const storage = firebase.storage();
-        
-        let currentUser = null;
-        let currentUserData = null;
-        
-        // Tab switching
-        window.switchTab = function(tabId) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
-            const target = document.getElementById(`tab-${tabId}`);
-            if(target) target.classList.remove('hidden');
-            
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('text-emerald-600', 'active');
-                btn.classList.add('text-slate-400');
-            });
-            const activeBtn = document.querySelector(`.nav-btn[data-tab="${tabId}"]`);
-            if(activeBtn) {
-                activeBtn.classList.add('text-emerald-600', 'active');
-                activeBtn.classList.remove('text-slate-400');
-            }
-            
-            if (tabId === 'admin' && currentUserData && currentUserData.isAdmin) {
-                loadAdminStats();
-                loadAllUsers();
-                loadDepartmentsList();
-            }
+        // Toast function
+        window.showToast = function(message, isError = false) {
+            const toast = document.getElementById('toast-message');
+            toast.textContent = message;
+            toast.style.backgroundColor = isError ? '#ef4444' : '#10b981';
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
         };
         
         // Dark Mode
@@ -1382,438 +1754,39 @@
             document.body.classList.toggle('dark-mode');
             const isDark = document.body.classList.contains('dark-mode');
             localStorage.setItem('darkMode', isDark);
-            document.getElementById('dark-mode-toggle').innerHTML = isDark ? '☀️ Light' : '🌙 Dark';
+            const btn = document.getElementById('dark-mode-toggle');
+            if (btn) btn.innerHTML = isDark ? '☀️ Light' : '🌙 Dark';
         };
         
         if (localStorage.getItem('darkMode') === 'true') {
             document.body.classList.add('dark-mode');
-            document.getElementById('dark-mode-toggle').innerHTML = '☀️ Light';
+            const btn = document.getElementById('dark-mode-toggle');
+            if (btn) btn.innerHTML = '☀️ Light';
         }
         
         // Auth UI
-        document.getElementById('login-tab').onclick = () => {
-            document.getElementById('login-tab').classList.add('active');
-            document.getElementById('signup-tab').classList.remove('active');
-            document.getElementById('login-form').style.display = 'block';
-            document.getElementById('signup-form').style.display = 'none';
-        };
+        const loginTab = document.getElementById('login-tab');
+        const signupTab = document.getElementById('signup-tab');
+        const loginForm = document.getElementById('login-form');
+        const signupForm = document.getElementById('signup-form');
         
-        document.getElementById('signup-tab').onclick = () => {
-            document.getElementById('signup-tab').classList.add('active');
-            document.getElementById('login-tab').classList.remove('active');
-            document.getElementById('signup-form').style.display = 'block';
-            document.getElementById('login-form').style.display = 'none';
-        };
-        
-        function showMessage(element, message, isError = true) {
-            const msgDiv = document.getElementById(element);
-            msgDiv.textContent = message;
-            msgDiv.style.display = 'block';
-            setTimeout(() => {
-                msgDiv.style.display = 'none';
-            }, 4000);
+        if (loginTab) {
+            loginTab.onclick = () => {
+                loginTab.classList.add('active');
+                signupTab.classList.remove('active');
+                loginForm.style.display = 'block';
+                signupForm.style.display = 'none';
+            };
         }
         
-        // Login
-        window.handleLogin = async () => {
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-            
-            if (!email || !password) {
-                showMessage('login-error', 'Please fill in all fields');
-                return;
-            }
-            
-            try {
-                const result = await auth.signInWithEmailAndPassword(email, password);
-                if (!result.user.emailVerified) {
-                    await auth.signOut();
-                    showMessage('login-error', 'Please verify your email first. Check your inbox.');
-                    return;
-                }
-                await loadUserData(result.user);
-            } catch (error) {
-                showMessage('login-error', error.message);
-            }
-        };
-        
-        // Signup
-        window.handleSignup = async () => {
-            const name = document.getElementById('signup-name').value;
-            const email = document.getElementById('signup-email').value;
-            const password = document.getElementById('signup-password').value;
-            const phone = document.getElementById('signup-phone').value;
-            const department = document.getElementById('signup-department').value;
-            const termsChecked = document.getElementById('terms-checkbox').checked;
-            
-            if (!name || !email || !password) {
-                showMessage('login-error', 'Please fill in all required fields');
-                return;
-            }
-            
-            if (!termsChecked) {
-                showMessage('login-error', 'You must agree to the Terms & Conditions');
-                return;
-            }
-            
-            if (password.length < 6) {
-                showMessage('login-error', 'Password must be at least 6 characters');
-                return;
-            }
-            
-            let formattedPhone = phone.replace(/\D/g, '');
-            if (formattedPhone.startsWith('0')) {
-                formattedPhone = formattedPhone.substring(1);
-            }
-            
-            try {
-                const result = await auth.createUserWithEmailAndPassword(email, password);
-                await result.user.sendEmailVerification();
-                
-                await db.collection('users').doc(result.user.uid).set({
-                    name: name,
-                    email: email,
-                    phone: formattedPhone,
-                    department: department || 'Not specified',
-                    avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=10b981&color=fff`,
-                    createdAt: new Date().toISOString(),
-                    isAdmin: email === 'precioussebastian70@gmail.com',
-                    isVerified: false,
-                    isBanned: false
-                });
-                
-                showMessage('login-success', 'Account created! Please verify your email before logging in.', false);
-                await auth.signOut();
-                setTimeout(() => {
-                    document.getElementById('login-email').value = email;
-                    document.getElementById('login-password').value = '';
-                }, 1000);
-            } catch (error) {
-                showMessage('login-error', error.message);
-            }
-        };
-        
-        // Google Login
-        window.handleGoogleLogin = async () => {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            try {
-                const result = await auth.signInWithPopup(provider);
-                await loadUserData(result.user);
-            } catch (error) {
-                showMessage('login-error', error.message);
-            }
-        };
-        
-        // Load user data after login
-        async function loadUserData(user) {
-            const userDoc = await db.collection('users').doc(user.uid).get();
-            if (!userDoc.exists) {
-                await db.collection('users').doc(user.uid).set({
-                    name: user.displayName || user.email.split('@')[0],
-                    email: user.email,
-                    phone: user.phoneNumber ? user.phoneNumber.replace(/\D/g, '') : '',
-                    department: 'Not specified',
-                    avatar: user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || user.email)}&background=10b981&color=fff`,
-                    createdAt: new Date().toISOString(),
-                    isAdmin: user.email === 'precioussebastian70@gmail.com',
-                    isVerified: false,
-                    isBanned: false
-                });
-            }
-            
-            currentUser = user;
-            currentUserData = (await db.collection('users').doc(user.uid).get()).data();
-            
-            // Update UI
-            document.getElementById('user-name').innerText = currentUserData.name;
-            document.getElementById('user-avatar').src = currentUserData.avatar;
-            document.getElementById('profile-page-avatar').src = currentUserData.avatar;
-            
-            // Update profile view
-            document.getElementById('profile-view-name').innerText = currentUserData.name;
-            document.getElementById('profile-view-phone').innerText = currentUserData.phone || 'Not set';
-            document.getElementById('profile-view-dept').innerText = currentUserData.department || 'Not specified';
-            document.getElementById('profile-view-since').innerText = new Date(currentUserData.createdAt).toLocaleDateString();
-            
-            // Edit mode fields
-            document.getElementById('profile-edit-name').value = currentUserData.name;
-            document.getElementById('profile-edit-phone').value = currentUserData.phone || '';
-            document.getElementById('profile-edit-dept').value = currentUserData.department || '';
-            
-            const isAdmin = currentUserData.isAdmin;
-            document.getElementById('admin-trigger').style.display = isAdmin ? 'block' : 'none';
-            document.getElementById('admin-nav-btn').style.display = isAdmin ? 'flex' : 'none';
-            
-            document.getElementById('dashboard-nav-btn').style.display = 'flex';
-            document.getElementById('profile-nav-btn').style.display = 'flex';
-            
-            document.getElementById('login-container').style.display = 'none';
-            document.getElementById('main-app').style.display = 'block';
-            
-            loadDepartmentsForFilter();
-            
-            if (typeof loadMarketDisplay === 'function') loadMarketDisplay('items');
-            if (typeof loadAcademicMaterials === 'function') loadAcademicMaterials();
-            if (typeof loadVerifiedGroups === 'function') loadVerifiedGroups();
-            if (typeof loadBroadcastMessage === 'function') loadBroadcastMessage();
+        if (signupTab) {
+            signupTab.onclick = () => {
+                signupTab.classList.add('active');
+                loginTab.classList.remove('active');
+                signupForm.style.display = 'block';
+                loginForm.style.display = 'none';
+            };
         }
-        
-        // Profile Page Functions
-        window.openProfilePage = function() {
-            document.getElementById('profile-page').style.display = 'block';
-            document.getElementById('main-app').style.display = 'none';
-        };
-        
-        window.closeProfilePage = function() {
-            document.getElementById('profile-page').style.display = 'none';
-            document.getElementById('main-app').style.display = 'block';
-        };
-        
-        window.enableProfileEdit = function() {
-            document.getElementById('profile-view-mode').style.display = 'none';
-            document.getElementById('profile-edit-mode').style.display = 'block';
-        };
-        
-        window.cancelProfileEdit = function() {
-            document.getElementById('profile-view-mode').style.display = 'block';
-            document.getElementById('profile-edit-mode').style.display = 'none';
-            // Reset fields
-            document.getElementById('profile-edit-name').value = currentUserData.name;
-            document.getElementById('profile-edit-phone').value = currentUserData.phone || '';
-            document.getElementById('profile-edit-dept').value = currentUserData.department || '';
-        };
-        
-        window.saveProfileFromPage = async function() {
-            const name = document.getElementById('profile-edit-name').value;
-            const phone = document.getElementById('profile-edit-phone').value;
-            const department = document.getElementById('profile-edit-dept').value;
-            
-            let formattedPhone = phone.replace(/\D/g, '');
-            if (formattedPhone.startsWith('0')) {
-                formattedPhone = formattedPhone.substring(1);
-            }
-            
-            await db.collection('users').doc(currentUser.uid).update({
-                name: name,
-                phone: formattedPhone,
-                department: department
-            });
-            
-            currentUserData.name = name;
-            currentUserData.phone = formattedPhone;
-            currentUserData.department = department;
-            
-            document.getElementById('user-name').innerText = name;
-            document.getElementById('profile-view-name').innerText = name;
-            document.getElementById('profile-view-phone').innerText = formattedPhone || 'Not set';
-            document.getElementById('profile-view-dept').innerText = department || 'Not specified';
-            
-            alert('Profile updated!');
-            cancelProfileEdit();
-        };
-        
-        window.uploadProfilePicture = function() {
-            document.getElementById('profile-picture-input').click();
-        };
-        
-        window.updateProfilePicture = async function() {
-            const file = document.getElementById('profile-picture-input').files[0];
-            if (!file) return;
-            
-            const storageRef = storage.ref().child(`profile_pics/${currentUser.uid}`);
-            await storageRef.put(file);
-            const url = await storageRef.getDownloadURL();
-            
-            await db.collection('users').doc(currentUser.uid).update({ avatar: url });
-            currentUserData.avatar = url;
-            document.getElementById('user-avatar').src = url;
-            document.getElementById('profile-page-avatar').src = url;
-            
-            alert('Profile picture updated!');
-        };
-        
-        window.deleteAccount = async function() {
-            if (confirm('Are you sure you want to delete your account? This cannot be undone.')) {
-                const posts = await db.collection('Marketplace').where('userId', '==', currentUser.uid).get();
-                posts.forEach(doc => doc.ref.delete());
-                
-                await db.collection('users').doc(currentUser.uid).delete();
-                await currentUser.delete();
-                
-                alert('Account deleted');
-                handleLogout();
-            }
-        };
-        
-        // Logout
-        window.handleLogout = async () => {
-            await auth.signOut();
-            document.getElementById('login-container').style.display = 'flex';
-            document.getElementById('main-app').style.display = 'none';
-            document.getElementById('profile-page').style.display = 'none';
-            currentUser = null;
-            currentUserData = null;
-        };
-        
-        // Forgot Password
-        window.forgotPassword = async () => {
-            const email = prompt('Enter your email address:');
-            if (email) {
-                try {
-                    await auth.sendPasswordResetEmail(email);
-                    alert('Password reset email sent! Check your inbox.');
-                } catch (error) {
-                    alert(error.message);
-                }
-            }
-        };
-        
-        // Load departments for academic filter
-        async function loadDepartmentsForFilter() {
-            const deptSnapshot = await db.collection('departments').orderBy('name').get();
-            const filterContainer = document.getElementById('academic-dept-filter');
-            if (filterContainer) {
-                let html = '<button class="active" onclick="filterAcademicByDept(\'all\')">All Depts</button>';
-                deptSnapshot.forEach(doc => {
-                    const dept = doc.data();
-                    html += `<button onclick="filterAcademicByDept('${dept.name}')">${dept.name}</button>`;
-                });
-                filterContainer.innerHTML = html;
-            }
-        }
-        
-        window.filterAcademicByDept = function(dept) {
-            document.querySelectorAll('#academic-dept-filter button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            if (typeof loadAcademicMaterials === 'function') {
-                loadAcademicMaterials('all', dept);
-            }
-        };
-        
-        // Admin Functions
-        async function loadAdminStats() {
-            const usersSnap = await db.collection('users').get();
-            const postsSnap = await db.collection('Marketplace').get();
-            const reportsSnap = await db.collection('Reports').get();
-            const commentsSnap = await db.collection('Comments').get();
-            
-            document.getElementById('admin-stats').innerHTML = `
-                <div class="stat-card"><h4>${usersSnap.size}</h4><p>Total Users</p></div>
-                <div class="stat-card"><h4>${postsSnap.size}</h4><p>Total Posts</p></div>
-                <div class="stat-card"><h4>${reportsSnap.size}</h4><p>Reports</p></div>
-                <div class="stat-card"><h4>${commentsSnap.size}</h4><p>Comments</p></div>
-            `;
-        }
-        
-        async function loadAllUsers() {
-            const usersSnap = await db.collection('users').get();
-            let html = '<table class="user-table"><thead> <th>Name</th><th>Email</th><th>Dept</th><th>Posts</th><th>Actions</th> </thead><tbody>';
-            for (const doc of usersSnap.docs) {
-                const user = doc.data();
-                const postsSnap = await db.collection('Marketplace').where('userId', '==', doc.id).get();
-                html += `
-                    <tr>
-                        <td>${escapeHtml(user.name)}</td>
-                        <td>${escapeHtml(user.email)}</td>
-                        <td>${escapeHtml(user.department || '-')}</td>
-                        <td>${postsSnap.size}</td>
-                        <td>
-                            ${!user.isBanned ? `<button class="admin-btn admin-btn-ban" onclick="banUser('${doc.id}')">Ban</button>` : `<button class="admin-btn admin-btn-unban" onclick="unbanUser('${doc.id}')">Unban</button>`}
-                            ${!user.isVerified ? `<button class="admin-btn admin-btn-verify" onclick="verifySeller('${doc.id}')">Verify</button>` : `<button class="admin-btn" onclick="unverifySeller('${doc.id}')">Unverify</button>`}
-                            <button class="admin-btn admin-btn-delete" onclick="deleteUser('${doc.id}')">Delete</button>
-                        </td>
-                    </tr>
-                `;
-            }
-            html += '</tbody></table>';
-            document.getElementById('admin-user-list').innerHTML = html;
-        }
-        
-        window.searchUsers = function() {
-            const searchTerm = document.getElementById('admin-search-users').value.toLowerCase();
-            const rows = document.querySelectorAll('#admin-user-list table tbody tr');
-            rows.forEach(row => {
-                const text = row.innerText.toLowerCase();
-                row.style.display = text.includes(searchTerm) ? '' : 'none';
-            });
-        };
-        
-        window.banUser = async function(userId) {
-            await db.collection('users').doc(userId).update({ isBanned: true });
-            loadAllUsers();
-            loadAdminStats();
-        };
-        
-        window.unbanUser = async function(userId) {
-            await db.collection('users').doc(userId).update({ isBanned: false });
-            loadAllUsers();
-            loadAdminStats();
-        };
-        
-        window.verifySeller = async function(userId) {
-            await db.collection('users').doc(userId).update({ isVerified: true });
-            const posts = await db.collection('Marketplace').where('userId', '==', userId).get();
-            posts.forEach(doc => doc.ref.update({ isVerified: true }));
-            loadAllUsers();
-            if (typeof loadMarketDisplay === 'function') loadMarketDisplay('items');
-        };
-        
-        window.unverifySeller = async function(userId) {
-            await db.collection('users').doc(userId).update({ isVerified: false });
-            const posts = await db.collection('Marketplace').where('userId', '==', userId).get();
-            posts.forEach(doc => doc.ref.update({ isVerified: false }));
-            loadAllUsers();
-            if (typeof loadMarketDisplay === 'function') loadMarketDisplay('items');
-        };
-        
-        window.deleteUser = async function(userId) {
-            if (confirm('Delete this user? All their posts will be deleted too.')) {
-                const posts = await db.collection('Marketplace').where('userId', '==', userId).get();
-                posts.forEach(doc => doc.ref.delete());
-                const academics = await db.collection('Academics').where('userId', '==', userId).get();
-                academics.forEach(doc => doc.ref.delete());
-                await db.collection('users').doc(userId).delete();
-                loadAllUsers();
-                loadAdminStats();
-                if (typeof loadMarketDisplay === 'function') loadMarketDisplay('items');
-                if (typeof loadAcademicMaterials === 'function') loadAcademicMaterials();
-            }
-        };
-        
-        // Department Management
-        async function loadDepartmentsList() {
-            const deptSnapshot = await db.collection('departments').orderBy('name').get();
-            let html = '';
-            deptSnapshot.forEach(doc => {
-                const dept = doc.data();
-                html += `
-                    <div class="dept-item">
-                        <span>${escapeHtml(dept.name)}</span>
-                        <button onclick="deleteDepartment('${doc.id}')" class="text-red-500 text-xs">Delete</button>
-                    </div>
-                `;
-            });
-            document.getElementById('departments-list').innerHTML = html || '<p class="text-slate-400">No departments added yet</p>';
-        }
-        
-        window.addDepartment = async function() {
-            const name = document.getElementById('new-dept-name').value.trim();
-            if (!name) return alert('Enter department name');
-            await db.collection('departments').add({ name: name });
-            document.getElementById('new-dept-name').value = '';
-            loadDepartmentsList();
-            loadDepartmentsForFilter();
-        };
-        
-        window.deleteDepartment = async function(id) {
-            if (confirm('Delete this department?')) {
-                await db.collection('departments').doc(id).delete();
-                loadDepartmentsList();
-                loadDepartmentsForFilter();
-            }
-        };
         
         // Modal Functions
         window.closeModal = function() {
@@ -1856,140 +1829,76 @@
             document.getElementById('notification-modal').style.display = 'flex';
         };
         
-        function escapeHtml(str) {
-            if(!str) return '';
-            return str.replace(/[&<>]/g, function(m) {
-                if(m === '&') return '&amp;';
-                if(m === '<') return '&lt;';
-                if(m === '>') return '&gt;';
-                return m;
-            });
-        }
-        
-        // Dashboard button
-        window.openDashboard = function() {
-            const dashboardModal = document.getElementById('dashboard-modal');
-            const dashboardContent = document.getElementById('dashboard-content');
-            dashboardModal.style.display = 'flex';
-            dashboardContent.innerHTML = '<div class="text-center py-8"><i class="fa-solid fa-spinner fa-spin text-2xl text-emerald-600"></i><p class="mt-2">Loading your posts...</p></div>';
-            loadUserPosts();
-        };
-        
-        async function loadUserPosts() {
-            if (!currentUser) return;
-            const postsSnap = await db.collection('Marketplace').where('userId', '==', currentUser.uid).get();
-            const posts = postsSnap.docs;
-            const dashboardContent = document.getElementById('dashboard-content');
+        // Tab switching
+        window.switchTab = function(tabId) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+            const target = document.getElementById(`tab-${tabId}`);
+            if(target) target.classList.remove('hidden');
             
-            if (posts.length === 0) {
-                dashboardContent.innerHTML = `
-                    <h3 class="text-xl font-bold mb-4">My Dashboard</h3>
-                    <p class="text-slate-500 text-center py-8">You haven't posted anything yet.</p>
-                    <button onclick="closeDashboardModal()" class="w-full bg-emerald-600 text-white py-3 rounded-xl mt-4 font-bold">Close</button>
-                `;
-                return;
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-emerald-600', 'active');
+                btn.classList.add('text-slate-400');
+            });
+            const activeBtn = document.querySelector(`.nav-btn[data-tab="${tabId}"]`);
+            if(activeBtn) {
+                activeBtn.classList.add('text-emerald-600', 'active');
+                activeBtn.classList.remove('text-slate-400');
             }
             
-            let postsHtml = '<h3 class="text-xl font-bold mb-4">My Listings</h3>';
-            posts.forEach(doc => {
-                const p = doc.data();
-                postsHtml += `
-                    <div class="border rounded-xl p-3 mb-3">
-                        <div class="flex gap-3">
-                            <img src="${p.image}" class="w-16 h-16 object-cover rounded-lg">
-                            <div class="flex-1">
-                                <h4 class="font-bold text-sm">${escapeHtml(p.name)}</h4>
-                                <p class="text-xs text-emerald-600 font-bold">₦${p.price}</p>
-                                <p class="text-[10px] text-slate-500">${p.condition || 'No condition'} | ${p.category || 'Uncategorized'}</p>
-                                ${p.isSold ? '<span class="text-xs text-red-500 font-bold">SOLD</span>' : ''}
-                            </div>
-                        </div>
-                        <div class="flex gap-2 mt-3">
-                            <button onclick="editProduct('${doc.id}')" class="flex-1 bg-blue-500 text-white py-1 rounded-lg text-xs">Edit</button>
-                            <button onclick="markAsSold('${doc.id}')" class="flex-1 bg-orange-500 text-white py-1 rounded-lg text-xs">Mark Sold</button>
-                            <button onclick="deleteProduct('${doc.id}')" class="flex-1 bg-red-500 text-white py-1 rounded-lg text-xs">Delete</button>
-                        </div>
-                    </div>
-                `;
-            });
-            dashboardContent.innerHTML = postsHtml + '<button onclick="closeDashboardModal()" class="w-full mt-4 bg-slate-200 py-2 rounded-xl font-bold">Close</button>';
-        }
-        
-        window.editProduct = async function(productId) {
-            const doc = await db.collection('Marketplace').doc(productId).get();
-            const data = doc.data();
-            const modal = document.getElementById('modal-overlay');
-            const content = document.getElementById('modal-content');
-            modal.classList.remove('hidden');
-            content.innerHTML = `
-                <h3 class="text-xl font-black mb-4 italic text-emerald-600">Edit Product ✏️</h3>
-                <div class="space-y-3">
-                    <input type="text" id="edit-name" value="${escapeHtml(data.name)}" placeholder="Product name" class="w-full p-3 bg-slate-50 rounded-xl">
-                    <input type="number" id="edit-price" value="${data.price}" placeholder="Price" class="w-full p-3 bg-slate-50 rounded-xl">
-                    <textarea id="edit-desc" placeholder="Description" rows="3" class="w-full p-3 bg-slate-50 rounded-xl">${escapeHtml(data.description || '')}</textarea>
-                    <select id="edit-condition" class="w-full p-3 bg-slate-50 rounded-xl">
-                        <option value="New" ${data.condition === 'New' ? 'selected' : ''}>New</option>
-                        <option value="Like New" ${data.condition === 'Like New' ? 'selected' : ''}>Like New</option>
-                        <option value="Used" ${data.condition === 'Used' ? 'selected' : ''}>Used</option>
-                    </select>
-                    <select id="edit-category" class="w-full p-3 bg-slate-50 rounded-xl">
-                        <option value="Electronics" ${data.category === 'Electronics' ? 'selected' : ''}>Electronics</option>
-                        <option value="Books" ${data.category === 'Books' ? 'selected' : ''}>Books</option>
-                        <option value="Fashion" ${data.category === 'Fashion' ? 'selected' : ''}>Fashion</option>
-                        <option value="Food" ${data.category === 'Food' ? 'selected' : ''}>Food</option>
-                        <option value="Accommodation" ${data.category === 'Accommodation' ? 'selected' : ''}>Accommodation</option>
-                    </select>
-                    <button onclick="saveEdit('${productId}')" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-black">SAVE CHANGES</button>
-                </div>
-            `;
-        };
-        
-        window.saveEdit = async function(productId) {
-            const name = document.getElementById('edit-name').value;
-            const price = document.getElementById('edit-price').value;
-            const description = document.getElementById('edit-desc').value;
-            const condition = document.getElementById('edit-condition').value;
-            const category = document.getElementById('edit-category').value;
-            await db.collection('Marketplace').doc(productId).update({
-                name, price: Number(price), description, condition, category,
-                updatedAt: new Date().toISOString()
-            });
-            document.getElementById('modal-overlay').classList.add('hidden');
-            alert('Product updated!');
-            loadUserPosts();
-            if (typeof loadMarketDisplay === 'function') loadMarketDisplay('items');
-        };
-        
-        window.markAsSold = async function(productId) {
-            await db.collection('Marketplace').doc(productId).update({ isSold: true });
-            alert('Marked as sold!');
-            loadUserPosts();
-            if (typeof loadMarketDisplay === 'function') loadMarketDisplay('items');
-        };
-        
-        window.deleteProduct = async function(productId) {
-            if (confirm('Are you sure you want to delete this product?')) {
-                await db.collection('Marketplace').doc(productId).delete();
-                alert('Product deleted!');
-                loadUserPosts();
-                if (typeof loadMarketDisplay === 'function') loadMarketDisplay('items');
+            if (tabId === 'admin' && window.currentUserData && window.currentUserData?.isAdmin) {
+                if (typeof loadAdminStats === 'function') loadAdminStats();
+                if (typeof loadAllUsers === 'function') loadAllUsers();
+                if (typeof loadDepartmentsList === 'function') loadDepartmentsList();
             }
         };
         
-        // Rating and Comment functions (placeholder)
-        window.submitRating = function() { alert('Rating submitted!'); closeRatingModal(); };
-        window.submitComment = function() { alert('Comment posted!'); closeCommentModal(); };
+        // Profile page functions
+        window.openProfilePage = function() {
+            document.getElementById('profile-page').style.display = 'block';
+            document.getElementById('main-app').style.display = 'none';
+            const bio = document.getElementById('profile-bio');
+            if (bio) {
+                document.getElementById('bio-char-count').innerText = bio.value.length;
+            }
+        };
         
-        // Check if already logged in
-        auth.onAuthStateChanged(async (user) => {
-            if (user) {
-                if (!user.emailVerified) {
-                    await auth.signOut();
-                    return;
+        window.closeProfilePage = function() {
+            document.getElementById('profile-page').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+        };
+        
+        // Bio character counter
+        const bioTextarea = document.getElementById('profile-bio');
+        if (bioTextarea) {
+            bioTextarea.addEventListener('input', function() {
+                document.getElementById('bio-char-count').innerText = this.value.length;
+            });
+        }
+        
+        // Forgot Password
+        window.forgotPassword = async () => {
+            const email = prompt('Enter your email address:');
+            if (email) {
+                try {
+                    await firebase.auth().sendPasswordResetEmail(email);
+                    showToast('Password reset email sent! Check your inbox.');
+                } catch (error) {
+                    showToast(error.message, true);
                 }
-                await loadUserData(user);
             }
-        });
+        };
+        
+        // Google Login (will be defined in app.js but we need the function here for the onclick)
+        window.handleGoogleLogin = async () => {
+            if (typeof window.handleGoogleLoginImpl === 'function') {
+                await window.handleGoogleLoginImpl();
+            } else {
+                showToast('Please wait, loading...', true);
+            }
+        };
+        
+        // Make showToast globally available
+        window.showToast = showToast;
     </script>
 </body>
 </html>
