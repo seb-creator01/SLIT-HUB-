@@ -58,6 +58,367 @@ let currentUserData = null;
 let allMarketplaceProducts = [];
 
 // ============================
+// TOAST FUNCTION
+// ============================
+window.showToast = function(message, isError = false) {
+    const toast = document.getElementById('toast-message');
+    if (!toast) return;
+    toast.textContent = message;
+    toast.style.backgroundColor = isError ? '#ef4444' : '#10b981';
+    toast.style.display = 'block';
+    setTimeout(() => {
+        toast.style.display = 'none';
+    }, 3000);
+};
+
+// ============================
+// EDIT PROFILE FUNCTIONS
+// ============================
+
+// Save Profile
+window.saveProfile = async function() {
+    const saveBtn = document.getElementById('save-profile-btn');
+    const btnText = saveBtn.querySelector('.btn-text');
+    const btnSpinner = saveBtn.querySelector('.btn-spinner');
+    
+    // Show loading spinner
+    btnText.style.opacity = '0';
+    btnSpinner.style.display = 'inline-block';
+    saveBtn.disabled = true;
+    
+    try {
+        const firstName = document.getElementById('profile-first-name').value;
+        const lastName = document.getElementById('profile-last-name').value;
+        const name = `${firstName} ${lastName}`.trim();
+        let phone = document.getElementById('profile-phone').value.replace(/\D/g, '');
+        const year = document.getElementById('profile-year').value;
+        const department = document.getElementById('profile-department').value;
+        const course = document.getElementById('profile-course').value;
+        const bio = document.getElementById('profile-bio').value;
+        
+        // Validate phone (10 digits)
+        if (phone.startsWith('0')) {
+            phone = phone.substring(1);
+        }
+        if (phone.length !== 10 && phone.length > 0) {
+            showToast('Phone number must be 10 digits (e.g., 8012345678)', true);
+            btnText.style.opacity = '1';
+            btnSpinner.style.display = 'none';
+            saveBtn.disabled = false;
+            return;
+        }
+        
+        // Get interests and clubs from the DOM
+        const interests = [];
+        document.querySelectorAll('#interests-container .tag').forEach(tag => {
+            const text = tag.childNodes[0].textContent.trim();
+            if (text) interests.push(text);
+        });
+        
+        const clubs = [];
+        document.querySelectorAll('#clubs-container .tag').forEach(tag => {
+            const text = tag.childNodes[0].textContent.trim();
+            if (text) clubs.push(text);
+        });
+        
+        const updateData = {
+            name: name,
+            phone: phone,
+            year: year,
+            department: department,
+            course: course,
+            bio: bio,
+            interests: interests,
+            clubs: clubs
+        };
+        
+        await db.collection('users').doc(currentUser.uid).update(updateData);
+        
+        // Update global user data
+        currentUserData = { ...currentUserData, ...updateData };
+        
+        // Update header name
+        document.getElementById('user-name').innerText = name;
+        
+        showToast('Profile updated successfully!');
+        
+    } catch (error) {
+        console.error(error);
+        showToast('Error saving profile: ' + error.message, true);
+    } finally {
+        // Hide loading spinner
+        btnText.style.opacity = '1';
+        btnSpinner.style.display = 'none';
+        saveBtn.disabled = false;
+    }
+};
+
+// Add Interest Tag
+window.addInterest = function() {
+    const input = document.getElementById('new-interest');
+    const value = input.value.trim();
+    if (value) {
+        const container = document.getElementById('interests-container');
+        const tag = document.createElement('div');
+        tag.className = 'tag';
+        tag.innerHTML = `${escapeHtml(value)} <span class="tag-remove" onclick="this.parentElement.remove()">✕</span>`;
+        container.appendChild(tag);
+        input.value = '';
+    }
+};
+
+// Add Club Tag
+window.addClub = function() {
+    const input = document.getElementById('new-club');
+    const value = input.value.trim();
+    if (value) {
+        const container = document.getElementById('clubs-container');
+        const tag = document.createElement('div');
+        tag.className = 'tag';
+        tag.innerHTML = `${escapeHtml(value)} <span class="tag-remove" onclick="this.parentElement.remove()">✕</span>`;
+        container.appendChild(tag);
+        input.value = '';
+    }
+};
+
+// Update Password
+window.updatePassword = async function() {
+    const currentPwd = document.getElementById('current-password').value;
+    const newPwd = document.getElementById('new-password').value;
+    const confirmPwd = document.getElementById('confirm-password').value;
+    const updateBtn = document.getElementById('update-password-btn');
+    
+    if (!currentPwd || !newPwd || !confirmPwd) {
+        showToast('Please fill in all password fields', true);
+        return;
+    }
+    
+    if (newPwd.length < 6) {
+        showToast('New password must be at least 6 characters', true);
+        return;
+    }
+    
+    if (newPwd !== confirmPwd) {
+        showToast('New passwords do not match', true);
+        return;
+    }
+    
+    // Show loading spinner
+    const originalText = updateBtn.innerHTML;
+    updateBtn.innerHTML = '<span class="spinner"></span> Updating...';
+    updateBtn.disabled = true;
+    
+    try {
+        const credential = firebase.auth.EmailAuthProvider.credential(currentUser.email, currentPwd);
+        await currentUser.reauthenticateWithCredential(credential);
+        await currentUser.updatePassword(newPwd);
+        
+        document.getElementById('current-password').value = '';
+        document.getElementById('new-password').value = '';
+        document.getElementById('confirm-password').value = '';
+        
+        showToast('Password updated successfully!');
+    } catch (error) {
+        showToast('Error: ' + error.message, true);
+    } finally {
+        updateBtn.innerHTML = originalText;
+        updateBtn.disabled = false;
+    }
+};
+
+// Profile Picture Upload with Cloudinary
+document.getElementById('profile-pic-input')?.addEventListener('change', async function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const avatarDiv = document.getElementById('profile-page-avatar');
+    const originalHtml = avatarDiv.innerHTML;
+    
+    // Show loading spinner on avatar
+    avatarDiv.innerHTML = '<div class="spinner" style="width: 30px; height: 30px;"></div>';
+    
+    try {
+        // Instant preview
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            avatarDiv.style.backgroundImage = `url(${event.target.result})`;
+            avatarDiv.style.backgroundSize = 'cover';
+            avatarDiv.style.backgroundPosition = 'center';
+            avatarDiv.innerHTML = '';
+        };
+        reader.readAsDataURL(file);
+        
+        // Upload to Cloudinary
+        const imageUrl = await uploadFile(file);
+        
+        // Update Firestore
+        await db.collection('users').doc(currentUser.uid).update({ avatar: imageUrl });
+        currentUserData.avatar = imageUrl;
+        
+        // Update header avatar
+        document.getElementById('user-avatar').src = imageUrl;
+        
+        showToast('Profile picture updated!');
+    } catch (error) {
+        console.error(error);
+        showToast('Error uploading photo: ' + error.message, true);
+        avatarDiv.innerHTML = originalHtml;
+        avatarDiv.style.backgroundImage = '';
+    }
+});
+
+// Cover Photo Upload with Cloudinary
+document.getElementById('cover-input')?.addEventListener('change', async function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const coverDiv = document.getElementById('profile-cover');
+    const originalBg = coverDiv.style.backgroundImage;
+    
+    // Instant preview
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        coverDiv.style.backgroundImage = `url(${event.target.result})`;
+        coverDiv.style.backgroundSize = 'cover';
+        coverDiv.style.backgroundPosition = 'center';
+    };
+    reader.readAsDataURL(file);
+    
+    try {
+        // Upload to Cloudinary
+        const imageUrl = await uploadFile(file);
+        
+        // Update Firestore
+        await db.collection('users').doc(currentUser.uid).update({ coverPhoto: imageUrl });
+        currentUserData.coverPhoto = imageUrl;
+        
+        showToast('Cover photo updated!');
+    } catch (error) {
+        console.error(error);
+        showToast('Error uploading cover photo: ' + error.message, true);
+        coverDiv.style.backgroundImage = originalBg;
+    }
+});
+
+// Delete Account
+window.deleteAccount = async function() {
+    if (confirm('⚠️ WARNING: This will permanently delete your account and all your data. Type DELETE to confirm.')) {
+        const confirmText = prompt('Type DELETE to confirm account deletion:');
+        if (confirmText === 'DELETE') {
+            const deleteBtn = document.querySelector('.btn-delete');
+            const originalText = deleteBtn.innerHTML;
+            deleteBtn.innerHTML = '<span class="spinner"></span> Deleting...';
+            deleteBtn.disabled = true;
+            
+            try {
+                // Delete user's marketplace posts
+                const posts = await db.collection('Marketplace').where('userId', '==', currentUser.uid).get();
+                posts.forEach(doc => doc.ref.delete());
+                
+                // Delete user's academic posts
+                const academics = await db.collection('Academics').where('userId', '==', currentUser.uid).get();
+                academics.forEach(doc => doc.ref.delete());
+                
+                // Delete user's comments
+                const comments = await db.collection('Comments').where('userId', '==', currentUser.uid).get();
+                comments.forEach(doc => doc.ref.delete());
+                
+                // Delete user's ratings
+                const ratings = await db.collection('Ratings').where('userId', '==', currentUser.uid).get();
+                ratings.forEach(doc => doc.ref.delete());
+                
+                // Delete user document
+                await db.collection('users').doc(currentUser.uid).delete();
+                
+                // Delete Firebase Auth user
+                await currentUser.delete();
+                
+                showToast('Account deleted successfully');
+                handleLogout();
+            } catch (error) {
+                showToast('Error: ' + error.message, true);
+                deleteBtn.innerHTML = originalText;
+                deleteBtn.disabled = false;
+            }
+        } else {
+            showToast('Deletion cancelled');
+        }
+    }
+};
+
+// Load Profile Data into Edit Form
+function loadProfileIntoForm() {
+    if (!currentUserData) return;
+    
+    const fullName = currentUserData.name || '';
+    const nameParts = fullName.split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+    
+    document.getElementById('profile-first-name').value = firstName;
+    document.getElementById('profile-last-name').value = lastName;
+    document.getElementById('profile-email').value = currentUserData.email || '';
+    document.getElementById('profile-phone').value = currentUserData.phone || '';
+    document.getElementById('profile-year').value = currentUserData.year || '300';
+    document.getElementById('profile-department').value = currentUserData.department || '';
+    document.getElementById('profile-course').value = currentUserData.course || '';
+    document.getElementById('profile-bio').value = currentUserData.bio || '';
+    
+    // Update bio character counter
+    const bioLength = (currentUserData.bio || '').length;
+    const charCountSpan = document.getElementById('bio-char-count');
+    if (charCountSpan) charCountSpan.innerText = bioLength;
+    
+    // Load interests
+    const interests = currentUserData.interests || [];
+    const interestsContainer = document.getElementById('interests-container');
+    if (interestsContainer) {
+        interestsContainer.innerHTML = '';
+        interests.forEach(interest => {
+            const tag = document.createElement('div');
+            tag.className = 'tag';
+            tag.innerHTML = `${escapeHtml(interest)} <span class="tag-remove" onclick="this.parentElement.remove()">✕</span>`;
+            interestsContainer.appendChild(tag);
+        });
+    }
+    
+    // Load clubs
+    const clubs = currentUserData.clubs || [];
+    const clubsContainer = document.getElementById('clubs-container');
+    if (clubsContainer) {
+        clubsContainer.innerHTML = '';
+        clubs.forEach(club => {
+            const tag = document.createElement('div');
+            tag.className = 'tag';
+            tag.innerHTML = `${escapeHtml(club)} <span class="tag-remove" onclick="this.parentElement.remove()">✕</span>`;
+            clubsContainer.appendChild(tag);
+        });
+    }
+    
+    // Load avatar
+    const avatarDiv = document.getElementById('profile-page-avatar');
+    if (avatarDiv) {
+        if (currentUserData.avatar && !currentUserData.avatar.includes('ui-avatars')) {
+            avatarDiv.style.backgroundImage = `url(${currentUserData.avatar})`;
+            avatarDiv.style.backgroundSize = 'cover';
+            avatarDiv.style.backgroundPosition = 'center';
+            avatarDiv.innerHTML = '';
+        } else {
+            avatarDiv.style.backgroundImage = '';
+            avatarDiv.innerHTML = '<i class="fa-solid fa-user-graduate"></i>';
+        }
+    }
+    
+    // Load cover photo
+    const coverDiv = document.getElementById('profile-cover');
+    if (coverDiv && currentUserData.coverPhoto) {
+        coverDiv.style.backgroundImage = `url(${currentUserData.coverPhoto})`;
+        coverDiv.style.backgroundSize = 'cover';
+        coverDiv.style.backgroundPosition = 'center';
+    }
+}
+
+// ============================
 // BOOTUP
 // ============================
 window.addEventListener('DOMContentLoaded', () => {
@@ -824,7 +1185,7 @@ async function loadAdminStats() {
 
 async function loadAllUsers() {
     const usersSnap = await db.collection('users').get();
-    let html = '<table class="user-table"><thead><tr><th>Name</th><th>Email</th><th>Dept</th><th>Posts</th><th>Actions</th></tr></thead><tbody>';
+    let html = '<table class="user-table"><thead><tr><th>Name</th><th>Email</th><th>Dept</th><th>Posts</th><th>Actions</th> </thead><tbody>';
     for (const doc of usersSnap.docs) {
         const user = doc.data();
         const postsSnap = await db.collection('Marketplace').where('userId', '==', doc.id).get();
@@ -1016,6 +1377,11 @@ auth.onAuthStateChanged(async (user) => {
                 email: user.email,
                 phone: '',
                 department: '',
+                course: '',
+                bio: '',
+                interests: [],
+                clubs: [],
+                year: '300',
                 avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || user.email)}&background=10b981&color=fff`,
                 createdAt: new Date().toISOString(),
                 isAdmin: user.email === 'precioussebastian70@gmail.com',
@@ -1025,8 +1391,12 @@ auth.onAuthStateChanged(async (user) => {
             await db.collection('users').doc(user.uid).set(currentUserData);
         }
         
+        // Update header
         document.getElementById('user-name').innerText = currentUserData.name;
         document.getElementById('user-avatar').src = currentUserData.avatar;
+        
+        // Load profile data into edit form
+        loadProfileIntoForm();
         
         const isAdmin = currentUserData.isAdmin;
         document.getElementById('admin-trigger').style.display = isAdmin ? 'block' : 'none';
